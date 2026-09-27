@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, User, Key, Save, CheckCircle, AlertTriangle,
-    Plus, Trash2, Edit2, X } from 'lucide-react';
+    Plus, Trash2, Edit2, X, Eye, EyeOff } from 'lucide-react';
 import { db } from '../../../lib/firebase';
 import { collection, query, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 
@@ -12,6 +12,8 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
     const [editingId, setEditingId] = useState(null);
     const [successMsg, setSuccessMsg] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
+    const [showWorkerPassword, setShowWorkerPassword] = useState(false);
+    const [visibleWorkerIds, setVisibleWorkerIds] = useState(new Set());
 
     // Form state
     const [formData, setFormData] = useState({
@@ -43,6 +45,7 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
             password: 'كلمة المرور',
             username_placeholder: 'مثال: موظف1',
             password_placeholder: '••••••••',
+            password_security_hint: 'يمكنك إظهار كلمة المرور الحالية أو استبدالها ثم الضغط على حفظ',
             no_users: 'لا يوجد مستخدمين بعد. أضف أول مستخدم!',
             th_user: 'اسم المستخدم',
             th_permissions: 'الصلاحيات',
@@ -77,6 +80,7 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
             password: 'Password',
             username_placeholder: 'e.g., Worker1',
             password_placeholder: '••••••••',
+            password_security_hint: 'Reveal the current password or replace it, then save',
             no_users: 'No users yet. Add your first user!',
             th_user: 'Username',
             th_permissions: 'Permissions',
@@ -135,12 +139,13 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
         setEditingId(null);
         setShowForm(false);
         setErrorMsg('');
+        setShowWorkerPassword(false);
     };
 
     const handleEdit = (worker) => {
         setFormData({
             username: worker.username || '',
-            password: '',
+            password: worker.password || '',
             allowViewHistory: worker.allowViewHistory || false,
             allowOnlyPrint: worker.allowOnlyPrint || false,
             allowExpenses: worker.allowExpenses || false,
@@ -307,16 +312,20 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
                                 </label>
                                 <div className="relative">
                                     <input
-                                        type="password"
+                                        type={showWorkerPassword ? 'text' : 'password'}
                                         name="password"
                                         value={formData.password}
                                         onChange={handleFormChange}
                                         placeholder={t.password_placeholder}
-                                        className="w-full bg-gray-50 dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-xl py-2.5 pr-9 pl-3 outline-none focus:border-blue-500 transition-colors font-bold text-sm text-gray-900 dark:text-white text-right"
+                                        className="w-full bg-gray-50 dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-xl py-2.5 pr-9 pl-10 outline-none focus:border-blue-500 transition-colors font-bold text-sm text-gray-900 dark:text-white text-right"
                                         required={!editingId}
                                     />
                                     <Key className="absolute top-3 right-3 text-gray-400" size={15} />
+                                    <button type="button" onClick={() => setShowWorkerPassword(prev => !prev)} className="absolute top-2.5 left-3 text-gray-400 hover:text-blue-500" aria-label={showWorkerPassword ? 'Hide password' : 'Show password'}>
+                                        {showWorkerPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
                                 </div>
+                                <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">{t.password_security_hint}</p>
                             </div>
                         </div>
 
@@ -402,6 +411,7 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
                             <tr>
                                 <th className="p-3 md:p-4 font-black text-gray-700 dark:text-gray-300 text-xs">#</th>
                                 <th className="p-3 md:p-4 font-black text-gray-700 dark:text-gray-300 text-xs">{t.th_user}</th>
+                                <th className="p-3 md:p-4 font-black text-gray-700 dark:text-gray-300 text-xs">{t.password}</th>
                                 <th className="p-3 md:p-4 font-black text-gray-700 dark:text-gray-300 text-xs">{t.th_permissions}</th>
                                 <th className="p-3 md:p-4 font-black text-gray-700 dark:text-gray-300 text-xs text-center">{t.th_actions}</th>
                             </tr>
@@ -409,7 +419,7 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
                         <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                             {loading ? (
                                 <tr>
-                                    <td colSpan="4" className="p-8 text-center text-gray-400 font-bold text-xs">
+                                    <td colSpan="5" className="p-8 text-center text-gray-400 font-bold text-xs">
                                         <div className="flex items-center justify-center gap-2">
                                             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                                             <span>{isRTL ? 'جاري التحميل...' : 'Loading...'}</span>
@@ -418,7 +428,7 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
                                 </tr>
                             ) : workers.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" className="p-12 text-center">
+                                    <td colSpan="5" className="p-12 text-center">
                                         <div className="flex flex-col items-center gap-2">
                                             <Shield size={30} className="text-gray-300" />
                                             <span className="text-gray-400 font-bold italic text-xs">{t.no_users}</span>
@@ -440,6 +450,25 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
                                                     <User size={14} />
                                                 </div>
                                                 <span className="font-black text-gray-800 dark:text-white text-sm">{worker.username}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-3 md:p-4">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-mono text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[72px]">
+                                                    {visibleWorkerIds.has(worker.id) ? (worker.password || '—') : '••••••••'}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setVisibleWorkerIds(prev => {
+                                                        const next = new Set(prev);
+                                                        next.has(worker.id) ? next.delete(worker.id) : next.add(worker.id);
+                                                        return next;
+                                                    })}
+                                                    className="text-gray-400 hover:text-blue-500"
+                                                    title={visibleWorkerIds.has(worker.id) ? 'Hide password' : 'Show password'}
+                                                >
+                                                    {visibleWorkerIds.has(worker.id) ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                </button>
                                             </div>
                                         </td>
                                         <td className="p-3 md:p-4">

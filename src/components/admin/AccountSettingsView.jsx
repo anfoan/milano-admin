@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Lock, Shield, Clock, Trash2, Loader2, Check, AlertTriangle, Monitor, Smartphone, Globe } from 'lucide-react';
+import { Settings, Lock, Shield, Clock, Trash2, Loader2, Check, AlertTriangle, Monitor, Smartphone, Globe, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { updateProfile, verifyBeforeUpdateEmail, updatePassword, deleteUser, sendEmailVerification, signOut, reauthenticateWithCredential, EmailAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
 import { addAdminEmail } from '../../lib/adminEmails';
@@ -34,6 +34,7 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [visiblePasswordFields, setVisiblePasswordFields] = useState({ current: false, new: false, confirm: false });
     const [loginHistory, setLoginHistory] = useState([]); // Fixed: Defined loginHistory state
 
     // Initial Load & IP Fetch
@@ -139,7 +140,8 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
                 new: "كلمة المرور الجديدة",
                 confirm: "تأكيد كلمة المرور",
                 update: "تحديث كلمة المرور",
-                forgot: "نسيت كلمة المرور الحالية؟"
+                forgot: "نسيت كلمة المرور الحالية؟",
+                reveal_hint: "لا يمكن لـ Firebase استرجاع كلمة المرور الحالية أو عرضها. يمكنك إظهار النص الذي أدخلته أو إرسال رابط إعادة تعيين جديد."
             },
             security: {
                 status: "حالة الحساب",
@@ -214,7 +216,8 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
                 new: "New Password",
                 confirm: "Confirm New Password",
                 update: "Update Password",
-                forgot: "Forgot current password?"
+                forgot: "Forgot current password?",
+                reveal_hint: "Firebase cannot retrieve or display the current password. You can reveal what you entered or send a new reset link."
             },
             security: {
                 status: "Account Status",
@@ -436,21 +439,31 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
                     {activeTab === 'password' && (
                         <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl p-6 border border-gray-100 dark:border-white/5 shadow-sm space-y-5">
                             <h3 className="font-bold text-gray-800 dark:text-white">{txt.password.title}</h3>
-                            <div className="bg-blue-50 dark:bg-blue-500/10 p-4 rounded-xl border border-blue-100 dark:border-blue-500/20 text-sm text-blue-700 dark:text-blue-300">
-                                {txt.password.hint}
+                            <div className="bg-blue-50 dark:bg-blue-500/10 p-4 rounded-xl border border-blue-100 dark:border-blue-500/20 text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                                <p>{txt.password.hint}</p>
+                                <p className="text-xs font-bold opacity-80">{txt.password.reveal_hint}</p>
                             </div>
                             <div>
                                 <label className={`block text-xs font-bold text-gray-500 mb-1.5 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.password.current}</label>
-                                <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} className={`w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} placeholder="••••••" />
+                                <div className="relative">
+                                    <input type={visiblePasswordFields.current ? 'text' : 'password'} name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} className={`w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 pl-11 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} placeholder="••••••" />
+                                    <button type="button" onClick={() => setVisiblePasswordFields(prev => ({ ...prev, current: !prev.current }))} className="absolute left-3 top-3 text-gray-400 hover:text-blue-500">{visiblePasswordFields.current ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                                </div>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <div className="flex-1">
                                     <label className={`block text-xs font-bold text-gray-500 mb-1.5 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.password.new}</label>
-                                    <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} className={`w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} placeholder="••••••" />
+                                    <div className="relative">
+                                        <input type={visiblePasswordFields.new ? 'text' : 'password'} name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} className={`w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 pl-11 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} placeholder="••••••" />
+                                        <button type="button" onClick={() => setVisiblePasswordFields(prev => ({ ...prev, new: !prev.new }))} className="absolute left-3 top-3 text-gray-400 hover:text-blue-500">{visiblePasswordFields.new ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                                    </div>
                                 </div>
                                 <div className="flex-1">
                                     <label className={`block text-xs font-bold text-gray-500 mb-1.5 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.password.confirm}</label>
-                                    <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} className={`w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} placeholder="••••••" />
+                                    <div className="relative">
+                                        <input type={visiblePasswordFields.confirm ? 'text' : 'password'} name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} className={`w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 pl-11 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`} placeholder="••••••" />
+                                        <button type="button" onClick={() => setVisiblePasswordFields(prev => ({ ...prev, confirm: !prev.confirm }))} className="absolute left-3 top-3 text-gray-400 hover:text-blue-500">{visiblePasswordFields.confirm ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex items-center justify-between pt-2">
