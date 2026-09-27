@@ -4,6 +4,9 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  preview: {
+    allowedHosts: true,
+  },
   server: {
     allowedHosts: ['.trycloudflare.com', '.loca.lt', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io'],
   },
