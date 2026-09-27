@@ -1,0 +1,88 @@
+========================================================
+ملفات قوالب إيميلات متجر ميلانو - Firebase Console
+========================================================
+طريقة الاستخدام:
+1. افتح Firebase Console > Authentication > Templates
+2. اختار القالب (Email verification / Password reset / Email change / MFA)
+3. الصق Sender name + Subject + الـ HTML في خانة Message
+4. Save
+
+ملاحظة مهمة عن [[actionUrl]]:
+لو ظهر حرفي (مش رابط) في المعاينة، من شريط أدوات المحرر
+اختار Insert > Action URL عشان تحط الرابط الصح.
+المتغيرات %EMAIL% و %APP_NAME% بتتكتب عادي.
+
+لو المحرر رفض الحفظ: SMTP Enable off > Save > الصق القوالب >
+Save > Enable on > أعد إدخال قيم SMTP (smtp.gmail.com / 465 / SSL /
+milanoyemen@gmail.com / باسورد التطبيق).
+
+========================================================
+قالب 1: Email address verification (تأكيد البريد)
+========================================================
+Sender name: متجر ميلانو
+Subject: تأكيد البريد الإلكتروني - متجر ميلانو
+Message (HTML):
+--------------------------------------------------------
+<div style="max-width:520px;margin:0 auto;padding:20px;font-family:Segoe UI,Tahoma,Arial,sans-serif;direction:rtl;background:#ffffff">
+  <div style="height:4px;background:#111827;margin-bottom:24px"></div>
+  <p style="font-size:12px;color:#6b7280;margin:0 0 4px">متجر ميلانو</p>
+  <p style="font-size:22px;font-weight:bold;color:#111827;margin:0 0 16px">تأكيد البريد الإلكتروني</p>
+  <p style="font-size:14px;color:#374151;line-height:1.8;margin:0 0 20px">مرحبًا،<br>استلمنا طلبًا لتأكيد بريدك الإلكتروني في متجر ميلانو (%EMAIL%).<br>اضغط الزر بالأسفل لتفعيل حسابك.</p>
+  <a href="[[actionUrl]]" style="display:inline-block;background:#111827;color:#ffffff;font-size:14px;font-weight:bold;padding:12px 28px;border-radius:8px;text-decoration:none;margin:0 0 20px">تأكيد البريد الإلكتروني</a>
+  <p style="font-size:11px;color:#6b7280;margin:0 0 4px">أو انسخ الرابط وافتحه في المتصفح:</p>
+  <p style="direction:ltr;text-align:left;font-size:11px;color:#4b5563;margin:0 0 20px;word-break:break-all">[[actionUrl]]</p>
+  <p style="font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:12px;margin:0">© 2026 متجر ميلانو</p>
+</div>
+
+========================================================
+قالب 2: Password reset (إعادة تعيين كلمة المرور)
+========================================================
+Sender name: متجر ميلانو
+Subject: إعادة تعيين كلمة المرور - متجر ميلانو
+Message (HTML):
+--------------------------------------------------------
+<div style="max-width:520px;margin:0 auto;padding:20px;font-family:Segoe UI,Tahoma,Arial,sans-serif;direction:rtl;background:#ffffff">
+  <div style="height:4px;background:#111827;margin-bottom:24px"></div>
+  <p style="font-size:12px;color:#6b7280;margin:0 0 4px">متجر ميلانو</p>
+  <p style="font-size:22px;font-weight:bold;color:#111827;margin:0 0 16px">إعادة تعيين كلمة المرور</p>
+  <p style="font-size:14px;color:#374151;line-height:1.8;margin:0 0 20px">مرحبًا،<br>استلمنا طلبًا لإعادة تعيين كلمة مرور حسابك في متجر ميلانو (%EMAIL%).<br>اضغط الزر بالأسفل للمتابعة. إذا لم تكن أنت من أرسل الطلب، يمكنك تجاهل هذه الرسالة.</p>
+  <a href="[[actionUrl]]" style="display:inline-block;background:#111827;color:#ffffff;font-size:14px;font-weight:bold;padding:12px 28px;border-radius:8px;text-decoration:none;margin:0 0 20px">إعادة تعيين كلمة المرور</a>
+  <p style="font-size:11px;color:#6b7280;margin:0 0 4px">أو انسخ الرابط وافتحه في المتصفح:</p>
+  <p style="direction:ltr;text-align:left;font-size:11px;color:#4b5563;margin:0 0 20px;word-break:break-all">[[actionUrl]]</p>
+  <p style="font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:12px;margin:0">© 2026 متجر ميلانو</p>
+</div>
+
+========================================================
+قالب 3: Email address change (تغيير البريد)
+========================================================
+Sender name: متجر ميلانو
+Subject: تغيير البريد الإلكتروني - متجر ميلانو
+Message (HTML):
+--------------------------------------------------------
+<div style="max-width:520px;margin:0 auto;padding:20px;font-family:Segoe UI,Tahoma,Arial,sans-serif;direction:rtl;background:#ffffff">
+  <div style="height:4px;background:#111827;margin-bottom:24px"></div>
+  <p style="font-size:12px;color:#6b7280;margin:0 0 4px">متجر ميلانو</p>
+  <p style="font-size:22px;font-weight:bold;color:#111827;margin:0 0 16px">تغيير البريد الإلكتروني</p>
+  <p style="font-size:14px;color:#374151;line-height:1.8;margin:0 0 20px">مرحبًا،<br>استلمنا طلبًا لتغيير البريد الإلكتروني لحسابك.<br>اضغط الزر بالأسفل لتأكيد التغيير إلى (%EMAIL%).</p>
+  <a href="[[actionUrl]]" style="display:inline-block;background:#111827;color:#ffffff;font-size:14px;font-weight:bold;padding:12px 28px;border-radius:8px;text-decoration:none;margin:0 0 20px">تأكيد تغيير البريد</a>
+  <p style="font-size:11px;color:#6b7280;margin:0 0 4px">أو انسخ الرابط وافتحه في المتصفح:</p>
+  <p style="direction:ltr;text-align:left;font-size:11px;color:#4b5563;margin:0 0 20px;word-break:break-all">[[actionUrl]]</p>
+  <p style="font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:12px;margin:0">© 2026 متجر ميلانو</p>
+</div>
+
+========================================================
+قالب 4: Multi-factor enrollment notification (تنبيه MFA)
+========================================================
+Sender name: متجر ميلانو
+Subject: تفعيل التحقق بخطوتين - متجر ميلانو
+Message (HTML):
+--------------------------------------------------------
+<div style="max-width:520px;margin:0 auto;padding:20px;font-family:Segoe UI,Tahoma,Arial,sans-serif;direction:rtl;background:#ffffff">
+  <div style="height:4px;background:#111827;margin-bottom:24px"></div>
+  <p style="font-size:12px;color:#6b7280;margin:0 0 4px">متجر ميلانو</p>
+  <p style="font-size:22px;font-weight:bold;color:#111827;margin:0 0 16px">تفعيل التحقق بخطوتين</p>
+  <p style="font-size:14px;color:#374151;line-height:1.8;margin:0 0 20px">مرحبًا،<br>تم تفعيل التحقق بخطوتين (MFA) على حسابك في متجر ميلانو.<br>إذا لم تكن أنت من فعلّه، غيّر كلمة المرور فورًا وتواصل معنا.</p>
+  <p style="font-size:11px;color:#6b7280;margin:0 0 4px">أو انسخ الرابط وافتحه في المتصفح:</p>
+  <p style="direction:ltr;text-align:left;font-size:11px;color:#4b5563;margin:0 0 20px;word-break:break-all">[[actionUrl]]</p>
+  <p style="font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:12px;margin:0">© 2026 متجر ميلانو</p>
+</div>

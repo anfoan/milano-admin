@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // وظيفة للتحقق من أن المستخدم هو أدمن موثوق (Whitelist)
+    function isAdmin() {
+      return request.auth != null &&
+        (request.auth.token.email == 'ah3992222@gmail.com' ||
+         request.auth.token.email == 'milanoyemen@gmail.com' ||
+         request.auth.token.email == 'milanostore@gmail.com' ||
+         request.auth.token.email == 'payg91254@gmail.com' ||
+         request.auth.token.email == 'grgr@getemails.uk');
+    }
+
+    // 1. سجل تسجيل الدخول - للأدمن فقط
+    match /login_history/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // 2. الطلبات - الزبون ينشئ فقط، والأدمن يتحكم في الباقي
+    match /orders/{orderId} {
+      allow create: if true;
+      allow read, update, delete, list: if isAdmin();
+    }
+
+    // 3. القسائم والخصومات
+    match /coupons/{couponId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 4. المنتجات والأقسام
+    match /products/{doc=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /categories/{doc=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 5. الإعدادات العامة للمتجر
+    match /settings/{doc=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ★★★ مستخدمي نقطة البيع (الموظفين) ★★★
+    match /settings/pos/workers/{workerId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // 6. رسائل "تواصل معنا" والدردشة (Support Chat)
+    match /contact_messages/{messageId} {
+      allow create: if true;
+      allow read, update: if true;
+      allow list, delete: if isAdmin();
+
+      match /messages/{chatId} {
+        allow read, create: if true;
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // 7. تقييمات المتجر (Reviews)
+    match /reviews/{reviewId} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // 8. أي بيانات أخرى: قراءة للكل وكتابة للأدمن فقط
+    match /{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

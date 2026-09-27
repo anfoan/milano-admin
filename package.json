@@ -1,0 +1,50 @@
+{
+  "name": "milano-admin",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "firebase": "^12.7.0",
+    "firebase-admin": "^13.7.0",
+    "framer-motion": "^12.23.26",
+    "googleapis": "^171.4.0",
+    "html2canvas": "^1.4.1",
+    "i18next": "^25.7.4",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "jspdf": "^4.0.0",
+    "lucide-react": "^0.562.0",
+    "react": "^19.2.0",
+    "react-color": "^2.19.3",
+    "react-dom": "^19.2.0",
+    "react-easy-crop": "^5.5.6",
+    "react-google-recaptcha": "^3.1.0",
+    "react-i18next": "^16.5.1",
+    "react-image-crop": "^11.0.10",
+    "react-is": "^19.2.3",
+    "react-router-dom": "^7.11.0",
+    "react-to-print": "^3.2.0",
+    "react-whatsapp-widget": "^2.2.0",
+    "recharts": "^3.6.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "vite": "^5.1.0"
+  }
+}

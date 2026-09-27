@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- Favicon is set dynamically in the script below -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-site-verification" content="WqmG1b29BTtRNzTbWlVnabPgM9T5ztrZzccsKwkho80" />
+  <meta name="description"
+    content="متجر ميلانو لجميع المستلزمات الرياضية للاعبين كرة القدم من شركات (نايك، أديداس، بوما، لاكوست). بضاعة فيتنامية درجة أولى، بواتي حبوب وطرح، فنايل نسخة اللاعبين وكلاسيك، وتوصيل لجميع محافظات اليمن." />
+  <meta name="keywords"
+    content="متجر ميلانو, مستلزمات رياضية, بواتي حبوب, بواتي طرح, فنايل رياضية, نسخة اللاعبين, نسخة كلاسيك, نايك, أديداس, بوما, لاكوست, اليمن, توصيل محافظات اليمن" />
+  <meta property="og:title" content="متجر ميلانو - Milano Store" />
+  <meta property="og:description"
+    content="متجر ميلانو لجميع المستلزمات الرياضية للاعبين كرة القدم. بضاعة فيتنامية أعلى خامة في العالم. بواتي، فنايل، ترنكات، وهوديات مع خدمة التوصيل لجميع محافظات اليمن." />
+  <meta property="og:image" content="https://milano2.netlify.app/logo.jpg" />
+  <meta property="og:image:width" content="1024" />
+  <meta property="og:image:height" content="1024" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:url" content="https://milano2.netlify.app/" />
+  <meta property="og:site_name" content="متجر ميلانو" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="متجر ميلانو - Milano Store" />
+  <meta name="twitter:description"
+    content="متجر ميلانو لجميع المستلزمات الرياضية للاعبين كرة القدم. بضاعة فيتنامية أعلى خامة في العالم." />
+  <meta name="twitter:image" content="https://milano2.netlify.app/logo.jpg" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <script>
+    const setPWA = () => {
+      const path = window.location.pathname;
+      const isAdmin = path.startsWith('/admin') ||
+        path.startsWith('/milano-secure-gate-99') ||
+        path.startsWith('/milano-dashboard-vault-77');
+
+      // Manifest
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = isAdmin ? '/admin-manifest.json' : '/manifest.json';
+      document.head.appendChild(manifestLink);
+
+      // Favicon - set BEFORE browser renders
+      const iconLink = document.createElement('link');
+      iconLink.rel = 'icon';
+      iconLink.type = 'image/png';
+      iconLink.href = isAdmin ? '/admin-icon-192.png' : '/favicon.ico.png';
+      document.head.appendChild(iconLink);
+
+      // Title
+      document.title = isAdmin ? 'إعدادات ميلانو' : 'متجر ميلانو';
+    };
+    setPWA();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js');
+      });
+    }
+  </script>
+</body>
+
+</html>

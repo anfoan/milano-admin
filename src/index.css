@@ -1,0 +1,532 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Cairo', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 dark:bg-[#111317] dark:text-white transition-colors duration-300;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    overscroll-behavior-y: none;
+    /* Prevent pull-to-refresh reset on mobile */
+    touch-action: pan-y;
+    /* Optimize touch scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scroll for iOS */
+  }
+}
+
+.dir-rtl {
+  direction: rtl;
+}
+
+.dir-ltr {
+  direction: ltr;
+}
+
+/* Hide number input spinners */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .flip-rtl {
+    @apply transition-transform;
+  }
+
+  [dir='rtl'] .flip-rtl {
+    transform: scaleX(-1);
+  }
+}
+
+@media print {
+  @page {
+    size: auto;
+    margin: 15mm;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Restore multi-page support WITHOUT breaking flex/grid layouts */
+  html, body, #root, #root div, main, section, [class*="h-screen"], [class*="overflow-hidden"], [class*="flex-1"] {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    /* Do NOT force display: block - keep flex/grid designs intact */
+  }
+
+  /* Force images to be tiny in print unless specified otherwise */
+  .printable-content img,
+  .print-report-img {
+    max-width: 45px !important;
+    max-height: 45px !important;
+    width: 45px !important;
+    height: 45px !important;
+    object-fit: contain !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  /* Ensure containers don't restrict height */
+  .printable-content,
+  .overflow-x-auto {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  table, th, td {
+    color: black !important;
+    border: 1px solid #eee !important;
+  }
+
+  th {
+    background-color: #f9fafb !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -40%;
+  }
+
+  50% {
+    left: 120%;
+  }
+
+  100% {
+    left: 120%;
+  }
+}
+
+.shimmer-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 200px;
+  height: 100%;
+  background: linear-gradient(to right,
+      transparent,
+      rgba(255, 255, 255, 0.45),
+      transparent);
+  transform: skewX(-45deg);
+  animation: shimmer 4s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* ==========================================================================
+   Admin Panel Dark Mode Global Overrides
+   ========================================================================== */
+
+/* Cards & Panel Backgrounds */
+.dark .admin-dashboard-root .bg-white {
+  background-color: #1c1c1e !important;
+}
+
+.dark .admin-dashboard-root .bg-gray-50 {
+  background-color: #0d0d0e !important;
+}
+
+.dark .admin-dashboard-root .bg-gray-100 {
+  background-color: #0d0d0e !important;
+}
+
+/* Typography Colors for Dark Theme */
+.dark .admin-dashboard-root .text-gray-900,
+.dark .admin-dashboard-root .text-gray-800,
+.dark .admin-dashboard-root .text-gray-700 {
+  color: #f3f4f6 !important;
+}
+
+.dark .admin-dashboard-root .text-gray-600,
+.dark .admin-dashboard-root .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+/* Borders & Dividing Lines */
+.dark .admin-dashboard-root .border-gray-50,
+.dark .admin-dashboard-root .border-gray-100,
+.dark .admin-dashboard-root .border-gray-200 {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .admin-dashboard-root .divide-gray-50 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Forms, Inputs, Textareas and Select Dropdowns */
+.dark .admin-dashboard-root input,
+.dark .admin-dashboard-root textarea,
+.dark .admin-dashboard-root select {
+  background-color: #0d0d0e !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.dark .admin-dashboard-root input:focus,
+.dark .admin-dashboard-root textarea:focus,
+.dark .admin-dashboard-root select:focus {
+  border-color: #3b82f6 !important;
+}
+
+/* Table Row Hover State */
+.dark .admin-dashboard-root .hover\:bg-gray-50:hover {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Recharts Chart Tooltip Styles */
+.dark .admin-dashboard-root .recharts-default-tooltip {
+  background-color: #1c1c1e !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .admin-dashboard-root .recharts-tooltip-item {
+  color: #ffffff !important;
+}
+
+.dark .admin-dashboard-root .recharts-tooltip-label {
+  color: #9ca3af !important;
+}
+
+/* Metric Circles Backdrop Overlays */
+.dark .admin-dashboard-root .bg-green-50 {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+.dark .admin-dashboard-root .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.dark .admin-dashboard-root .bg-cyan-50 {
+  background-color: rgba(6, 182, 212, 0.1) !important;
+}
+
+.dark .admin-dashboard-root .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.dark .admin-dashboard-root .bg-orange-50 {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+.dark .admin-dashboard-root .bg-gray-100 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .admin-dashboard-root .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Custom Opacity Background & Border Overrides for Dark Mode */
+.dark .admin-dashboard-root .bg-gray-50\/50 {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.dark .admin-dashboard-root .bg-white\/50 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .admin-dashboard-root .bg-gray-50\/80 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .admin-dashboard-root .border-white\/20 {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .admin-dashboard-root .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+/* Table and Component Hover State Overrides */
+.dark .admin-dashboard-root .hover\:bg-white:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .admin-dashboard-root .hover\:bg-gray-100:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .admin-dashboard-root .hover\:bg-gray-50:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.dark .admin-dashboard-root .hover\:bg-blue-100:hover {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .admin-dashboard-root .hover\:bg-red-100:hover {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.dark .admin-dashboard-root .hover\:bg-green-100:hover {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+/* Badge Background Overrides */
+.dark .admin-dashboard-root .bg-green-100 {
+  background-color: rgba(34, 197, 94, 0.15) !important;
+}
+
+.dark .admin-dashboard-root .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .admin-dashboard-root .bg-orange-100 {
+  background-color: rgba(249, 115, 22, 0.15) !important;
+}
+
+/* Text & Icon Color Overrides for Badges/Statuses */
+.dark .admin-dashboard-root .text-red-600 {
+  color: #f87171 !important;
+}
+
+.dark .admin-dashboard-root .text-green-600 {
+  color: #4ade80 !important;
+}
+
+.dark .admin-dashboard-root .text-blue-600 {
+  color: #60a5fa !important;
+}
+
+.dark .admin-dashboard-root .text-orange-600 {
+  color: #fb923c !important;
+}
+
+/* Inactive Stepper background & lines override */
+.dark .admin-dashboard-root .bg-gray-200 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Active Color Dots border override */
+.dark .admin-dashboard-root .border-gray-900 {
+  border-color: #ffffff !important;
+}
+
+/* Sleek Dark Scrollbar for Dark Mode */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0d0d0e;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+  border: 2px solid #0d0d0e;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+.dark {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a #0d0d0e;
+}
+
+/* Light Alert/Badge Border Overrides for Dark Mode */
+.dark .admin-dashboard-root .border-blue-100 {
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .admin-dashboard-root .border-green-100 {
+  border-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.dark .admin-dashboard-root .border-red-100 {
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.dark .admin-dashboard-root .border-orange-100 {
+  border-color: rgba(249, 115, 22, 0.2) !important;
+}
+
+/* Stepper and number badge shadows override */
+.dark .admin-dashboard-root .shadow-blue-200 {
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Input Placeholder color override for better distinction */
+.dark .admin-dashboard-root ::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Status Badge backgrounds overrides for dark mode */
+.dark .admin-dashboard-root .bg-yellow-50 {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
+.dark .admin-dashboard-root .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+.dark .admin-dashboard-root .bg-purple-50 {
+  background-color: rgba(168, 85, 247, 0.1) !important;
+}
+.dark .admin-dashboard-root .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+.dark .admin-dashboard-root .bg-yellow-100 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+.dark .admin-dashboard-root .bg-purple-100 {
+  background-color: rgba(168, 85, 247, 0.15) !important;
+}
+
+/* Status Badge text color overrides for dark mode (using 400/500/600/700 tailwind values equivalents) */
+.dark .admin-dashboard-root .text-yellow-600,
+.dark .admin-dashboard-root .text-yellow-700 {
+  color: #fbbf24 !important;
+}
+.dark .admin-dashboard-root .text-indigo-600,
+.dark .admin-dashboard-root .text-indigo-700 {
+  color: #818cf8 !important;
+}
+.dark .admin-dashboard-root .text-purple-600,
+.dark .admin-dashboard-root .text-purple-700 {
+  color: #c084fc !important;
+}
+.dark .admin-dashboard-root .text-emerald-600,
+.dark .admin-dashboard-root .text-emerald-700 {
+  color: #34d399 !important;
+}
+.dark .admin-dashboard-root .text-blue-700 {
+  color: #60a5fa !important;
+}
+.dark .admin-dashboard-root .text-green-700 {
+  color: #34d399 !important;
+}
+.dark .admin-dashboard-root .text-red-700 {
+  color: #f87171 !important;
+}
+.dark .admin-dashboard-root .text-orange-500 {
+  color: #fb923c !important;
+}
+.dark .admin-dashboard-root .text-blue-500 {
+  color: #60a5fa !important;
+}
+.dark .admin-dashboard-root .text-green-500 {
+  color: #4ade80 !important;
+}
+.dark .admin-dashboard-root .text-red-500 {
+  color: #f87171 !important;
+}
+
+/* Status Badge border overrides for dark mode */
+.dark .admin-dashboard-root .border-yellow-200 {
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+.dark .admin-dashboard-root .border-indigo-200 {
+  border-color: rgba(99, 102, 241, 0.2) !important;
+}
+.dark .admin-dashboard-root .border-purple-200 {
+  border-color: rgba(168, 85, 247, 0.2) !important;
+}
+.dark .admin-dashboard-root .border-emerald-200 {
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Table Row Hover & Selection with Opacity Overrides for Dark Mode */
+.dark .admin-dashboard-root .hover\:bg-blue-50\/50:hover {
+  background-color: rgba(59, 130, 246, 0.08) !important;
+}
+
+.dark .admin-dashboard-root .bg-blue-50\/30 {
+  background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+/* Light shadow override to prevent white glows in dark mode */
+.dark .admin-dashboard-root .shadow-gray-200\/50,
+.dark .admin-dashboard-root .shadow-gray-200 {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Custom smooth modal animations */
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes modal-content-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-backdrop-in {
+  animation: modal-backdrop-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-in {
+  animation: modal-content-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
