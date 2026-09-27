@@ -55,6 +55,9 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             save_order: 'حفظ الترتيب',
             order_saved: 'تم حفظ الترتيب بنجاح',
             saving: 'جاري الحفظ...',
+            edit: 'تعديل المخزون',
+            save: 'حفظ',
+            cancel: 'إلغاء',
         },
         en: {
             add_stock: 'Add New Stock',
@@ -101,6 +104,9 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             save_order: 'Save Order',
             order_saved: 'Order saved successfully',
             saving: 'Saving...',
+            edit: 'Edit stock',
+            save: 'Save',
+            cancel: 'Cancel',
         }
     };
     const txt = t[lang];
@@ -602,6 +608,55 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                                 })}
                                                             </div>
                                                         )}
+                                                        {editingId === product.id ? (
+                                                            <div className="flex flex-wrap items-center gap-1.5 mt-2 no-print">
+                                                                {sizeValues.length > 0 ? (
+                                                                    sizeValues.map(size => (
+                                                                        <label key={size} className="inline-flex items-center gap-1 whitespace-nowrap border border-blue-300 rounded-lg px-1.5 py-0.5 bg-blue-50">
+                                                                            <span className="text-[10px] font-bold text-gray-500">{size}:</span>
+                                                                            <input
+                                                                                type="number"
+                                                                                min="0"
+                                                                                className="w-9 bg-white border border-blue-400 rounded text-center text-[11px] font-black outline-none"
+                                                                                value={tempSizeStocks[size] ?? product.sizeStocks?.[size] ?? 0}
+                                                                                onChange={(e) => setTempSizeStocks(prev => ({ ...prev, [size]: Math.max(0, Number(e.target.value) || 0) }))}
+                                                                                onKeyDown={(e) => {
+                                                                                    if (e.key === 'Enter') { updateStockWithSizes(product.id, tempSizeStocks); setEditingId(null); }
+                                                                                    if (e.key === 'Escape') setEditingId(null);
+                                                                                }}
+                                                                            />
+                                                                        </label>
+                                                                    ))
+                                                                ) : (
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        className="w-16 bg-white border-2 border-blue-500 rounded-lg py-1 text-center text-xs font-black outline-none"
+                                                                        value={tempStock}
+                                                                        onChange={(e) => setTempStock(Math.max(0, Number(e.target.value) || 0))}
+                                                                        onKeyDown={(e) => {
+                                                                            if (e.key === 'Enter') { updateStock(product.id, tempStock); setEditingId(null); }
+                                                                            if (e.key === 'Escape') setEditingId(null);
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                                <button type="button" onClick={() => { sizeValues.length > 0 ? updateStockWithSizes(product.id, tempSizeStocks) : updateStock(product.id, tempStock); setEditingId(null); }} className="p-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors" title={txt.save}>
+                                                                    <Save size={12} />
+                                                                </button>
+                                                                <button type="button" onClick={() => setEditingId(null)} className="px-1.5 py-1 text-[10px] font-black text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200" title={txt.cancel}>
+                                                                    {txt.cancel}
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => { setEditingId(product.id); setTempStock(product.stock); setTempSizeStocks(product.sizeStocks || {}); }}
+                                                                className="mt-1 p-1 bg-blue-50 rounded-lg text-blue-500 hover:bg-blue-100 transition-colors no-print"
+                                                                title={txt.edit}
+                                                            >
+                                                                <Edit2 size={13} />
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </td>
@@ -631,72 +686,13 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                             {/* Stock */}
                                             <td className="px-3 py-1">
                                                 <div className="flex items-center gap-2">
-                                                    {editingId === product.id ? (
-                                                        sizeValues.length > 0 ? (
-                                                            <div className="flex flex-wrap gap-1.5 no-print">
-                                                                {sizeValues.map(size => (
-                                                                    <span key={size} className="inline-flex items-center gap-1 whitespace-nowrap border-2 border-blue-300 rounded-xl px-2 py-0.5 bg-blue-50">
-                                                                        <span className="text-[11px] font-bold text-gray-500">{size}:</span>
-                                                                        <input
-                                                                            type="number"
-                                                                            className="w-10 bg-white border border-blue-400 rounded py-0 text-center text-[11px] font-black outline-none"
-                                                                            value={tempSizeStocks[size] ?? product.sizeStocks?.[size] ?? 0}
-                                                                            onChange={(e) => {
-                                                                                const val = Number(e.target.value) || 0;
-                                                                                setTempSizeStocks(prev => ({ ...prev, [size]: val }));
-                                                                            }}
-                                                                            autoFocus={size === sizeValues[0]}
-                                                                            onKeyDown={(e) => {
-                                                                                if (e.key === 'Enter') {
-                                                                                    updateStockWithSizes(product.id, tempSizeStocks);
-                                                                                    setEditingId(null);
-                                                                                } else if (e.key === 'Escape') {
-                                                                                    setEditingId(null);
-                                                                                }
-                                                                            }}
-                                                                        />
-                                                                    </span>
-                                                                ))}
-                                                                <button onClick={() => { updateStockWithSizes(product.id, tempSizeStocks); setEditingId(null); }} className="p-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shrink-0 self-center">
-                                                                    <Save size={13} />
-                                                                </button>
-                                                            </div>
-                                                        ) : (
-                                                        <div className="flex items-center gap-2 no-print">
-                                                            <input
-                                                                type="number"
-                                                                className="w-20 bg-white border-2 border-blue-500 rounded-lg py-1 text-center text-sm font-black outline-none shadow-sm"
-                                                                value={tempStock}
-                                                                onChange={(e) => setTempStock(e.target.value)}
-                                                                autoFocus
-                                                                onKeyDown={(e) => {
-                                                                    if (e.key === 'Enter') { updateStock(product.id, tempStock); setEditingId(null); }
-                                                                    else if (e.key === 'Escape') { setEditingId(null); }
-                                                                }}
-                                                            />
-                                                            <button onClick={() => { updateStock(product.id, tempStock); setEditingId(null); }} className="p-1 px-2 bg-green-500 text-white rounded-lg hover:bg-green-600 shadow-md transition-colors">
-                                                                <Save size={14} />
-                                                            </button>
-                                                        </div>
-                                                        )
-                                                    ) : (
-                                                        <div className="flex items-center gap-2">
-                                                            {/* Larger stock badge */}
-                                                            <div className={`px-4 py-1.5 rounded-full text-sm font-black print:p-0 print:bg-transparent ${
-                                                                stock <= 0 ? 'bg-red-100 text-red-600' :
-                                                                stock <= 5 ? 'bg-orange-100 text-orange-600' :
-                                                                'bg-green-100 text-green-700'
-                                                            }`}>
-                                                                {stock}<span className="mx-0.5"></span>{txt.piece}
-                                                            </div>
-                                                            <button
-                                                                onClick={() => { setEditingId(product.id); setTempStock(product.stock); setTempSizeStocks(product.sizeStocks || {}); }}
-                                                                className="p-1.5 bg-blue-50 rounded-lg text-blue-500 hover:bg-blue-100 transition-colors no-print"
-                                                            >
-                                                                <Edit2 size={15} />
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                                    <div className={`px-4 py-1.5 rounded-full text-sm font-black print:p-0 print:bg-transparent ${
+                                                        stock <= 0 ? 'bg-red-100 text-red-600' :
+                                                        stock <= 5 ? 'bg-orange-100 text-orange-600' :
+                                                        'bg-green-100 text-green-700'
+                                                    }`}>
+                                                        {stock}<span className="mx-0.5"></span>{txt.piece}
+                                                    </div>
                                                 </div>
                                             </td>
 
