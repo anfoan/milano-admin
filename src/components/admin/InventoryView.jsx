@@ -595,7 +595,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                             <span className="text-[10px] text-gray-400 font-bold">{txt.active_in_store}</span>
                                                         </div>
                                                         {/* Sizes: larger and clearer */}
-                                                        {product.variants?.find(v => v.type === 'size')?.values?.length > 0 && (
+                                                        {editingId !== product.id && product.variants?.find(v => v.type === 'size')?.values?.length > 0 && (
                                                             <div className="flex flex-wrap gap-1.5 mt-1.5 no-print">
                                                                 {product.variants.find(v => v.type === 'size').values.map(size => {
                                                                     const qty = product.sizeStocks?.[size] !== undefined ? Number(product.sizeStocks[size]) : 0;
