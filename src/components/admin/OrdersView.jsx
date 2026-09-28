@@ -33,13 +33,19 @@ class SafeInvoicePreview extends React.Component {
                 </div>
                 <div className="bg-gray-50 border rounded-lg p-4 mb-5 text-sm font-bold">{lang === 'ar' ? 'العميل:' : 'Customer:'} {order?.formData?.name || '---'}<br />{order?.formData?.phone || ''}</div>
                 <table className="w-full border-collapse border text-sm"><thead><tr className="bg-gray-900 text-white"><th className="p-2 text-right">{lang === 'ar' ? 'المنتج' : 'Product'}</th><th className="p-2">{lang === 'ar' ? 'الكمية' : 'Qty'}</th><th className="p-2">{lang === 'ar' ? 'الإجمالي' : 'Total'}</th></tr></thead><tbody>{items.map((item, index) => <tr key={index} className="border-b"><td className="p-2">{item.title || '---'}{item.selectedSize ? ` / ${item.selectedSize}` : ''}</td><td className="p-2 text-center">{item.quantity || 1}</td><td className="p-2 text-center">{money(Number(item.price || 0) * Number(item.quantity || 1))}</td></tr>)}</tbody></table>
-                <div className="mt-5 ml-auto w-64 border-t-2 pt-3 font-black text-lg flex justify-between"><span>{lang === 'ar' ? 'الإجمالي:' : 'Total:'}</span><span>{money(order?.total)}</span></div>
+                <div className="mt-5 ml-auto w-72 border-t-2 pt-3 space-y-2 font-bold">
+                    <div className="flex justify-between"><span>{lang === 'ar' ? 'المجموع الفرعي:' : 'Subtotal:'}</span><span>{money(order?.subTotal || order?.total)}</span></div>
+                    <div className="flex justify-between text-red-600"><span>{lang === 'ar' ? 'الخصم:' : 'Discount:'}</span><span>- {money(Number(order?.discount || 0) + Math.round(Number(order?.subTotal || 0) * Number(order?.discountPercentage || 0) / 100))}</span></div>
+                    <div className="flex justify-between"><span>{lang === 'ar' ? 'التوصيل:' : 'Delivery:'}</span><span>{money(order?.deliveryCost)}</span></div>
+                    <div className="border-t-2 pt-2 font-black text-lg flex justify-between"><span>{lang === 'ar' ? 'الإجمالي:' : 'Total:'}</span><span>{money(order?.total)}</span></div>
+                </div>
             </div>
         );
     }
     render() {
-        if (this.state.failed) return this.renderFallback();
-        return <InvoiceTemplate {...this.props} orders={[this.props.order]} />;
+        // Keep the eye preview independent from the printable template. Older sales
+        // orders can have incompatible shapes; the review screen must never crash.
+        return this.renderFallback();
     }
 }
 
