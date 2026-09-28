@@ -208,6 +208,25 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
     const itemsPerPage = 10;
 
     // Reset page to 1 when filters change
+const printPreviewInvoice = () => {
+const source = document.getElementById('order-preview-invoice');
+if (!source) return;
+const printWindow = window.open('', '_blank', 'width=1000,height=900');
+if (!printWindow) return alert(lang === 'ar' ? 'يرجى السماح بالنوافذ المنبثقة للطباعة' : 'Please allow popups for printing');
+printWindow.document.write(`<!doctype html><html dir="${lang === 'ar' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><title>${txt.preview_invoice}</title><style>
+    @page { size: A4 portrait; margin: 0; }
+    html, body { margin: 0; padding: 0; background: white; }
+    body { font-family: Cairo, Arial, sans-serif; }
+    .print-page { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; padding: 12mm 14mm !important; box-sizing: border-box !important; page-break-after: auto !important; break-after: auto !important; overflow: hidden !important; box-shadow: none !important; border-radius: 0 !important; }
+    .print\:hidden, [data-html2canvas-ignore="true"] { display: none !important; }
+    table { page-break-inside: auto; } tr { page-break-inside: avoid; }
+    * { box-sizing: border-box; }
+</style></head><body>${source.innerHTML}</body></html>`);
+printWindow.document.close();
+printWindow.focus();
+printWindow.onload = () => printWindow.print();
+    };
+
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery, filterStatus]);
@@ -695,24 +714,6 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
             setLoading(false);
         });
 
-        const printPreviewInvoice = () => {
-        const source = document.getElementById('order-preview-invoice');
-        if (!source) return;
-        const printWindow = window.open('', '_blank', 'width=1000,height=900');
-        if (!printWindow) return alert(lang === 'ar' ? 'يرجى السماح بالنوافذ المنبثقة للطباعة' : 'Please allow popups for printing');
-        printWindow.document.write(`<!doctype html><html dir="${lang === 'ar' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><title>${txt.preview_invoice}</title><style>
-            @page { size: A4 portrait; margin: 0; }
-            html, body { margin: 0; padding: 0; background: white; }
-            body { font-family: Cairo, Arial, sans-serif; }
-            .print-page { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; padding: 12mm 14mm !important; box-sizing: border-box !important; page-break-after: auto !important; break-after: auto !important; overflow: hidden !important; box-shadow: none !important; border-radius: 0 !important; }
-            .print\:hidden, [data-html2canvas-ignore="true"] { display: none !important; }
-            table { page-break-inside: auto; } tr { page-break-inside: avoid; }
-            * { box-sizing: border-box; }
-        </style></head><body>${source.innerHTML}</body></html>`);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.onload = () => printWindow.print();
-    };
     return () => unsubscribe();
     }, []);
 
