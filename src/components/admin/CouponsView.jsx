@@ -28,7 +28,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             random: "عشوائي",
             code_placeholder: "كوبون",
             discount_percent: "نسبة الخصم %",
-            discount_amount: "مبلغ",
+            discount_amount: "المبلغ",
             unlimited_usage: "غير محدود الاستخدام",
             unlimited_desc: "تفعيل هذا الخيار يلغي الحد الأقصى",
             yes: "نعم",
@@ -104,6 +104,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const txt = t[lang];
     const isRTL = lang === 'ar';
     const currency = getLocalizedCurrency(generalSettings?.currency || 'YER', lang);
+    const discountCurrencyLabel = lang === 'ar' ? 'ريال يمني' : currency;
     // The exact discount is calculated at checkout from the order subtotal.
     // In this list, use the configured minimum order as the transparent preview basis.
     const getDiscountAmount = (coupon) => {
@@ -113,7 +114,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     };
     const formatDiscountAmount = (coupon) => {
         const amount = getDiscountAmount(coupon);
-        return amount === null ? (lang === 'ar' ? 'حسب قيمة الطلب' : 'Based on order') : `${amount.toLocaleString()} ${currency}`;
+        return amount === null ? (lang === 'ar' ? 'حسب قيمة الطلب' : 'Based on order') : `${amount.toLocaleString()} ${discountCurrencyLabel}`;
     };
 
     useEffect(() => {
@@ -279,7 +280,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                         <span className="text-2xl text-pink-500 font-black">{discountPercent}%</span>
                                         <span className="text-xs text-gray-500 font-black text-center leading-tight">
                                             <span className="block text-[10px] text-gray-400">{txt.discount_amount}</span>
-                                            {Number(minOrderAmount) > 0 ? `${Math.round(Number(minOrderAmount) * Number(discountPercent) / 100).toLocaleString()} ${currency}` : (lang === 'ar' ? 'حسب قيمة الطلب' : 'Based on order')}
+                                            {Number(minOrderAmount) > 0 ? `${Math.round(Number(minOrderAmount) * Number(discountPercent) / 100).toLocaleString()} ${discountCurrencyLabel}` : (lang === 'ar' ? 'حسب قيمة الطلب' : 'Based on order')}
                                         </span>
                                     </div>
                                 </div>

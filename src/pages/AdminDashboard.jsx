@@ -213,19 +213,6 @@ const AdminDashboard = () => {
 
 
 
-    // Listener for Notification Navigation
-    useEffect(() => {
-        const handleNavigation = (e) => {
-            if (e.detail?.view === 'order-details' && e.detail?.data) {
-                handleViewOrder(e.detail.data);
-            }
-            if (e.detail?.view === 'admin-chat' && e.detail?.chatId) {
-                handleOpenChat(e.detail.chatId);
-            }
-        };
-        window.addEventListener('admin-navigate', handleNavigation);
-        return () => window.removeEventListener('admin-navigate', handleNavigation);
-    }, []);
 
     // Click Outside Listener for Profile Menu
     const profileMenuRef = React.useRef(null);
@@ -304,6 +291,15 @@ const AdminDashboard = () => {
         setSelectedChatId(chatId);
         setActiveTab('admin-chat');
     };
+    // Keep the global notification navigation listener after its handlers are defined.
+    useEffect(() => {
+        const handleNavigation = (e) => {
+            if (e.detail?.view === 'order-details' && e.detail?.data) handleViewOrder(e.detail.data);
+            if (e.detail?.view === 'admin-chat' && e.detail?.chatId) handleOpenChat(e.detail.chatId);
+        };
+        window.addEventListener('admin-navigate', handleNavigation);
+        return () => window.removeEventListener('admin-navigate', handleNavigation);
+    }, []);
 
     const renderView = () => {
         // Guard: restrict workers to allowed tabs only

@@ -290,7 +290,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     formattedDate: rData.createdAt?.toDate ? rData.createdAt.toDate().toLocaleDateString(isRTL ? 'ar-YE' : 'en-GB') : rData.date || '',
                     formattedTime: rData.createdAt?.toDate ? rData.createdAt.toDate().toLocaleTimeString(isRTL ? 'ar-YE' : 'en-GB', { hour: '2-digit', minute: '2-digit' }) : ''
                 };
-            }).filter(r => r.isPOS === true || r.isExternal === true); // POS + External only (exclude storefront orders)
+            }).filter(r => r.isPOS === true || r.isExternal === true); // Only POS and external invoices; storefront orders stay out
             setReceipts(data);
 
             // Calculate Today's Sales (for dashboard card)
