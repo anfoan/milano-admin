@@ -104,6 +104,17 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const txt = t[lang];
     const isRTL = lang === 'ar';
     const currency = getLocalizedCurrency(generalSettings?.currency || 'YER', lang);
+    // The exact discount is calculated at checkout from the order subtotal.
+    // In this list, use the configured minimum order as the transparent preview basis.
+    const getDiscountAmount = (coupon) => {
+        const baseAmount = Number(coupon?.minOrderAmount || 0);
+        const percent = Number(coupon?.discountPercent || 0);
+        return baseAmount > 0 && percent > 0 ? Math.round(baseAmount * percent / 100) : null;
+    };
+    const formatDiscountAmount = (coupon) => {
+        const amount = getDiscountAmount(coupon);
+        return amount === null ? (lang === 'ar' ? 'حسب قيمة الطلب' : 'Based on order') : `${amount.toLocaleString()} ${currency}`;
+    };
 
     useEffect(() => {
         const q = query(collection(db, "coupons"), orderBy("createdAt", "desc"));
@@ -264,7 +275,13 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-sm font-bold text-gray-500">
                                     <span>{txt.discount_percent}</span>
-                                    <span className="text-2xl text-pink-500 font-black">{discountPercent}%</span><span className="text-sm text-gray-500 font-black">{txt.discount_amount}: {Math.round((Number(minOrderAmount) || 0) * Number(discountPercent) / 100).toLocaleString()} {currency}</span>
+                                    <div className="flex items-end gap-3">
+                                        <span className="text-2xl text-pink-500 font-black">{discountPercent}%</span>
+                                        <span className="text-xs text-gray-500 font-black text-center leading-tight">
+                                            <span className="block text-[10px] text-gray-400">{txt.discount_amount}</span>
+                                            {Number(minOrderAmount) > 0 ? `${Math.round(Number(minOrderAmount) * Number(discountPercent) / 100).toLocaleString()} ${currency}` : (lang === 'ar' ? 'حسب قيمة الطلب' : 'Based on order')}
+                                        </span>
+                                    </div>
                                 </div>
                                 <input
                                     type="range"
@@ -396,7 +413,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                                     <span className="font-black text-pink-500 text-lg">{coupon.discountPercent}%</span>
                                                 </td>
                                                 <td className="p-6 text-center font-black text-gray-700 font-mono">
-                                                    {Math.round(Number(coupon.minOrderAmount || 0) * Number(coupon.discountPercent || 0) / 100).toLocaleString()} {currency}
+                                                    <span className={getDiscountAmount(coupon) === null ? 'text-xs text-gray-400 font-bold' : ''}>
+                                                        {formatDiscountAmount(coupon)}
+                                                    </span>
                                                 </td>
                                                 <td className="p-6 text-center font-bold text-gray-600">
                                                     {coupon.isUnlimited ? (
@@ -407,20 +426,22 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                                     {coupon.usedCount || 0}
                                                 </td>
                                                 <td className="p-6 text-center">
-                                                    <button
-                                                        onClick={() => editCoupon(coupon)}
-                                                        className="p-2 bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 rounded-lg transition-colors"
-                                                        title={lang === 'ar' ? 'تعديل' : 'Edit'}
-                                                    >
-                                                        <Edit2 size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => deleteCoupon(coupon.id)}
-                                                        className="p-2 bg-red-500/15 text-red-600 hover:bg-red-500/25 rounded-lg transition-colors"
-                                                        title={lang === 'ar' ? 'حذف' : 'Delete'}
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
+                                                    <div className="inline-flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => editCoupon(coupon)}
+                                                            className="w-8 h-8 p-0 bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 rounded-lg transition-colors inline-flex items-center justify-center"
+                                                            title={lang === 'ar' ? 'تعديل' : 'Edit'}
+                                                        >
+                                                            <Edit2 size={15} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteCoupon(coupon.id)}
+                                                            className="w-8 h-8 p-0 bg-red-500/15 text-red-600 hover:bg-red-500/25 rounded-lg transition-colors inline-flex items-center justify-center"
+                                                            title={lang === 'ar' ? 'حذف' : 'Delete'}
+                                                        >
+                                                            <Trash2 size={15} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
