@@ -2151,19 +2151,12 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             </AnimatePresence>
 
             {/* Size Selection Modal */}
-            <AnimatePresence>
-                {showSizeModal && sizeModalProduct && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+            {showSizeModal && sizeModalProduct && (
+                    <div
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                         onClick={() => setShowSizeModal(false)}
                     >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
+                        <div
                             className="bg-white rounded-3xl w-[400px] max-w-[95vw] shadow-2xl overflow-hidden"
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -2287,10 +2280,9 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         : `Add ${Object.values(sizeModalQtys).reduce((a, b) => a + b, 0) > 0 ? '(' + Object.values(sizeModalQtys).reduce((a, b) => a + b, 0) + ')' : ''} to Cart`}
                                 </button>
                             </div>
-                        </motion.div>
-                    </motion.div>
+                        </div>
+                    </div>
                 )}
-            </AnimatePresence>
         </div>
     );
 };

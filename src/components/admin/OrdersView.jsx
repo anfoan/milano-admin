@@ -1120,7 +1120,16 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
                                         <td className="p-2 md:py-3 md:px-3 text-center">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
-                                                    onClick={() => setPreviewOrder(order)}
+                                                    onClick={() => setPreviewOrder({
+                                                        ...order,
+                                                        cartItems: Array.isArray(order.cartItems) ? order.cartItems : [],
+                                                        formData: order.formData && typeof order.formData === 'object' ? order.formData : {},
+                                                        total: Number(order.total || 0),
+                                                        subTotal: Number(order.subTotal || 0),
+                                                        deliveryCost: Number(order.deliveryCost || 0),
+                                                        discount: Number(order.discount || 0),
+                                                        discountPercentage: Number(order.discountPercentage || 0)
+                                                    })}
                                                     className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 shadow-sm active:scale-95 transition-all"
                                                     title={lang === 'ar' ? 'عرض الفاتورة' : 'View Invoice'}
                                                 >
