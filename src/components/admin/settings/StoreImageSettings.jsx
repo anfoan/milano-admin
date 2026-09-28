@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Save, Image as ImageIcon, Upload, X, ArrowRight, ChevronLeft, Loader2, Receipt, Tag } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import { uploadToCloudinary } from '../../../services/uploadService';
 
 const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
     const [loading, setLoading] = useState(true);
@@ -21,7 +22,7 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
             loading: "جاري التحميل...",
             upload_error: "حدث خطأ أثناء رفع الصورة",
             type_error: "عذراً، يجب أن يكون الملف صورة من نوع JPG أو PNG أو WebP",
-            size_error: "عذراً، حجم الصورة كبير جداً. يجب أن يكون أقل من 2 ميجابايت",
+            size_error: "عذراً، حجم الصورة كبير جداً. يجب أن يكون أقل من 15 ميجابايت",
             save_success: "تم حفظ الصور بنجاح!",
             save_error: "حدث خطأ أثناء الحفظ",
             save_btn: "حفظ التغييرات",
@@ -82,30 +83,29 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
         }
     };
 
-    const uploadToCloudinary = async (file) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-        formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-        formData.append("cloud_name", cloudName);
-
-        try {
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                method: "POST",
-                body: formData,
-            });
-            const data = await res.json();
-            if (data.secure_url) {
-                return data.secure_url;
-            } else {
-                throw new Error("Cloudinary Upload Failed");
-            }
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            alert(txt.upload_error);
-            return null;
-        }
-    };
+    const cropToSquare = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const image = new Image();
+            image.onload = () => {
+                const sourceSize = Math.min(image.naturalWidth, image.naturalHeight);
+                const sx = Math.round((image.naturalWidth - sourceSize) / 2);
+                const sy = Math.round((image.naturalHeight - sourceSize) / 2);
+                const outputSize = Math.min(sourceSize, 1600);
+                const canvas = document.createElement('canvas');
+                canvas.width = outputSize;
+                canvas.height = outputSize;
+                const context = canvas.getContext('2d');
+                if (!context) return reject(new Error('Canvas unavailable'));
+                context.drawImage(image, sx, sy, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
+                canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Image crop failed')), 'image/jpeg', 0.92);
+            };
+            image.onerror = () => reject(new Error('Invalid image'));
+            image.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 
     const validateFile = (file) => {
         // 1. Valid Types
@@ -115,8 +115,8 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
             return false;
         }
 
-        // 2. Size Limit (2MB)
-        const maxSize = 2 * 1024 * 1024; // 2MB
+        // Source files up to 15MB are accepted; they are cropped and compressed automatically.
+        const maxSize = 15 * 1024 * 1024;
         if (file.size > maxSize) {
             alert(txt.size_error);
             return false;
@@ -137,7 +137,8 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
 
         setUploading(prev => ({ ...prev, [type]: true }));
         try {
-            const imageUrl = await uploadToCloudinary(file);
+            const croppedFile = await cropToSquare(file);
+            const imageUrl = await uploadToCloudinary(croppedFile, `store-${type}`);
             if (imageUrl) {
                 const newImages = type in { nike: true, adidas: true, puma: true, lacoste: true }
                     ? { ...images, brands: { ...(images.brands || {}), [type]: imageUrl } }

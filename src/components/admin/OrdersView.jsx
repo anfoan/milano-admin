@@ -156,6 +156,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
     // searchQuery is now handled via props from AdminDashboard
     const [filterStatus, setFilterStatus] = useState('all');
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [previewOrder, setPreviewOrder] = useState(null);
     const [selectedOrdersIds, setSelectedOrdersIds] = useState([]);
     const [productCostMap, setProductCostMap] = useState({});
 
@@ -1101,7 +1102,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
                                         <td className="p-2 md:py-3 md:px-3 text-center">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
-                                                    onClick={() => onViewOrder && onViewOrder(order)}
+                                                    onClick={() => setPreviewOrder(order)}
                                                     className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 shadow-sm active:scale-95 transition-all"
                                                     title={lang === 'ar' ? 'عرض الفاتورة' : 'View Invoice'}
                                                 >
@@ -1302,6 +1303,23 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
                 )}
             </AnimatePresence>
 
+            {/* Invoice Preview opened by the eye button */}
+            <AnimatePresence>
+                {previewOrder && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0, y: 20, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20 }} className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col">
+                            <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50 shrink-0">
+                                <h3 className="font-black text-gray-800">{txt.preview_invoice} — {previewOrder.orderId}</h3>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={() => window.print()} className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-sm flex items-center gap-2"><Printer size={16} />{txt.print}</button>
+                                    <button onClick={() => setPreviewOrder(null)} className="p-2 rounded-xl hover:bg-gray-200 text-gray-500" title={txt.close}><X size={20} /></button>
+                                </div>
+                            </div>
+                            <div className="overflow-y-auto p-4 md:p-8"><InvoiceTemplate orders={[previewOrder]} lang={lang} generalSettings={generalSettings} /></div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             {/* Order Details Panel (Overlay) */}
             <AnimatePresence>
                 {selectedOrder && (

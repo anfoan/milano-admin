@@ -65,14 +65,14 @@ const AdminSidePanel = ({ isOpen, onClose, lang = 'ar' }) => {
         const q = query(
             collection(db, "contact_messages"),
             orderBy("createdAt", "desc"),
-            limit(10)
+            limit(30)
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             setMessages(snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
-            })).filter(msg => !msg.readByAdmin));
+            })));
         });
 
         return () => unsubscribe();
@@ -165,7 +165,7 @@ const AdminSidePanel = ({ isOpen, onClose, lang = 'ar' }) => {
                                         <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-gray-400`} size={18} />
                                     </div>
 
-                                    <h3 className="text-sm font-bold text-gray-400 pt-2">{txt.unread_messages}</h3>
+                                    <h3 className="text-sm font-bold text-gray-400 pt-2">{lang === 'ar' ? 'رسائل صندوق الوارد' : 'Inbox Messages'}</h3>
 
                                     <div className="space-y-2">
                                         {messages.length === 0 ? (
@@ -215,8 +215,8 @@ const AdminSidePanel = ({ isOpen, onClose, lang = 'ar' }) => {
 
                                                         {/* Status Badge Bottom Left */}
                                                         <div className={`absolute bottom-4 ${isRTL ? 'left-4' : 'right-4'}`}>
-                                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${msg.status === 'new' ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-500'}`}>
-                                                                {msg.status === 'new' ? txt.new : txt.read}
+                                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${msg.status === 'new' || !msg.readByAdmin ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-500'}`}>
+                                                                {msg.status === 'new' || !msg.readByAdmin ? txt.new : txt.read}
                                                             </span>
                                                         </div>
                                                     </div>

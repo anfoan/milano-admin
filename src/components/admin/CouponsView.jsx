@@ -27,6 +27,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             random: "عشوائي",
             code_placeholder: "كوبون",
             discount_percent: "نسبة الخصم %",
+            discount_amount: "مبلغ الخصم",
             unlimited_usage: "غير محدود الاستخدام",
             unlimited_desc: "تفعيل هذا الخيار يلغي الحد الأقصى",
             yes: "نعم",
@@ -47,7 +48,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             th_coupon: "الكوبون",
             th_created: "تاريخ الإنشاء",
             th_expiry: "تاريخ الانتهاء",
-            th_discount: "نسبة الخصم",
+            th_discount: "الخصم",
             th_max: "أقصى عدد",
             th_uses: "الاستخدامات",
             th_actions: "العمليات",
@@ -131,7 +132,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
         // Security & Validation Checks
         if (!code) return alert(txt.alert_missing);
         if (discountPercent <= 0 || discountPercent > 100) return alert(lang === 'ar' ? 'نسبة الخصم يجب أن تكون بين 1 و 100' : 'Discount must be between 1 and 100');
-        if (!isUnlimited && maxUses < 1) return alert(lang === 'ar' ? 'أقصى عدد للاستخدام يجب أن يكون 1 على الأقل' : 'Max uses must be at least 1');
+        if (!isUnlimited && Number(maxUses) < 1) return alert(lang === 'ar' ? 'أقصى عدد للاستخدام يجب أن يكون 1 على الأقل' : 'Max uses must be at least 1');
         if (minOrderAmount < 0) return alert(lang === 'ar' ? 'مبلغ الحد الأدنى لا يمكن أن يكون سالباً' : 'Min order cannot be negative');
 
         if (expiryDate) {
@@ -151,7 +152,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             await addDoc(collection(db, "coupons"), {
                 code: code.toUpperCase(),
                 discountPercent: Number(discountPercent),
-                maxUses: isUnlimited ? 'unlimited' : Number(maxUses),
+                maxUses: isUnlimited ? null : Math.max(1, Number(maxUses)),
                 expiryDate: expiryDate || null,
                 minOrderAmount: Number(minOrderAmount) || 0,
                 usedCount: 0,
@@ -247,7 +248,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-sm font-bold text-gray-500">
                                     <span>{txt.discount_percent}</span>
-                                    <span className="text-2xl text-pink-500 font-black">{discountPercent}%</span>
+                                    <span className="text-2xl text-pink-500 font-black">{discountPercent}%</span><span className="text-sm text-gray-500 font-black">{txt.discount_amount}: {Math.round((Number(minOrderAmount) || 0) * Number(discountPercent) / 100).toLocaleString()} {currency}</span>
                                 </div>
                                 <input
                                     type="range"
@@ -352,15 +353,15 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                         <tr><td colSpan="7" className="p-12 text-center text-gray-400 font-bold">{txt.no_coupons}</td></tr>
                                     ) : (
                                         coupons.map((coupon) => (
-                                            <tr key={coupon.id} className={`hover:bg-gray-50 transition-colors ${(!coupon.isUnlimited && coupon.usedCount >= coupon.maxUses) ? 'opacity-60 bg-gray-50' : ''}`}>
+                                            <tr key={coupon.id} className={`hover:bg-gray-50 transition-colors ${(!coupon.isUnlimited && Number(coupon.usedCount || 0) >= Number(coupon.maxUses || 0)) ? 'opacity-60 bg-gray-50' : ''}`}>
                                                 <td className="p-6">
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${(!coupon.isUnlimited && coupon.usedCount >= coupon.maxUses) ? 'bg-gray-200 text-gray-500' : 'bg-blue-50 text-blue-500'}`}>
+                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${(!coupon.isUnlimited && Number(coupon.usedCount || 0) >= Number(coupon.maxUses || 0)) ? 'bg-gray-200 text-gray-500' : 'bg-blue-50 text-blue-500'}`}>
                                                             <Tag size={18} />
                                                         </div>
                                                         <div className="flex flex-col">
                                                             <span className="font-black text-gray-800 tracking-wider font-mono uppercase text-lg">{coupon.code}</span>
-                                                            {(!coupon.isUnlimited && coupon.usedCount >= coupon.maxUses) && (
+                                                            {(!coupon.isUnlimited && Number(coupon.usedCount || 0) >= Number(coupon.maxUses || 0)) && (
                                                                 <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded w-fit mt-1">{txt.expired}</span>
                                                             )}
                                                         </div>
@@ -375,7 +376,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                                     </span>
                                                 </td>
                                                 <td className="p-6 text-center">
-                                                    <span className="font-black text-pink-500 text-lg">{coupon.discountPercent}%</span>
+                                                    <span className="font-black text-pink-500 text-lg">{coupon.discountPercent}%</span><span className="block text-xs text-gray-500 font-bold">{txt.discount_amount}: {Math.round(Number(coupon.minOrderAmount || 0) * Number(coupon.discountPercent || 0) / 100).toLocaleString()} {currency}</span>
                                                 </td>
                                                 <td className="p-6 text-center font-bold text-gray-600">
                                                     {coupon.isUnlimited ? (

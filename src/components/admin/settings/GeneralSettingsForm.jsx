@@ -253,7 +253,10 @@ const GeneralSettingsForm = ({ onBack, lang = 'ar' }) => {
                         <select
                             name="storeLocation"
                             value={formData.storeLocation}
-                            onChange={handleChange}
+                            onChange={(e) => {
+                                const selected = countries.find(c => c.name === e.target.value);
+                                setFormData(prev => ({ ...prev, storeLocation: e.target.value, countryFlag: selected?.flag || prev.countryFlag, countryCode: selected?.code || prev.countryCode }));
+                            }}
                             className={`w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors appearance-none font-bold text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}
                         >
                             {countries.map(c => (

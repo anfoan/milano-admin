@@ -397,6 +397,9 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             };
 
             const docRef = await addDoc(collection(db, "orders"), orderData);
+            if (appliedCoupon?.id && !appliedCoupon.isUnlimited) {
+                await updateDoc(doc(db, "coupons", appliedCoupon.id), { usedCount: increment(1) });
+            }
 
             // Update stock
             for (const item of cartItems) {

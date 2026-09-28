@@ -522,7 +522,7 @@ const AdminDashboard = () => {
                         </div>
 
                         <button
-                            onClick={() => setActiveTab('inbox')}
+                            onClick={() => setShowRightPanel(true)}
                             className="relative p-2.5 bg-green-500/15 dark:bg-green-400/10 hover:bg-green-500/25 rounded-xl transition-colors"
                             title={lang === 'ar' ? 'فتح صندوق الوارد' : 'Open Inbox'}
                         >

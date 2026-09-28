@@ -44,6 +44,7 @@ const FooterSettingsView = ({ lang }) => {
                         description: "لجميع المستلزمات الرياضية أونلاين.",
                         address: "شميلة شارع السفينة جوار فندق جدة",
                         qualityStatement: "تم شراء جميع البضاعة بأعلى جودة",
+                        phone: "",
                         slogan: "لسنا الوحيدون ولكننا الأفضل"
                     }
                 };
@@ -230,6 +231,10 @@ const FooterSettingsView = ({ lang }) => {
                                     onChange={(e) => updateStoreInfo('qualityStatement', e.target.value)}
                                     className="w-full px-5 py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:border-blue-500 font-bold"
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-gray-400 uppercase mb-2 mr-1">{isRTL ? "رقم الهاتف" : "Phone"}</label>
+                                <div className="relative"><Smartphone size={18} className={`absolute ${isRTL ? 'right-5' : 'left-5'} top-1/2 -translate-y-1/2 text-cyan-500`} /><input type="text" value={footerData.storeSection.phone || ''} onChange={(e) => updateStoreInfo('phone', e.target.value)} className={`w-full ${isRTL ? 'pr-12 pl-5' : 'pl-12 pr-5'} py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:border-blue-500 font-bold`} /></div>
                             </div>
                             <div>
                                 <label className="block text-xs font-black text-gray-400 uppercase mb-2 mr-1">{isRTL ? "شعار المتجر (Slogan)" : "Slogan"}</label>
