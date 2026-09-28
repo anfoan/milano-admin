@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Eye, Printer, Search, FileDown, Trash2, Clock, CheckCircle, XCircle, MapPin, Phone, User, ShoppingBag, MessageCircle, Truck, X, Layers, ChevronDown, AlertTriangle, RefreshCw, Pencil } from 'lucide-react';
+import { Printer, Search, FileDown, Trash2, Clock, CheckCircle, XCircle, MapPin, Phone, User, ShoppingBag, MessageCircle, Truck, X, Layers, ChevronDown, AlertTriangle, RefreshCw, Pencil } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -194,6 +194,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
     const [filterStatus, setFilterStatus] = useState('all');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [previewOrder, setPreviewOrder] = useState(null);
+    const [printOrder, setPrintOrder] = useState(null);
     const [selectedOrdersIds, setSelectedOrdersIds] = useState([]);
     const [productCostMap, setProductCostMap] = useState({});
 
@@ -678,6 +679,34 @@ printWindow.onload = () => printWindow.print();
         };
     };
 
+    const handlePrintSingleInvoice = (order) => {
+        const printWindow = window.open('', '_blank', 'width=1000,height=900');
+        if (!printWindow) {
+            alert(txt.alert_popup);
+            return;
+        }
+        setPrintOrder(order);
+        window.setTimeout(() => {
+            const content = document.getElementById('printable-single-invoice');
+            if (!content) {
+                printWindow.close();
+                alert(txt.alert_print_error);
+                return;
+            }
+            printWindow.document.write(`<!doctype html><html dir="${isRTL ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><title>${txt.print_invoices}</title><style>
+                @page { size: A4 portrait; margin: 0; }
+                html, body { margin: 0; padding: 0; background: #fff; }
+                body { font-family: Cairo, Arial, sans-serif; }
+                .print-page { width: 210mm !important; min-height: 148mm !important; height: auto !important; margin: 0 !important; padding: 20px 40px !important; page-break-after: auto !important; break-after: auto !important; overflow: hidden !important; box-shadow: none !important; border-radius: 0 !important; }
+                * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            </style></head><body>${content.innerHTML}</body></html>`);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.onload = () => printWindow.print();
+            setPrintOrder(null);
+        }, 80);
+    };
+
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -898,6 +927,13 @@ printWindow.onload = () => printWindow.print();
                     <InvoiceTemplate orders={ordersToPrint} lang={lang} generalSettings={generalSettings} />
                 </div>
             </div>
+            {printOrder && (
+                <div style={{ position: 'fixed', left: '-10000px', top: 0 }}>
+                    <div id="printable-single-invoice">
+                        <InvoiceTemplate orders={[printOrder]} lang={lang} generalSettings={generalSettings} hideHeader={true} />
+                    </div>
+                </div>
+            )}
 
             {/* Actions Bar */}
 
@@ -1158,20 +1194,11 @@ printWindow.onload = () => printWindow.print();
                                         <td className="p-2 md:py-3 md:px-3 text-center">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
-                                                    onClick={() => setPreviewOrder({
-                                                        ...order,
-                                                        cartItems: Array.isArray(order.cartItems) ? order.cartItems : [],
-                                                        formData: order.formData && typeof order.formData === 'object' ? order.formData : {},
-                                                        total: Number(order.total || 0),
-                                                        subTotal: Number(order.subTotal || 0),
-                                                        deliveryCost: Number(order.deliveryCost || 0),
-                                                        discount: Number(order.discount || 0),
-                                                        discountPercentage: Number(order.discountPercentage || 0)
-                                                    })}
-                                                    className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 shadow-sm active:scale-95 transition-all"
-                                                    title={lang === 'ar' ? 'عرض الفاتورة' : 'View Invoice'}
+                                                    onClick={() => handlePrintSingleInvoice(order)}
+                                                    className="w-9 h-9 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 shadow-sm active:scale-95 transition-all"
+                                                    title={lang === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice'}
                                                 >
-                                                    <Eye size={18} />
+                                                    <Printer size={17} />
                                                 </button>
                                                 <button
                                                     onClick={() => onViewOrder && onViewOrder(order, true)}
