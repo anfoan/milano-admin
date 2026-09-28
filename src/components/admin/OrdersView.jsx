@@ -12,6 +12,37 @@ import { useCurrency } from '../../context/CurrencyContext';
 
 import InvoiceTemplate from '../InvoiceTemplate';
 
+class SafeInvoicePreview extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { failed: false };
+    }
+    static getDerivedStateFromError() {
+        return { failed: true };
+    }
+    renderFallback() {
+        const { order, lang, generalSettings } = this.props;
+        const items = Array.isArray(order?.cartItems) ? order.cartItems : [];
+        const currency = getLocalizedCurrency(generalSettings?.currency || order?.currency || 'YER', lang);
+        const money = (value) => `${Number(value || 0).toLocaleString()} ${currency}`;
+        return (
+            <div className="bg-white text-gray-900 p-6 rounded-xl" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                <div className="flex justify-between items-start border-b-2 border-gray-800 pb-4 mb-5">
+                    <div><h1 className="text-3xl font-black">{lang === 'ar' ? 'فاتورة مبيعات' : 'Sales Invoice'}</h1><p className="font-bold">متجر ميلانو</p></div>
+                    <div className="text-sm font-bold text-right"><div>{lang === 'ar' ? 'رقم الفاتورة:' : 'Invoice:'} {order?.orderId || order?.id || '---'}</div><div>{order?.date || ''}</div></div>
+                </div>
+                <div className="bg-gray-50 border rounded-lg p-4 mb-5 text-sm font-bold">{lang === 'ar' ? 'العميل:' : 'Customer:'} {order?.formData?.name || '---'}<br />{order?.formData?.phone || ''}</div>
+                <table className="w-full border-collapse border text-sm"><thead><tr className="bg-gray-900 text-white"><th className="p-2 text-right">{lang === 'ar' ? 'المنتج' : 'Product'}</th><th className="p-2">{lang === 'ar' ? 'الكمية' : 'Qty'}</th><th className="p-2">{lang === 'ar' ? 'الإجمالي' : 'Total'}</th></tr></thead><tbody>{items.map((item, index) => <tr key={index} className="border-b"><td className="p-2">{item.title || '---'}{item.selectedSize ? ` / ${item.selectedSize}` : ''}</td><td className="p-2 text-center">{item.quantity || 1}</td><td className="p-2 text-center">{money(Number(item.price || 0) * Number(item.quantity || 1))}</td></tr>)}</tbody></table>
+                <div className="mt-5 ml-auto w-64 border-t-2 pt-3 font-black text-lg flex justify-between"><span>{lang === 'ar' ? 'الإجمالي:' : 'Total:'}</span><span>{money(order?.total)}</span></div>
+            </div>
+        );
+    }
+    render() {
+        if (this.state.failed) return this.renderFallback();
+        return <InvoiceTemplate {...this.props} orders={[this.props.order]} />;
+    }
+}
+
 const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, setSearchQuery }) => {
     const t = {
         ar: {
@@ -1342,7 +1373,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
                                     <button onClick={() => setPreviewOrder(null)} className="p-2 rounded-xl hover:bg-gray-200 text-gray-500" title={txt.close}><X size={20} /></button>
                                 </div>
                             </div>
-                            <div id="order-preview-invoice" className="overflow-y-auto p-4 md:p-8"><InvoiceTemplate orders={[previewOrder]} lang={lang} generalSettings={generalSettings} /></div>
+                            <div id="order-preview-invoice" className="overflow-y-auto p-4 md:p-8"><SafeInvoicePreview order={previewOrder} lang={lang} generalSettings={generalSettings} /></div>
                         </motion.div>
                     </motion.div>
                 )}
