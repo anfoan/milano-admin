@@ -334,6 +334,29 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
         return matchesSearch && matchesCategory;
     });
+    const getReceiptDate = (receipt) => {
+        if (receipt.createdAt?.toDate) return receipt.createdAt.toDate();
+        if (receipt.date) { const parsed = new Date(`${receipt.date}T00:00:00`); return Number.isNaN(parsed.getTime()) ? null : parsed; }
+        return null;
+    };
+    const visibleReceipts = receipts.filter((receipt) => {
+        const receiptDate = getReceiptDate(receipt);
+        let inPeriod = true;
+        if (reportStartDate || reportEndDate) {
+            const start = reportStartDate ? new Date(`${reportStartDate}T00:00:00`) : new Date(0);
+            const end = reportEndDate ? new Date(`${reportEndDate}T23:59:59.999`) : new Date(8640000000000000);
+            inPeriod = receiptDate ? receiptDate >= start && receiptDate <= end : false;
+        }
+        const queryText = searchReceiptId.trim().toLowerCase();
+        const matchesSearch = !queryText || String(receipt.orderId || '').toLowerCase().includes(queryText) || String(receipt.formData?.name || '').toLowerCase().includes(queryText);
+        return inPeriod && matchesSearch;
+    });
+    const activeVisibleReceipts = visibleReceipts.filter(receipt => receipt.status !== 'cancelled');
+    const paymentTotals = activeVisibleReceipts.reduce((totals, receipt) => {
+        const method = receipt.paymentMethod === 'card' ? 'card' : receipt.paymentMethod === 'transfer' ? 'transfer' : 'cash';
+        totals[method] += Number(receipt.total || 0);
+        return totals;
+    }, { cash: 0, card: 0, transfer: 0 });
 
     const handleAddToCart = (product) => {
         const totalStock = Number(product.stock || 0);
@@ -725,7 +748,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 <div class="meta-row">
                     <span>${isRTL ? 'طريقة الدفع:' : 'Payment:'}</span>
                     <span>${
-                        order.paymentMethod === 'card' ? (isRTL ? 'شبكة' : 'Card') :
+                        order.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') :
                         order.paymentMethod === 'transfer' ? (isRTL ? 'تحويل بنكي' : 'Bank Transfer') :
                         order.paymentMethod === 'cash' || !order.paymentMethod || order.paymentMethod === 'manual' ? (isRTL ? 'نقدي / كاش' : 'Cash') :
                         order.paymentMethod
@@ -934,7 +957,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                           <span class="payment-val">${(generatedReport.paymentBreakdown.cash || 0).toLocaleString()} ${currency}</span>
                       </div>
                       <div class="payment-card">
-                          <span class="payment-label">${isRTL ? 'بطاقة شبكة' : 'Card'}</span>
+                          <span class="payment-label">${isRTL ? 'محفظة جيب' : 'Jib Wallet'}</span>
                           <span class="payment-val">${(generatedReport.paymentBreakdown.card || 0).toLocaleString()} ${currency}</span>
                       </div>
                       <div class="payment-card">
@@ -958,9 +981,9 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                       </thead>
                       <tbody>
                           ${generatedReport.receipts.map((r, idx) => {
-                              const paymentLabel = r.paymentMethod === 'card' ? (isRTL ? 'شبكة' : 'Card') :
+                              const paymentLabel = r.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') :
                                   r.paymentMethod === 'transfer' ? (isRTL ? 'تحويل بنكي' : 'Bank Transfer') :
-                                  (isRTL ? 'نقدي' : 'Cash');
+                                  (isRTL ? 'نقدي / كاش' : 'Cash');
                               return `
                               <tr>
                                   <td style="text-align:center; color:#9ca3af;">${idx + 1}</td>
@@ -1236,7 +1259,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             </td>
                                         </tr>
                                     ))}
-                                    {receipts.length === 0 && (
+                                    {visibleReceipts.length === 0 && (
                                         <tr>
                                             <td colSpan="4" className="p-10 text-center text-gray-400 font-bold italic">
                                                 {isRTL ? "لا توجد عمليات مبيعات اليوم بعد" : "No POS activity found"}
@@ -1701,6 +1724,19 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     </div>
 
                     <div className="flex-1 bg-white dark:bg-[#1c1c1e] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm pt-4 pb-5 px-5 flex flex-col gap-2 overflow-hidden h-[calc(100vh-10rem)]">
+                    {/* Payment totals use the same visible period/search filter as the invoice table. */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-1">
+                        {[
+                            { id: 'cash', label: isRTL ? 'نقدي / كاش' : 'Cash', cls: 'bg-green-500/15 text-green-700 dark:text-green-300' },
+                            { id: 'card', label: isRTL ? 'محفظة جيب' : 'Jib Wallet', cls: 'bg-purple-500/15 text-purple-700 dark:text-purple-300' },
+                            { id: 'transfer', label: isRTL ? 'تحويل بنكي' : 'Bank Transfer', cls: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300' }
+                        ].map(method => (
+                            <div key={method.id} className={`rounded-2xl px-4 py-3 text-center font-black ${method.cls}`}>
+                                <div className="text-xs">{method.label}</div>
+                                <div className="font-mono text-lg mt-1">{paymentTotals[method.id].toLocaleString()} {currency}</div>
+                            </div>
+                        ))}
+                    </div>
                     {/* Receipts Summary Header */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
@@ -1794,19 +1830,6 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         )}
                     </div>
 
-                    {/* Payment method summary — same three methods as the POS terminal */}
-                    <div className="grid grid-cols-3 gap-2 mb-3">
-                        {[
-                            { id: 'cash', label: isRTL ? 'نقدي / كاش' : 'Cash', cls: 'bg-green-500/15 text-green-700 dark:text-green-300' },
-                            { id: 'card', label: isRTL ? 'محفظة جيب' : 'Jib Wallet', cls: 'bg-purple-500/15 text-purple-700 dark:text-purple-300' },
-                            { id: 'transfer', label: isRTL ? 'تحويل بنكي' : 'Bank Transfer', cls: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300' }
-                        ].map(method => (
-                            <div key={method.id} className={`rounded-xl px-3 py-2 text-center font-black text-[10px] ${method.cls}`}>
-                                <div>{method.label}</div>
-                                <div className="font-mono text-xs mt-1">{receipts.filter(r => (r.paymentMethod || 'cash') === method.id).reduce((sum, r) => sum + Number(r.total || 0), 0).toLocaleString()} {currency}</div>
-                            </div>
-                        ))}
-                    </div>
                     {/* Search and Table */}
                     <div className="flex-1 flex flex-col overflow-hidden">
                         <div className="mb-4">
@@ -1840,17 +1863,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {receipts
-                                        .filter(r => {
-                                            // Current month only (same logic as monthly sales card)
-                                            const now = new Date();
-                                            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                                            const inCurrentMonth = r.createdAt?.toDate ? r.createdAt.toDate() >= startOfMonth : false;
-                                            const matchesSearch = r.orderId?.toLowerCase().includes(searchReceiptId.toLowerCase()) || 
-                                                                  r.formData?.name?.toLowerCase().includes(searchReceiptId.toLowerCase());
-                                            return inCurrentMonth && matchesSearch;
-                                        })
-                                        .map((receipt, idx) => (
+                                    {visibleReceipts.map((receipt, idx) => (
                                             <tr key={receipt.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
                                                 <td className="p-3 text-center text-gray-400 w-8">{idx + 1}</td>
                                                 <td className="p-3 font-mono font-black">{receipt.orderId}</td>
@@ -1866,8 +1879,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         'bg-green-100 dark:bg-green-500/10 text-green-600'
                                                     }`}>
                                                         {receipt.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') :
-                                                         receipt.paymentMethod === 'transfer' ? (isRTL ? 'تحويل' : 'Transfer') :
-                                                         receipt.paymentMethod === 'cash' || !receipt.paymentMethod || receipt.paymentMethod === 'manual' ? (isRTL ? 'نقدي' : 'Cash') :
+                                                         receipt.paymentMethod === 'transfer' ? (isRTL ? 'تحويل بنكي' : 'Bank Transfer') :
+                                                         receipt.paymentMethod === 'cash' || !receipt.paymentMethod || receipt.paymentMethod === 'manual' ? (isRTL ? 'نقدي / كاش' : 'Cash') :
                                                          receipt.paymentMethod}
                                                     </span>
                                                 </td>
@@ -1934,7 +1947,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             </tr>
                                         ))}
                                     
-                                    {receipts.length === 0 && (
+                                    {visibleReceipts.length === 0 && (
                                         <tr>
                                             <td colSpan="10" className="p-10 text-center text-gray-400 font-bold italic">
                                                 {isRTL ? "لا توجد فواتير مسجلة بنقطة البيع بعد" : "No POS receipts found"}
@@ -2059,7 +2072,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             <span className="block font-black text-gray-800 dark:text-white font-mono mt-1">{(generatedReport.paymentBreakdown.cash || 0).toLocaleString()} {currency}</span>
                                         </div>
                                         <div>
-                                            <span>{isRTL ? "بطاقة شبكة:" : "Card:"}</span>
+                                            <span>{isRTL ? "محفظة جيب:" : "Card:"}</span>
                                             <span className="block font-black text-gray-800 dark:text-white font-mono mt-1">{(generatedReport.paymentBreakdown.card || 0).toLocaleString()} {currency}</span>
                                         </div>
                                         <div>
@@ -2090,9 +2103,9 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     <td className="p-2 font-mono">{r.orderId}</td>
                                                     <td className="p-2">{r.formData?.name || '---'}</td>
                                                     <td className="p-2">
-                                                        {r.paymentMethod === 'card' ? (isRTL ? 'شبكة' : 'Card') :
+                                                        {r.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') :
                                                          r.paymentMethod === 'transfer' ? (isRTL ? 'تحويل بنكي' : 'Bank Transfer') :
-                                                         r.paymentMethod === 'cash' || !r.paymentMethod || r.paymentMethod === 'manual' ? (isRTL ? 'نقدي' : 'Cash') :
+                                                         r.paymentMethod === 'cash' || !r.paymentMethod || r.paymentMethod === 'manual' ? (isRTL ? 'نقدي / كاش' : 'Cash') :
                                                          r.paymentMethod}
                                                     </td>
                                                     <td className="p-2">{r.formattedDate}</td>

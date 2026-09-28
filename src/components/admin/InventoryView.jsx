@@ -640,7 +640,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                                         }}
                                                                     />
                                                                 )}
-                                                                <button type="button" onClick={() => { sizeValues.length > 0 ? updateStockWithSizes(product.id, tempSizeStocks) : updateStock(product.id, tempStock); setEditingId(null); }} className="p-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors" title={txt.save}>
+                                                                <button type="button" onClick={() => { sizeValues.length > 0 ? updateStockWithSizes(product.id, tempSizeStocks) : updateStock(product.id, tempStock); setEditingId(null); }} className="w-7 h-7 p-0 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center justify-center" title={txt.save}>
                                                                     <Save size={12} />
                                                                 </button>
                                                                 <button type="button" onClick={() => setEditingId(null)} className="px-1.5 py-1 text-[10px] font-black text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200" title={txt.cancel}>
@@ -651,7 +651,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                             <button
                                                                 type="button"
                                                                 onClick={() => { setEditingId(product.id); setTempStock(product.stock); setTempSizeStocks(product.sizeStocks || {}); }}
-                                                                className="mt-1 p-1 bg-blue-50 rounded-lg text-blue-500 hover:bg-blue-100 transition-colors no-print"
+                                                                className="mt-1 w-7 h-7 p-0 bg-blue-50 rounded-md text-blue-500 hover:bg-blue-100 transition-colors no-print flex items-center justify-center"
                                                                 title={txt.edit}
                                                             >
                                                                 <Edit2 size={13} />

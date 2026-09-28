@@ -3,7 +3,7 @@ import {
     Image as ImageIcon, Plus, X, Upload,
     Type, Hash, Palette, Ruler, Info,
     ChevronDown, Save, Trash2, Bold, Italic, Underline,
-    Link, Heading2, List, ListOrdered, FileJson
+    Link, Heading2, List, ListOrdered, FileJson, ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../../lib/firebase';
@@ -545,6 +545,11 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                 />
             )}
             <form onSubmit={handleSave} className="space-y-6 pb-20 font-['Cairo']" dir={isRTL ? 'rtl' : 'ltr'}>
+                {editingProduct && (
+                    <button type="button" onClick={() => { setEditingProduct(null); setActiveTab('product-list'); }} className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-600 hover:text-blue-600 hover:border-blue-300 transition-colors" title={isRTL ? 'العودة إلى قائمة المنتجات' : 'Back to products'}>
+                        <ArrowRight size={20} className={isRTL ? '' : 'rotate-180'} />
+                    </button>
+                )}
                 {/* 1. Product Info Section (Matching Image 1) */}
                 <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden relative">
                     <div className={`absolute top-8 ${isRTL ? 'right-8' : 'left-8'} w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-black z-10 shadow-lg shadow-blue-200`}>
