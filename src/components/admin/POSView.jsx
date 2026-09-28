@@ -1794,6 +1794,19 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         )}
                     </div>
 
+                    {/* Payment method summary — same three methods as the POS terminal */}
+                    <div className="grid grid-cols-3 gap-2 mb-3">
+                        {[
+                            { id: 'cash', label: isRTL ? 'نقدي / كاش' : 'Cash', cls: 'bg-green-500/15 text-green-700 dark:text-green-300' },
+                            { id: 'card', label: isRTL ? 'محفظة جيب' : 'Jib Wallet', cls: 'bg-purple-500/15 text-purple-700 dark:text-purple-300' },
+                            { id: 'transfer', label: isRTL ? 'تحويل بنكي' : 'Bank Transfer', cls: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300' }
+                        ].map(method => (
+                            <div key={method.id} className={`rounded-xl px-3 py-2 text-center font-black text-[10px] ${method.cls}`}>
+                                <div>{method.label}</div>
+                                <div className="font-mono text-xs mt-1">{receipts.filter(r => (r.paymentMethod || 'cash') === method.id).reduce((sum, r) => sum + Number(r.total || 0), 0).toLocaleString()} {currency}</div>
+                            </div>
+                        ))}
+                    </div>
                     {/* Search and Table */}
                     <div className="flex-1 flex flex-col overflow-hidden">
                         <div className="mb-4">
@@ -1816,6 +1829,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <tr>
                                         <th className="p-3 w-8 text-center">#</th>
                                         <th className="p-3 text-start">{isRTL ? "رقم الفاتورة" : "Invoice ID"}</th>
+                                        <th className="p-3 text-start">{isRTL ? "اسم المنتج + المقاس" : "Product + Size"}</th>
+                                        <th className="p-3 text-center">{isRTL ? "الكمية" : "Qty"}</th>
                                         <th className="p-3 text-start">{isRTL ? "اسم العميل" : "Customer"}</th>
                                         <th className="p-3 text-start">{isRTL ? "طريقة الدفع" : "Payment"}</th>
                                         <th className="p-3 text-start">{isRTL ? "التاريخ والوقت" : "Date & Time"}</th>
@@ -1839,6 +1854,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             <tr key={receipt.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
                                                 <td className="p-3 text-center text-gray-400 w-8">{idx + 1}</td>
                                                 <td className="p-3 font-mono font-black">{receipt.orderId}</td>
+                                                <td className="p-3">
+                                                    <div className="space-y-0.5">{(receipt.cartItems || []).map((item, itemIdx) => <div key={itemIdx}>{item.title}{(item.selectedSize || item.size) ? ` / ${item.selectedSize || item.size}` : ''}</div>)}</div>
+                                                </td>
+                                                <td className="p-3 text-center font-mono">{(receipt.cartItems || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</td>
                                                 <td className="p-3">{receipt.formData?.name || '---'}</td>
                                                 <td className="p-3">
                                                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-black ${
@@ -1846,7 +1865,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         receipt.paymentMethod === 'transfer' ? 'bg-cyan-100 dark:bg-cyan-500/10 text-cyan-600' :
                                                         'bg-green-100 dark:bg-green-500/10 text-green-600'
                                                     }`}>
-                                                        {receipt.paymentMethod === 'card' ? (isRTL ? 'شبكة' : 'Card') :
+                                                        {receipt.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') :
                                                          receipt.paymentMethod === 'transfer' ? (isRTL ? 'تحويل' : 'Transfer') :
                                                          receipt.paymentMethod === 'cash' || !receipt.paymentMethod || receipt.paymentMethod === 'manual' ? (isRTL ? 'نقدي' : 'Cash') :
                                                          receipt.paymentMethod}
@@ -1917,7 +1936,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     
                                     {receipts.length === 0 && (
                                         <tr>
-                                            <td colSpan="8" className="p-10 text-center text-gray-400 font-bold italic">
+                                            <td colSpan="10" className="p-10 text-center text-gray-400 font-bold italic">
                                                 {isRTL ? "لا توجد فواتير مسجلة بنقطة البيع بعد" : "No POS receipts found"}
                                             </td>
                                         </tr>

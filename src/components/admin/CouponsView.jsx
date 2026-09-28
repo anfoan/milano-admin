@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Percent, Plus, Trash2, Tag, Calendar, Users } from 'lucide-react';
+import { Percent, Plus, Trash2, Tag, Calendar, Users, Edit2 } from 'lucide-react';
 import { db } from '../../lib/firebase';
-import { collection, query, orderBy, onSnapshot, doc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, deleteDoc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
@@ -10,6 +10,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const [coupons, setCoupons] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
+    const [editingCoupon, setEditingCoupon] = useState(null);
 
     // Form State
     const [code, setCode] = useState('');
@@ -27,7 +28,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             random: "عشوائي",
             code_placeholder: "كوبون",
             discount_percent: "نسبة الخصم %",
-            discount_amount: "مبلغ الخصم",
+            discount_amount: "مبلغ",
             unlimited_usage: "غير محدود الاستخدام",
             unlimited_desc: "تفعيل هذا الخيار يلغي الحد الأقصى",
             yes: "نعم",
@@ -66,6 +67,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             random: "Random",
             code_placeholder: "CODE",
             discount_percent: "Discount %",
+            discount_amount: "Amount",
             unlimited_usage: "Unlimited Usage",
             unlimited_desc: "Enable to remove usage limit",
             yes: "Yes",
@@ -145,21 +147,23 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
         try {
             // Check for existing code (Simple client-side check if list is small, otherwise query)
             // Since we have 'coupons' state, we can check it.
-            if (coupons.some(c => c.code === code.toUpperCase())) {
+            if (coupons.some(c => c.code === code.toUpperCase() && c.id !== editingCoupon?.id)) {
                 return alert(lang === 'ar' ? 'هذا الكوبون موجود بالفعل' : 'Coupon code already exists');
             }
 
-            await addDoc(collection(db, "coupons"), {
+            const couponData = {
                 code: code.toUpperCase(),
                 discountPercent: Number(discountPercent),
                 maxUses: isUnlimited ? null : Math.max(1, Number(maxUses)),
                 expiryDate: expiryDate || null,
                 minOrderAmount: Number(minOrderAmount) || 0,
-                usedCount: 0,
+                usedCount: editingCoupon ? Number(editingCoupon.usedCount || 0) : 0,
                 isUnlimited,
-                createdAt: serverTimestamp(),
-                createdAtDisplay: new Date().toISOString().slice(0, 19).replace('T', ' ')
-            });
+                createdAt: editingCoupon?.createdAt || serverTimestamp(),
+                createdAtDisplay: editingCoupon?.createdAtDisplay || new Date().toISOString().slice(0, 19).replace('T', ' ')
+            };
+            if (editingCoupon) await updateDoc(doc(db, "coupons", editingCoupon.id), couponData);
+            else await addDoc(collection(db, "coupons"), couponData);
             setIsAdding(false);
             resetForm();
             alert(txt.alert_success);
@@ -176,6 +180,18 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
         setMaxUses(100);
         setExpiryDate('');
         setMinOrderAmount('');
+        setEditingCoupon(null);
+    };
+
+    const editCoupon = (coupon) => {
+        setEditingCoupon(coupon);
+        setCode(coupon.code || '');
+        setDiscountPercent(Number(coupon.discountPercent || 0));
+        setIsUnlimited(Boolean(coupon.isUnlimited));
+        setMaxUses(coupon.maxUses || 1);
+        setExpiryDate(coupon.expiryDate || '');
+        setMinOrderAmount(coupon.minOrderAmount || '');
+        setIsAdding(true);
     };
 
     const deleteCoupon = async (id) => {
@@ -205,7 +221,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                 )}
                 {isAdding && (
                     <button
-                        onClick={() => setIsAdding(false)}
+                        onClick={() => { setIsAdding(false); resetForm(); }}
                         className="px-6 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition flex items-center gap-2"
                     >
                         <span>{txt.cancel}</span>
@@ -222,7 +238,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                         className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-xl overflow-hidden max-w-4xl mx-auto"
                     >
                         <div className="flex justify-center mb-8 border-b-2 border-blue-500 w-fit mx-auto pb-2">
-                            <h3 className="text-xl font-black text-gray-800">{txt.add_coupon}</h3>
+                            <h3 className="text-xl font-black text-gray-800">{editingCoupon ? (lang === 'ar' ? 'تعديل الكوبون' : 'Edit Coupon') : txt.add_coupon}</h3>
                         </div>
 
                         <div className="space-y-8">
@@ -341,6 +357,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                         <th className="p-6 font-bold">{txt.th_created}</th>
                                         <th className="p-6 font-bold">{txt.th_expiry}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_discount}</th>
+                                        <th className="p-6 font-bold text-center">{txt.discount_amount}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_max}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_uses}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_actions}</th>
@@ -348,9 +365,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
                                     {loading ? (
-                                        <tr><td colSpan="7" className="p-12 text-center text-gray-400 font-bold">{txt.loading}</td></tr>
+                                        <tr><td colSpan="8" className="p-12 text-center text-gray-400 font-bold">{txt.loading}</td></tr>
                                     ) : coupons.length === 0 ? (
-                                        <tr><td colSpan="7" className="p-12 text-center text-gray-400 font-bold">{txt.no_coupons}</td></tr>
+                                        <tr><td colSpan="8" className="p-12 text-center text-gray-400 font-bold">{txt.no_coupons}</td></tr>
                                     ) : (
                                         coupons.map((coupon) => (
                                             <tr key={coupon.id} className={`hover:bg-gray-50 transition-colors ${(!coupon.isUnlimited && Number(coupon.usedCount || 0) >= Number(coupon.maxUses || 0)) ? 'opacity-60 bg-gray-50' : ''}`}>
@@ -376,7 +393,10 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                                     </span>
                                                 </td>
                                                 <td className="p-6 text-center">
-                                                    <span className="font-black text-pink-500 text-lg">{coupon.discountPercent}%</span><span className="block text-xs text-gray-500 font-bold">{txt.discount_amount}: {Math.round(Number(coupon.minOrderAmount || 0) * Number(coupon.discountPercent || 0) / 100).toLocaleString()} {currency}</span>
+                                                    <span className="font-black text-pink-500 text-lg">{coupon.discountPercent}%</span>
+                                                </td>
+                                                <td className="p-6 text-center font-black text-gray-700 font-mono">
+                                                    {Math.round(Number(coupon.minOrderAmount || 0) * Number(coupon.discountPercent || 0) / 100).toLocaleString()} {currency}
                                                 </td>
                                                 <td className="p-6 text-center font-bold text-gray-600">
                                                     {coupon.isUnlimited ? (
@@ -388,10 +408,18 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                                 </td>
                                                 <td className="p-6 text-center">
                                                     <button
-                                                        onClick={() => deleteCoupon(coupon.id)}
-                                                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                                        onClick={() => editCoupon(coupon)}
+                                                        className="p-2 bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 rounded-lg transition-colors"
+                                                        title={lang === 'ar' ? 'تعديل' : 'Edit'}
                                                     >
-                                                        <Trash2 size={20} />
+                                                        <Edit2 size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteCoupon(coupon.id)}
+                                                        className="p-2 bg-red-500/15 text-red-600 hover:bg-red-500/25 rounded-lg transition-colors"
+                                                        title={lang === 'ar' ? 'حذف' : 'Delete'}
+                                                    >
+                                                        <Trash2 size={18} />
                                                     </button>
                                                 </td>
                                             </tr>

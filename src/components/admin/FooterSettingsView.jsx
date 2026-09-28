@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
-import { 
-    Save, Plus, Trash2, Edit2, Layout, CreditCard, 
-    MessageCircle, MapPin, Award, Info, Banknote, 
+import {
+    Save, Plus, Trash2, Edit2, Layout, CreditCard,
+    MessageCircle, MapPin, Award, Info, Banknote,
     Building2, Wallet, Repeat, Smartphone, Check, X,
     Palette, Landmark, Coins, ArrowRightLeft, WalletCards, CircleDollarSign
 } from 'lucide-react';
@@ -201,17 +201,17 @@ const FooterSettingsView = ({ lang }) => {
                                     onChange={(e) => updateStoreInfo('title', e.target.value)}
                                     className="w-full px-5 py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:border-blue-500 font-bold"
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase mb-2 mr-1">{isRTL ? "الوصف" : "Description"}</label>
+                            </div><div>
+                                <label className="block text-xs font-black text-gray-400 uppercase mb-2 mr-1">{isRTL ? "عبارة ضمان الجودة" : "Quality Statement"}</label>
                                 <input
                                     type="text"
-                                    value={footerData.storeSection.description}
-                                    onChange={(e) => updateStoreInfo('description', e.target.value)}
+                                    value={footerData.storeSection.qualityStatement}
+                                    onChange={(e) => updateStoreInfo('qualityStatement', e.target.value)}
                                     className="w-full px-5 py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:border-blue-500 font-bold"
                                 />
                             </div>
-                            <div>
+
+<div>
                                 <label className="block text-xs font-black text-gray-400 uppercase mb-2 mr-1">{isRTL ? "العنوان" : "Address"}</label>
                                 <div className="relative">
                                     <MapPin size={18} className={`absolute ${isRTL ? 'right-5' : 'left-5'} top-1/2 -translate-y-1/2 text-gray-400`} />
@@ -222,30 +222,11 @@ const FooterSettingsView = ({ lang }) => {
                                         className={`w-full ${isRTL ? 'pr-12 pl-5' : 'pl-12 pr-5'} py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:border-blue-500 font-bold`}
                                     />
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase mb-2 mr-1">{isRTL ? "عبارة ضمان الجودة" : "Quality Statement"}</label>
-                                <input
-                                    type="text"
-                                    value={footerData.storeSection.qualityStatement}
-                                    onChange={(e) => updateStoreInfo('qualityStatement', e.target.value)}
-                                    className="w-full px-5 py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:border-blue-500 font-bold"
-                                />
-                            </div>
-                            <div>
+                            </div><div>
                                 <label className="block text-xs font-black text-gray-400 uppercase mb-2 mr-1">{isRTL ? "رقم الهاتف" : "Phone"}</label>
                                 <div className="relative"><Smartphone size={18} className={`absolute ${isRTL ? 'right-5' : 'left-5'} top-1/2 -translate-y-1/2 text-cyan-500`} /><input type="text" value={footerData.storeSection.phone || ''} onChange={(e) => updateStoreInfo('phone', e.target.value)} className={`w-full ${isRTL ? 'pr-12 pl-5' : 'pl-12 pr-5'} py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:border-blue-500 font-bold`} /></div>
                             </div>
-                            <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase mb-2 mr-1">{isRTL ? "شعار المتجر (Slogan)" : "Slogan"}</label>
-                                <input
-                                    type="text"
-                                    value={footerData.storeSection.slogan}
-                                    onChange={(e) => updateStoreInfo('slogan', e.target.value)}
-                                    className="w-full px-5 py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl outline-none focus:border-blue-500 font-bold"
-                                />
-                            </div>
-                        </div>
+</div>
                     </div>
                 )}
 

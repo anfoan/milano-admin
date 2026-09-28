@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Star, MessageSquare, Trash2, User, X, Send, Pencil } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const ReviewsView = ({ lang = 'ar' }) => {
     const [reviews, setReviews] = useState([]);
@@ -211,19 +210,12 @@ const ReviewsView = ({ lang = 'ar' }) => {
             </div>
 
             {/* Reply Modal */}
-            <AnimatePresence>
-                {replyModalOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+            {replyModalOpen && (
+                    <div
                         className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
                         onClick={closeReplyModal}
                     >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
+                        <div
                             className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl"
                             onClick={e => e.stopPropagation()}
                             dir={isRTL ? "rtl" : "ltr"}
@@ -273,10 +265,9 @@ const ReviewsView = ({ lang = 'ar' }) => {
                                     <span>{txt.send}</span>
                                 </button>
                             </div>
-                        </motion.div>
-                    </motion.div>
+                        </div>
+                    </div>
                 )}
-            </AnimatePresence>
         </div>
     );
 };

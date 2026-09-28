@@ -658,7 +658,25 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
             setLoading(false);
         });
 
-        return () => unsubscribe();
+        const printPreviewInvoice = () => {
+        const source = document.getElementById('order-preview-invoice');
+        if (!source) return;
+        const printWindow = window.open('', '_blank', 'width=1000,height=900');
+        if (!printWindow) return alert(lang === 'ar' ? 'يرجى السماح بالنوافذ المنبثقة للطباعة' : 'Please allow popups for printing');
+        printWindow.document.write(`<!doctype html><html dir="${lang === 'ar' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><title>${txt.preview_invoice}</title><style>
+            @page { size: A4 portrait; margin: 0; }
+            html, body { margin: 0; padding: 0; background: white; }
+            body { font-family: Cairo, Arial, sans-serif; }
+            .print-page { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; padding: 12mm 14mm !important; box-sizing: border-box !important; page-break-after: auto !important; break-after: auto !important; overflow: hidden !important; box-shadow: none !important; border-radius: 0 !important; }
+            .print\:hidden, [data-html2canvas-ignore="true"] { display: none !important; }
+            table { page-break-inside: auto; } tr { page-break-inside: avoid; }
+            * { box-sizing: border-box; }
+        </style></head><body>${source.innerHTML}</body></html>`);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.onload = () => printWindow.print();
+    };
+    return () => unsubscribe();
     }, []);
 
     // Filter Logic
@@ -1311,11 +1329,11 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
                             <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50 shrink-0">
                                 <h3 className="font-black text-gray-800">{txt.preview_invoice} — {previewOrder.orderId}</h3>
                                 <div className="flex items-center gap-2">
-                                    <button onClick={() => window.print()} className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-sm flex items-center gap-2"><Printer size={16} />{txt.print}</button>
+                                    <button onClick={printPreviewInvoice} className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-sm flex items-center gap-2"><Printer size={16} />{txt.print}</button>
                                     <button onClick={() => setPreviewOrder(null)} className="p-2 rounded-xl hover:bg-gray-200 text-gray-500" title={txt.close}><X size={20} /></button>
                                 </div>
                             </div>
-                            <div className="overflow-y-auto p-4 md:p-8"><InvoiceTemplate orders={[previewOrder]} lang={lang} generalSettings={generalSettings} /></div>
+                            <div id="order-preview-invoice" className="overflow-y-auto p-4 md:p-8"><InvoiceTemplate orders={[previewOrder]} lang={lang} generalSettings={generalSettings} /></div>
                         </motion.div>
                     </motion.div>
                 )}
