@@ -133,7 +133,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
     // Check Auth Status (either Admin user or Local Worker)
     useEffect(() => {
-        const checkAuth = auth.onAuthStateChanged(async (user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
             const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
             
             if (user) {
@@ -162,7 +162,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             setAuthLoading(false);
         });
 
-        return () => checkAuth();
+        return () => unsubscribeAuth();
     }, []);
 
     // Worker Login Handler
