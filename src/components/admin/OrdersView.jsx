@@ -838,7 +838,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
             {/* Hidden Printable Component - Wrapped in Ref Div */}
             <div style={{ position: 'fixed', left: '-10000px', top: 0 }}>
                 <div id="printable-invoices">
-                    <InvoiceTemplate orders={ordersToPrint} lang={lang} />
+                    <InvoiceTemplate orders={ordersToPrint} lang={lang} generalSettings={generalSettings} />
                 </div>
             </div>
 

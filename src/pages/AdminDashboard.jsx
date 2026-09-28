@@ -99,11 +99,12 @@ const AdminDashboard = () => {
     useEffect(() => {
         // Real-time listener for general settings (currency)
         const unsubscribe = onSnapshot(doc(db, "settings", "general"), (docSnap) => {
-            if (docSnap.exists()) {
-                setGeneralSettings(docSnap.data());
-            }
+            if (docSnap.exists()) setGeneralSettings(docSnap.data());
         });
-        return () => unsubscribe();
+        const unsubscribeImages = onSnapshot(doc(db, "settings", "images"), (docSnap) => {
+            if (docSnap.exists()) setGeneralSettings(prev => ({ ...prev, invoiceLogo: docSnap.data().invoiceLogo || '' }));
+        });
+        return () => { unsubscribe(); unsubscribeImages(); };
     }, []);
 
     // Search Indexer (Fetch basic data for instant search)
@@ -521,10 +522,16 @@ const AdminDashboard = () => {
                         </div>
 
                         <button
-                            onClick={() => setShowRightPanel(true)}
-                            className="p-2.5 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl transition-colors"
+                            onClick={() => setActiveTab('inbox')}
+                            className="relative p-2.5 bg-green-500/15 dark:bg-green-400/10 hover:bg-green-500/25 rounded-xl transition-colors"
+                            title={lang === 'ar' ? 'فتح صندوق الوارد' : 'Open Inbox'}
                         >
-                            <ArrowRightFromLine size={20} className="text-gray-600 dark:text-gray-300" />
+                            <MessageSquare size={20} className="text-green-600 dark:text-green-300" />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center border-2 border-white dark:border-[#0a0a0b]">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
                         </button>
                     </div>
                 </header>

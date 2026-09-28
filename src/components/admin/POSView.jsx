@@ -1405,8 +1405,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     </span>
                                                 )}
                                                 {Number(product.stock || 0) <= 0 && (
-                                                    <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center z-10">
-                                                        <span className="text-white font-black text-sm bg-red-500 px-4 py-1.5 rounded-full shadow-lg border-2 border-red-300">
+                                                    <div className="absolute inset-0 bg-red-500/20 rounded-xl flex items-center justify-center z-10">
+                                                        <span className="text-white font-black text-sm bg-red-500/70 px-4 py-1.5 rounded-full shadow-lg border-2 border-red-300/60">
                                                             {isRTL ? 'نفذ المخزون' : 'Out of Stock'}
                                                         </span>
                                                     </div>
@@ -1598,7 +1598,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     disabled={!(isAdminManager || workerPermissions.allowChangePayment)}
                                     className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
                                         paymentMethod === 'cash' 
-                                            ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-black' 
+                                            ? 'border-green-500/60 bg-green-500/15 dark:bg-green-400/10 text-green-700 dark:text-green-300 font-black'
                                             : 'border-gray-200 dark:border-white/5 text-gray-400'
                                     } ${!(isAdminManager || workerPermissions.allowChangePayment) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >
@@ -1610,19 +1610,19 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     disabled={!(isAdminManager || workerPermissions.allowChangePayment)}
                                     className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
                                         paymentMethod === 'card' 
-                                            ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-black' 
+                                            ? 'border-purple-500/60 bg-purple-500/15 dark:bg-purple-400/10 text-purple-700 dark:text-purple-300 font-black'
                                             : 'border-gray-200 dark:border-white/5 text-gray-400'
                                     } ${!(isAdminManager || workerPermissions.allowChangePayment) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >
                                     <CreditCard size={16} />
-                                    <span className="text-[10px]">{isRTL ? "شبكة" : "Network Card"}</span>
+                                    <span className="text-[10px]">{isRTL ? "محفظة جيب" : "Jib Wallet"}</span>
                                 </button>
                                 <button
                                     onClick={() => (isAdminManager || workerPermissions.allowChangePayment) && setPaymentMethod('transfer')}
                                     disabled={!(isAdminManager || workerPermissions.allowChangePayment)}
                                     className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
                                         paymentMethod === 'transfer' 
-                                            ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-black' 
+                                            ? 'border-cyan-500/60 bg-cyan-500/15 dark:bg-cyan-400/10 text-cyan-700 dark:text-cyan-300 font-black'
                                             : 'border-gray-200 dark:border-white/5 text-gray-400'
                                     } ${!(isAdminManager || workerPermissions.allowChangePayment) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >

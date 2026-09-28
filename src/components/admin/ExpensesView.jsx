@@ -690,7 +690,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                           <div class="bond-title">${title}</div>
                       </div>
                       <div class="header-left">
-                          <img src="/admin-logo.png" alt="Logo" class="logo" onerror="this.src='/logo.jpg'; this.onerror=function(){this.src='/logo-rounded.png'; this.onerror=null;}" />
+                          <img src="${generalSettings?.invoiceLogo || '/admin-logo.png'}" alt="Logo" class="logo" onerror="this.src='/logo.jpg'; this.onerror=function(){this.src='/logo-rounded.png'; this.onerror=null;}" />
                           <div class="date-time">التاريخ: ${bond.date || ''}</div>
                           <div class="date-time">الوقت: ${timeStr}</div>
                       </div>
@@ -1304,7 +1304,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                           <div class="bond-title">${title}</div>
                       </div>
                       <div class="header-left">
-                          <img src="/admin-logo.png" alt="Logo" class="logo" onerror="this.src='/logo.jpg'; this.onerror=function(){this.src='/logo-rounded.png'; this.onerror=null;}" />
+                          <img src="${generalSettings?.invoiceLogo || '/admin-logo.png'}" alt="Logo" class="logo" onerror="this.src='/logo.jpg'; this.onerror=function(){this.src='/logo-rounded.png'; this.onerror=null;}" />
                           <div class="date-time">التاريخ: ${expense.date || ''}</div>
                       </div>
                   </div>

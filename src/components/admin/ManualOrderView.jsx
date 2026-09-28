@@ -569,7 +569,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                 {/* Hidden Invoice Template for printing */}
                 <div style={{ display: 'none' }}>
                     <div id="manual-invoice-content">
-                        <InvoiceTemplate orders={[createdOrderData]} lang={lang} />
+                        <InvoiceTemplate orders={[createdOrderData]} lang={lang} generalSettings={generalSettings} />
                     </div>
                 </div>
             </motion.div>

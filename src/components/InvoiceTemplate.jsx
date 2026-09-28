@@ -79,8 +79,8 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                     </div>
                                 </div>
                                 <div className={`flex flex-col justify-center items-center ${lang === 'ar' ? 'pl-4' : 'pr-4'}`}>
-                                    <div className="w-28 h-28 rounded-full bg-black flex items-center justify-center overflow-hidden border-4 border-gray-100 p-1">
-                                        <img src="/logo.jpg" onError={(e) => e.target.src = '/nav-logo.png'} className="w-full h-full object-contain rounded-full" />
+                                    <div className="w-28 h-28 rounded-[20px] bg-black flex items-center justify-center overflow-hidden border-4 border-gray-100 p-1">
+                                        <img src={generalSettings?.invoiceLogo || "/admin-logo.png"} onError={(e) => e.target.src = '/admin-logo.png'} className="w-full h-full object-contain rounded-[18px]" />
                                     </div>
                                 </div>
                             </div>

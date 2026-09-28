@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, MessageSquare, Trash2, User, X, Send } from 'lucide-react';
+import { Star, MessageSquare, Trash2, User, X, Send, Pencil } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -181,14 +181,22 @@ const ReviewsView = ({ lang = 'ar' }) => {
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={() => openReplyModal(review)}
-                                                    className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                                                    className="p-2.5 bg-green-500/15 text-green-600 hover:bg-green-500/25 rounded-xl transition-all shadow-sm"
                                                     title={txt.reply_title}
                                                 >
                                                     <MessageSquare size={18} />
                                                 </button>
                                                 <button
+                                                    onClick={() => openReplyModal(review)}
+                                                    className="p-2.5 bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 rounded-xl transition-all shadow-sm"
+                                                    title={lang === 'ar' ? 'تعديل الرد' : 'Edit Reply'}
+                                                >
+                                                    <Pencil size={18} />
+                                                </button>
+                                                <button
                                                     onClick={() => deleteReview(review.id)}
-                                                    className="p-3 bg-red-50 rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                                    className="p-2.5 bg-red-500/15 text-red-600 hover:bg-red-500/25 rounded-xl transition-all shadow-sm"
+                                                    title={lang === 'ar' ? 'حذف التقييم' : 'Delete Review'}
                                                 >
                                                     <Trash2 size={18} />
                                                 </button>
