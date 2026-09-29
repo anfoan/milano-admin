@@ -705,9 +705,18 @@ printWindow.onload = () => printWindow.print();
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
                 <style>
                     @page { size: A4 portrait; margin: 0; }
-                    html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+                    html, body { margin: 0 !important; padding: 0 !important; background: #f3f4f6 !important; }
                     body { font-family: 'Cairo', Arial, sans-serif; }
-                    .print-container { width: 100% !important; }
+                    .print-toolbar {
+                        position: sticky; top: 0; z-index: 20; display: flex; justify-content: center;
+                        padding: 16px; background: rgba(255,255,255,.96); box-shadow: 0 2px 12px rgba(15,23,42,.10);
+                    }
+                    .print-button {
+                        border: 0; border-radius: 10px; background: #2563eb; color: #fff; padding: 11px 28px;
+                        font: 700 15px Cairo, Arial, sans-serif; cursor: pointer; box-shadow: 0 6px 14px rgba(37,99,235,.25);
+                    }
+                    .print-button:hover { background: #1d4ed8; }
+                    .print-container { width: 100% !important; padding: 28px 0 40px; }
                     .print-page {
                         width: 210mm !important;
                         min-height: 240mm !important;
@@ -717,20 +726,33 @@ printWindow.onload = () => printWindow.print();
                         page-break-after: avoid !important;
                         break-after: avoid-page !important;
                         page-break-inside: avoid !important;
-                        box-shadow: none !important;
-                        border-radius: 0 !important;
+                        background: #fff !important;
+                        box-shadow: 0 10px 30px rgba(15,23,42,.18) !important;
+                        border: 1px solid #e5e7eb !important;
+                        border-radius: 30px !important;
                         overflow: hidden !important;
                     }
                     .print\:hidden, [data-html2canvas-ignore="true"] { display: none !important; }
                     table, tr { page-break-inside: avoid !important; }
                     * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                </style></head><body>${content.innerHTML}</body></html>`);
+                    @media print {
+                        html, body { background: #fff !important; }
+                        .print-toolbar { display: none !important; }
+                        .print-container { padding: 0 !important; }
+                        .print-page {
+                            box-shadow: none !important; border: 0 !important; border-radius: 0 !important;
+                            margin: 0 !important; width: 210mm !important; min-height: 240mm !important;
+                        }
+                    }
+                </style></head><body>
+                <div class="print-toolbar no-print">
+                    <button class="print-button" onclick="window.print()">🖨️ ${lang === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice'}</button>
+                </div>
+                <div class="invoice-preview">${content.innerHTML}</div>
+                </body></html>`);
             printWindow.document.close();
             printWindow.focus();
-            printWindow.onload = () => {
-                const ready = printWindow.document.fonts?.ready || Promise.resolve();
-                ready.then(() => setTimeout(() => printWindow.print(), 250));
-            };
+            // Keep the preview open so the user can review it and press the blue print button.
             setPrintOrder(null);
         }, 80);
     };
