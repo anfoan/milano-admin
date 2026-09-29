@@ -693,16 +693,44 @@ printWindow.onload = () => printWindow.print();
                 alert(txt.alert_print_error);
                 return;
             }
-            printWindow.document.write(`<!doctype html><html dir="${isRTL ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><title>${txt.print_invoices}</title><style>
-                @page { size: A4 portrait; margin: 0; }
-                html, body { margin: 0; padding: 0; background: #fff; }
-                body { font-family: Cairo, Arial, sans-serif; }
-                .print-page { width: 210mm !important; min-height: 148mm !important; height: auto !important; margin: 0 !important; padding: 20px 40px !important; page-break-after: auto !important; break-after: auto !important; overflow: hidden !important; box-shadow: none !important; border-radius: 0 !important; }
-                * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            </style></head><body>${content.innerHTML}</body></html>`);
+            // Copy the app styles as well as the invoice markup. Without them, the
+            // popup contains the right HTML but loses the exact InvoiceTemplate design.
+            const copiedStyles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+                .map((node) => node.tagName === 'LINK'
+                    ? `<link rel="stylesheet" href="${new URL(node.getAttribute('href'), window.location.href).href}">`
+                    : node.outerHTML)
+                .join('');
+            printWindow.document.write(`<!doctype html><html dir="${isRTL ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><title>${txt.print_invoices}</title>
+                ${copiedStyles}
+                <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+                <style>
+                    @page { size: A4 portrait; margin: 0; }
+                    html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+                    body { font-family: 'Cairo', Arial, sans-serif; }
+                    .print-container { width: 100% !important; }
+                    .print-page {
+                        width: 210mm !important;
+                        min-height: 240mm !important;
+                        height: auto !important;
+                        margin: 0 auto !important;
+                        padding: 20px 40px !important;
+                        page-break-after: avoid !important;
+                        break-after: avoid-page !important;
+                        page-break-inside: avoid !important;
+                        box-shadow: none !important;
+                        border-radius: 0 !important;
+                        overflow: hidden !important;
+                    }
+                    .print\:hidden, [data-html2canvas-ignore="true"] { display: none !important; }
+                    table, tr { page-break-inside: avoid !important; }
+                    * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                </style></head><body>${content.innerHTML}</body></html>`);
             printWindow.document.close();
             printWindow.focus();
-            printWindow.onload = () => printWindow.print();
+            printWindow.onload = () => {
+                const ready = printWindow.document.fonts?.ready || Promise.resolve();
+                ready.then(() => setTimeout(() => printWindow.print(), 250));
+            };
             setPrintOrder(null);
         }, 80);
     };
