@@ -14,6 +14,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             milano: 'ميلانو',
             panel: 'لوحة التحكم',
             overview: 'لوحة التحكم',
+            purchases: 'المشتريات',
             products: 'المنتجات',
             add_product: 'إضافة منتج جديد',
             product_list: 'قائمة المنتجات',
@@ -40,6 +41,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             milano: 'Milano',
             panel: 'Admin Panel',
             overview: 'Dashboard',
+            purchases: 'Purchases',
             products: 'Products',
             add_product: 'Add Product',
             product_list: 'Product List',
@@ -69,6 +71,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
 
     const allMenuItems = [
         { id: 'overview', name: txt.overview, icon: <LayoutDashboard size={20} /> },
+        { id: 'purchases', name: txt.purchases, icon: <ShoppingCart size={20} /> },
         {
             id: 'products',
             name: txt.products,

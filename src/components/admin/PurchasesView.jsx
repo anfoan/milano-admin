@@ -1,0 +1,122 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { addDoc, collection, deleteDoc, doc, increment, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
+import { CalendarDays, Check, ClipboardList, Edit3, FileText, Package, Plus, Printer, Search, Trash2, X, XCircle } from 'lucide-react';
+
+const PurchasesView = ({ lang = 'ar', generalSettings }) => {
+    const isRTL = lang === 'ar';
+    const currency = generalSettings?.currency || 'YER';
+    const [purchases, setPurchases] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [period, setPeriod] = useState('all');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [form, setForm] = useState({
+        invoiceNumber: '', supplierName: '', productId: '', productName: '', date: new Date().toISOString().slice(0, 10),
+        quantity: 1, unitCost: '', paid: '', notes: ''
+    });
+
+    const t = isRTL ? {
+        title: 'إدارة المشتريات', subtitle: 'متابعة فواتير الشراء، الموردين، والمدفوعات', total: 'إجمالي المشتريات', paid: 'إجمالي المدفوع', remaining: 'إجمالي المتبقي', count: 'عدد فواتير المشتريات', invoices: 'فاتورة مسجلة', add: 'إضافة فاتورة شراء', report: 'تقرير المشتريات', search: 'بحث برقم الفاتورة أو اسم المورد أو المنتج...', all: 'الكل', paidStatus: 'مدفوع', partial: 'آجل', unpaid: 'غير مدفوع', period: 'الفترة', thisMonth: 'هذا الشهر', thisWeek: 'هذا الأسبوع', thisYear: 'هذه السنة', custom: 'مخصص', invoice: 'رقم الفاتورة', supplier: 'اسم المورد', product: 'اسم المنتج', date: 'التاريخ', quantity: 'الكمية', totalOrder: 'إجمالي الطلب', paidCol: 'المدفوع', due: 'المتبقي', status: 'الحالة', actions: 'الإجراءات', noData: 'لا توجد فواتير مشتريات مطابقة', subtotal: 'الإجمالي', formTitleAdd: 'إضافة فاتورة شراء', formTitleEdit: 'تعديل فاتورة الشراء', save: 'حفظ الفاتورة', cancel: 'إلغاء', unitCost: 'سعر الوحدة', notes: 'ملاحظات', chooseProduct: 'اختر المنتج من المخزون', manualProduct: 'أو اكتب اسم المنتج', print: 'طباعة', deleteConfirm: 'هل أنت متأكد من حذف فاتورة الشراء؟ سيتم إعادة الكمية للمخزون.', required: 'أكمل البيانات المطلوبة', close: 'إغلاق'
+    } : {
+        title: 'Purchase Management', subtitle: 'Track purchase invoices, suppliers, and payments', total: 'Total Purchases', paid: 'Total Paid', remaining: 'Total Remaining', count: 'Purchase Invoices', invoices: 'registered invoices', add: 'Add Purchase Invoice', report: 'Purchase Report', search: 'Search invoice, supplier, or product...', all: 'All', paidStatus: 'Paid', partial: 'Partial', unpaid: 'Unpaid', period: 'Period', thisMonth: 'This month', thisWeek: 'This week', thisYear: 'This year', custom: 'Custom', invoice: 'Invoice No.', supplier: 'Supplier', product: 'Product', date: 'Date', quantity: 'Qty', totalOrder: 'Order Total', paidCol: 'Paid', due: 'Remaining', status: 'Status', actions: 'Actions', noData: 'No matching purchase invoices', subtotal: 'Total', formTitleAdd: 'Add Purchase Invoice', formTitleEdit: 'Edit Purchase Invoice', save: 'Save Invoice', cancel: 'Cancel', unitCost: 'Unit Cost', notes: 'Notes', chooseProduct: 'Choose product from inventory', manualProduct: 'Or type product name', print: 'Print', deleteConfirm: 'Delete this purchase? The quantity will be returned from stock.', required: 'Complete the required fields', close: 'Close'
+    };
+
+    useEffect(() => {
+        const unsubPurchases = onSnapshot(collection(db, 'purchases'), snap => {
+            const list = snap.docs.map(item => ({ id: item.id, ...item.data() }));
+            list.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+            setPurchases(list);
+        }, err => console.error('Purchases listener:', err));
+        const unsubProducts = onSnapshot(collection(db, 'products'), snap => {
+            setProducts(snap.docs.map(item => ({ id: item.id, ...item.data() })).sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''))));
+        }, err => console.error('Products listener:', err));
+        return () => { unsubPurchases(); unsubProducts(); };
+    }, []);
+
+    useEffect(() => {
+        if (period === 'all' || period === 'custom') {
+            if (period === 'all') { setStartDate(''); setEndDate(''); }
+            return;
+        }
+        const now = new Date();
+        const start = new Date(now);
+        if (period === 'this_month') start.setDate(1);
+        if (period === 'this_year') { start.setMonth(0, 1); }
+        if (period === 'this_week') start.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        const fmt = d => d.toISOString().slice(0, 10);
+        setStartDate(fmt(start)); setEndDate(fmt(now));
+    }, [period]);
+
+    const inDateRange = (value) => (!startDate || value >= startDate) && (!endDate || value <= endDate);
+    const statusOf = item => Number(item.paid || 0) >= Number(item.total || 0) ? 'paid' : Number(item.paid || 0) > 0 ? 'partial' : 'unpaid';
+    const filtered = useMemo(() => purchases.filter(item => {
+        const needle = search.trim().toLowerCase();
+        const text = [item.invoiceNumber, item.supplierName, item.productName].join(' ').toLowerCase();
+        return (!needle || text.includes(needle)) && (statusFilter === 'all' || statusOf(item) === statusFilter) && inDateRange(item.date || '');
+    }), [purchases, search, statusFilter, startDate, endDate]);
+    const totals = filtered.reduce((out, item) => {
+        out.total += Number(item.total || 0); out.paid += Number(item.paid || 0); out.remaining += Math.max(0, Number(item.total || 0) - Number(item.paid || 0)); out.quantity += Number(item.quantity || 0); return out;
+    }, { total: 0, paid: 0, remaining: 0, quantity: 0 });
+    const money = value => `${Number(value || 0).toLocaleString()} ${isRTL ? 'ريال يمني' : currency}`;
+
+    const resetForm = () => setForm({ invoiceNumber: `PUR-${Date.now().toString().slice(-6)}`, supplierName: '', productId: '', productName: '', date: new Date().toISOString().slice(0, 10), quantity: 1, unitCost: '', paid: '', notes: '' });
+    const openAdd = () => { setEditingId(null); resetForm(); setModalOpen(true); };
+    const openEdit = item => { setEditingId(item.id); setForm({ invoiceNumber: item.invoiceNumber || '', supplierName: item.supplierName || '', productId: item.productId || '', productName: item.productName || '', date: item.date || new Date().toISOString().slice(0, 10), quantity: item.quantity || 1, unitCost: item.unitCost || '', paid: item.paid || '', notes: item.notes || '' }); setModalOpen(true); };
+    const updateStock = async (productId, delta) => { if (productId && delta) await updateDoc(doc(db, 'products', productId), { stock: increment(Number(delta)) }); };
+
+    const save = async e => {
+        e.preventDefault();
+        const quantity = Math.max(0, Number(form.quantity) || 0);
+        const unitCost = Math.max(0, Number(form.unitCost) || 0);
+        const total = quantity * unitCost;
+        if (!form.supplierName.trim() || !form.productName.trim() || quantity <= 0 || unitCost < 0) { alert(t.required); return; }
+        setSaving(true);
+        try {
+            const payload = { invoiceNumber: form.invoiceNumber.trim() || `PUR-${Date.now().toString().slice(-6)}`, supplierName: form.supplierName.trim(), productId: form.productId || '', productName: form.productName.trim(), date: form.date, quantity, unitCost, total, paid: Math.min(total, Math.max(0, Number(form.paid) || 0)), currency, notes: form.notes.trim(), updatedAt: serverTimestamp() };
+            if (editingId) {
+                const old = purchases.find(item => item.id === editingId);
+                if (old?.productId !== payload.productId) { await updateStock(old?.productId, -Number(old?.quantity || 0)); await updateStock(payload.productId, quantity); }
+                else await updateStock(payload.productId, quantity - Number(old?.quantity || 0));
+                await updateDoc(doc(db, 'purchases', editingId), payload);
+            } else {
+                await addDoc(collection(db, 'purchases'), { ...payload, createdAt: serverTimestamp() });
+                await updateStock(payload.productId, quantity);
+            }
+            setModalOpen(false);
+        } catch (err) { console.error('Save purchase:', err); alert(isRTL ? 'حدث خطأ أثناء حفظ الفاتورة' : 'Could not save purchase'); }
+        finally { setSaving(false); }
+    };
+    const remove = async item => {
+        if (!window.confirm(t.deleteConfirm)) return;
+        try { await deleteDoc(doc(db, 'purchases', item.id)); await updateStock(item.productId, -Number(item.quantity || 0)); } catch (err) { console.error('Delete purchase:', err); }
+    };
+    const print = (rows = filtered) => {
+        const win = window.open('', '_blank', 'width=1100,height=800'); if (!win) return;
+        const rowsHtml = rows.map((item, index) => `<tr><td>${index + 1}</td><td>${item.invoiceNumber || '---'}</td><td>${item.supplierName || '---'}</td><td>${item.productName || '---'}</td><td>${item.date || '---'}</td><td>${item.quantity || 0}</td><td>${money(item.total)}</td><td>${money(item.paid)}</td><td>${money(Math.max(0, Number(item.total || 0) - Number(item.paid || 0)))}</td></tr>`).join('');
+        win.document.write(`<!doctype html><html dir="${isRTL ? 'rtl' : 'ltr'}"><head><meta charset="utf-8"><title>${t.report}</title><style>@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;background:#fff}h1{font-size:22px;margin:0 0 4px}p{margin:0 0 18px;color:#64748b}table{width:100%;border-collapse:collapse;font-size:11px}th{background:#111827;color:#fff;padding:9px;border:1px solid #374151}td{padding:8px;border:1px solid #cbd5e1;text-align:center}tfoot td{font-weight:800;background:#f1f5f9}.no-print{display:none}@media print{button{display:none}}</style></head><body><h1>${t.title}</h1><p>${t.report} - ${new Date().toLocaleDateString()}</p><table><thead><tr><th>#</th><th>${t.invoice}</th><th>${t.supplier}</th><th>${t.product}</th><th>${t.date}</th><th>${t.quantity}</th><th>${t.totalOrder}</th><th>${t.paidCol}</th><th>${t.due}</th></tr></thead><tbody>${rowsHtml}</tbody><tfoot><tr><td colspan="5">${t.subtotal}</td><td>${totals.quantity}</td><td>${money(totals.total)}</td><td>${money(totals.paid)}</td><td>${money(totals.remaining)}</td></tr></tfoot></table><script>window.onload=()=>window.print()</script></body></html>`); win.document.close();
+    };
+    const statusLabel = value => value === 'paid' ? t.paidStatus : value === 'partial' ? t.partial : t.unpaid;
+    const statusClass = value => value === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : value === 'partial' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-rose-50 text-rose-600 border-rose-200';
+    const cards = [{ label: t.total, value: totals.total, icon: <Package size={17} />, color: 'blue' }, { label: t.paid, value: totals.paid, icon: <Check size={17} />, color: 'emerald' }, { label: t.remaining, value: totals.remaining, icon: <XCircle size={17} />, color: 'rose' }, { label: t.count, value: filtered.length, icon: <FileText size={17} />, color: 'violet', count: true }];
+
+    return <div className="space-y-5" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {cards.map(card => <div key={card.label} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 flex items-start justify-between"><div><p className="text-[11px] font-black text-gray-500 mb-2">{card.label}</p><p className={`text-xl font-black ${card.color === 'emerald' ? 'text-emerald-500' : card.color === 'rose' ? 'text-rose-500' : card.color === 'violet' ? 'text-violet-600' : 'text-gray-800'}`}>{card.count ? card.value : money(card.value)}</p>{card.count && <span className="text-[10px] text-gray-400 font-bold">{t.invoices}</span>}</div><div className={`w-9 h-9 rounded-xl flex items-center justify-center ${card.color === 'emerald' ? 'bg-emerald-50 text-emerald-500' : card.color === 'rose' ? 'bg-rose-50 text-rose-500' : card.color === 'violet' ? 'bg-violet-50 text-violet-500' : 'bg-blue-50 text-blue-500'}`}>{card.icon}</div></div>)}
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="p-4 md:p-5 border-b border-gray-100 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between"><div className="flex items-center gap-3"><div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><ClipboardList size={22}/></div><div><h1 className="text-xl font-black text-gray-900">{t.title}</h1><p className="text-[11px] font-bold text-gray-400">{t.subtitle}</p></div></div><div className="flex gap-2 w-full md:w-auto"><button onClick={openAdd} className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white px-4 py-2.5 text-sm font-black shadow-lg shadow-blue-500/20 hover:bg-blue-700"><Plus size={17}/>{t.add}</button><button onClick={() => print()} className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100 text-gray-700 px-4 py-2.5 text-sm font-black hover:bg-gray-200"><Printer size={16}/>{t.report}</button></div></div>
+            <div className="p-4 border-b border-gray-100 grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-3"><div className="relative"><Search size={17} className="absolute right-3 top-3 text-gray-400"/><input value={search} onChange={e => setSearch(e.target.value)} placeholder={t.search} className="w-full rounded-xl bg-gray-50 border border-gray-200 py-2.5 pr-10 pl-3 text-sm font-bold outline-none focus:border-blue-400"/></div><select value={period} onChange={e => setPeriod(e.target.value)} className="rounded-xl bg-gray-50 border border-gray-200 px-3 py-2 text-sm font-black"><option value="all">{t.period}: {t.all}</option><option value="this_month">{t.thisMonth}</option><option value="this_week">{t.thisWeek}</option><option value="this_year">{t.thisYear}</option><option value="custom">{t.custom}</option></select><div className="flex rounded-xl bg-gray-100 p-1 gap-1">{[['all', t.all], ['paid', t.paidStatus], ['partial', t.partial], ['unpaid', t.unpaid]].map(([key, label]) => <button key={key} onClick={() => setStatusFilter(key)} className={`px-3 py-1.5 rounded-lg text-xs font-black ${statusFilter === key ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:bg-white'}`}>{label}</button>)}</div></div>
+            {period === 'custom' && <div className="px-4 pb-4 flex flex-wrap gap-3"><label className="text-xs font-black text-gray-500 flex items-center gap-2"><CalendarDays size={15}/>{isRTL ? 'من' : 'From'}<input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="rounded-lg border border-gray-200 px-2 py-1.5 text-xs font-bold"/></label><label className="text-xs font-black text-gray-500 flex items-center gap-2">{isRTL ? 'إلى' : 'To'}<input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="rounded-lg border border-gray-200 px-2 py-1.5 text-xs font-bold"/></label></div>}
+            <div className="overflow-x-auto"><table className="w-full min-w-[980px] text-xs"><thead className="bg-gray-50 text-gray-500 font-black"><tr>{[t.invoice, t.supplier, t.product, t.date, t.quantity, t.totalOrder, t.paidCol, t.due, t.status, t.actions].map(label => <th key={label} className="px-3 py-3 text-center whitespace-nowrap">{label}</th>)}</tr></thead><tbody className="divide-y divide-gray-100">{filtered.length === 0 ? <tr><td colSpan="10" className="py-16 text-center text-gray-400 font-bold">{t.noData}</td></tr> : filtered.map(item => { const state = statusOf(item); return <tr key={item.id} className="hover:bg-blue-50/30"><td className="px-3 py-3 text-center font-mono font-black text-blue-600">{item.invoiceNumber || '---'}</td><td className="px-3 py-3 text-center font-black text-gray-700">{item.supplierName || '---'}</td><td className="px-3 py-3 text-center font-bold text-gray-700 max-w-[220px]">{item.productName || '---'}</td><td className="px-3 py-3 text-center font-mono text-gray-500">{item.date || '---'}</td><td className="px-3 py-3 text-center font-black">{item.quantity || 0}</td><td className="px-3 py-3 text-center font-black">{money(item.total)}</td><td className="px-3 py-3 text-center font-black text-emerald-600">{money(item.paid)}</td><td className="px-3 py-3 text-center font-black text-rose-500">{money(Math.max(0, Number(item.total || 0) - Number(item.paid || 0)))}</td><td className="px-3 py-3 text-center"><span className={`inline-flex px-2.5 py-1 rounded-full border text-[10px] font-black ${statusClass(state)}`}>{statusLabel(state)}</span></td><td className="px-3 py-3"><div className="flex justify-center gap-1.5"><button onClick={() => print([item])} title={t.print} className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200"><Printer size={14}/></button><button onClick={() => openEdit(item)} title={t.formTitleEdit} className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100"><Edit3 size={14}/></button><button onClick={() => remove(item)} title={isRTL ? 'حذف' : 'Delete'} className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-100"><Trash2 size={14}/></button></div></td></tr>; })}</tbody><tfoot className="bg-gray-50 border-t border-gray-200"><tr><td colSpan="4" className="px-3 py-3 font-black text-gray-700">{t.subtotal} ({filtered.length})</td><td className="px-3 py-3 text-center font-black">{totals.quantity}</td><td className="px-3 py-3 text-center font-black">{money(totals.total)}</td><td className="px-3 py-3 text-center font-black text-emerald-600">{money(totals.paid)}</td><td className="px-3 py-3 text-center font-black text-rose-500">{money(totals.remaining)}</td><td colSpan="2"></td></tr></tfoot></table></div>
+        </div>
+        {modalOpen && <div className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"><div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-white rounded-3xl shadow-2xl"><div className="p-5 border-b border-gray-100 flex items-center justify-between"><div><h2 className="text-lg font-black text-gray-900">{editingId ? t.formTitleEdit : t.formTitleAdd}</h2><p className="text-xs text-gray-400 font-bold">{t.subtitle}</p></div><button onClick={() => setModalOpen(false)} className="w-9 h-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200"><X size={18}/></button></div><form onSubmit={save} className="p-5 space-y-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><label className="space-y-1"><span className="text-xs font-black text-gray-600">{t.invoice}</span><input value={form.invoiceNumber} onChange={e => setForm({ ...form, invoiceNumber: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-3 font-bold outline-none focus:border-blue-400"/></label><label className="space-y-1"><span className="text-xs font-black text-gray-600">{t.date}</span><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-3 font-bold outline-none focus:border-blue-400"/></label><label className="space-y-1"><span className="text-xs font-black text-gray-600">{t.supplier} *</span><input required value={form.supplierName} onChange={e => setForm({ ...form, supplierName: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-3 font-bold outline-none focus:border-blue-400"/></label><label className="space-y-1"><span className="text-xs font-black text-gray-600">{t.chooseProduct}</span><select value={form.productId} onChange={e => { const p = products.find(item => item.id === e.target.value); setForm({ ...form, productId: e.target.value, productName: p?.name || form.productName }); }} className="w-full rounded-xl border border-gray-200 px-3 py-3 font-bold outline-none focus:border-blue-400"><option value="">{t.manualProduct}</option>{products.map(product => <option key={product.id} value={product.id}>{product.name}</option>)}</select></label><label className="space-y-1 md:col-span-2"><span className="text-xs font-black text-gray-600">{t.product} *</span><input required value={form.productName} onChange={e => setForm({ ...form, productName: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-3 font-bold outline-none focus:border-blue-400"/></label><label className="space-y-1"><span className="text-xs font-black text-gray-600">{t.quantity} *</span><input required type="number" min="1" value={form.quantity} onChange={e => setForm({ ...form, quantity: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-3 font-bold outline-none focus:border-blue-400"/></label><label className="space-y-1"><span className="text-xs font-black text-gray-600">{t.unitCost} *</span><input required type="number" min="0" value={form.unitCost} onChange={e => setForm({ ...form, unitCost: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-3 font-bold outline-none focus:border-blue-400"/></label><label className="space-y-1"><span className="text-xs font-black text-gray-600">{t.paidCol}</span><input type="number" min="0" value={form.paid} onChange={e => setForm({ ...form, paid: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-3 font-bold outline-none focus:border-blue-400" placeholder={money(0)}/></label><label className="space-y-1"><span className="text-xs font-black text-gray-600">{t.notes}</span><input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} className="w-full rounded-xl border border-gray-200 px-3 py-3 font-bold outline-none focus:border-blue-400"/></label></div><div className="rounded-xl bg-blue-50 border border-blue-100 p-3 flex justify-between items-center"><span className="text-xs font-black text-blue-700">{t.totalOrder}</span><strong className="text-lg font-black text-blue-700">{money((Number(form.quantity) || 0) * (Number(form.unitCost) || 0))}</strong></div><div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => setModalOpen(false)} className="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-black">{t.cancel}</button><button disabled={saving} className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-black hover:bg-blue-700 disabled:opacity-50">{saving ? '...' : t.save}</button></div></form></div></div>}
+    </div>;
+};
+
+export default PurchasesView;

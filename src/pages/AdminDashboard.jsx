@@ -17,6 +17,7 @@ import LimitedOffersView from '../components/admin/LimitedOffersView';
 import PaymentsView from '../components/admin/PaymentsView';
 import DeliveryView from '../components/admin/DeliveryView'; // New
 import ExpensesView from '../components/admin/ExpensesView';
+import PurchasesView from '../components/admin/PurchasesView';
 import InboxView from '../components/admin/InboxView'; // New
 import AdminChatView from '../components/admin/AdminChatView'; // New Chat View
 import OrderDetailsView from '../components/admin/OrderDetailsView'; // New Detail Page
@@ -75,6 +76,7 @@ const AdminDashboard = () => {
 
     const allNavShortcuts = [
         { id: 'overview', label: lang === 'ar' ? 'نظرة عامة' : 'Overview', icon: <PanelRight size={16}/>, category: 'nav' },
+        { id: 'purchases', label: lang === 'ar' ? 'المشتريات' : 'Purchases', icon: <ShoppingBag size={16}/>, category: 'nav' },
         { id: 'product-list', label: lang === 'ar' ? 'قائمة المنتجات' : 'Products List', icon: <ShoppingBag size={16}/>, category: 'nav' },
         { id: 'inventory', label: lang === 'ar' ? 'إدارة المخزون' : 'Inventory Management', icon: <Store size={16}/>, category: 'nav' },
         { id: 'orders', label: lang === 'ar' ? 'الطلبات' : 'Orders', icon: <ShoppingBag size={16}/>, category: 'nav' },
@@ -318,6 +320,8 @@ const AdminDashboard = () => {
                 return <DashboardHome setActiveTab={setActiveTab} onViewOrder={handleViewOrder} lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
             case 'add-product':
                 return <ProductForm editingProduct={editingProduct} setEditingProduct={setEditingProduct} setActiveTab={setActiveTab} lang={lang} />;
+            case 'purchases':
+                return <PurchasesView lang={lang} generalSettings={generalSettings} />;
             case 'product-list':
                 return <ProductsView onEdit={handleEditProduct} lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
             case 'inventory':
