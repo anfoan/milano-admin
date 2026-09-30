@@ -73,7 +73,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
         week: 'أسبوع', month: 'شهر 1', quarter: '3 شهور', half: '6 شهور', year: 'سنة', custom: 'فترة مخصصة',
         weekDetail: 'أسبوع (آخر 7 أيام)', monthDetail: 'شهر (آخر 30 يوم)', quarterDetail: '3 شهور', halfDetail: '6 شهور', yearDetail: 'سنة حالية', customDetail: 'فترة مخصصة',
         currentStock: 'الرصيد الحالي للمخزون', purchases: 'إجمالي المشتريات', expenses: 'إجمالي المصروفات', sales: 'إجمالي المبيعات', revenue: 'إجمالي الإيرادات', profit: 'صافي الربح',
-        stockHint: 'إجمالي قيمة بضاعة المستودع والمحل', purchasesHint: 'فواتير شراء الأصناف الموردة', expensesHint: 'فواتير الخدمات والمصاريف التشغيلية', salesHint: 'إجمالي مبيعات نقطة البيع والطلبات', revenueHint: 'المبالغ المقبوضة وسندات القبض المودعة', profitHint: 'المبيعات ناقص تكلفة البضاعة والمصروفات',
+        stockHint: 'إجمالي قيمة بضاعة المستودع والمحل', purchasesHint: 'فواتير شراء الأصناف الموردة', expensesHint: 'جميع مصروفات النظام وسندات الصرف', salesHint: 'مبيعات نقطة البيع والمتجر والطلبات الخارجية', revenueHint: 'جميع سندات القبض والإيرادات المسجلة', profitHint: 'المبيعات والإيرادات ناقص التكاليف والمصروفات',
         stockBadge: 'مخزون متاح', purchasesBadge: 'عدد الفواتير', expensesBadge: 'مصروفات تشغيل', salesBadge: 'عدد العمليات', revenueBadge: 'التدفق النقدي المحصل', profitBadge: 'هامش ربح',
         chartTitle: 'الأرباح والمبيعات', chartPeriod: 'رسم بياني تفاعلي يوضح مقارنة المبيعات والمشتريات والمصروفات وصافي الربح',
         search: 'ابحث في العمليات المالية...', all: 'الكل', transactionCount: 'عملية معروضة', paymentMethod: 'طريقة الدفع', cash: 'نقدي / كاش', wallet: 'تحويل / محفظة', transfer: 'تحويل بنكي',
@@ -138,10 +138,34 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
         const key = isoDay(value);
         return Boolean(key) && (!startDate || key >= startDate) && (!endDate || key <= endDate);
     };
-    const isCancelled = (status) => ['cancelled', 'canceled', 'ملغي', 'ملغى'].includes(String(status || '').toLowerCase());
-    const orderTotal = (order) => order?.total !== undefined && order?.total !== null
-        ? Number(order.total || 0)
-        : Math.max(0, Number(order?.subTotal || order?.price || 0) - Number(order?.discount || 0) + Number(order?.deliveryCost || 0));
+    const toNumber = (value) => {
+        if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+        const normalized = String(value ?? '')
+            .replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
+            .replace(/[٬,\s]/g, '');
+        const numeric = Number(normalized);
+        return Number.isFinite(numeric) ? numeric : 0;
+    };
+    const normalizedText = (value) => String(value || '').trim().toLowerCase();
+    const isCancelled = (status) => {
+        const text = normalizedText(status);
+        return ['cancelled', 'canceled', 'ملغي', 'ملغى'].some(value => text.includes(value)) || text.includes('إلغاء');
+    };
+    const isReceiptBond = (bond) => {
+        const type = normalizedText(bond?.type);
+        return ['receipt', 'receive', 'income', 'revenue', 'قبض', 'سند قبض', 'سندات القبض', 'إيراد', 'ايراد'].includes(type)
+            || type.includes('قبض') || type.includes('إيراد') || type.includes('ايراد');
+    };
+    const isPaymentBond = (bond) => {
+        const type = normalizedText(bond?.type);
+        return ['payment', 'expense', 'صرف', 'سند صرف', 'سندات الصرف'].includes(type) || type.includes('صرف');
+    };
+    const orderTotal = (order) => {
+        const storedTotalKey = ['total', 'totalAmount', 'grandTotal', 'finalTotal', 'amount']
+            .find(key => order?.[key] !== undefined && order?.[key] !== null && order?.[key] !== '');
+        if (storedTotalKey) return toNumber(order[storedTotalKey]);
+        return Math.max(0, toNumber(order?.subTotal ?? order?.subtotal ?? order?.price) - toNumber(order?.discount) + toNumber(order?.deliveryCost));
+    };
     const orderDate = (order) => order.completedAt || order.updatedAt || order.createdAt || order.date;
     const purchaseDate = (purchase) => purchase.date || purchase.updatedAt || purchase.createdAt;
     const expenseDate = (expense) => expense.date || expense.updatedAt || expense.createdAt;
@@ -153,7 +177,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
     const typeClass = (type) => ({ sales: 'bg-emerald-50 text-emerald-700 ring-emerald-200', purchase: 'bg-orange-50 text-orange-700 ring-orange-200', expense: 'bg-rose-50 text-rose-700 ring-rose-200', receipt: 'bg-violet-50 text-violet-700 ring-violet-200', payment: 'bg-amber-50 text-amber-700 ring-amber-200' }[type] || 'bg-gray-50 text-gray-600 ring-gray-200');
     const categoryClass = (type) => ({
         all: 'border-slate-300 bg-slate-50/70 text-slate-700 dark:border-slate-400 dark:bg-slate-400/10 dark:text-slate-100', sales: 'border-emerald-300 bg-emerald-50/70 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300', purchase: 'border-cyan-300 bg-cyan-50/70 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300',
-        expense: 'border-rose-300 bg-rose-50/70 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300', receipt: 'border-violet-300 bg-violet-50/70 text-violet-700 dark:bg-violet-400/10 dark:text-violet-300', payment: 'border-orange-300 bg-orange-50/70 text-orange-700 dark:bg-orange-400/10 dark:text-orange-300'
+        expense: 'border-rose-300 bg-rose-50/70 text-rose-700 dark:border-rose-500/65 dark:bg-rose-950/60 dark:text-rose-200', receipt: 'border-violet-300 bg-violet-50/70 text-violet-700 dark:bg-violet-400/10 dark:text-violet-300', payment: 'border-orange-300 bg-orange-50/70 text-orange-700 dark:bg-orange-400/10 dark:text-orange-300'
     }[type] || 'border-slate-300 bg-transparent text-slate-700 dark:border-slate-400 dark:text-slate-100');
     const statusClass = (status) => {
         if (status === t.completed || status === t.paid) return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
@@ -161,25 +185,36 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
         return 'bg-cyan-50 text-cyan-700 ring-cyan-200';
     };
 
-    const productCostMap = useMemo(() => Object.fromEntries(products.map(product => [String(product.name || '').trim(), Number(product.costPrice || 0)])), [products]);
+    const productCostMap = useMemo(() => products.reduce((map, product) => {
+        const cost = toNumber(product.costPrice);
+        [product.id, product.name, product.title].filter(Boolean).forEach(key => { map[String(key).trim()] = cost; });
+        return map;
+    }, {}), [products]);
+    const getOrderItems = (order) => Array.isArray(order?.cartItems) ? order.cartItems : (Array.isArray(order?.items) ? order.items : (Array.isArray(order?.products) ? order.products : []));
+    const orderCost = (order) => getOrderItems(order).reduce((sum, line) => {
+        const lineCost = line?.costPrice !== undefined && line?.costPrice !== null && line?.costPrice !== ''
+            ? toNumber(line.costPrice)
+            : (productCostMap[String(line?.id || line?.productId || line?.title || line?.name || '').trim()] || 0);
+        return sum + toNumber(line?.quantity ?? line?.qty ?? 1) * lineCost;
+    }, 0);
     const activeOrders = useMemo(() => orders.filter(order => !isCancelled(order.status) && isInRange(orderDate(order))), [orders, startDate, endDate]);
     const filteredPurchases = useMemo(() => purchases.filter(item => isInRange(purchaseDate(item))), [purchases, startDate, endDate]);
     const filteredExpenses = useMemo(() => expenses.filter(item => isInRange(expenseDate(item))), [expenses, startDate, endDate]);
     const filteredBonds = useMemo(() => bonds.filter(item => isInRange(bondDate(item))), [bonds, startDate, endDate]);
+    const receiptBonds = useMemo(() => filteredBonds.filter(isReceiptBond), [filteredBonds]);
+    const paymentBonds = useMemo(() => filteredBonds.filter(isPaymentBond), [filteredBonds]);
 
     const statistics = useMemo(() => {
         const sales = activeOrders.reduce((sum, order) => sum + orderTotal(order), 0);
-        const purchasesTotal = filteredPurchases.reduce((sum, item) => sum + Number(item.total ?? item.amount ?? 0), 0);
-        const expensesTotal = filteredExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-        const revenues = filteredBonds.filter(item => item.type === 'receipt').reduce((sum, item) => sum + Number(item.amount || 0), 0);
-        const payments = filteredBonds.filter(item => item.type === 'payment').reduce((sum, item) => sum + Number(item.amount || 0), 0);
-        const costOfSold = activeOrders.reduce((sum, order) => {
-            const lines = Array.isArray(order.cartItems) ? order.cartItems : (Array.isArray(order.items) ? order.items : []);
-            return sum + lines.reduce((lineSum, line) => lineSum + Number(line.quantity || line.qty || 1) * Number(line.costPrice ?? productCostMap[String(line.title || line.name || '').trim()] ?? 0), 0);
-        }, 0);
-        const stockBalance = products.reduce((sum, product) => sum + Number(product.stock || 0) * Number(product.price ?? product.costPrice ?? 0), 0);
-        return { sales, purchases: purchasesTotal, expenses: expensesTotal, revenues, payments, costOfSold, stockBalance, profit: sales + revenues - expensesTotal - payments - costOfSold };
-    }, [activeOrders, filteredPurchases, filteredExpenses, filteredBonds, products, productCostMap]);
+        const purchasesTotal = filteredPurchases.reduce((sum, item) => sum + toNumber(item.total ?? item.amount), 0);
+        const directExpenses = filteredExpenses.reduce((sum, item) => sum + toNumber(item.amount), 0);
+        const paymentBondsTotal = paymentBonds.reduce((sum, item) => sum + toNumber(item.amount), 0);
+        const expensesTotal = directExpenses + paymentBondsTotal;
+        const revenues = receiptBonds.reduce((sum, item) => sum + toNumber(item.amount), 0);
+        const costOfSold = activeOrders.reduce((sum, order) => sum + orderCost(order), 0);
+        const stockBalance = products.reduce((sum, product) => sum + toNumber(product.stock) * toNumber(product.price ?? product.costPrice), 0);
+        return { sales, purchases: purchasesTotal, expenses: expensesTotal, directExpenses, paymentBonds: paymentBondsTotal, revenues, costOfSold, stockBalance, profit: sales + revenues - expensesTotal - costOfSold };
+    }, [activeOrders, filteredPurchases, filteredExpenses, receiptBonds, paymentBonds, products, productCostMap]);
 
     const allTransactions = useMemo(() => {
         const salesRows = activeOrders.map(order => ({
@@ -199,8 +234,8 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
             entity: expense.category || '---', payment: expense.paymentMethod || 'cash', status: t.completed
         }));
         const bondRows = filteredBonds.map(bond => ({
-            id: `bond-${bond.id}`, type: bond.type === 'receipt' ? 'receipt' : 'payment', date: isoDay(bondDate(bond)), rawDate: toDate(bondDate(bond)), amount: Number(bond.amount || 0),
-            reference: bond.number || `BND-${String(bond.id).slice(-6).toUpperCase()}`, description: bond.notes || (bond.type === 'receipt' ? t.receiptType : t.paymentType),
+            id: `bond-${bond.id}`, type: isReceiptBond(bond) ? 'receipt' : 'payment', date: isoDay(bondDate(bond)), rawDate: toDate(bondDate(bond)), amount: toNumber(bond.amount),
+            reference: bond.number || `BND-${String(bond.id).slice(-6).toUpperCase()}`, description: bond.notes || (isReceiptBond(bond) ? t.receiptType : t.paymentType),
             entity: bond.entityName || '---', payment: bond.paymentMethod || 'cash', status: t.documented
         }));
         return [...salesRows, ...purchaseRows, ...expenseRows, ...bondRows].filter(row => row.date).sort((a, b) => Number(b.rawDate || 0) - Number(a.rawDate || 0));
@@ -241,30 +276,28 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
     const chartData = useMemo(() => chartBuckets.map(bucket => {
         const within = (value) => { const date = toDate(value); return date && date >= bucket.start && date <= new Date(bucket.end.getFullYear(), bucket.end.getMonth(), bucket.end.getDate(), 23, 59, 59); };
         const sales = activeOrders.filter(order => within(orderDate(order))).reduce((sum, order) => sum + orderTotal(order), 0);
-        const purchasesTotal = filteredPurchases.filter(item => within(purchaseDate(item))).reduce((sum, item) => sum + Number(item.total ?? item.amount ?? 0), 0);
-        const expensesTotal = filteredExpenses.filter(item => within(expenseDate(item))).reduce((sum, item) => sum + Number(item.amount || 0), 0);
-        const revenue = filteredBonds.filter(item => item.type === 'receipt' && within(bondDate(item))).reduce((sum, item) => sum + Number(item.amount || 0), 0);
-        const payments = filteredBonds.filter(item => item.type === 'payment' && within(bondDate(item))).reduce((sum, item) => sum + Number(item.amount || 0), 0);
-        const cost = activeOrders.filter(order => within(orderDate(order))).reduce((sum, order) => {
-            const lines = Array.isArray(order.cartItems) ? order.cartItems : (Array.isArray(order.items) ? order.items : []);
-            return sum + lines.reduce((lineSum, line) => lineSum + Number(line.quantity || line.qty || 1) * Number(line.costPrice ?? productCostMap[String(line.title || line.name || '').trim()] ?? 0), 0);
-        }, 0);
-        return { label: bucket.label, sales, purchases: purchasesTotal, expenses: expensesTotal, profit: sales + revenue - expensesTotal - payments - cost };
-    }), [chartBuckets, activeOrders, filteredPurchases, filteredExpenses, filteredBonds, productCostMap]);
+        const purchasesTotal = filteredPurchases.filter(item => within(purchaseDate(item))).reduce((sum, item) => sum + toNumber(item.total ?? item.amount), 0);
+        const directExpenses = filteredExpenses.filter(item => within(expenseDate(item))).reduce((sum, item) => sum + toNumber(item.amount), 0);
+        const paymentExpenses = paymentBonds.filter(item => within(bondDate(item))).reduce((sum, item) => sum + toNumber(item.amount), 0);
+        const expensesTotal = directExpenses + paymentExpenses;
+        const revenue = receiptBonds.filter(item => within(bondDate(item))).reduce((sum, item) => sum + toNumber(item.amount), 0);
+        const cost = activeOrders.filter(order => within(orderDate(order))).reduce((sum, order) => sum + orderCost(order), 0);
+        return { label: bucket.label, sales, purchases: purchasesTotal, expenses: expensesTotal, profit: sales + revenue - expensesTotal - cost };
+    }), [chartBuckets, activeOrders, filteredPurchases, filteredExpenses, receiptBonds, paymentBonds, productCostMap]);
 
     const activePeriodDetail = ({ week: t.weekDetail, month: t.monthDetail, quarter: t.quarterDetail, half: t.halfDetail, year: t.yearDetail, custom: t.customDetail }[period] || t.weekDetail);
     const metricCards = [
         { title: t.currentStock, hint: t.stockHint, amount: number(statistics.stockBalance), icon: <Package size={18}/>, tone: 'from-[#2866ea] via-[#2860df] to-[#2855c9]', badge: t.stockBadge, key: 'stock' },
         { title: t.purchases, hint: t.purchasesHint, amount: number(statistics.purchases), icon: <ShoppingCart size={18}/>, tone: 'from-[#ff800e] via-[#fb790d] to-[#ee6f08]', badge: `${t.purchasesBadge}: ${number(filteredPurchases.length)}`, key: 'purchases' },
-        { title: t.expenses, hint: t.expensesHint, amount: number(statistics.expenses), icon: <TrendingDown size={20}/>, tone: 'from-[#fa414b] via-[#f33f51] to-[#ee3652]', badge: t.expensesBadge, key: 'expenses' },
+        { title: t.expenses, hint: t.expensesHint, amount: number(statistics.expenses), icon: <TrendingDown size={20}/>, tone: 'from-[#fa414b] via-[#f33f51] to-[#ee3652]', badge: `${t.expensesBadge}: ${number(filteredExpenses.length + paymentBonds.length)}`, key: 'expenses' },
         { title: t.sales, hint: t.salesHint, amount: number(statistics.sales), icon: <TrendingUp size={18}/>, tone: 'from-[#16a953] via-[#10a04c] to-[#18a956]', badge: `${t.salesBadge} ${number(activeOrders.length)}`, key: 'sales' },
         { title: t.revenue, hint: t.revenueHint, amount: number(statistics.revenues), icon: <CircleDollarSign size={20}/>, tone: 'from-[#8244ea] via-[#7d39e2] to-[#7431cf]', badge: t.revenueBadge, key: 'revenue' },
         { title: t.profit, hint: t.profitHint, amount: number(statistics.profit), icon: <Wallet size={20}/>, tone: 'from-[#11b9cf] via-[#08b2c5] to-[#059ab4]', badge: `${t.profitBadge} %${statistics.sales ? ((statistics.profit / statistics.sales) * 100).toFixed(1) : '0'}`, key: 'profit' }
     ];
     const summaryRows = [
-        { title: t.totalGoodsSales, category: t.income, value: statistics.sales, note: isRTL ? 'مبيعات نقطة البيع والطلبات' : 'Point of sale and order sales', color: 'text-emerald-600' },
+        { title: t.totalGoodsSales, category: t.income, value: statistics.sales, note: isRTL ? 'مبيعات نقطة البيع والمتجر والطلبات الخارجية' : 'Point of sale, storefront, and external-order sales', color: 'text-emerald-600' },
         { title: t.approvedPurchases, category: t.inventoryPurchases, value: statistics.purchases, note: isRTL ? 'إضافات المخزون وفواتير الموردين' : 'Inventory additions and supplier invoices', color: 'text-amber-600' },
-        { title: t.operatingExpenses, category: t.expense, value: statistics.expenses + statistics.payments, note: isRTL ? 'كهرباء، إيجارات، خدمات وسندات صرف' : 'Utilities, rents, services, and payment bonds', color: 'text-rose-600' },
+        { title: t.operatingExpenses, category: t.expense, value: statistics.expenses, note: isRTL ? 'كهرباء، إيجارات، خدمات وسندات صرف' : 'Utilities, rents, services, and payment bonds', color: 'text-rose-600' },
         { title: t.netProfit, category: t.result, value: statistics.profit, note: `${t.profitBadge}: ${statistics.sales ? `${((statistics.profit / statistics.sales) * 100).toFixed(1)}%` : '0%'}`, color: 'text-cyan-700' }
     ];
     const categoryFilters = [['all', t.all], ['sales', t.salesType], ['purchase', t.purchaseType], ['expense', t.expenseType], ['receipt', t.receiptType], ['payment', t.paymentType]];
