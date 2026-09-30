@@ -19,8 +19,10 @@ import InvoiceTemplate from '../InvoiceTemplate';
 const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
     const isRTL = lang === 'ar';
     const { formatPrice } = useCurrency();
-    const [orderCurrency, setOrderCurrency] = useState('YER');
-    const currency = orderCurrency === 'SAR' ? (isRTL ? 'ريال سعودي' : 'SAR') : (isRTL ? 'ريال يمني' : 'YER');
+    const [orderCurrency, setOrderCurrency] = useState(generalSettings?.currency || 'YER');
+    const currency = getLocalizedCurrency(orderCurrency, lang);
+
+    useEffect(() => { setOrderCurrency(generalSettings?.currency || 'YER'); }, [generalSettings?.currency]);
 
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -672,14 +674,11 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-black text-gray-700 block">عملة الفاتورة والطلب</label>
-                                    <select
-                                        value={orderCurrency}
-                                        onChange={(e) => setOrderCurrency(e.target.value)}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 transition-all font-bold cursor-pointer"
-                                    >
-                                        <option value="YER">🇾🇪 ريال يمني (YER)</option>
-                                        <option value="SAR">🇸🇦 ريال سعودي (SAR)</option>
-                                    </select>
+                                    <input
+                                        value={currency}
+                                        readOnly
+                                        className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl font-bold text-gray-600 cursor-not-allowed"
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-black text-gray-700 block">{txt.delivery_type}</label>

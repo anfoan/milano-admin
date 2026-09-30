@@ -169,18 +169,18 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                                 <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-bold text-gray-600 border-l border-gray-400 whitespace-nowrap">
                                                     {item.originalPrice && item.originalPrice > item.price ? (
                                                         <div className="flex flex-col items-center">
-                                                            <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>{formatPrice(item.originalPrice, order.currency)}</span>
-                                                            <span className="text-red-600">{formatPrice(item.price, order.currency)}</span>
+                                                            <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>{formatPrice(item.originalPrice, currency)}</span>
+                                                            <span className="text-red-600">{formatPrice(item.price, currency)}</span>
                                                         </div>
                                                     ) : (
-                                                        <span>{formatPrice(item.price, order.currency)}</span>
+                                                        <span>{formatPrice(item.price, currency)}</span>
                                                     )}
                                                 </td>
                                                 <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-bold text-gray-600 border-l border-gray-400">
                                                     <span>{item.quantity || 1}</span>
                                                 </td>
                                                 <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-black text-[#111317] whitespace-nowrap">
-                                                    <span>{formatPrice((item.price || 0) * (item.quantity || 1), order.currency)}</span>
+                                                    <span>{formatPrice((item.price || 0) * (item.quantity || 1), currency)}</span>
                                                 </td>
                                             </tr>
                                         ))}
@@ -195,7 +195,7 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                         <div className={`flex justify-between items-center text-gray-600 text-sm font-bold`}>
                                             <span>{lang === 'ar' ? 'المجموع الفرعي:' : 'Subtotal:'}</span>
                                             <span className="text-gray-800">
-                                                {formatPrice(order.subTotal || order.total, order.currency)}
+                                                {formatPrice(order.subTotal || order.total, currency)}
                                             </span>
                                         </div>
                                         <div className={`flex justify-between items-center text-red-500 text-sm font-bold`}>
@@ -205,21 +205,21 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                                     const productDiscount = Number(order.discount || 0);
                                                     const couponDiscount = Math.round(Number(order.subTotal || 0) * (Number(order.discountPercentage || 0) / 100));
                                                     const totalD = productDiscount + couponDiscount;
-                                                    return totalD > 0 ? `- ${formatPrice(totalD, order.currency)}` : '0';
+                                                    return totalD > 0 ? `- ${formatPrice(totalD, currency)}` : '0';
                                                 })()}
                                             </span>
                                         </div>
                                         <div className={`flex justify-between items-center text-gray-600 text-sm font-bold`}>
                                             <span>{lang === 'ar' ? 'رسوم التوصيل:' : 'Delivery:'}</span>
                                             <span className="text-gray-800">
-                                                {formatPrice(order.deliveryCost, order.currency)}
+                                                {formatPrice(order.deliveryCost, currency)}
                                             </span>
                                         </div>
                                         <div className="my-2 border-t-2 border-dashed border-gray-300"></div>
                                         <div className={`flex justify-between items-center`}>
                                             <span className="text-lg font-black text-[#111317]">{lang === 'ar' ? 'الإجمالي:' : 'Total:'}</span>
                                             <span className="text-xl font-black text-[#111317]">
-                                                {formatPrice(order.total || 0, order.currency)}
+                                                {formatPrice(order.total || 0, currency)}
                                             </span>
                                         </div>
                                     </div>

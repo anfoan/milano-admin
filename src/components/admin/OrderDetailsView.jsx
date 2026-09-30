@@ -34,7 +34,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
     const [isSaving, setIsSaving] = useState(false);
 
     // Currency conversion helpers for edit mode inputs
-    const isSAR = order.currency === 'SAR';
+    const isSAR = generalSettings?.currency === 'SAR';
     const rate = isSAR ? (exchangeRate || 140) : 1;
 
     const toDisplayPrice = (valInYER) => {
@@ -75,8 +75,8 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
         return () => unsub();
     }, [isEditing]);
 
-    const currency = order.currency === 'SAR' 
-        ? (lang === 'ar' ? "ر.س" : "SAR") 
+    const currency = generalSettings?.currency === 'SAR'
+        ? (lang === 'ar' ? "ر.س" : "SAR")
         : (lang === 'ar' ? "ر.ي" : "YER");
 
     const t = {
@@ -121,7 +121,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
             discount_percentage: "نسبة الخصم (%)",
             discount_fixed: "خصم المنتجات / إضافي",
             invoice_total: "إجمالي الفاتورة",
-            currency: order.currency === 'SAR' ? "ريال سعودي" : "ريال يمني",
+            currency: generalSettings?.currency === 'SAR' ? "ريال سعودي" : "ريال يمني",
 
             // Actions & Buttons
             print: "طباعة",
@@ -480,9 +480,9 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
                 <style>
-                    body { 
-                        font-family: 'Cairo', sans-serif; 
-                        background-color: #f3f4f6; 
+                    body {
+                        font-family: 'Cairo', sans-serif;
+                        background-color: #f3f4f6;
                         margin: 0;
                         padding: 0;
                         min-width: 1024px;
@@ -497,8 +497,8 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                         padding: 40px 0;
                     }
                     @media print {
-                        body { 
-                            background-color: white !important; 
+                        body {
+                            background-color: white !important;
                             min-width: auto !important;
                         }
                         #invoice-content {
@@ -506,9 +506,9 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                             padding: 0 !important;
                         }
                         .no-print { display: none !important; }
-                        * { 
-                            -webkit-print-color-adjust: exact !important; 
-                            print-color-adjust: exact !important; 
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
                         }
                         @page {
                             size: A4;
@@ -1063,7 +1063,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                                         <span className="text-[10px] text-gray-400 font-bold">{currency}</span>
                                                     </div>
                                                 ) : (
-                                                    <span className="font-bold text-blue-600 text-xs md:text-sm whitespace-nowrap">{formatPrice(item.price, order.currency || 'YER')}</span>
+                                                    <span className="font-bold text-blue-600 text-xs md:text-sm whitespace-nowrap">{formatPrice(item.price, generalSettings?.currency || 'YER')}</span>
                                                 )}
                                             </td>
                                             <td className="py-4 px-4 md:px-6 text-center whitespace-nowrap">
@@ -1079,7 +1079,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                                     <span className="font-bold text-gray-700 text-xs md:text-sm">{item.quantity || 1}</span>
                                                 )}
                                             </td>
-                                            <td className="py-4 px-4 md:px-6 text-center font-bold text-gray-800 text-xs md:text-sm whitespace-nowrap">{formatPrice(item.price * (item.quantity || 1), order.currency || 'YER')}</td>
+                                            <td className="py-4 px-4 md:px-6 text-center font-bold text-gray-800 text-xs md:text-sm whitespace-nowrap">{formatPrice(item.price * (item.quantity || 1), generalSettings?.currency || 'YER')}</td>
                                             {isEditing && (
                                                 <td className="py-4 px-2 text-center">
                                                     <button
@@ -1111,7 +1111,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                             <div className={`flex flex-col items-end gap-3 max-w-xs ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
                                 <div className="flex justify-between w-full text-sm font-bold text-gray-500">
                                     <span>{txt.subtotal}</span>
-                                    <span className="font-bold text-gray-500">{formatPrice(isEditing ? editOrder.subTotal : (order.subTotal || 0), order.currency || 'YER')}</span>
+                                    <span className="font-bold text-gray-500">{formatPrice(isEditing ? editOrder.subTotal : (order.subTotal || 0), generalSettings?.currency || 'YER')}</span>
                                 </div>
                                 <div className="flex justify-between w-full text-sm font-bold text-gray-500 items-center">
                                     <span>{txt.discount_percentage}</span>
@@ -1132,7 +1132,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                                 const couponPercentage = Number(order.discountPercentage || 0);
                                                 const couponDiscount = Math.round(Number(order.subTotal || 0) * (couponPercentage / 100));
                                                 const totalDiscountAmt = productDiscount + couponDiscount;
-                                                
+
                                                 if (order.subTotal > 0 && totalDiscountAmt > 0) {
                                                     const totalPerc = Math.round((totalDiscountAmt / order.subTotal) * 100);
                                                     return (
@@ -1161,7 +1161,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                             <span className="text-[10px] text-gray-400 font-bold">{currency}</span>
                                         </div>
                                     ) : (
-                                        <span>{formatPrice(order.discount || 0, order.currency || 'YER')}</span>
+                                        <span>{formatPrice(order.discount || 0, generalSettings?.currency || 'YER')}</span>
                                     )}
                                 </div>
                                 <div className="flex justify-between w-full text-sm font-bold text-gray-400 items-center">
@@ -1192,14 +1192,14 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                             <span className="text-[10px] text-gray-400 font-bold">{currency}</span>
                                         </div>
                                     ) : (
-                                        <span className="font-bold text-gray-700 text-xs md:text-sm">{formatPrice(order.deliveryCost || 0, order.currency || 'YER')}</span>
+                                        <span className="font-bold text-gray-700 text-xs md:text-sm">{formatPrice(order.deliveryCost || 0, generalSettings?.currency || 'YER')}</span>
                                     )}
                                 </div>
                                 <div className="h-px w-full bg-gray-200 my-1"></div>
                                 <div className="flex justify-between w-full text-base md:text-lg font-black text-gray-800 whitespace-nowrap items-center">
                                     <span>{txt.invoice_total}</span>
                                     <span className="text-blue-600 font-bold text-lg md:text-xl">
-                                        {formatPrice(isEditing ? editOrder.total : (order.total || ((Number(order.subTotal || 0) + Number(order.deliveryCost || 0)) - Number(order.discount || 0))), order.currency || 'YER')}
+                                        {formatPrice(isEditing ? editOrder.total : (order.total || ((Number(order.subTotal || 0) + Number(order.deliveryCost || 0)) - Number(order.discount || 0))), generalSettings?.currency || 'YER')}
                                     </span>
                                 </div>
                             </div>

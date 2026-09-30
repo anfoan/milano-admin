@@ -400,7 +400,7 @@ printWindow.onload = () => printWindow.print();
                 <td style="padding: 8px;">${o.formData?.name || '---'}</td>
                 <td style="padding: 8px;">${o.formData?.phone || '---'}</td>
                 <td style="padding: 8px;">${getStatusLabel(o.status)}</td>
-                <td style="padding: 8px; text-align: center; font-weight: bold;">${formatPrice(o.total !== undefined ? o.total : ((o.subTotal || 0) - (o.discount || 0) + (o.deliveryCost || 0)), o.currency || 'YER')}</td>
+                <td style="padding: 8px; text-align: center; font-weight: bold;">${formatPrice(o.total !== undefined ? o.total : ((o.subTotal || 0) - (o.discount || 0) + (o.deliveryCost || 0)), generalSettings?.currency || 'YER')}</td>
                 <td style="padding: 8px; white-space: nowrap;">${o.date || '-'}</td>
             </tr>
         `).join('');
@@ -499,7 +499,7 @@ printWindow.onload = () => printWindow.print();
                         <div style="background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
                             <div style="color: #64748b; font-size: 11px; font-weight: bold;">${lang === 'ar' ? 'إجمالي المبيعات' : 'Total Sales'}</div>
                             <div style="color: #16a34a; font-size: 20px; font-weight: 900;">
-                                ${ordersToExport.length > 1 ? ordersToExport.reduce((acc, curr) => acc + (curr.total !== undefined ? curr.total : ((curr.subTotal || 0) - (curr.discount || 0) + (curr.deliveryCost || 0))), 0).toLocaleString() + ' ' + (generalSettings?.currency || 'YER') : formatPrice(ordersToExport[0]?.total !== undefined ? ordersToExport[0]?.total : ((ordersToExport[0]?.subTotal || 0) - (ordersToExport[0]?.discount || 0) + (ordersToExport[0]?.deliveryCost || 0)), ordersToExport[0]?.currency)}
+                                ${ordersToExport.length > 1 ? ordersToExport.reduce((acc, curr) => acc + (curr.total !== undefined ? curr.total : ((curr.subTotal || 0) - (curr.discount || 0) + (curr.deliveryCost || 0))), 0).toLocaleString() + ' ' + (generalSettings?.currency || 'YER') : formatPrice(ordersToExport[0]?.total !== undefined ? ordersToExport[0]?.total : ((ordersToExport[0]?.subTotal || 0) - (ordersToExport[0]?.discount || 0) + (ordersToExport[0]?.deliveryCost || 0)), generalSettings?.currency || 'YER')}
                             </div>
                         </div>
                         <div style="background: #eff6ff; padding: 12px; border-radius: 10px; border: 1px solid #dbeafe;">
@@ -1190,7 +1190,7 @@ printWindow.onload = () => printWindow.print();
                                             <div className="font-black text-gray-800 flex flex-col items-start gap-0.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="text-sm md:text-base">
-                                                        {formatPrice(order.subTotal ? (order.subTotal - (order.discount || 0) + (order.deliveryCost || 0)) : order.total, order.currency || 'YER')}
+                                                        {formatPrice(order.subTotal ? (order.subTotal - (order.discount || 0) + (order.deliveryCost || 0)) : order.total, generalSettings?.currency || 'YER')}
                                                     </span>
                                                 </div>
                                                 {order.deliveryCost > 0 && <span className="text-[9px] text-gray-400 font-normal">{lang === 'ar' ? 'شامل التوصيل' : 'Inc. Delivery'}</span>}
@@ -1551,7 +1551,7 @@ printWindow.onload = () => printWindow.print();
                                                     <h5 className="font-bold text-gray-800 text-xs line-clamp-1">{item.title}</h5>
                                                     <div className="flex justify-between items-end mt-1">
                                                         <span className="text-xs text-gray-500">الكمية: {item.quantity || 1}</span>
-                                                        <span className="font-bold text-green-600 text-sm">{item.price?.toLocaleString()} {getLocalizedCurrency('YER', lang)}</span>
+                                                        <span className="font-bold text-green-600 text-sm">{item.price?.toLocaleString()} {getLocalizedCurrency(generalSettings?.currency || 'YER', lang)}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1563,15 +1563,15 @@ printWindow.onload = () => printWindow.print();
                                 <div className="border-t-2 border-dashed border-gray-100 pt-4 space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">{txt.subtotal}</span>
-                                        <span className="font-bold">{(selectedOrder.subTotal || selectedOrder.total)?.toLocaleString()} {getLocalizedCurrency('YER', lang)}</span>
+                                        <span className="font-bold">{(selectedOrder.subTotal || selectedOrder.total)?.toLocaleString()} {getLocalizedCurrency(generalSettings?.currency || 'YER', lang)}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">{txt.delivery}</span>
-                                        <span className="font-bold">{selectedOrder.deliveryCost?.toLocaleString()} {getLocalizedCurrency('YER', lang)}</span>
+                                        <span className="font-bold">{selectedOrder.deliveryCost?.toLocaleString()} {getLocalizedCurrency(generalSettings?.currency || 'YER', lang)}</span>
                                     </div>
                                     <div className="flex justify-between text-lg text-blue-600 font-black pt-2">
                                         <span>{txt.total_final}</span>
-                                        <span>{((Number(selectedOrder.subTotal || 0) + Number(selectedOrder.deliveryCost || 0)) - Number(selectedOrder.discount || 0)).toLocaleString()} {getLocalizedCurrency('YER', lang)}</span>
+                                        <span>{((Number(selectedOrder.subTotal || 0) + Number(selectedOrder.deliveryCost || 0)) - Number(selectedOrder.discount || 0)).toLocaleString()} {getLocalizedCurrency(generalSettings?.currency || 'YER', lang)}</span>
                                     </div>
                                 </div>
                             </div>

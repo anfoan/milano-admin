@@ -84,7 +84,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
         'AED': isRTL ? 'درهم إماراتي' : 'AED',
     };
 
-    const getCurrencyLabel = (curr) => currencyLabels[curr] || curr;
+    const getCurrencyLabel = () => currencyLabels[currency] || currency;
 
     // Helper: map old internal entity type values to display text, or show as-is for free text
     const getEntityLabel = (val) => {
@@ -272,7 +272,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
             date: expense.date,
             description: expense.description || '',
             paymentMethod: expense.paymentMethod || '',
-            currency: expense.currency || currency
+            currency: currency
         });
         if (isPredefined) {
             setIsCustomCategory(false);
@@ -298,7 +298,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
             date: currentExpense.date,
             description: currentExpense.description,
             paymentMethod: currentExpense.paymentMethod || 'cash',
-            currency: currentExpense.currency || currency,
+            currency: currency,
             updatedAt: serverTimestamp()
         };
 
@@ -353,7 +353,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
             time: bond.time || new Date().toTimeString().slice(0, 5),
             entityName: bond.entityName,
             amount: bond.amount,
-            currency: bond.currency || currency,
+            currency: currency,
             paymentMethod: bond.paymentMethod || '',
             notes: bond.notes || '',
             entityType: bond.entityType || ''
@@ -375,7 +375,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
             time: currentBond.time,
             entityName: currentBond.entityName,
             amount: Number(currentBond.amount),
-            currency: currentBond.currency,
+            currency: currency,
             paymentMethod: currentBond.paymentMethod,
             notes: currentBond.notes,
             entityType: entityTypeValue,
@@ -1884,16 +1884,11 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'العملة' : 'Currency'}</label>
-                                        <select
-                                            value={currentExpense.currency || currency}
-                                            onChange={(e) => setCurrentExpense({ ...currentExpense, currency: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-[#2c2c2e] dark:text-white font-bold"
-                                        >
-                                            <option value="YER">{currencyLabels.YER}</option>
-                                            <option value="SAR">{currencyLabels.SAR}</option>
-                                            <option value="USD">{currencyLabels.USD}</option>
-                                            <option value="AED">{currencyLabels.AED}</option>
-                                        </select>
+                                        <input
+                                            value={getCurrencyLabel()}
+                                            readOnly
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/5 dark:text-white font-bold cursor-not-allowed"
+                                        />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'طريقة الدفع' : 'Payment Method'}</label>
@@ -2049,16 +2044,11 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'العملة' : 'Currency'}</label>
-                                        <select
-                                            value={currentBond.currency}
-                                            onChange={(e) => setCurrentBond({ ...currentBond, currency: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-[#2c2c2e] dark:text-white font-bold"
-                                        >
-                                            <option value="YER">{currencyLabels.YER}</option>
-                                            <option value="SAR">{currencyLabels.SAR}</option>
-                                            <option value="USD">{currencyLabels.USD}</option>
-                                            <option value="AED">{currencyLabels.AED}</option>
-                                        </select>
+                                        <input
+                                            value={getCurrencyLabel()}
+                                            readOnly
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/5 dark:text-white font-bold cursor-not-allowed"
+                                        />
                                     </div>
                                 </div>
 
