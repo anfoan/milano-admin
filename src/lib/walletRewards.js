@@ -23,7 +23,7 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
             transaction.get(rewardRef)
         ]);
         const settings = settingsSnapshot.exists() ? settingsSnapshot.data() : {};
-        const amount = Math.max(0, Number(settings.defaultReward ?? 500));
+        const amount = Math.max(0, Number(order.walletRewardOverride ?? settings.defaultReward ?? 500));
         if (settings.enabled === false || amount === 0) return { granted: false, reason: 'rewards-disabled' };
         if (rewardSnapshot.exists() || order.walletRewardGranted) return { granted: false, reason: 'already-granted' };
 
