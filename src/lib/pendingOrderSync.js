@@ -1,4 +1,4 @@
-import { doc, increment, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, increment, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
 /**
@@ -58,9 +58,23 @@ export const reconcilePendingCustomerOrder = async (orderId) => {
                 transaction.update(couponRef, { usedCount: increment(1) });
             }
         }
+        if (order.walletDebitPending && Number(order.walletApplied || 0) > 0) {
+            const walletTransactionRef = doc(collection(db, 'wallet_transactions'));
+            transaction.set(walletTransactionRef, {
+                walletId: order.customerWalletId || '',
+                type: 'spend',
+                amount: Number(order.walletApplied || 0),
+                orderId: order.orderId || order.id || orderId,
+                customerName: order.formData?.name || '',
+                phone: order.formData?.fullPhone || order.formData?.phone || '',
+                source: 'checkout',
+                createdAt: serverTimestamp()
+            });
+        }
         transaction.update(orderRef, {
             inventorySyncPending: false,
             inventorySyncStatus: 'synced-by-admin',
+            walletDebitPending: false,
             inventorySyncedAt: serverTimestamp()
         });
         return { reconciled: true };
