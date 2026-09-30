@@ -308,7 +308,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
             </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">{metricCards.map(card => <MetricCard key={card.key} {...card} currencyLabel={currencyLabel}/>)}</section>
+        <section className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">{metricCards.map(card => <MetricCard key={card.key} {...card} currencyLabel={currencyLabel}/>)}</section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#1d1d20] md:p-5">
             <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div className="text-right"><h2 className="text-[13px] font-black text-slate-900 dark:text-white">{t.chartTitle} ({activePeriodDetail})</h2><p className="mt-1 text-[9px] font-bold text-slate-400">{t.chartPeriod}</p></div><div className="flex flex-wrap items-center gap-3 text-[10px] font-black"><span className="text-emerald-600">● {t.sales}</span><span className="text-orange-500">● {t.purchases}</span><span className="text-rose-500">● {t.expenses}</span><span className="text-cyan-600">● {t.profit}</span></div></div>
