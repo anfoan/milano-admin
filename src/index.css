@@ -531,7 +531,7 @@ input[type=number] {
   animation: modal-content-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-/* Financial reports: soft wave light travelling from left to right inside every metric card. */
+/* Financial reports: two translucent background waves moving inside every metric card. */
 .financial-report-card-wave {
   position: absolute;
   inset: 0;
@@ -547,20 +547,22 @@ input[type=number] {
   width: 118%;
   height: 78%;
   border-radius: 54% 46% 0 0 / 69% 74% 0 0;
-  background: linear-gradient(103deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.025) 48%, rgba(255, 255, 255, 0.16));
+  background: linear-gradient(103deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.035) 48%, rgba(255, 255, 255, 0.14));
   transform: rotate(-3deg);
+  animation: financial-card-wave-front 6.8s ease-in-out infinite alternate;
 }
 
 .financial-report-card-wave::after {
   content: "";
   position: absolute;
-  top: -45%;
-  bottom: -45%;
-  left: -46%;
-  width: 31%;
-  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.04) 18%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0.04) 82%, transparent 100%);
-  transform: skewX(-18deg) translateX(0);
-  animation: financial-report-wave 5.2s cubic-bezier(0.25, 0.65, 0.35, 1) infinite;
+  left: -20%;
+  bottom: -53%;
+  width: 125%;
+  height: 84%;
+  border-radius: 48% 57% 0 0 / 76% 64% 0 0;
+  background: linear-gradient(96deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.13) 52%, rgba(255, 255, 255, 0.025));
+  transform: rotate(2deg);
+  animation: financial-card-wave-back 8.4s ease-in-out infinite alternate;
 }
 
 .financial-report-card-icon {
@@ -576,13 +578,19 @@ input[type=number] {
   transform: rotate(4deg);
 }
 
-@keyframes financial-report-wave {
-  0%, 18% { transform: skewX(-18deg) translateX(0); opacity: 0; }
-  24% { opacity: 0.95; }
-  62% { opacity: 0.48; }
-  78%, 100% { transform: skewX(-18deg) translateX(550%); opacity: 0; }
+@keyframes financial-card-wave-front {
+  0% { transform: translate3d(-4%, 2px, 0) rotate(-3deg) scaleX(1.04); }
+  50% { transform: translate3d(3%, -4px, 0) rotate(1deg) scaleX(1.09); }
+  100% { transform: translate3d(8%, 1px, 0) rotate(-1deg) scaleX(1.03); }
+}
+
+@keyframes financial-card-wave-back {
+  0% { transform: translate3d(7%, -1px, 0) rotate(2deg) scaleX(1.04); }
+  50% { transform: translate3d(-1%, -5px, 0) rotate(-2deg) scaleX(1.1); }
+  100% { transform: translate3d(-8%, 2px, 0) rotate(1deg) scaleX(1.05); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .financial-report-card-wave::before { animation: none; }
+  .financial-report-card-wave::before,
+  .financial-report-card-wave::after { animation: none; }
 }
