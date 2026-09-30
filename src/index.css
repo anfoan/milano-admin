@@ -542,13 +542,15 @@ input[type=number] {
 .financial-report-card-wave::before {
   content: "";
   position: absolute;
-  left: -22%;
-  top: -49%;
-  width: 144%;
-  height: 188%;
-  border-radius: 48% 53% 50% 46% / 44% 52% 47% 55%;
-  background: radial-gradient(ellipse at 25% 67%, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.2) 29%, rgba(255, 255, 255, 0.06) 52%, transparent 70%);
-  opacity: 0.92;
+  left: -28%;
+  top: -32%;
+  width: 156%;
+  height: 164%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 82% 48% at 22% 88%, transparent 0 43%, rgba(255, 255, 255, 0.22) 44% 53%, transparent 54%),
+    radial-gradient(ellipse 76% 43% at 70% 12%, transparent 0 44%, rgba(255, 255, 255, 0.13) 45% 53%, transparent 54%);
+  opacity: 1;
   mix-blend-mode: normal;
   animation: financial-card-wave-front 2.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
 }
@@ -556,13 +558,15 @@ input[type=number] {
 .financial-report-card-wave::after {
   content: "";
   position: absolute;
-  left: -20%;
-  top: -64%;
-  width: 141%;
-  height: 200%;
-  border-radius: 56% 43% 49% 51% / 55% 43% 58% 45%;
-  background: radial-gradient(ellipse at 74% 38%, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.15) 28%, rgba(255, 255, 255, 0.05) 48%, transparent 69%);
-  opacity: 0.78;
+  left: -22%;
+  top: -38%;
+  width: 151%;
+  height: 174%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 85% 50% at 82% 81%, transparent 0 42%, rgba(255, 255, 255, 0.17) 43% 51%, transparent 52%),
+    radial-gradient(ellipse 73% 40% at 18% 19%, transparent 0 43%, rgba(255, 255, 255, 0.1) 44% 51%, transparent 52%);
+  opacity: 1;
   mix-blend-mode: normal;
   animation: financial-card-wave-back 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
 }
