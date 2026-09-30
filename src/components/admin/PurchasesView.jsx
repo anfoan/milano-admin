@@ -216,7 +216,7 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
         {modalOpen && <div className="fixed inset-0 z-[120] bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 md:p-5">
             <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[30px] bg-white shadow-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-[30px] border-b border-gray-100 bg-white px-5 py-3">
-                    <button type="button" onClick={() => setModalOpen(false)} className="w-9 h-9 rounded-xl bg-gray-50 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"><X size={18}/></button>
+                    <button type="button" onClick={() => setModalOpen(false)} aria-label={isRTL ? 'إغلاق' : 'Close'} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"><X size={18} strokeWidth={2.25}/></button>
                     <div className="text-center"><h2 className="text-base font-black text-gray-900">{editingId ? t.formTitleEdit : (isRTL ? 'إضافة فاتورة شراء جديدة' : 'Add New Purchase Invoice')}</h2><p className="text-[10px] font-bold text-gray-400">{isRTL ? 'تسجيل فاتورة شراء جديدة وإضافة المنتجات للمخزون' : 'Record a new purchase invoice and add items to inventory'}</p></div>
                     <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><ClipboardList size={18}/></div>
                 </div>
