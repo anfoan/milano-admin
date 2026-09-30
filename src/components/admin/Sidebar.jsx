@@ -209,7 +209,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                             >
                                 <span className="text-slate-400 dark:text-slate-300">{item.icon}</span>
                                 <span className="flex-1 text-right text-[15px]">{item.name}</span>
-                                <span dir="ltr" className="inline-flex h-7 min-w-[62px] items-center justify-between gap-1 rounded-lg border border-emerald-300 bg-emerald-100 px-2 font-mono text-[11px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{walletBalance.toLocaleString('en-US')}</span></span>
+                                <span dir="ltr" className="inline-flex h-6 min-w-[54px] items-center justify-between gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-1.5 font-sans tabular-nums text-[10px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{walletBalance.toLocaleString('en-US')}</span></span>
                             </button> : <button
                                 onClick={() => {
                                     if (item.subItems) {
