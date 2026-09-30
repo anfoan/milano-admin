@@ -74,7 +74,6 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
     const allMenuItems = [
         { id: 'overview', name: txt.overview, icon: <LayoutDashboard size={20} /> },
         { id: 'purchases', name: txt.purchases, icon: <ShoppingCart size={20} /> },
-        { id: 'financial-reports', name: txt.financial_reports, icon: <BarChart3 size={20} /> },
         {
             id: 'products',
             name: txt.products,
@@ -110,6 +109,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
         { id: 'delivery', name: txt.delivery, icon: <Truck size={20} /> },
         { id: 'payments', name: txt.payments, icon: <CreditCard size={20} /> },
         { id: 'expenses', name: txt.expenses, icon: <Receipt size={20} /> },
+        { id: 'financial-reports', name: txt.financial_reports, icon: <BarChart3 size={20} /> },
         {
             id: 'settings-section',
             name: txt.store_settings,

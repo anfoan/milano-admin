@@ -530,3 +530,34 @@ input[type=number] {
 .animate-modal-in {
   animation: modal-content-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+
+/* Financial reports: soft wave light travelling from left to right inside every metric card. */
+.financial-report-card-wave {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.financial-report-card-wave::before {
+  content: "";
+  position: absolute;
+  top: -35%;
+  bottom: -35%;
+  left: -42%;
+  width: 34%;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.03) 18%, rgba(255, 255, 255, 0.34) 50%, rgba(255, 255, 255, 0.04) 82%, transparent 100%);
+  transform: skewX(-18deg) translateX(0);
+  animation: financial-report-wave 5.2s cubic-bezier(0.25, 0.65, 0.35, 1) infinite;
+}
+
+@keyframes financial-report-wave {
+  0%, 18% { transform: skewX(-18deg) translateX(0); opacity: 0; }
+  24% { opacity: 0.95; }
+  62% { opacity: 0.48; }
+  78%, 100% { transform: skewX(-18deg) translateX(550%); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .financial-report-card-wave::before { animation: none; }
+}
