@@ -3,7 +3,7 @@ import {
     LayoutDashboard, Package, ShoppingCart, Percent,
     UserX, MessageSquare, Settings, CreditCard,
     Palette, Truck, Briefcase, Inbox, Users,
-    PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt
+    PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt, BarChart3
 } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, toggleLang, unreadCount = 0, newOrdersCount = 0, restrictedTabs = null }) => {
@@ -35,7 +35,8 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             logout: 'تسجيل الخروج',
             manual_order: 'إنشاء طلب خارجي',
             orders_list: 'قائمة الطلبات',
-            expenses: 'المصروفات والسندات'
+            expenses: 'المصروفات والسندات',
+            financial_reports: 'التقارير المالية'
         },
         en: {
             milano: 'Milano',
@@ -62,7 +63,8 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             logout: 'Logout',
             manual_order: 'Create Manual Order',
             orders_list: 'All Orders',
-            expenses: 'Expenses & Bonds'
+            expenses: 'Expenses & Bonds',
+            financial_reports: 'Financial Reports'
         }
     };
 
@@ -72,6 +74,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
     const allMenuItems = [
         { id: 'overview', name: txt.overview, icon: <LayoutDashboard size={20} /> },
         { id: 'purchases', name: txt.purchases, icon: <ShoppingCart size={20} /> },
+        { id: 'financial-reports', name: txt.financial_reports, icon: <BarChart3 size={20} /> },
         {
             id: 'products',
             name: txt.products,
