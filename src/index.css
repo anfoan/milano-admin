@@ -549,7 +549,8 @@ input[type=number] {
   border-radius: 54% 46% 0 0 / 69% 74% 0 0;
   background: linear-gradient(103deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.035) 48%, rgba(255, 255, 255, 0.14));
   transform: rotate(-3deg);
-  animation: financial-card-wave-front 6.8s ease-in-out infinite alternate;
+  mix-blend-mode: soft-light;
+  animation: financial-card-wave-front 3.8s ease-in-out infinite alternate;
 }
 
 .financial-report-card-wave::after {
@@ -562,7 +563,8 @@ input[type=number] {
   border-radius: 48% 57% 0 0 / 76% 64% 0 0;
   background: linear-gradient(96deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.13) 52%, rgba(255, 255, 255, 0.025));
   transform: rotate(2deg);
-  animation: financial-card-wave-back 8.4s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+  animation: financial-card-wave-back 4.9s ease-in-out infinite alternate;
 }
 
 .financial-report-card-icon {

@@ -4,8 +4,8 @@ import {
     Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
 import {
-    BarChart3, CalendarDays, ChevronLeft, Download, FileText, Landmark, Package, Printer,
-    RefreshCw, Search, ShoppingCart, TrendingUp, WalletCards, X
+    ArrowDown, BarChart3, CalendarDays, ChevronLeft, Download, FileText, Landmark, Package, Printer,
+    RefreshCw, Search, ShoppingCart, TrendingUp, X
 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
@@ -32,10 +32,10 @@ const dayAtNoon = (value) => value ? new Date(`${value}T12:00:00`) : null;
 const escapeHtml = (value) => String(value ?? '').replace(/[<>&"']/g, char => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#039;' }[char]));
 
 const MetricCard = ({ title, hint, amount, currencyLabel, icon, tone, badge }) => (
-    <article className={`financial-report-card relative h-[104px] w-full overflow-hidden rounded-xl bg-gradient-to-br ${tone} p-4 text-white text-right shadow-[0_10px_24px_rgba(15,23,42,0.12)]`}>
+    <article className={`financial-report-card relative h-[110px] w-full overflow-hidden rounded-xl bg-gradient-to-br ${tone} p-4 text-white text-right shadow-[0_10px_24px_rgba(15,23,42,0.12)]`}>
         <div className="financial-report-card-wave" />
         <div className="financial-report-card-icon absolute left-1 top-1 z-10 flex h-[52px] w-[52px] items-center justify-center text-white">{icon}</div>
-        <div className="absolute bottom-4 left-16 right-3 top-4 z-10 flex flex-col items-end text-right">
+        <div className="absolute bottom-4 left-16 right-2 top-4 z-10 flex flex-col items-end text-right">
             <p className="whitespace-nowrap text-[14px] font-black leading-none text-white">{title}</p>
             <p className="mt-1 whitespace-nowrap text-[9px] font-bold text-white/75">{hint}</p>
             <div className="mt-auto flex items-baseline gap-1.5" dir="rtl">
@@ -256,7 +256,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
     const metricCards = [
         { title: t.currentStock, hint: t.stockHint, amount: number(statistics.stockBalance), icon: <Package size={18}/>, tone: 'from-[#2866ea] via-[#2860df] to-[#2855c9]', badge: t.stockBadge, key: 'stock' },
         { title: t.purchases, hint: t.purchasesHint, amount: number(statistics.purchases), icon: <ShoppingCart size={18}/>, tone: 'from-[#ff800e] via-[#fb790d] to-[#ee6f08]', badge: `${t.purchasesBadge}: ${number(filteredPurchases.length)}`, key: 'purchases' },
-        { title: t.expenses, hint: t.expensesHint, amount: number(statistics.expenses), icon: <WalletCards size={18}/>, tone: 'from-[#fa414b] via-[#f33f51] to-[#ee3652]', badge: t.expensesBadge, key: 'expenses' },
+        { title: t.expenses, hint: t.expensesHint, amount: number(statistics.expenses), icon: <ArrowDown size={20}/>, tone: 'from-[#fa414b] via-[#f33f51] to-[#ee3652]', badge: t.expensesBadge, key: 'expenses' },
         { title: t.sales, hint: t.salesHint, amount: number(statistics.sales), icon: <TrendingUp size={18}/>, tone: 'from-[#16a953] via-[#10a04c] to-[#18a956]', badge: `${t.salesBadge} ${number(activeOrders.length)}`, key: 'sales' },
         { title: t.revenue, hint: t.revenueHint, amount: number(statistics.revenues), icon: <Landmark size={18}/>, tone: 'from-[#8244ea] via-[#7d39e2] to-[#7431cf]', badge: t.revenueBadge, key: 'revenue' },
         { title: t.profit, hint: t.profitHint, amount: number(statistics.profit), icon: <BarChart3 size={18}/>, tone: 'from-[#11b9cf] via-[#08b2c5] to-[#059ab4]', badge: `${t.profitBadge} %${statistics.sales ? ((statistics.profit / statistics.sales) * 100).toFixed(1) : '0'}`, key: 'profit' }
