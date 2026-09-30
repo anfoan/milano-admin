@@ -36,8 +36,8 @@ const MetricCard = ({ title, hint, amount, currencyLabel, icon, tone, badge }) =
         <div className="financial-report-card-wave" />
         <div className="financial-report-card-icon absolute left-1 top-1 z-10 flex h-[52px] w-[52px] items-center justify-center text-white">{icon}</div>
         <div className="relative z-10 ml-16 flex h-full flex-col items-end text-right">
-            <p className="text-[13px] font-black leading-none text-white">{title}</p>
-            <p className="mt-1 text-[9px] font-bold text-white/75">{hint}</p>
+            <p className="whitespace-nowrap text-[14px] font-black leading-none text-white">{title}</p>
+            <p className="mt-1 whitespace-nowrap text-[9px] font-bold text-white/75">{hint}</p>
             <div className="mt-auto flex items-baseline gap-1.5" dir="rtl">
                 <strong dir="ltr" className="font-['Cairo'] text-[23px] font-black leading-none tracking-tight text-white">{amount}</strong>
                 <span className="text-[10px] font-black text-white/90">{currencyLabel}</span>
@@ -73,7 +73,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
         week: 'أسبوع', month: 'شهر 1', quarter: '3 شهور', half: '6 شهور', year: 'سنة', custom: 'فترة مخصصة',
         weekDetail: 'أسبوع (آخر 7 أيام)', monthDetail: 'شهر (آخر 30 يوم)', quarterDetail: '3 شهور', halfDetail: '6 شهور', yearDetail: 'سنة حالية', customDetail: 'فترة مخصصة',
         currentStock: 'الرصيد الحالي للمخزون', purchases: 'إجمالي المشتريات', expenses: 'إجمالي المصروفات', sales: 'إجمالي المبيعات', revenue: 'إجمالي الإيرادات', profit: 'صافي الربح',
-        stockHint: 'قيمة المنتجات المتوفرة بالمخزون', purchasesHint: 'فواتير الشراء المعتمدة', expensesHint: 'فواتير الكهرباء والمصروفات التشغيلية', salesHint: 'المبيعات المسجلة في الفواتير والطلبات', revenueHint: 'إجمالي المقبوضات المالية المتنوعة', profitHint: 'المبيعات والمصروفات',
+        stockHint: 'إجمالي قيمة بضاعة المستودع والمحل', purchasesHint: 'فواتير شراء الأصناف الموردة', expensesHint: 'فواتير الخدمات والمصاريف التشغيلية', salesHint: 'المبيعات المسجلة في الفواتير والطلبات', revenueHint: 'إجمالي المقبوضات المالية المتنوعة', profitHint: 'المبيعات والمصروفات',
         stockBadge: 'مخزون متاح', purchasesBadge: 'عدد الفواتير', expensesBadge: 'مصروفات تشغيل', salesBadge: 'عدد العمليات', revenueBadge: 'تدفق نقدي محصل', profitBadge: 'هامش الربح',
         chartTitle: 'الأرباح والمبيعات', chartPeriod: 'رسم بياني تفاعلي يوضح مقارنة المبيعات والمشتريات والمصروفات وصافي الربح',
         search: 'ابحث في العمليات المالية...', all: 'الكل', transactionCount: 'عملية معروضة', paymentMethod: 'طريقة الدفع', cash: 'نقدي / كاش', wallet: 'تحويل / محفظة', transfer: 'تحويل بنكي',
@@ -255,7 +255,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
     const activePeriodDetail = ({ week: t.weekDetail, month: t.monthDetail, quarter: t.quarterDetail, half: t.halfDetail, year: t.yearDetail, custom: t.customDetail }[period] || t.weekDetail);
     const metricCards = [
         { title: t.currentStock, hint: t.stockHint, amount: number(statistics.stockBalance), icon: <Package size={18}/>, tone: 'from-[#2866ea] via-[#2860df] to-[#2855c9]', badge: t.stockBadge, key: 'stock' },
-        { title: t.purchases, hint: t.purchasesHint, amount: number(statistics.purchases), icon: <ShoppingCart size={18}/>, tone: 'from-[#ff800e] via-[#fb790d] to-[#ee6f08]', badge: `${t.purchasesBadge} ${number(filteredPurchases.length)}`, key: 'purchases' },
+        { title: t.purchases, hint: t.purchasesHint, amount: number(statistics.purchases), icon: <ShoppingCart size={18}/>, tone: 'from-[#ff800e] via-[#fb790d] to-[#ee6f08]', badge: `${t.purchasesBadge}: ${number(filteredPurchases.length)}`, key: 'purchases' },
         { title: t.expenses, hint: t.expensesHint, amount: number(statistics.expenses), icon: <WalletCards size={18}/>, tone: 'from-[#fa414b] via-[#f33f51] to-[#ee3652]', badge: t.expensesBadge, key: 'expenses' },
         { title: t.sales, hint: t.salesHint, amount: number(statistics.sales), icon: <TrendingUp size={18}/>, tone: 'from-[#16a953] via-[#10a04c] to-[#18a956]', badge: `${t.salesBadge} ${number(activeOrders.length)}`, key: 'sales' },
         { title: t.revenue, hint: t.revenueHint, amount: number(statistics.revenues), icon: <Landmark size={18}/>, tone: 'from-[#8244ea] via-[#7d39e2] to-[#7431cf]', badge: t.revenueBadge, key: 'revenue' },
