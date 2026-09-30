@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     LayoutDashboard, Package, ShoppingCart, Percent,
     UserX, MessageSquare, Settings, CreditCard,
     Palette, Truck, Briefcase, Inbox, Users,
     PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt, BarChart3, Wallet
 } from 'lucide-react';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 
 const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, toggleLang, unreadCount = 0, newOrdersCount = 0, restrictedTabs = null }) => {
 
@@ -74,21 +72,9 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
 
     const txt = t[lang];
     const isRTL = lang === 'ar';
-    const [walletBalance, setWalletBalance] = useState(0);
-
-    useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, 'bonds'), snapshot => {
-            const balance = snapshot.docs.reduce((total, doc) => {
-                const bond = doc.data();
-                const amount = Number(String(bond.amount ?? '').replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit)).replace(/[٬,\s]/g, '')) || 0;
-                const type = String(bond.type || '').trim().toLowerCase();
-                const receipt = ['receipt', 'receive', 'income', 'revenue', 'قبض', 'سند قبض', 'إيراد', 'ايراد'].includes(type) || type.includes('قبض') || type.includes('إيراد') || type.includes('ايراد');
-                return total + (receipt ? amount : -amount);
-            }, 0);
-            setWalletBalance(balance);
-        }, error => console.error('Sidebar wallet listener:', error));
-        return () => unsubscribe();
-    }, []);
+    // This is a separate wallet balance placeholder from the supplied design.
+    // It must not be combined with the Jib Wallet payment method or bond activity.
+    const walletDisplayBalance = '700';
 
     const allMenuItems = [
         { id: 'overview', name: txt.overview, icon: <LayoutDashboard size={20} /> },
@@ -209,7 +195,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                             >
                                 <span className="text-slate-400 dark:text-slate-300">{item.icon}</span>
                                 <span className="flex-1 text-right text-[15px]">{item.name}</span>
-                                <span dir="ltr" className="inline-flex h-6 min-w-[54px] items-center justify-between gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-1.5 font-sans tabular-nums text-[10px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{walletBalance.toLocaleString('en-US')}</span></span>
+                                <span dir="ltr" className="inline-flex h-6 min-w-[54px] items-center justify-between gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-1.5 font-sans tabular-nums text-[10px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{walletDisplayBalance}</span></span>
                             </button> : <button
                                 onClick={() => {
                                     if (item.subItems) {
