@@ -8,6 +8,6 @@ export default defineConfig({
     allowedHosts: true,
   },
   server: {
-    allowedHosts: ['.trycloudflare.com', '.loca.lt', '.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io'],
+    allowedHosts: true,
   },
 })

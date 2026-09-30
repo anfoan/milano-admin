@@ -19,6 +19,7 @@ import DeliveryView from '../components/admin/DeliveryView'; // New
 import ExpensesView from '../components/admin/ExpensesView';
 import PurchasesView from '../components/admin/PurchasesView';
 import FinancialReportsView from '../components/admin/FinancialReportsView';
+import WalletView from '../components/admin/WalletView';
 import InboxView from '../components/admin/InboxView'; // New
 import AdminChatView from '../components/admin/AdminChatView'; // New Chat View
 import OrderDetailsView from '../components/admin/OrderDetailsView'; // New Detail Page
@@ -327,6 +328,8 @@ const AdminDashboard = () => {
                 return <PurchasesView lang={lang} generalSettings={generalSettings} />;
             case 'financial-reports':
                 return <FinancialReportsView lang={lang} generalSettings={generalSettings} />;
+            case 'wallet':
+                return <WalletView lang={lang} generalSettings={generalSettings} />;
             case 'product-list':
                 return <ProductsView onEdit={handleEditProduct} lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
             case 'inventory':

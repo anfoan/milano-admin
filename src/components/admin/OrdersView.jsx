@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Printer, Search, FileDown, Trash2, Clock, CheckCircle, XCircle, MapPin, Phone, User, ShoppingBag, MessageCircle, Truck, X, Layers, ChevronDown, AlertTriangle, RefreshCw, Pencil } from 'lucide-react';
 import { db } from '../../lib/firebase';
+import { grantWalletRewardForCompletedOrder, isCompletedOrderStatus } from '../../lib/walletRewards';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useReactToPrint } from 'react-to-print';
@@ -854,9 +855,10 @@ printWindow.onload = () => printWindow.print();
         }
 
         try {
-            await Promise.all(ordersToUpdate.map(order => {
+            await Promise.all(ordersToUpdate.map(async order => {
                 const orderRef = doc(db, "orders", order.id);
-                return updateDoc(orderRef, { status: bulkStatus });
+                await updateDoc(orderRef, { status: bulkStatus });
+                if (isCompletedOrderStatus(bulkStatus)) await grantWalletRewardForCompletedOrder(order.id);
             }));
             setSelectedOrdersIds([]);
             setBulkStatus('');
@@ -872,6 +874,7 @@ printWindow.onload = () => printWindow.print();
         try {
             const orderRef = doc(db, "orders", orderId);
             await updateDoc(orderRef, { status: newStatus });
+            if (isCompletedOrderStatus(newStatus)) await grantWalletRewardForCompletedOrder(orderId);
         } catch (error) {
             console.error("Error updating status:", error);
             alert(txt.alert_status_update_error);
