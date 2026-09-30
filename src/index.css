@@ -542,33 +542,33 @@ input[type=number] {
 .financial-report-card-wave::before {
   content: "";
   position: absolute;
-  top: -35%;
-  bottom: -35%;
-  left: -42%;
-  width: 34%;
-  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.03) 18%, rgba(255, 255, 255, 0.34) 50%, rgba(255, 255, 255, 0.04) 82%, transparent 100%);
-  transform: skewX(-18deg) translateX(0);
-  animation: financial-report-wave 5.2s cubic-bezier(0.25, 0.65, 0.35, 1) infinite;
+  left: -13%;
+  bottom: -42%;
+  width: 118%;
+  height: 78%;
+  border-radius: 54% 46% 0 0 / 69% 74% 0 0;
+  background: linear-gradient(103deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.025) 48%, rgba(255, 255, 255, 0.16));
+  transform: rotate(-3deg);
 }
 
 .financial-report-card-wave::after {
   content: "";
   position: absolute;
-  left: -8%;
-  bottom: -37%;
-  width: 116%;
-  height: 66%;
-  border-radius: 47% 54% 0 0 / 70% 78% 0 0;
-  background: linear-gradient(104deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.035) 46%, rgba(255, 255, 255, 0.18));
-  transform: rotate(-3deg);
+  top: -45%;
+  bottom: -45%;
+  left: -46%;
+  width: 31%;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.04) 18%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0.04) 82%, transparent 100%);
+  transform: skewX(-18deg) translateX(0);
+  animation: financial-report-wave 5.2s cubic-bezier(0.25, 0.65, 0.35, 1) infinite;
 }
 
 .financial-report-card-icon {
   border: 1px solid rgba(255, 255, 255, 0.21);
-  border-radius: 10px 15px 11px 18px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.19), rgba(255, 255, 255, 0.035));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 16px rgba(7, 22, 53, 0.08);
-  transform: rotate(-4deg);
+  border-radius: 13px 18px 13px 21px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.23), rgba(255, 255, 255, 0.025));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 8px 16px rgba(7, 22, 53, 0.08);
+  transform: rotate(-4deg) skewY(1deg);
 }
 
 .financial-report-card-icon svg {

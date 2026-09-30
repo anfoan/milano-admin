@@ -34,12 +34,12 @@ const escapeHtml = (value) => String(value ?? '').replace(/[<>&"']/g, char => ({
 const MetricCard = ({ title, hint, amount, currencyLabel, icon, tone, badge }) => (
     <article className={`financial-report-card relative h-[104px] w-full overflow-hidden rounded-xl bg-gradient-to-br ${tone} p-4 text-white text-right shadow-[0_10px_24px_rgba(15,23,42,0.12)]`}>
         <div className="financial-report-card-wave" />
-        <div className="financial-report-card-icon absolute left-3 top-3 z-10 flex h-11 w-11 items-center justify-center text-white">{icon}</div>
-        <div className="relative z-10 mr-14 flex h-full flex-col items-end text-right">
+        <div className="financial-report-card-icon absolute left-1 top-1 z-10 flex h-[52px] w-[52px] items-center justify-center text-white">{icon}</div>
+        <div className="relative z-10 ml-16 flex h-full flex-col items-end text-right">
             <p className="text-[13px] font-black leading-none text-white">{title}</p>
             <p className="mt-1 text-[9px] font-bold text-white/75">{hint}</p>
             <div className="mt-auto flex items-baseline gap-1.5" dir="rtl">
-                <strong dir="ltr" className="font-mono text-[23px] font-black leading-none tracking-tight text-white">{amount}</strong>
+                <strong dir="ltr" className="font-['Cairo'] text-[23px] font-black leading-none tracking-tight text-white">{amount}</strong>
                 <span className="text-[10px] font-black text-white/90">{currencyLabel}</span>
             </div>
         </div>
