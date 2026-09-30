@@ -76,7 +76,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
         stockHint: 'إجمالي قيمة بضاعة المستودع والمحل', purchasesHint: 'فواتير شراء الأصناف الموردة', expensesHint: 'جميع مصروفات النظام وسندات الصرف', salesHint: 'مبيعات نقطة البيع والمتجر والطلبات الخارجية', revenueHint: 'جميع سندات القبض والإيرادات المسجلة', profitHint: 'المبيعات والإيرادات ناقص التكاليف والمصروفات',
         stockBadge: 'مخزون متاح', purchasesBadge: 'عدد الفواتير', expensesBadge: 'مصروفات تشغيل', salesBadge: 'عدد العمليات', revenueBadge: 'التدفق النقدي المحصل', profitBadge: 'هامش ربح',
         chartTitle: 'الأرباح والمبيعات', chartPeriod: 'رسم بياني تفاعلي يوضح مقارنة المبيعات والمشتريات والمصروفات وصافي الربح',
-        search: 'ابحث في العمليات المالية...', all: 'الكل', transactionCount: 'عملية معروضة', paymentMethod: 'طريقة الدفع', cash: 'نقدي / كاش', wallet: 'تحويل / محفظة', transfer: 'تحويل بنكي',
+        search: 'ابحث في العمليات المالية...', all: 'الكل', transactionCount: 'عملية معروضة', paymentMethod: 'طريقة الدفع', cash: 'نقدي / كاش', wallet: 'محفظة جيب', transfer: 'تحويل بنكي',
         salesType: 'المبيعات', purchaseType: 'المشتريات', expenseType: 'المصروفات', receiptType: 'سندات القبض', paymentType: 'سندات الصرف',
         date: 'التاريخ', type: 'نوع المعاملة', description: 'البيان / الوصف', entity: 'الطرف / العميل / المورد', amount: 'المبلغ', status: 'الحالة',
         noTransactions: 'لا توجد عمليات مالية مطابقة للفلاتر المحددة',
