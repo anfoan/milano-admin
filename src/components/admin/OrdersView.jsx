@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Printer, Search, FileDown, Trash2, Clock, CheckCircle, XCircle, MapPin, Phone, User, ShoppingBag, MessageCircle, Truck, X, Layers, ChevronDown, AlertTriangle, RefreshCw, Pencil } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { grantWalletRewardForCompletedOrder, isCompletedOrderStatus } from '../../lib/walletRewards';
+import { reconcilePendingCustomerOrder } from '../../lib/pendingOrderSync';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useReactToPrint } from 'react-to-print';
@@ -198,6 +199,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
     const [printOrder, setPrintOrder] = useState(null);
     const [selectedOrdersIds, setSelectedOrdersIds] = useState([]);
     const [productCostMap, setProductCostMap] = useState({});
+    const pendingSyncIdsRef = useRef(new Set());
 
     // Excel/PDF Export State
     const [showExportModal, setShowExportModal] = useState(false);
@@ -792,6 +794,13 @@ printWindow.onload = () => printWindow.print();
             });
             setOrders(fetchedOrders);
             setLoading(false);
+            fetchedOrders.filter(order => order.inventorySyncPending).forEach(order => {
+                if (pendingSyncIdsRef.current.has(order.id)) return;
+                pendingSyncIdsRef.current.add(order.id);
+                reconcilePendingCustomerOrder(order.id)
+                    .catch(error => console.error('Pending customer order reconciliation failed:', order.id, error))
+                    .finally(() => pendingSyncIdsRef.current.delete(order.id));
+            });
         });
 
     return () => unsubscribe();
