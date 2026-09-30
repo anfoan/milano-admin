@@ -66,7 +66,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
 
     const t = isRTL ? {
         title: 'إدارة التقارير المالية', subtitle: 'متابعة مالية شاملة لمبيعات المتجر، المشتريات، المصروفات وصافي الربح',
-        printPdf: 'طباعة PDF', period: 'الفترة', week: 'أسبوع', month: 'شهر 1', quarter: '3 شهور', half: '6 شهور', year: 'سنة', custom: 'فترة مخصصة',
+        printPdf: 'التقرير المالي', period: 'الفترة', week: 'أسبوع', month: 'شهر 1', quarter: '3 شهور', half: '6 شهور', year: 'سنة', custom: 'فترة مخصصة',
         currentStock: 'الرصيد الحالي للمخزون', purchases: 'إجمالي المشتريات', expenses: 'إجمالي المصروفات', sales: 'إجمالي المبيعات', revenue: 'إجمالي الإيرادات', profit: 'صافي الربح',
         stockHint: 'القيمة الحالية للمنتجات بالمخزون', purchasesHint: 'فواتير شراء المخزون خلال الفترة', expensesHint: 'المصروفات التشغيلية والسندات', salesHint: 'إجمالي فواتير البيع غير الملغاة', revenueHint: 'سندات القبض والإيرادات الأخرى', profitHint: 'بعد تكلفة المنتجات والمصروفات',
         salesPurchases: 'الأرباح والمبيعات', chartHint: 'رسم بياني تفاعلي يقارن المبيعات والمشتريات والمصروفات وصافي الربح',
