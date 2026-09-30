@@ -32,7 +32,7 @@ const dayAtNoon = (value) => value ? new Date(`${value}T12:00:00`) : null;
 const escapeHtml = (value) => String(value ?? '').replace(/[<>&"']/g, char => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#039;' }[char]));
 
 const MetricCard = ({ title, hint, amount, currencyLabel, icon, tone, badge }) => (
-    <article dir="rtl" className={`financial-report-card relative h-[110px] w-full overflow-hidden rounded-xl bg-gradient-to-br ${tone} p-4 text-white text-right shadow-[0_10px_24px_rgba(15,23,42,0.12)]`}>
+    <article dir="rtl" className={`financial-report-card relative h-[124px] w-full overflow-hidden rounded-xl bg-gradient-to-br ${tone} p-4 text-white text-right shadow-[0_10px_24px_rgba(15,23,42,0.12)]`}>
         <div className="financial-report-card-wave" />
         <div className="financial-report-card-icon absolute left-1 top-1 z-10 flex h-[52px] w-[52px] items-center justify-center text-white">{icon}</div>
         <div className="absolute bottom-4 left-16 right-2 top-4 z-10 flex flex-col items-start text-right">
