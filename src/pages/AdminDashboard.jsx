@@ -30,7 +30,7 @@ import DesignView from '../components/admin/DesignView'; // New Design View
 import ManualOrderView from '../components/admin/ManualOrderView'; // New Manual Order View
 import FooterSettingsView from '../components/admin/FooterSettingsView'; // New Footer Settings
 import POSView from '../components/admin/POSView';
-import { Menu, Search, Bell, User, PanelRight, ArrowRightFromLine, Store, Settings, LogOut, ShoppingBag, MessageSquare, WalletCards, X } from 'lucide-react';
+import { Menu, Search, Bell, User, PanelRight, ArrowRightFromLine, Store, Settings, LogOut, ShoppingBag, MessageSquare, Wallet, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminDashboard = () => {
@@ -82,7 +82,7 @@ const AdminDashboard = () => {
         { id: 'product-list', label: lang === 'ar' ? 'قائمة المنتجات' : 'Products List', icon: <ShoppingBag size={16}/>, category: 'nav' },
         { id: 'inventory', label: lang === 'ar' ? 'إدارة المخزون' : 'Inventory Management', icon: <Store size={16}/>, category: 'nav' },
         { id: 'orders', label: lang === 'ar' ? 'الطلبات' : 'Orders', icon: <ShoppingBag size={16}/>, category: 'nav' },
-        { id: 'wallet', label: lang === 'ar' ? 'المحفظة' : 'Wallet', icon: <WalletCards size={16}/>, category: 'nav' },
+        { id: 'wallet', label: lang === 'ar' ? 'المحفظة' : 'Wallet', icon: <Wallet size={16}/>, category: 'nav' },
         { id: 'inbox', label: lang === 'ar' ? 'الرسائل' : 'Messages/Inbox', icon: <MessageSquare size={16}/>, category: 'nav' },
         { id: 'settings', label: lang === 'ar' ? 'إعدادات المتجر' : 'Store Settings', icon: <Settings size={16}/>, category: 'nav' },
         { id: 'delivery', label: lang === 'ar' ? 'إعدادات التوصيل' : 'Delivery Settings', icon: <Store size={16}/>, category: 'nav' },

@@ -3,7 +3,7 @@ import {
     LayoutDashboard, Package, ShoppingCart, Percent,
     UserX, MessageSquare, Settings, CreditCard,
     Palette, Truck, Briefcase, Inbox, Users,
-    PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt, BarChart3, WalletCards
+    PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt, BarChart3, Wallet
 } from 'lucide-react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -113,7 +113,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                 { id: 'manual-order', name: txt.manual_order }
             ]
         },
-        { id: 'wallet', name: txt.wallet, icon: <WalletCards size={20} /> },
+        { id: 'wallet', name: txt.wallet, icon: <Wallet size={20} /> },
         {
             id: 'discount',
             name: txt.discount,
@@ -205,11 +205,11 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                         <div key={item.id} className="space-y-1">
                             {item.id === 'wallet' ? <button
                                 onClick={() => setActiveTab(item.id)}
-                                className={`relative w-full flex items-center gap-3 rounded-2xl px-4 py-3 font-black transition-all duration-300 ${isSectionActive(item) ? 'bg-[#f4f4f4] text-slate-900 shadow-inner dark:bg-white/10 dark:text-white' : 'bg-[#f7f7f7] text-slate-900 hover:bg-[#f1f1f1] dark:bg-white/5 dark:text-white dark:hover:bg-white/10'}`}
+                                className={`relative flex h-12 w-full items-center gap-3 rounded-2xl px-4 font-black transition-all duration-300 ${isSectionActive(item) ? 'bg-[#f4f4f4] text-slate-900 shadow-inner dark:bg-white/10 dark:text-white' : 'bg-[#f7f7f7] text-slate-900 hover:bg-[#f1f1f1] dark:bg-white/5 dark:text-white dark:hover:bg-white/10'}`}
                             >
-                                <span className={`absolute top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-300 ${isRTL ? 'right-4' : 'left-4'}`}>{item.icon}</span>
-                                <span className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-base">{item.name}</span>
-                                <span dir="ltr" className={`absolute top-1/2 -translate-y-1/2 rounded-lg border border-emerald-300 bg-emerald-100 px-2.5 py-1 font-mono text-[11px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200 ${isRTL ? 'left-4' : 'right-4'}`}>$ {walletBalance.toLocaleString('en-US')}</span>
+                                <span className="text-slate-400 dark:text-slate-300">{item.icon}</span>
+                                <span className="flex-1 text-right text-[15px]">{item.name}</span>
+                                <span dir="ltr" className="inline-flex h-7 min-w-[62px] items-center justify-between gap-1 rounded-lg border border-emerald-300 bg-emerald-100 px-2 font-mono text-[11px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{walletBalance.toLocaleString('en-US')}</span></span>
                             </button> : <button
                                 onClick={() => {
                                     if (item.subItems) {
