@@ -542,13 +542,12 @@ input[type=number] {
 .financial-report-card-wave::before {
   content: "";
   position: absolute;
-  left: -13%;
-  bottom: -42%;
-  width: 118%;
-  height: 78%;
-  border-radius: 54% 46% 0 0 / 69% 74% 0 0;
-  background: linear-gradient(103deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.035) 48%, rgba(255, 255, 255, 0.14));
-  transform: rotate(-3deg);
+  left: -24%;
+  top: -58%;
+  width: 145%;
+  height: 190%;
+  border-radius: 48% 53% 50% 46% / 44% 52% 47% 55%;
+  background: radial-gradient(ellipse at 27% 63%, rgba(255, 255, 255, 0.19), rgba(255, 255, 255, 0.07) 34%, transparent 67%);
   mix-blend-mode: soft-light;
   animation: financial-card-wave-front 3.8s ease-in-out infinite alternate;
 }
@@ -556,13 +555,12 @@ input[type=number] {
 .financial-report-card-wave::after {
   content: "";
   position: absolute;
-  left: -20%;
-  bottom: -53%;
-  width: 125%;
-  height: 84%;
-  border-radius: 48% 57% 0 0 / 76% 64% 0 0;
-  background: linear-gradient(96deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.13) 52%, rgba(255, 255, 255, 0.025));
-  transform: rotate(2deg);
+  left: -17%;
+  top: -70%;
+  width: 138%;
+  height: 205%;
+  border-radius: 56% 43% 49% 51% / 55% 43% 58% 45%;
+  background: radial-gradient(ellipse at 72% 43%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.035) 36%, transparent 70%);
   mix-blend-mode: screen;
   animation: financial-card-wave-back 4.9s ease-in-out infinite alternate;
 }
@@ -581,15 +579,15 @@ input[type=number] {
 }
 
 @keyframes financial-card-wave-front {
-  0% { transform: translate3d(-4%, 2px, 0) rotate(-3deg) scaleX(1.04); }
-  50% { transform: translate3d(3%, -4px, 0) rotate(1deg) scaleX(1.09); }
-  100% { transform: translate3d(8%, 1px, 0) rotate(-1deg) scaleX(1.03); }
+  0% { transform: translate3d(-9%, 7%, 0) rotate(-7deg) scale(1.02); }
+  50% { transform: translate3d(4%, -4%, 0) rotate(3deg) scale(1.1); }
+  100% { transform: translate3d(10%, 5%, 0) rotate(-2deg) scale(1.04); }
 }
 
 @keyframes financial-card-wave-back {
-  0% { transform: translate3d(7%, -1px, 0) rotate(2deg) scaleX(1.04); }
-  50% { transform: translate3d(-1%, -5px, 0) rotate(-2deg) scaleX(1.1); }
-  100% { transform: translate3d(-8%, 2px, 0) rotate(1deg) scaleX(1.05); }
+  0% { transform: translate3d(10%, -5%, 0) rotate(6deg) scale(1.06); }
+  50% { transform: translate3d(-3%, 6%, 0) rotate(-4deg) scale(1.13); }
+  100% { transform: translate3d(-11%, -2%, 0) rotate(3deg) scale(1.07); }
 }
 
 @media (prefers-reduced-motion: reduce) {

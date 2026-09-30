@@ -4,8 +4,8 @@ import {
     Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
 import {
-    ArrowDown, ArrowUp, BarChart3, CalendarDays, ChevronLeft, Download, FileText, Package, Printer,
-    RefreshCw, Search, ShoppingCart, TrendingUp, X
+    BarChart3, CalendarDays, ChevronLeft, CircleDollarSign, Download, FileText, Package, Printer,
+    RefreshCw, Search, ShoppingCart, TrendingDown, TrendingUp, Wallet, X
 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
@@ -256,10 +256,10 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
     const metricCards = [
         { title: t.currentStock, hint: t.stockHint, amount: number(statistics.stockBalance), icon: <Package size={18}/>, tone: 'from-[#2866ea] via-[#2860df] to-[#2855c9]', badge: t.stockBadge, key: 'stock' },
         { title: t.purchases, hint: t.purchasesHint, amount: number(statistics.purchases), icon: <ShoppingCart size={18}/>, tone: 'from-[#ff800e] via-[#fb790d] to-[#ee6f08]', badge: `${t.purchasesBadge}: ${number(filteredPurchases.length)}`, key: 'purchases' },
-        { title: t.expenses, hint: t.expensesHint, amount: number(statistics.expenses), icon: <ArrowDown size={20}/>, tone: 'from-[#fa414b] via-[#f33f51] to-[#ee3652]', badge: t.expensesBadge, key: 'expenses' },
+        { title: t.expenses, hint: t.expensesHint, amount: number(statistics.expenses), icon: <TrendingDown size={20}/>, tone: 'from-[#fa414b] via-[#f33f51] to-[#ee3652]', badge: t.expensesBadge, key: 'expenses' },
         { title: t.sales, hint: t.salesHint, amount: number(statistics.sales), icon: <TrendingUp size={18}/>, tone: 'from-[#16a953] via-[#10a04c] to-[#18a956]', badge: `${t.salesBadge} ${number(activeOrders.length)}`, key: 'sales' },
-        { title: t.revenue, hint: t.revenueHint, amount: number(statistics.revenues), icon: <ArrowUp size={20}/>, tone: 'from-[#8244ea] via-[#7d39e2] to-[#7431cf]', badge: t.revenueBadge, key: 'revenue' },
-        { title: t.profit, hint: t.profitHint, amount: number(statistics.profit), icon: <BarChart3 size={18}/>, tone: 'from-[#11b9cf] via-[#08b2c5] to-[#059ab4]', badge: `${t.profitBadge} %${statistics.sales ? ((statistics.profit / statistics.sales) * 100).toFixed(1) : '0'}`, key: 'profit' }
+        { title: t.revenue, hint: t.revenueHint, amount: number(statistics.revenues), icon: <CircleDollarSign size={20}/>, tone: 'from-[#8244ea] via-[#7d39e2] to-[#7431cf]', badge: t.revenueBadge, key: 'revenue' },
+        { title: t.profit, hint: t.profitHint, amount: number(statistics.profit), icon: <Wallet size={20}/>, tone: 'from-[#11b9cf] via-[#08b2c5] to-[#059ab4]', badge: `${t.profitBadge} %${statistics.sales ? ((statistics.profit / statistics.sales) * 100).toFixed(1) : '0'}`, key: 'profit' }
     ];
     const summaryRows = [
         { title: t.totalGoodsSales, category: t.income, value: statistics.sales, note: isRTL ? 'مبيعات نقطة البيع والطلبات' : 'Point of sale and order sales', color: 'text-emerald-600' },
