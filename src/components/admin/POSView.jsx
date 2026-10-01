@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import InvoiceTemplate from '../InvoiceTemplate';
 import DraggableScrollContainer from '../DraggableScrollContainer';
+import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 
 const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const isRTL = lang === 'ar';
@@ -491,6 +492,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 isExternal: false
             };
 
+            let savedOrderDocumentId = editingOrderId || '';
             if (editingOrderId) {
                 // Retrieve original order to restore stock first
                 const origDoc = await getDoc(doc(db, "orders", editingOrderId));
@@ -516,8 +518,16 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             } else {
                 // Create new document
                 const docRef = await addDoc(collection(db, "orders"), orderData);
+                savedOrderDocumentId = docRef.id;
                 setLastCreatedOrderId(orderId);
                 setLastCreatedOrderData({ id: docRef.id, ...orderData });
+            }
+
+            // A POS receipt is completed at creation; credit its phone-linked wallet once.
+            // A temporary wallet issue must never prevent the sale or inventory update.
+            if (savedOrderDocumentId) {
+                try { await syncWalletRewardForOrderStatus(savedOrderDocumentId, 'completed'); }
+                catch (rewardError) { console.error('POS wallet reward sync failed:', rewardError); }
             }
 
             // Deduct stock for new cartItems
@@ -669,6 +679,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 status: 'cancelled',
                 updatedAt: serverTimestamp()
             });
+            try { await syncWalletRewardForOrderStatus(receipt.id, 'cancelled'); }
+            catch (rewardError) { console.error('POS wallet reward reversal failed:', rewardError); }
 
             alert(isRTL ? "تم تحديث حالة الإيصال كـ مسترجع بنجاح" : "Receipt status updated to refunded successfully");
         } catch (err) {

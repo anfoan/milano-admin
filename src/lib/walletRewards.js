@@ -7,9 +7,22 @@ export const isCompletedOrderStatus = (status) => {
 };
 
 const amountOf = value => Math.max(0, Number(value || 0));
+export const orderCustomerPhone = (order = {}) => String(order.formData?.fullPhone || order.formData?.phone || order.customer?.phone || order.phone || '').trim();
+export const normalizeWalletPhone = (value = '') => {
+    const digits = orderCustomerPhone({ phone: value })
+        .replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
+        .replace(/[^0-9]/g, '');
+    // Store checkout saves Yemen numbers as +967XXXXXXXXX while POS/manual
+    // invoices commonly use the local nine-digit form. Both identify one wallet.
+    return digits.startsWith('967') && digits.length === 12 ? digits.slice(3) : digits;
+};
+export const getOrderRewardWalletId = (order = {}) => {
+    const normalizedPhone = normalizeWalletPhone(orderCustomerPhone(order));
+    return normalizedPhone.length >= 7 ? `phone-${normalizedPhone}` : (order.walletRewardWalletId || order.customerWalletId || '');
+};
 const customerDetails = (order, wallet = {}) => ({
-    customerName: wallet.customerName || order.formData?.name || order.customer?.name || order.customerName || '',
-    phone: wallet.phone || order.formData?.fullPhone || order.formData?.phone || order.phone || '',
+    customerName: order.formData?.name || order.customer?.name || order.customerName || wallet.customerName || '',
+    phone: orderCustomerPhone(order) || wallet.phone || '',
 });
 
 /**
@@ -26,7 +39,8 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
         if (!orderSnapshot.exists()) return { granted: false, reason: 'order-missing' };
         const order = orderSnapshot.data();
         if (!isCompletedOrderStatus(order.status)) return { granted: false, reason: 'not-completed' };
-        if (!order.customerWalletId) return { granted: false, reason: 'no-customer-wallet' };
+        const resolvedWalletId = getOrderRewardWalletId(order);
+        if (!resolvedWalletId) return { granted: false, reason: 'no-customer-phone' };
 
         const [settingsSnapshot, rewardSnapshot] = await Promise.all([
             transaction.get(walletSettingsRef),
@@ -40,6 +54,8 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
             // Repair older invoices whose reward ledger exists but whose order flags were not saved.
             if (rewardRecord && (!order.walletRewardGranted || order.walletRewardReversed)) {
                 transaction.update(orderRef, {
+                    customerWalletId: rewardRecord.walletId || resolvedWalletId,
+                    walletRewardWalletId: rewardRecord.walletId || resolvedWalletId,
                     walletRewardGranted: true,
                     walletRewardReversed: false,
                     walletRewardAmount: amountOf(rewardRecord.amount || order.walletRewardAmount),
@@ -52,7 +68,7 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
             return { granted: false, reason: 'already-granted', amount: amountOf(rewardRecord?.amount || order.walletRewardAmount) };
         }
 
-        const walletRef = doc(db, 'customer_wallets', order.customerWalletId);
+        const walletRef = doc(db, 'customer_wallets', resolvedWalletId);
         const customerRewardRef = doc(walletRef, 'transactions', rewardRef.id);
         const walletSnapshot = await transaction.get(walletRef);
         const existingWallet = walletSnapshot.exists() ? walletSnapshot.data() : {};
@@ -61,7 +77,7 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
         const { customerName, phone } = customerDetails(order, existingWallet);
         const rewardEntry = {
             transactionId: rewardRef.id,
-            walletId: order.customerWalletId,
+            walletId: resolvedWalletId,
             type: 'reward',
             amount,
             previousBalance,
@@ -78,7 +94,7 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
         };
 
         transaction.set(walletRef, {
-            walletId: order.customerWalletId,
+            walletId: resolvedWalletId,
             customerName,
             phone,
             balance: previousBalance + amount,
@@ -92,6 +108,8 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
         transaction.set(rewardRef, rewardEntry, { merge: true });
         transaction.set(customerRewardRef, rewardEntry, { merge: true });
         transaction.update(orderRef, {
+            customerWalletId: resolvedWalletId,
+            walletRewardWalletId: resolvedWalletId,
             walletRewardGranted: true,
             walletRewardReversed: false,
             walletRewardAmount: amount,
@@ -101,7 +119,7 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
             walletRewardReversalAmount: 0,
             walletRewardReversalShortfall: 0,
         });
-        return { granted: true, amount, walletId: order.customerWalletId, cycle };
+        return { granted: true, amount, walletId: resolvedWalletId, cycle };
     });
 };
 
@@ -121,12 +139,13 @@ export const reverseWalletRewardForOrder = async (orderId) => {
         ]);
         if (!orderSnapshot.exists()) return { reversed: false, reason: 'order-missing' };
         const order = orderSnapshot.data();
-        if (!order.customerWalletId) return { reversed: false, reason: 'no-customer-wallet' };
-        if (!order.walletRewardGranted && (!rewardSnapshot.exists() || rewardSnapshot.data().reversed)) {
+        const rewardRecord = rewardSnapshot.exists() ? rewardSnapshot.data() : {};
+        const resolvedWalletId = rewardRecord.walletId || order.walletRewardWalletId || getOrderRewardWalletId(order);
+        if (!resolvedWalletId) return { reversed: false, reason: 'no-customer-phone' };
+        if (!order.walletRewardGranted && (!rewardSnapshot.exists() || rewardRecord.reversed)) {
             return { reversed: false, reason: 'no-active-reward' };
         }
 
-        const rewardRecord = rewardSnapshot.exists() ? rewardSnapshot.data() : {};
         const amount = amountOf(order.walletRewardAmount || rewardRecord.amount);
         if (amount <= 0) return { reversed: false, reason: 'empty-reward' };
         const cycle = Number(order.walletRewardCycle || rewardRecord.cycle || 1);
@@ -134,7 +153,7 @@ export const reverseWalletRewardForOrder = async (orderId) => {
         const reversalSnapshot = await transaction.get(reversalRef);
         if (reversalSnapshot.exists()) return { reversed: false, reason: 'already-reversed' };
 
-        const walletRef = doc(db, 'customer_wallets', order.customerWalletId);
+        const walletRef = doc(db, 'customer_wallets', resolvedWalletId);
         const [walletSnapshot, customerRewardSnapshot] = await Promise.all([
             transaction.get(walletRef),
             transaction.get(doc(walletRef, 'transactions', rewardRef.id)),
@@ -148,7 +167,7 @@ export const reverseWalletRewardForOrder = async (orderId) => {
         const customerReversalRef = doc(walletRef, 'transactions', reversalRef.id);
         const rewardEntry = {
             transactionId: rewardRef.id,
-            walletId: order.customerWalletId,
+            walletId: resolvedWalletId,
             type: 'reward',
             amount,
             previousBalance: Math.max(0, balanceAfter - amount),
@@ -165,7 +184,7 @@ export const reverseWalletRewardForOrder = async (orderId) => {
         };
         const reversalEntry = {
             transactionId: reversalRef.id,
-            walletId: order.customerWalletId,
+            walletId: resolvedWalletId,
             type: 'reward_reversal',
             amount,
             previousBalance,
@@ -182,7 +201,7 @@ export const reverseWalletRewardForOrder = async (orderId) => {
         };
 
         transaction.set(walletRef, {
-            walletId: order.customerWalletId,
+            walletId: resolvedWalletId,
             customerName,
             phone,
             balance: balanceAfter,
@@ -193,13 +212,15 @@ export const reverseWalletRewardForOrder = async (orderId) => {
         transaction.set(reversalRef, reversalEntry);
         transaction.set(customerReversalRef, reversalEntry);
         transaction.update(orderRef, {
+            customerWalletId: resolvedWalletId,
+            walletRewardWalletId: resolvedWalletId,
             walletRewardGranted: false,
             walletRewardReversed: true,
             walletRewardReversedAt: serverTimestamp(),
             walletRewardReversalAmount: amount,
             walletRewardReversalShortfall: shortfall,
         });
-        return { reversed: true, amount, balanceAfter, shortfall, walletId: order.customerWalletId };
+        return { reversed: true, amount, balanceAfter, shortfall, walletId: resolvedWalletId };
     });
 };
 

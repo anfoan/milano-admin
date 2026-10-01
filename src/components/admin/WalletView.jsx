@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { collection, deleteDoc, doc, onSnapshot, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Package, Pencil, Printer, Save, Search, Trash2, Truck, Wallet, WalletCards, WalletMinimal, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
-import { grantWalletRewardForCompletedOrder, isCompletedOrderStatus, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
+import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { adjustCustomerWalletBalance, ensureWalletSpendLedgerForOrder, setCustomerWalletBalance } from '../../lib/walletLedger';
 
 const toMillis = value => value?.toMillis?.() || (value?.seconds ? value.seconds * 1000 : new Date(value || 0).getTime() || 0);
@@ -99,7 +99,7 @@ const WalletView = () => {
     useEffect(() => {
         if (!walletSettingsLoaded) return;
         orders.forEach(order => {
-            if (!order.id || !order.customerWalletId) return;
+            if (!order.id || !getOrderRewardWalletId(order)) return;
             const completed = isCompletedOrderStatus(order.status);
             const needsCredit = completed && (!order.walletRewardGranted || order.walletRewardReversed);
             const needsReversal = !completed && order.walletRewardGranted && !order.walletRewardReversed;

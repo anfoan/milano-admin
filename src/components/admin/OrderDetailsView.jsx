@@ -435,6 +435,8 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                 updatedAt: new Date()
             };
             await updateDoc(doc(db, "orders", order.id), updates);
+            // If the phone was just recorded on a completed invoice, reconcile its reward now.
+            await syncWalletRewardForOrderStatus(order.id, order.status);
 
             // Sync with parent state if callback provided
             if (onUpdate) {
