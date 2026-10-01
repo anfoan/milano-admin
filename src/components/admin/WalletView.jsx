@@ -407,6 +407,26 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-print-toolbar button.close { background: transparent; color: #9ca3af; font-size: 20px; padding: 0 6px; }
             .wallet-invoice-paper > header img { display: block !important; width: 72px !important; height: 72px !important; max-width: 72px !important; max-height: 72px !important; min-width: 72px !important; min-height: 72px !important; object-fit: contain !important; flex: 0 0 72px !important; }
             .wallet-invoice-paper table img { display: block !important; width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; min-width: 40px !important; min-height: 40px !important; object-fit: cover !important; }
+            .wallet-invoice-paper { direction: rtl !important; color: #111827 !important; font-family: Cairo, Arial, sans-serif !important; line-height: 1.45 !important; }
+            .wallet-invoice-paper > header { display: flex !important; align-items: flex-start !important; justify-content: space-between !important; gap: 20px !important; margin: 0 !important; padding: 0 0 20px !important; border-bottom: 1px solid #1f2937 !important; }
+            .wallet-invoice-paper > header > div { text-align: right !important; }
+            .wallet-invoice-paper > header h1 { margin: 0 !important; font-size: 27px !important; line-height: 1 !important; font-weight: 900 !important; color: #111827 !important; }
+            .wallet-invoice-paper > header p { margin: 8px 0 0 !important; font-size: 13px !important; font-weight: 900 !important; color: #64748b !important; }
+            .wallet-invoice-paper > header > div > div { margin-top: 16px !important; font-size: 9px !important; font-weight: 700 !important; color: #1f2937 !important; }
+            .wallet-invoice-paper > section:first-of-type { margin-top: 24px !important; padding: 12px 16px 16px !important; border: 1px solid #94a3b8 !important; border-radius: 8px !important; background: rgba(248,250,252,.72) !important; }
+            .wallet-invoice-paper > section:first-of-type h2 { margin: 0 !important; padding-bottom: 12px !important; border-bottom: 1px solid #94a3b8 !important; font-size: 13px !important; font-weight: 900 !important; }
+            .wallet-invoice-paper > section:first-of-type > div { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; column-gap: 32px !important; row-gap: 12px !important; margin-top: 16px !important; font-size: 9px !important; font-weight: 700 !important; }
+            .wallet-invoice-paper > section:nth-of-type(2) { margin-top: 20px !important; }
+            .wallet-invoice-paper > section:nth-of-type(2) h2 { margin: 0 0 12px !important; font-size: 15px !important; font-weight: 900 !important; }
+            .wallet-invoice-paper table { width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; font-size: 9px !important; direction: rtl !important; }
+            .wallet-invoice-paper table th { padding: 8px !important; background: #111317 !important; color: #fff !important; text-align: center !important; font-weight: 900 !important; border: 1px solid #64748b !important; }
+            .wallet-invoice-paper table th:first-child { text-align: right !important; }
+            .wallet-invoice-paper table td { padding: 8px !important; color: #111827 !important; vertical-align: middle !important; text-align: center !important; font-weight: 800 !important; border: 1px solid #94a3b8 !important; }
+            .wallet-invoice-paper table td:first-child { text-align: right !important; }
+            .wallet-invoice-paper > div[dir="ltr"] { display: flex !important; justify-content: flex-end !important; margin-top: 20px !important; }
+            .wallet-invoice-paper > div[dir="ltr"] > section { width: 270px !important; padding: 10px !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; background: #f8fafc !important; font-size: 10px !important; font-weight: 700 !important; }
+            .wallet-invoice-paper > footer { margin-top: 24px !important; padding-top: 16px !important; border-top: 1px solid #94a3b8 !important; text-align: center !important; }
+            .wallet-invoice-paper > footer p { margin: 0 !important; }
             .wallet-invoice-paper table, .wallet-invoice-paper tbody, .wallet-invoice-paper tr { page-break-inside: avoid !important; break-inside: avoid !important; }
             @media print {
                 html, body { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; background: #fff !important; }
