@@ -398,10 +398,10 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .join('');
         printWindow.document.write(`<!doctype html><html dir="rtl"><head><meta charset="UTF-8"><base href="${window.location.origin}/"><title>فاتورة متجر ميلانو</title>${copiedStyles}<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"><style>
             @page { size: A4 portrait; margin: 0; }
-            html, body { width: 210mm !important; height: 297mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
+            html, body { min-height: 100vh !important; margin: 0 !important; padding: 16px !important; background: #1f2937 !important; }
             * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .wallet-print-host { display: block !important; width: 210mm !important; height: 297mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
-            .wallet-invoice-paper { display: block !important; width: 210mm !important; height: 277mm !important; min-height: 277mm !important; max-height: 277mm !important; margin: 0 !important; padding: 20px 40px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; page-break-after: avoid !important; break-after: avoid-page !important; page-break-inside: avoid !important; break-inside: avoid !important; background: #fff !important; }
+            .wallet-print-host { display: block !important; width: 560px !important; max-width: calc(100vw - 32px) !important; min-height: 0 !important; margin: 0 auto !important; padding: 0 !important; background: #fff !important; border-radius: 20px !important; box-shadow: 0 16px 45px rgba(0,0,0,.35) !important; overflow: hidden !important; }
+            .wallet-invoice-paper { display: block !important; width: 100% !important; height: auto !important; min-height: 0 !important; max-height: none !important; margin: 0 !important; padding: 12px 20px 20px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: visible !important; page-break-inside: avoid !important; break-inside: avoid !important; background: #fff !important; }
             .wallet-print-toolbar { display: flex; align-items: center; justify-content: flex-start; gap: 10px; padding: 14px 24px; background: rgba(255,255,255,.96); border-bottom: 1px solid #e5e7eb; direction: ltr; }
             .wallet-print-toolbar button { border: 0; border-radius: 9px; padding: 9px 18px; background: #111827; color: #fff; font: 900 11px Cairo, Arial, sans-serif; cursor: pointer; }
             .wallet-print-toolbar button.close { background: transparent; color: #9ca3af; font-size: 20px; padding: 0 6px; }
@@ -409,12 +409,12 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-invoice-paper table img { display: block !important; width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; min-width: 40px !important; min-height: 40px !important; object-fit: cover !important; }
             .wallet-invoice-paper table, .wallet-invoice-paper tbody, .wallet-invoice-paper tr { page-break-inside: avoid !important; break-inside: avoid !important; }
             @media print {
-                html, body { width: 210mm !important; height: 297mm !important; overflow: hidden !important; }
+                html, body { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; background: #fff !important; }
                 .wallet-print-toolbar { display: none !important; }
-                .wallet-print-host { width: 210mm !important; height: 297mm !important; overflow: hidden !important; }
-                .wallet-invoice-paper { width: 210mm !important; height: 277mm !important; max-height: 277mm !important; overflow: hidden !important; }
+                .wallet-print-host { width: 210mm !important; max-width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; }
+                .wallet-invoice-paper { width: 210mm !important; height: 277mm !important; min-height: 277mm !important; max-height: 277mm !important; margin: 0 !important; padding: 20px 40px !important; overflow: hidden !important; }
             }
-        </style></head><body><div class="wallet-print-toolbar"><button onclick="window.print()">طباعة الفاتورة</button><button class="close" onclick="window.close()" aria-label="إغلاق">×</button></div><main class="wallet-print-host">${invoice.outerHTML}</main></body></html>`);
+        </style></head><body><main class="wallet-print-host"><div class="wallet-print-toolbar"><button onclick="window.print()">طباعة الفاتورة</button><button class="close" onclick="window.close()" aria-label="إغلاق">×</button></div>${invoice.outerHTML}</main></body></html>`);
         printWindow.document.close();
         printWindow.focus();
     };
