@@ -420,17 +420,19 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-invoice-paper > section:nth-of-type(2) h2 { margin: 0 0 8px !important; font-size: 15px !important; font-weight: 900 !important; }
             .wallet-invoice-paper table { width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; font-size: 9px !important; direction: rtl !important; }
             .wallet-invoice-paper table th { padding: 8px !important; background: #111317 !important; color: #fff !important; text-align: center !important; font-weight: 900 !important; border: 1px solid #64748b !important; }
-            .wallet-invoice-paper table th:first-child, .wallet-invoice-paper table td:first-child { width: 28% !important; }
+            .wallet-invoice-paper table th:first-child, .wallet-invoice-paper table td:first-child { width: 32% !important; }
             .wallet-invoice-paper table th:nth-child(2), .wallet-invoice-paper table td:nth-child(2) { width: 16% !important; }
             .wallet-invoice-paper table th:nth-child(3), .wallet-invoice-paper table td:nth-child(3) { width: 20% !important; }
-            .wallet-invoice-paper table th:nth-child(4), .wallet-invoice-paper table td:nth-child(4) { width: 16% !important; }
+            .wallet-invoice-paper table th:nth-child(4), .wallet-invoice-paper table td:nth-child(4) { width: 12% !important; }
             .wallet-invoice-paper table th:nth-child(5), .wallet-invoice-paper table td:nth-child(5) { width: 20% !important; }
+            .wallet-invoice-paper table th:nth-child(4) { font-size: 8px !important; }
+            .wallet-invoice-paper table td:nth-child(4) { padding-right: 3px !important; padding-left: 3px !important; font-size: 13px !important; font-weight: 900 !important; }
             .wallet-invoice-paper table th:first-child { text-align: right !important; }
             .wallet-invoice-paper table td { padding: 8px !important; color: #111827 !important; vertical-align: middle !important; text-align: center !important; font-weight: 800 !important; border: 1px solid #94a3b8 !important; }
             .wallet-invoice-paper table td:first-child { text-align: right !important; }
-            .wallet-invoice-product-content { display: flex !important; flex-direction: row !important; direction: rtl !important; align-items: center !important; gap: 6px !important; min-width: 0 !important; }
-            .wallet-invoice-product-image { display: block !important; order: 1 !important; width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; max-width: 32px !important; max-height: 32px !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; object-fit: cover !important; overflow: hidden !important; }
-            .wallet-invoice-product-name { display: block !important; order: 2 !important; flex: 1 1 auto !important; min-width: 0 !important; color: #111827 !important; font-size: 8px !important; font-weight: 900 !important; line-height: 1.35 !important; overflow-wrap: anywhere !important; }
+            .wallet-invoice-product-content { display: flex !important; flex-direction: row !important; direction: rtl !important; align-items: center !important; gap: 5px !important; min-width: 0 !important; }
+            .wallet-invoice-product-image { display: block !important; order: 1 !important; width: 30px !important; height: 30px !important; min-width: 30px !important; min-height: 30px !important; max-width: 30px !important; max-height: 30px !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; object-fit: cover !important; overflow: hidden !important; }
+            .wallet-invoice-product-name { display: block !important; order: 2 !important; flex: 1 1 auto !important; min-width: 0 !important; color: #111827 !important; font-size: 8px !important; font-weight: 900 !important; line-height: 1.2 !important; text-align: center !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
             .wallet-invoice-totals-wrap { display: flex !important; justify-content: flex-end !important; margin-top: 14px !important; }
             .wallet-invoice-totals { width: 250px !important; padding: 9px 10px !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; background: #f8fafc !important; font-size: 9px !important; font-weight: 700 !important; }
             .wallet-invoice-total-row { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important; min-height: 18px !important; margin: 0 !important; color: #1f2937 !important; white-space: nowrap !important; }
@@ -488,10 +490,10 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
                 <h2 className="mb-3 text-[15px] font-black">تفاصيل الفاتورة</h2>
                 <table className="w-full table-fixed border-collapse border border-slate-400 text-[9px]">
                     <thead className="bg-[#111317] text-white"><tr>
-                        <th className="wallet-invoice-product-column w-[28%] border-l border-slate-500 px-2 py-2 text-right font-black">اسم المنتج</th>
+                        <th className="wallet-invoice-product-column w-[32%] border-l border-slate-500 px-2 py-2 text-right font-black">اسم المنتج</th>
                         <th className="w-[16%] border-l border-slate-500 px-2 py-2 text-center font-black">المقاس</th>
                         <th className="w-[20%] border-l border-slate-500 px-2 py-2 text-center font-black">السعر</th>
-                        <th className="w-[16%] border-l border-slate-500 px-2 py-2 text-center font-black">الكمية</th>
+                        <th className="w-[12%] border-l border-slate-500 px-2 py-2 text-center font-black">الكمية</th>
                         <th className="w-[20%] px-2 py-2 text-center font-black">الإجمالي</th>
                     </tr></thead>
                     <tbody>{items.length ? items.map((item, index) => {
