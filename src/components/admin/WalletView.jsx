@@ -391,67 +391,21 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
         }
         const invoice = source.cloneNode(true);
         invoice.querySelector('.wallet-invoice-actions')?.remove();
-        invoice.querySelector('style')?.remove();
-        invoice.setAttribute('class', 'wallet-invoice-paper');
+        invoice.removeAttribute('id');
         const copiedStyles = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
             .map(node => `<link rel="stylesheet" href="${new URL(node.getAttribute('href'), window.location.href).href}">`)
             .join('');
         printWindow.document.write(`<!doctype html><html dir="rtl"><head><meta charset="UTF-8"><base href="${window.location.origin}/"><title>فاتورة متجر ميلانو</title>${copiedStyles}<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"><style>
             @page { size: A4 portrait; margin: 0; }
-            html, body { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; background: #fff !important; }
+            html, body { margin: 0 !important; padding: 0 !important; min-height: 100%; background: #fff !important; }
             * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .wallet-print-host { display: block !important; width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; overflow: hidden !important; }
-            .wallet-invoice-paper { display: block !important; width: 210mm !important; height: 277mm !important; min-height: 277mm !important; max-height: 277mm !important; margin: 0 !important; padding: 20px 40px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; page-break-inside: avoid !important; break-inside: avoid !important; background: #fff !important; }
-            .wallet-invoice-paper > header img { display: block !important; width: 72px !important; height: 72px !important; max-width: 72px !important; max-height: 72px !important; min-width: 72px !important; min-height: 72px !important; border-radius: 14px !important; clip-path: inset(0 round 14px) !important; object-fit: contain !important; flex: 0 0 72px !important; }
-            .wallet-invoice-paper table img { display: block !important; width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; min-width: 40px !important; min-height: 40px !important; object-fit: cover !important; }
-            .wallet-invoice-paper { direction: rtl !important; color: #111827 !important; font-family: Cairo, Arial, sans-serif !important; line-height: 1.45 !important; }
-            .wallet-invoice-paper > header { display: flex !important; align-items: flex-start !important; justify-content: space-between !important; gap: 16px !important; margin: 0 !important; padding: 0 0 14px !important; border-bottom: 1px solid #1f2937 !important; }
-            .wallet-invoice-paper > header > div { text-align: right !important; }
-            .wallet-invoice-paper > header h1 { margin: 0 !important; font-size: 27px !important; line-height: 1 !important; font-weight: 900 !important; color: #111827 !important; }
-            .wallet-invoice-paper > header p { margin: 5px 0 0 !important; font-size: 13px !important; font-weight: 900 !important; color: #64748b !important; }
-            .wallet-invoice-paper > header > div > div { margin-top: 10px !important; font-size: 9px !important; font-weight: 700 !important; color: #1f2937 !important; }
-            .wallet-invoice-customer { margin-top: 16px !important; padding: 11px 15px 12px !important; border: 1px solid #94a3b8 !important; border-radius: 8px !important; background: #f8fafc !important; }
-            .wallet-invoice-customer-title { margin: 0 !important; padding: 0 0 9px !important; border-bottom: 1px solid #94a3b8 !important; color: #111827 !important; font-size: 13px !important; font-weight: 900 !important; line-height: 1.25 !important; }
-            .wallet-invoice-customer-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; column-gap: 28px !important; row-gap: 7px !important; margin: 10px 0 0 !important; font-size: 9px !important; font-weight: 700 !important; }
-            .wallet-invoice-customer-row { display: flex !important; align-items: baseline !important; justify-content: flex-start !important; gap: 3px !important; min-width: 0 !important; margin: 0 !important; white-space: nowrap !important; color: #475569 !important; line-height: 1.2 !important; }
-            .wallet-invoice-customer-row b { min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; color: #111827 !important; font-size: 10px !important; font-weight: 900 !important; }
-            .wallet-invoice-paper > section:nth-of-type(2) { margin-top: 14px !important; }
-            .wallet-invoice-paper > section:nth-of-type(2) h2 { margin: 0 0 8px !important; font-size: 15px !important; font-weight: 900 !important; }
-            .wallet-invoice-paper table { width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; font-size: 9px !important; direction: rtl !important; }
-            .wallet-invoice-paper table th { padding: 8px !important; background: #111317 !important; color: #fff !important; text-align: center !important; font-weight: 900 !important; border: 1px solid #64748b !important; }
-            .wallet-invoice-paper table th:first-child, .wallet-invoice-paper table td:first-child { width: 32% !important; }
-            .wallet-invoice-paper table th:nth-child(2), .wallet-invoice-paper table td:nth-child(2) { width: 16% !important; }
-            .wallet-invoice-paper table th:nth-child(3), .wallet-invoice-paper table td:nth-child(3) { width: 20% !important; }
-            .wallet-invoice-paper table th:nth-child(4), .wallet-invoice-paper table td:nth-child(4) { width: 12% !important; }
-            .wallet-invoice-paper table th:nth-child(5), .wallet-invoice-paper table td:nth-child(5) { width: 20% !important; }
-            .wallet-invoice-paper table th:nth-child(4) { font-size: 8px !important; }
-            .wallet-invoice-paper table td:nth-child(4) { padding-right: 3px !important; padding-left: 3px !important; font-family: Arial, sans-serif !important; font-size: 16px !important; line-height: 1 !important; font-weight: 900 !important; }
-            .wallet-invoice-paper table th:first-child { text-align: right !important; }
-            .wallet-invoice-paper table td { padding: 8px !important; color: #111827 !important; vertical-align: middle !important; text-align: center !important; font-weight: 800 !important; border: 1px solid #94a3b8 !important; }
-            .wallet-invoice-paper table td:first-child { text-align: right !important; }
-            .wallet-invoice-product-content { display: flex !important; flex-direction: row !important; direction: rtl !important; align-items: center !important; gap: 5px !important; min-width: 0 !important; }
-            .wallet-invoice-product-image { display: block !important; order: 1 !important; width: 30px !important; height: 30px !important; min-width: 30px !important; min-height: 30px !important; max-width: 30px !important; max-height: 30px !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; object-fit: cover !important; overflow: hidden !important; }
-            .wallet-invoice-product-name { display: block !important; order: 2 !important; flex: 1 1 auto !important; min-width: 0 !important; color: #111827 !important; font-size: 8px !important; font-weight: 900 !important; line-height: 1.2 !important; text-align: center !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-            .wallet-invoice-totals-wrap { display: flex !important; justify-content: flex-end !important; margin-top: 15px !important; }
-            .wallet-invoice-totals { width: 270px !important; padding: 9px 11px 10px !important; border: 1px solid #e2e8f0 !important; border-radius: 7px !important; background: #f8fafc !important; font-size: 10px !important; font-weight: 700 !important; }
-            .wallet-invoice-total-row { display: flex !important; direction: ltr !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; min-height: 19px !important; margin: 0 !important; color: #1f2937 !important; white-space: nowrap !important; line-height: 1.25 !important; }
-            .wallet-invoice-total-row + .wallet-invoice-total-row { margin-top: 2px !important; }
-            .wallet-invoice-total-label { order: 2 !important; direction: rtl !important; margin-left: auto !important; color: #334155 !important; font-weight: 900 !important; text-align: right !important; }
-            .wallet-invoice-total-amount { display: flex !important; order: 1 !important; direction: ltr !important; align-items: center !important; justify-content: space-between !important; width: 132px !important; margin-right: auto !important; color: #111827 !important; font-size: 10px !important; font-weight: 900 !important; }
-            .wallet-invoice-currency { order: 1 !important; color: #475569 !important; font-weight: 700 !important; text-align: left !important; }
-            .wallet-invoice-total-number { order: 2 !important; color: #111827 !important; font-family: Arial, sans-serif !important; font-weight: 900 !important; text-align: right !important; }
-            .wallet-invoice-discount, .wallet-invoice-discount * { color: #dc2626 !important; }
-            .wallet-invoice-grand-total { min-height: 28px !important; margin-top: 5px !important; padding-top: 6px !important; border-top: 1px dashed #cbd5e1 !important; font-size: 13px !important; font-weight: 900 !important; }
-            .wallet-invoice-grand-total .wallet-invoice-total-label { color: #111827 !important; }
-            .wallet-invoice-grand-total .wallet-invoice-total-amount { width: 142px !important; font-size: 13px !important; }
-            .wallet-invoice-grand-total .wallet-invoice-total-number, .wallet-invoice-grand-total .wallet-invoice-currency { color: #111827 !important; }
-            .wallet-invoice-paper > footer { margin-top: 16px !important; padding-top: 12px !important; border-top: 1px solid #94a3b8 !important; text-align: center !important; }
-            .wallet-invoice-paper > footer p { margin: 0 !important; }
-            .wallet-invoice-paper table, .wallet-invoice-paper tbody, .wallet-invoice-paper tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+            .wallet-invoice-paper { display: block !important; width: 560px !important; max-width: calc(100vw - 24px) !important; min-height: 0 !important; height: auto !important; margin: 12px auto !important; overflow: visible !important; }
             @media print {
-                .wallet-invoice-paper table td:nth-child(4) { font-size: 13px !important; line-height: 1.2 !important; }
+                html, body { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; overflow: hidden !important; }
+                .wallet-invoice-paper { width: 100% !important; max-width: none !important; min-height: 0 !important; height: auto !important; margin: 0 !important; border-radius: 20px !important; box-shadow: none !important; overflow: visible !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+                .wallet-invoice-paper table, .wallet-invoice-paper tr { page-break-inside: avoid !important; break-inside: avoid !important; }
             }
-        </style></head><body><main class="wallet-print-host">${invoice.outerHTML}</main></body></html>`);
+        </style></head><body>${invoice.outerHTML}</body></html>`);
         printWindow.document.close();
         printWindow.onload = async () => {
             try { await printWindow.document.fonts?.ready; } catch (_) { /* Font loading must not block printing. */ }
