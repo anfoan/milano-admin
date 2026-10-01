@@ -184,8 +184,8 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                             <img src="/admin-new-icon.png" className="w-full h-full object-cover rounded-[12px] mix-blend-multiply dark:mix-blend-lighten" alt="Admin" />
                         </div>
                         <div className="flex flex-col justify-center">
-                            <span className="text-[20px] font-black text-gray-800 dark:text-white leading-tight translate-y-0.5">{txt.milano}</span>
-                            <span className="text-[10px] font-bold text-gray-400 capitalize tracking-wide translate-y-[-2px]">{txt.panel}</span>
+                            <span className="text-[20px] font-black text-slate-950 dark:text-white leading-tight translate-y-0.5">{txt.milano}</span>
+                            <span className="text-[10px] font-bold text-slate-700 dark:text-white capitalize tracking-wide translate-y-[-2px]">{txt.panel}</span>
                         </div>
                     </div>
                     {/* Close button for mobile */}
@@ -194,17 +194,17 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                     </button>
                 </div>
 
-                <nav className={`${restrictedTabs ? 'flex-1' : 'flex-none'} px-4 space-y-1`}>
+                <nav className={`relative ${restrictedTabs ? 'flex-1' : 'flex-none'} ml-4 border-l border-slate-200 px-4 pl-5 space-y-1 dark:border-white/15`}>
                     {menuItems.map((item) => (
                         <div key={item.id} className="space-y-1">
                             {item.id === 'wallet' ? <button
                                 onClick={() => setActiveTab(item.id)}
                                 className={`relative flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 font-bold transition-all duration-300 group ${isSectionActive(item)
                                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
+                                    : 'text-slate-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}
                             >
-                                <span className={`${isSectionActive(item) ? 'text-white' : 'text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400'}`}>{item.icon}</span>
+                                <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>{item.icon}</span>
                                 <span className="flex-1 text-right text-base font-black">{item.name}</span>
                                 <span dir="ltr" className="inline-flex h-6 min-w-[54px] items-center justify-between gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-1.5 font-sans tabular-nums text-[10px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{Number(walletDisplayBalance || 0).toLocaleString('en-US')}</span></span>
                             </button> : <button
@@ -218,10 +218,10 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                 }}
                                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 font-bold group ${isSectionActive(item)
                                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
+                                    : 'text-slate-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}
                             >
-                                <span className={`${isSectionActive(item) ? 'text-white' : 'text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400'}`}>
+                                <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>
                                     {item.icon}
                                 </span>
                                 <span className="text-base font-black flex-1 flex items-center gap-3">
@@ -251,7 +251,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                             onClick={() => setActiveTab(sub.id)}
                                             className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm font-extrabold ${activeTab === sub.id
                                                 ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500'
-                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
+                                                : 'text-slate-800 dark:text-white hover:text-slate-950 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
                                                 }`}
                                         >
                                             <div className={`w-1.5 h-1.5 rounded-full ${activeTab === sub.id ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
