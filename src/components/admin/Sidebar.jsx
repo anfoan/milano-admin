@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import {
     LayoutDashboard, Package, ShoppingCart, Percent,
@@ -74,13 +74,13 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
 
     const txt = t[lang];
     const isRTL = lang === 'ar';
-    // This wallet balance is deliberately separate from Jib Wallet payment activity.
-    const [walletDisplayBalance, setWalletDisplayBalance] = useState(0);
+    // The sidebar badge mirrors only the saved default customer-wallet reward.
+    // It is intentionally independent of Jib Wallet payments and customer balances.
+    const [walletRewardAmount, setWalletRewardAmount] = useState(0);
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, 'customer_wallets'), snapshot => {
-            const total = snapshot.docs.reduce((sum, item) => sum + Number(item.data().balance || 0), 0);
-            setWalletDisplayBalance(total);
-        }, error => console.error('Sidebar wallet listener:', error));
+        const unsubscribe = onSnapshot(doc(db, 'settings', 'wallet'), snapshot => {
+            setWalletRewardAmount(Math.max(0, Number(snapshot.data()?.defaultReward || 0)));
+        }, error => console.error('Sidebar wallet reward listener:', error));
         return () => unsubscribe();
     }, []);
 
@@ -206,7 +206,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                             >
                                 <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>{item.icon}</span>
                                 <span className="flex-1 whitespace-nowrap text-right text-base font-black">{item.name}</span>
-                                <span dir="ltr" className="inline-flex h-6 min-w-[54px] items-center justify-between gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-1.5 font-sans tabular-nums text-[10px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{Number(walletDisplayBalance || 0).toLocaleString('en-US')}</span></span>
+                                <span dir="ltr" className="inline-flex h-6 min-w-[54px] items-center justify-between gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-1.5 font-sans tabular-nums text-[10px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{Number(walletRewardAmount || 0).toLocaleString('en-US')}</span></span>
                             </button> : <button
                                 onClick={() => {
                                     if (item.subItems) {
