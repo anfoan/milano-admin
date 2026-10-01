@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { collection, deleteDoc, doc, onSnapshot, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, Package, Pencil, Printer, Save, Search, Trash2, Truck, Wallet, WalletCards, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
-import { grantWalletRewardForCompletedOrder, isCompletedOrderStatus } from '../../lib/walletRewards';
+import { grantWalletRewardForCompletedOrder, isCompletedOrderStatus, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 
 const toMillis = value => value?.toMillis?.() || (value?.seconds ? value.seconds * 1000 : new Date(value || 0).getTime() || 0);
 const currency = value => Number(value || 0).toLocaleString('en-US');
@@ -75,8 +75,8 @@ const WalletView = () => {
     const saveStatus = async (order, status) => {
         try {
             await updateDoc(doc(db, 'orders', order.id), { status, updatedAt: serverTimestamp() });
-            if (isCompletedOrderStatus(status)) await issueReward({ ...order, status });
-            setNotice('تم تحديث حالة الفاتورة.');
+            const walletResult = await syncWalletRewardForOrderStatus(order.id, status);
+            setNotice(walletResult.reversed ? `تم تحديث الحالة واسترجاع $ ${currency(walletResult.amount)} من مكافأة العميل.` : 'تم تحديث حالة الفاتورة.');
         } catch (error) { console.error(error); setNotice('تعذّر تعديل حالة الفاتورة.'); }
     };
     const saveInvoice = async (draft) => {
@@ -89,8 +89,9 @@ const WalletView = () => {
                 adminNote: draft.adminNote || '',
                 updatedAt: serverTimestamp()
             });
-            if (isCompletedOrderStatus(draft.status)) await issueReward(draft);
+            const walletResult = await syncWalletRewardForOrderStatus(draft.id, draft.status);
             setEditingOrder(null);
+            if (walletResult.reversed) setNotice(`تم حفظ التعديلات واسترجاع $ ${currency(walletResult.amount)} من مكافأة العميل.`);
             setNotice('تم حفظ تعديلات الفاتورة.');
         } catch (error) { console.error(error); setNotice('تعذّر حفظ تعديلات الفاتورة.'); }
     };

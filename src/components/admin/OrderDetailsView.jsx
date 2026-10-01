@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { doc, updateDoc, collection, onSnapshot, query, limit } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { grantWalletRewardForCompletedOrder, isCompletedOrderStatus } from '../../lib/walletRewards';
+import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import ImageWithFallback from '../ImageWithFallback';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import { useCurrency } from '../../context/CurrencyContext';
@@ -308,9 +308,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
             }
 
             await updateDoc(doc(db, "orders", order.id), updates);
-            if (isCompletedOrderStatus(newStatus)) {
-                await grantWalletRewardForCompletedOrder(order.id);
-            }
+            await syncWalletRewardForOrderStatus(order.id, newStatus);
             setStatus(newStatus);
         } catch (error) {
             console.error("Error updating status:", error);
