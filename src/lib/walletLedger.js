@@ -31,9 +31,7 @@ export const adjustCustomerWalletBalance = async ({
 
     return runTransaction(db, async transaction => {
         const walletSnapshot = await transaction.get(walletRef);
-        if (!walletSnapshot.exists()) throw new Error('WALLET_NOT_FOUND');
-
-        const wallet = walletSnapshot.data();
+        const wallet = walletSnapshot.exists() ? walletSnapshot.data() : {};
         const previousBalance = numeric(wallet.balance);
         const nextBalance = movement.direction === 'debit'
             ? previousBalance - movementAmount
@@ -96,12 +94,17 @@ export const setCustomerWalletBalance = async ({
         const resolvedName = String(customerName || wallet.customerName || '').trim();
         const resolvedPhone = String(phone || wallet.phone || '').trim();
 
-        transaction.update(walletRef, {
+        const walletData = {
+            walletId,
             balance: targetBalance,
             customerName: resolvedName || wallet.customerName || '',
             phone: resolvedPhone || wallet.phone || '',
+            deviceBound: wallet.deviceBound ?? true,
             updatedAt: serverTimestamp(),
-        });
+            ...(walletSnapshot.exists() ? {} : { createdAt: serverTimestamp() }),
+        };
+        if (walletSnapshot.exists()) transaction.update(walletRef, walletData);
+        else transaction.set(walletRef, walletData);
 
         if (difference !== 0) {
             const entry = {
