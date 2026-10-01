@@ -370,9 +370,12 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
     const address = order.formData?.address || order.formData?.city || order.formData?.region || '---';
     const phone = order.formData?.fullPhone || order.formData?.phone || order.phone || '---';
     const payment = paymentText(order.paymentMethod || order.formData?.paymentMethod);
-    const subtotal = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0);
+    const itemSubtotal = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0);
+    const subtotal = Number(order.subTotal ?? order.subtotal ?? itemSubtotal);
     const delivery = Number(order.deliveryCost || 0);
-    const discount = Number(order.discount || order.discountAmount || 0);
+    const productDiscount = Number(order.discount || order.discountAmount || 0);
+    const couponDiscount = Math.round(subtotal * (Number(order.discountPercentage || 0) / 100));
+    const discount = productDiscount + couponDiscount;
     const total = Number(order.total || subtotal + delivery - discount);
     return <div className="wallet-print-overlay fixed inset-0 z-[250] isolate overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-sm">
         <style>{`@media print { body { margin: 0 !important; background: #fff !important; } .wallet-print-overlay { position: static !important; overflow: visible !important; padding: 0 !important; background: #fff !important; } .wallet-invoice-paper { width: 210mm !important; max-width: 210mm !important; max-height: none !important; min-height: 148mm !important; margin: 0 auto !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; } .wallet-invoice-actions { display: none !important; } }`}</style>
@@ -427,7 +430,7 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             </section>
             <div dir="ltr" className="mt-5 flex justify-end"><section dir="rtl" className="w-[270px] rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-[10px] font-bold">
                 <p className="flex items-center justify-between gap-3"><span>المجموع الفرعي:</span><b dir="ltr" className="inline-flex items-center gap-1"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(subtotal)}</span></b></p>
-                {discount > 0 && <p className="mt-1.5 flex items-center justify-between gap-3 text-rose-600"><span>الخصم:</span><b dir="ltr" className="inline-flex items-center gap-1"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(discount)}</span></b></p>}
+                <p className="mt-1.5 flex items-center justify-between gap-3 text-rose-600"><span>الخصم:</span><b dir="ltr" className="inline-flex items-center gap-1"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(discount)}</span></b></p>
                 <p className="mt-1.5 flex items-center justify-between gap-3"><span>رسوم التوصيل:</span><b dir="ltr" className="inline-flex items-center gap-1"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(delivery)}</span></b></p>
                 <p className="mt-1.5 flex items-center justify-between gap-3 border-t border-dashed border-slate-300 pt-1.5 text-[14px] font-black"><span>الإجمالي:</span><b dir="ltr" className="inline-flex items-center gap-1"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(total)}</span></b></p>
             </section></div>
