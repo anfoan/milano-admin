@@ -405,7 +405,7 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-print-toolbar { display: flex; align-items: center; justify-content: flex-start; gap: 10px; padding: 14px 24px; background: rgba(255,255,255,.96); border-bottom: 1px solid #e5e7eb; direction: ltr; }
             .wallet-print-toolbar button { border: 0; border-radius: 9px; padding: 9px 18px; background: #111827; color: #fff; font: 900 11px Cairo, Arial, sans-serif; cursor: pointer; }
             .wallet-print-toolbar button.close { background: transparent; color: #9ca3af; font-size: 20px; padding: 0 6px; }
-            .wallet-invoice-paper > header img { display: block !important; width: 72px !important; height: 72px !important; max-width: 72px !important; max-height: 72px !important; min-width: 72px !important; min-height: 72px !important; object-fit: contain !important; flex: 0 0 72px !important; }
+            .wallet-invoice-paper > header img { display: block !important; width: 72px !important; height: 72px !important; max-width: 72px !important; max-height: 72px !important; min-width: 72px !important; min-height: 72px !important; border-radius: 14px !important; clip-path: inset(0 round 14px) !important; object-fit: contain !important; flex: 0 0 72px !important; }
             .wallet-invoice-paper table img { display: block !important; width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; min-width: 40px !important; min-height: 40px !important; object-fit: cover !important; }
             .wallet-invoice-paper { direction: rtl !important; color: #111827 !important; font-family: Cairo, Arial, sans-serif !important; line-height: 1.45 !important; }
             .wallet-invoice-paper > header { display: flex !important; align-items: flex-start !important; justify-content: space-between !important; gap: 16px !important; margin: 0 !important; padding: 0 0 14px !important; border-bottom: 1px solid #1f2937 !important; }
@@ -426,7 +426,7 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-invoice-paper table th:nth-child(4), .wallet-invoice-paper table td:nth-child(4) { width: 12% !important; }
             .wallet-invoice-paper table th:nth-child(5), .wallet-invoice-paper table td:nth-child(5) { width: 20% !important; }
             .wallet-invoice-paper table th:nth-child(4) { font-size: 8px !important; }
-            .wallet-invoice-paper table td:nth-child(4) { padding-right: 3px !important; padding-left: 3px !important; font-size: 13px !important; font-weight: 900 !important; }
+            .wallet-invoice-paper table td:nth-child(4) { padding-right: 3px !important; padding-left: 3px !important; font-family: Arial, sans-serif !important; font-size: 16px !important; line-height: 1 !important; font-weight: 900 !important; }
             .wallet-invoice-paper table th:first-child { text-align: right !important; }
             .wallet-invoice-paper table td { padding: 8px !important; color: #111827 !important; vertical-align: middle !important; text-align: center !important; font-weight: 800 !important; border: 1px solid #94a3b8 !important; }
             .wallet-invoice-paper table td:first-child { text-align: right !important; }
