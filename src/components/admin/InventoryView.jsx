@@ -827,16 +827,16 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     {/* Total Products */}
-                    <div className="bg-blue-50 border border-blue-100 rounded-[20px] p-4 flex flex-col gap-1">
-                        <span className="text-xs font-black text-blue-500 uppercase tracking-wide">{txt.grand_total_products}</span>
-                        <span className="text-2xl font-black text-blue-700">{products.length}</span>
-                        <span className="text-[10px] font-bold text-blue-400">{lang === 'ar' ? 'منتج مسجّل' : 'Registered Products'}</span>
+                    <div className="bg-cyan-50/70 border border-cyan-200 rounded-[20px] p-4 flex flex-col gap-1 dark:bg-cyan-400/10 dark:border-cyan-400/25">
+                        <span className="text-xs font-black text-cyan-600 dark:text-cyan-300 uppercase tracking-wide">{txt.grand_total_products}</span>
+                        <span className="text-2xl font-black text-cyan-700 dark:text-cyan-200">{products.length}</span>
+                        <span className="text-[10px] font-bold text-cyan-500 dark:text-cyan-300/80">{lang === 'ar' ? 'منتج مسجّل' : 'Registered Products'}</span>
                     </div>
                     {/* Total Qty */}
-                    <div className="bg-indigo-50 border border-indigo-100 rounded-[20px] p-4 flex flex-col gap-1">
-                        <span className="text-xs font-black text-indigo-500 uppercase tracking-wide">{txt.grand_total_qty}</span>
-                        <span className="text-2xl font-black text-indigo-700">{allTotalQty.toLocaleString()}</span>
-                        <span className="text-[10px] font-bold text-indigo-400">{txt.piece}</span>
+                    <div className="bg-violet-50/70 border border-violet-200 rounded-[20px] p-4 flex flex-col gap-1 dark:bg-violet-400/10 dark:border-violet-400/25">
+                        <span className="text-xs font-black text-violet-600 dark:text-violet-300 uppercase tracking-wide">{txt.grand_total_qty}</span>
+                        <span className="text-2xl font-black text-violet-700 dark:text-violet-200">{allTotalQty.toLocaleString()}</span>
+                        <span className="text-[10px] font-bold text-violet-500 dark:text-violet-300/80">{txt.piece}</span>
                     </div>
                     {/* Total Cost */}
                     <div className="bg-orange-50 border border-orange-100 rounded-[20px] p-4 flex flex-col gap-1">
@@ -845,18 +845,18 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                         <span className="text-[10px] font-bold text-orange-400">{currency}</span>
                     </div>
                     {/* Total Sell */}
-                    <div className="bg-green-50 border border-green-100 rounded-[20px] p-4 flex flex-col gap-1">
-                        <span className="text-xs font-black text-green-600 uppercase tracking-wide">{txt.grand_total_sell}</span>
-                        <span className="text-xl font-black text-green-700">{allTotalSell.toLocaleString()}</span>
-                        <span className="text-[10px] font-bold text-green-400">{currency}</span>
+                    <div className="bg-green-50/70 border border-green-200 rounded-[20px] p-4 flex flex-col gap-1 dark:bg-green-400/10 dark:border-green-400/25">
+                        <span className="text-xs font-black text-green-600 dark:text-green-300 uppercase tracking-wide">{txt.grand_total_sell}</span>
+                        <span className="text-xl font-black text-green-700 dark:text-green-200">{allTotalSell.toLocaleString()}</span>
+                        <span className="text-[10px] font-bold text-green-500 dark:text-green-300/80">{currency}</span>
                     </div>
                     {/* Net Profit */}
-                    <div className={`border rounded-[20px] p-4 flex flex-col gap-1 ${allTotalProfit >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}`}>
-                        <span className={`text-xs font-black uppercase tracking-wide ${allTotalProfit >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{txt.grand_total_profit}</span>
-                        <span className={`text-xl font-black ${allTotalProfit >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+                    <div className={`border rounded-[20px] p-4 flex flex-col gap-1 ${allTotalProfit >= 0 ? 'bg-blue-50/70 border-blue-200 dark:bg-blue-400/10 dark:border-blue-400/25' : 'bg-red-50/70 border-red-200 dark:bg-red-400/10 dark:border-red-400/25'}`}>
+                        <span className={`text-xs font-black uppercase tracking-wide ${allTotalProfit >= 0 ? 'text-blue-600 dark:text-blue-300' : 'text-red-500 dark:text-red-300'}`}>{txt.grand_total_profit}</span>
+                        <span className={`text-xl font-black ${allTotalProfit >= 0 ? 'text-blue-700 dark:text-blue-200' : 'text-red-600 dark:text-red-300'}`}>
                             {allTotalProfit >= 0 ? '+' : ''}{allTotalProfit.toLocaleString()}
                         </span>
-                        <span className={`text-[10px] font-bold ${allTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{currency}</span>
+                        <span className={`text-[10px] font-bold ${allTotalProfit >= 0 ? 'text-blue-500 dark:text-blue-300/80' : 'text-red-400 dark:text-red-300/80'}`}>{currency}</span>
                     </div>
                 </div>
             </div>
