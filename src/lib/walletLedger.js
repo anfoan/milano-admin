@@ -69,6 +69,62 @@ export const adjustCustomerWalletBalance = async ({
 };
 
 /**
+ * Sets a customer wallet to an exact balance while retaining an auditable
+ * credit or debit ledger entry for the difference.
+ */
+export const setCustomerWalletBalance = async ({
+    walletId,
+    balance,
+    note = '',
+    customerName = '',
+    phone = '',
+}) => {
+    const targetBalance = numeric(balance);
+    if (!walletId) throw new Error('INVALID_WALLET_MOVEMENT');
+
+    const walletRef = doc(db, 'customer_wallets', walletId);
+    const transactionRef = doc(collection(db, 'wallet_transactions'));
+    const customerTransactionRef = doc(walletRef, 'transactions', transactionRef.id);
+
+    return runTransaction(db, async transaction => {
+        const walletSnapshot = await transaction.get(walletRef);
+        if (!walletSnapshot.exists()) throw new Error('WALLET_NOT_FOUND');
+
+        const wallet = walletSnapshot.data();
+        const previousBalance = numeric(wallet.balance);
+        const difference = targetBalance - previousBalance;
+        const resolvedName = String(customerName || wallet.customerName || '').trim();
+        const resolvedPhone = String(phone || wallet.phone || '').trim();
+
+        transaction.update(walletRef, {
+            balance: targetBalance,
+            customerName: resolvedName || wallet.customerName || '',
+            phone: resolvedPhone || wallet.phone || '',
+            updatedAt: serverTimestamp(),
+        });
+
+        if (difference !== 0) {
+            const entry = {
+                transactionId: transactionRef.id,
+                walletId,
+                type: difference > 0 ? 'credit' : 'debit',
+                amount: Math.abs(difference),
+                previousBalance,
+                balanceAfter: targetBalance,
+                customerName: resolvedName,
+                phone: resolvedPhone,
+                note: String(note || 'تعديل مباشر للرصيد من الفاتورة').trim(),
+                source: 'admin-wallet-direct-adjustment',
+                createdAt: serverTimestamp(),
+            };
+            transaction.set(transactionRef, entry);
+            transaction.set(customerTransactionRef, entry);
+        }
+        return { previousBalance, balance: targetBalance, changed: difference !== 0, difference };
+    });
+};
+
+/**
  * Adds the immutable history entry for a checkout debit exactly once.
  * The checkout already applied the balance debit atomically; this records it
  * for administrators and the owning customer without altering the balance again.
