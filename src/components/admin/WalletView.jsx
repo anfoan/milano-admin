@@ -382,6 +382,8 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
     };
     return <div className="wallet-print-overlay fixed inset-0 z-[250] isolate overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-sm">
         <style>{`@page { size: A4 portrait; margin: 0; }
+            .wallet-invoice-currency, .wallet-invoice-inline-currency { font-size: 11px !important; font-family: Cairo, Arial, sans-serif !important; font-weight: 700 !important; }
+            .wallet-invoice-total-number, .wallet-invoice-line-number { font-family: Arial, sans-serif !important; font-variant-numeric: normal !important; font-feature-settings: normal !important; }
             @media print {
                 html, body { width: 210mm !important; min-width: 210mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; overflow: visible !important; }
                 body * { visibility: hidden !important; }
@@ -433,18 +435,18 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
                         return <tr key={`${item.id || item.title || 'item'}-${index}`} className="border-t border-slate-400">
                             <td className="wallet-invoice-product-cell border-l border-slate-400 px-2 py-2"><div className="wallet-invoice-product-content flex items-center gap-2"><img src={item.image || item.imageUrl || item.images?.[0] || '/nav-logo.png'} onError={event => { event.currentTarget.src = '/nav-logo.png'; }} alt="" className="wallet-invoice-product-image h-10 w-10 shrink-0 rounded-md border border-slate-300 object-cover"/><span className="wallet-invoice-product-name font-black leading-4">{item.title || item.name || 'منتج المتجر'}</span></div></td>
                             <td className="border-l border-slate-400 px-2 py-2 text-center font-black">{item.selectedSize || item.size || item.variant || '---'}</td>
-                            <td dir="rtl" className="border-l border-slate-400 px-2 py-2 text-center font-black"><span dir="ltr">{formatAmount(item.price)}</span> {currencyLabel}</td>
+                            <td dir="rtl" className="border-l border-slate-400 px-2 py-2 text-center font-black"><span dir="ltr" className="wallet-invoice-line-number">{formatAmount(item.price)}</span> <span className="wallet-invoice-inline-currency">{currencyLabel}</span></td>
                             <td dir="ltr" className="border-l border-slate-400 px-2 py-2 text-center font-mono font-black">{Number(item.quantity || 1)}</td>
-                            <td dir="rtl" className="px-2 py-2 text-center font-black"><span dir="ltr">{formatAmount(lineTotal)}</span> {currencyLabel}</td>
+                            <td dir="rtl" className="px-2 py-2 text-center font-black"><span dir="ltr" className="wallet-invoice-line-number">{formatAmount(lineTotal)}</span> <span className="wallet-invoice-inline-currency">{currencyLabel}</span></td>
                         </tr>;
                     }) : <tr><td colSpan="5" className="py-5 text-center font-bold text-slate-400">لا توجد منتجات مسجلة لهذه الفاتورة.</td></tr>}</tbody>
                 </table>
             </section>
             <div dir="ltr" className="wallet-invoice-totals-wrap mt-5 flex justify-end"><section dir="rtl" className="wallet-invoice-totals w-[270px] rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-[10px] font-bold">
-                <p className="wallet-invoice-total-row"><span className="wallet-invoice-total-label">المجموع الفرعي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number">{formatAmount(subtotal)}</span></b></p>
-                <p className="wallet-invoice-total-row wallet-invoice-discount"><span className="wallet-invoice-total-label">الخصم:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number">- {formatAmount(discount)}</span></b></p>
-                <p className="wallet-invoice-total-row"><span className="wallet-invoice-total-label">رسوم التوصيل:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number">{formatAmount(delivery)}</span></b></p>
-                <p className="wallet-invoice-total-row wallet-invoice-grand-total"><span className="wallet-invoice-total-label">الإجمالي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number">{formatAmount(total)}</span></b></p>
+                <p className="wallet-invoice-total-row"><span className="wallet-invoice-total-label">المجموع الفرعي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number font-sans">{formatAmount(subtotal)}</span></b></p>
+                <p className="wallet-invoice-total-row wallet-invoice-discount"><span className="wallet-invoice-total-label">الخصم:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number font-sans">- {formatAmount(discount)}</span></b></p>
+                <p className="wallet-invoice-total-row"><span className="wallet-invoice-total-label">رسوم التوصيل:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number font-sans">{formatAmount(delivery)}</span></b></p>
+                <p className="wallet-invoice-total-row wallet-invoice-grand-total"><span className="wallet-invoice-total-label">الإجمالي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number font-sans">{formatAmount(total)}</span></b></p>
             </section></div>
             <footer className="mt-6 border-t border-slate-400 pt-4 text-center"><p className="text-[10px] font-black">شكرًا لتسوقكم من متجر ميلانو</p><p className="mt-2 text-[7px] font-mono text-slate-500">ميلانو — فاتورة متجر إلكتروني</p></footer>
         </div>
