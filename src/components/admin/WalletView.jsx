@@ -230,7 +230,9 @@ const WalletView = () => {
         try {
             // Delete the shared orders document so both Wallet and Orders listeners remove it.
             await deleteDoc(doc(db, 'orders', order.id));
-            setNotice('تم حذف الفاتورة بنجاح.');
+            // Remove it locally as well, so Wallet updates immediately without waiting for a snapshot.
+            setOrders(previous => previous.filter(item => item.id !== order.id));
+            setNotice('');
         } catch (error) {
             console.error('Wallet invoice deletion failed:', error);
             setNotice('تعذّر حذف الفاتورة. تأكد من صلاحية لوحة التحكم ثم حاول مرة أخرى.');
