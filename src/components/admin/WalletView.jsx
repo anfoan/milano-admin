@@ -382,8 +382,10 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
     };
     return <div className="wallet-print-overlay fixed inset-0 z-[250] isolate overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-sm">
         <style>{`@page { size: A4 portrait; margin: 0; }
-            .wallet-invoice-currency, .wallet-invoice-inline-currency { font-size: 11px !important; font-family: Cairo, Arial, sans-serif !important; font-weight: 700 !important; }
-            .wallet-invoice-total-number, .wallet-invoice-line-number { font-family: Arial, sans-serif !important; font-variant-numeric: normal !important; font-feature-settings: normal !important; }
+            .wallet-invoice-currency { font-size: 11px !important; font-family: Cairo, Arial, sans-serif !important; font-weight: 700 !important; }
+            .wallet-invoice-inline-currency { font-size: 11px !important; font-family: Cairo, Arial, sans-serif !important; font-style: normal !important; font-weight: 900 !important; white-space: nowrap !important; }
+            .wallet-invoice-total-number { font-family: Arial, sans-serif !important; font-variant-numeric: normal !important; font-feature-settings: normal !important; }
+            .wallet-invoice-line-number { font-family: Arial, Helvetica, sans-serif !important; font-size: 11px !important; font-style: normal !important; font-weight: 800 !important; font-variant-numeric: normal !important; font-feature-settings: normal !important; }
             @media print {
                 html, body { width: 210mm !important; min-width: 210mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; overflow: visible !important; }
                 body * { visibility: hidden !important; }
