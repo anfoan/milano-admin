@@ -413,9 +413,11 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-invoice-paper > header h1 { margin: 0 !important; font-size: 27px !important; line-height: 1 !important; font-weight: 900 !important; color: #111827 !important; }
             .wallet-invoice-paper > header p { margin: 5px 0 0 !important; font-size: 13px !important; font-weight: 900 !important; color: #64748b !important; }
             .wallet-invoice-paper > header > div > div { margin-top: 10px !important; font-size: 9px !important; font-weight: 700 !important; color: #1f2937 !important; }
-            .wallet-invoice-paper > section:first-of-type { margin-top: 16px !important; padding: 10px 14px 12px !important; border: 1px solid #94a3b8 !important; border-radius: 8px !important; background: rgba(248,250,252,.72) !important; }
-            .wallet-invoice-paper > section:first-of-type h2 { margin: 0 !important; padding-bottom: 8px !important; border-bottom: 1px solid #94a3b8 !important; font-size: 13px !important; font-weight: 900 !important; }
-            .wallet-invoice-paper > section:first-of-type > div { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; column-gap: 24px !important; row-gap: 8px !important; margin-top: 10px !important; font-size: 9px !important; font-weight: 700 !important; }
+            .wallet-invoice-customer { margin-top: 16px !important; padding: 11px 15px 12px !important; border: 1px solid #94a3b8 !important; border-radius: 8px !important; background: #f8fafc !important; }
+            .wallet-invoice-customer-title { margin: 0 !important; padding: 0 0 9px !important; border-bottom: 1px solid #94a3b8 !important; color: #111827 !important; font-size: 13px !important; font-weight: 900 !important; line-height: 1.25 !important; }
+            .wallet-invoice-customer-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; column-gap: 28px !important; row-gap: 7px !important; margin: 10px 0 0 !important; font-size: 9px !important; font-weight: 700 !important; }
+            .wallet-invoice-customer-row { display: flex !important; align-items: baseline !important; justify-content: flex-start !important; gap: 3px !important; min-width: 0 !important; margin: 0 !important; white-space: nowrap !important; color: #475569 !important; line-height: 1.2 !important; }
+            .wallet-invoice-customer-row b { min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; color: #111827 !important; font-size: 10px !important; font-weight: 900 !important; }
             .wallet-invoice-paper > section:nth-of-type(2) { margin-top: 14px !important; }
             .wallet-invoice-paper > section:nth-of-type(2) h2 { margin: 0 0 8px !important; font-size: 15px !important; font-weight: 900 !important; }
             .wallet-invoice-paper table { width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; font-size: 9px !important; direction: rtl !important; }
@@ -433,17 +435,19 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-invoice-product-content { display: flex !important; flex-direction: row !important; direction: rtl !important; align-items: center !important; gap: 5px !important; min-width: 0 !important; }
             .wallet-invoice-product-image { display: block !important; order: 1 !important; width: 30px !important; height: 30px !important; min-width: 30px !important; min-height: 30px !important; max-width: 30px !important; max-height: 30px !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; object-fit: cover !important; overflow: hidden !important; }
             .wallet-invoice-product-name { display: block !important; order: 2 !important; flex: 1 1 auto !important; min-width: 0 !important; color: #111827 !important; font-size: 8px !important; font-weight: 900 !important; line-height: 1.2 !important; text-align: center !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-            .wallet-invoice-totals-wrap { display: flex !important; justify-content: flex-end !important; margin-top: 14px !important; }
-            .wallet-invoice-totals { width: 250px !important; padding: 9px 10px !important; border: 1px solid #e2e8f0 !important; border-radius: 8px !important; background: #f8fafc !important; font-size: 9px !important; font-weight: 700 !important; }
-            .wallet-invoice-total-row { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important; min-height: 18px !important; margin: 0 !important; color: #1f2937 !important; white-space: nowrap !important; }
-            .wallet-invoice-total-row + .wallet-invoice-total-row { margin-top: 4px !important; }
-            .wallet-invoice-total-amount { display: flex !important; direction: ltr !important; align-items: center !important; justify-content: space-between !important; width: 110px !important; font-weight: 900 !important; }
-            .wallet-invoice-total-amount > span:first-child { order: 1 !important; color: #475569 !important; }
-            .wallet-invoice-total-amount > span:last-child { order: 2 !important; color: #111827 !important; }
+            .wallet-invoice-totals-wrap { display: flex !important; justify-content: flex-end !important; margin-top: 15px !important; }
+            .wallet-invoice-totals { width: 270px !important; padding: 9px 11px 10px !important; border: 1px solid #e2e8f0 !important; border-radius: 7px !important; background: #f8fafc !important; font-size: 10px !important; font-weight: 700 !important; }
+            .wallet-invoice-total-row { display: flex !important; direction: rtl !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; min-height: 19px !important; margin: 0 !important; color: #1f2937 !important; white-space: nowrap !important; line-height: 1.25 !important; }
+            .wallet-invoice-total-row + .wallet-invoice-total-row { margin-top: 2px !important; }
+            .wallet-invoice-total-label { color: #334155 !important; font-weight: 900 !important; }
+            .wallet-invoice-total-amount { display: flex !important; direction: ltr !important; align-items: center !important; justify-content: space-between !important; width: 126px !important; color: #111827 !important; font-size: 10px !important; font-weight: 900 !important; }
+            .wallet-invoice-currency { order: 1 !important; color: #475569 !important; font-weight: 700 !important; }
+            .wallet-invoice-total-number { order: 2 !important; color: #111827 !important; font-family: Arial, sans-serif !important; font-weight: 900 !important; }
             .wallet-invoice-discount, .wallet-invoice-discount * { color: #dc2626 !important; }
-            .wallet-invoice-grand-total { min-height: 27px !important; margin-top: 6px !important; padding-top: 6px !important; border-top: 1px dashed #cbd5e1 !important; font-size: 13px !important; font-weight: 900 !important; }
-            .wallet-invoice-grand-total .wallet-invoice-total-amount { width: 126px !important; }
-            .wallet-invoice-grand-total .wallet-invoice-total-amount > span:first-child { color: #111827 !important; }
+            .wallet-invoice-grand-total { min-height: 28px !important; margin-top: 5px !important; padding-top: 6px !important; border-top: 1px dashed #cbd5e1 !important; font-size: 13px !important; font-weight: 900 !important; }
+            .wallet-invoice-grand-total .wallet-invoice-total-label { color: #111827 !important; }
+            .wallet-invoice-grand-total .wallet-invoice-total-amount { width: 138px !important; font-size: 13px !important; }
+            .wallet-invoice-grand-total .wallet-invoice-total-number, .wallet-invoice-grand-total .wallet-invoice-currency { color: #111827 !important; }
             .wallet-invoice-paper > footer { margin-top: 16px !important; padding-top: 12px !important; border-top: 1px solid #94a3b8 !important; text-align: center !important; }
             .wallet-invoice-paper > footer p { margin: 0 !important; }
             .wallet-invoice-paper table, .wallet-invoice-paper tbody, .wallet-invoice-paper tr { page-break-inside: avoid !important; break-inside: avoid !important; }
@@ -476,15 +480,15 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
                 </div>
                 <img src="/admin-logo.png" onError={event => { event.currentTarget.src = '/nav-logo.png'; }} alt="شعار متجر ميلانو" className="h-[72px] w-[72px] rounded-[15px] border-2 border-slate-100 bg-black object-contain p-1 shadow-sm"/>
             </header>
-            <section className="mt-6 rounded-lg border border-slate-400 bg-slate-50/70 px-4 pb-4 pt-3">
-                <h2 className="border-b border-slate-400 pb-3 text-[13px] font-black">بيانات العميل</h2>
-                <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-3 text-[9px] font-bold">
-                    <p>اسم المشتري: <b className="mr-1 text-[10px]">{customerName(order)}</b></p>
-                    <p>الدولة: <b className="mr-1 text-[10px]">{country}</b></p>
-                    <p>العنوان: <b className="mr-1 text-[10px]">{address}</b></p>
-                    <p>رقم الهاتف: <b dir="ltr" className="mr-1 font-mono text-[10px]">{phone}</b></p>
-                    <p>المدينة: <b className="mr-1 text-[10px]">{order.formData?.city || order.formData?.governorate || '---'}</b></p>
-                    <p>طريقة الدفع: <b className="mr-1 text-[10px]">{payment}</b></p>
+            <section className="wallet-invoice-customer mt-6 rounded-lg border border-slate-400 bg-slate-50/70 px-4 pb-4 pt-3">
+                <h2 className="wallet-invoice-customer-title border-b border-slate-400 pb-3 text-[13px] font-black">بيانات العميل</h2>
+                <div className="wallet-invoice-customer-grid mt-4 grid grid-cols-2 gap-x-8 gap-y-3 text-[9px] font-bold">
+                    <p className="wallet-invoice-customer-row"><span>اسم المشتري:</span><b>{customerName(order)}</b></p>
+                    <p className="wallet-invoice-customer-row"><span>الدولة:</span><b>{country}</b></p>
+                    <p className="wallet-invoice-customer-row"><span>العنوان:</span><b>{address}</b></p>
+                    <p className="wallet-invoice-customer-row"><span>رقم الهاتف:</span><b dir="ltr">{phone}</b></p>
+                    <p className="wallet-invoice-customer-row"><span>المدينة:</span><b>{order.formData?.city || order.formData?.governorate || '---'}</b></p>
+                    <p className="wallet-invoice-customer-row"><span>طريقة الدفع:</span><b>{payment}</b></p>
                 </div>
             </section>
             <section className="mt-5">
@@ -510,10 +514,10 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
                 </table>
             </section>
             <div dir="ltr" className="wallet-invoice-totals-wrap mt-5 flex justify-end"><section dir="rtl" className="wallet-invoice-totals w-[270px] rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-[10px] font-bold">
-                <p className="wallet-invoice-total-row"><span>المجموع الفرعي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(subtotal)}</span></b></p>
-                <p className="wallet-invoice-total-row wallet-invoice-discount"><span>الخصم:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(discount)}</span></b></p>
-                <p className="wallet-invoice-total-row"><span>رسوم التوصيل:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(delivery)}</span></b></p>
-                <p className="wallet-invoice-total-row wallet-invoice-grand-total"><span>الإجمالي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(total)}</span></b></p>
+                <p className="wallet-invoice-total-row"><span className="wallet-invoice-total-label">المجموع الفرعي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number">{formatAmount(subtotal)}</span></b></p>
+                <p className="wallet-invoice-total-row wallet-invoice-discount"><span className="wallet-invoice-total-label">الخصم:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number">- {formatAmount(discount)}</span></b></p>
+                <p className="wallet-invoice-total-row"><span className="wallet-invoice-total-label">رسوم التوصيل:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number">{formatAmount(delivery)}</span></b></p>
+                <p className="wallet-invoice-total-row wallet-invoice-grand-total"><span className="wallet-invoice-total-label">الإجمالي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number">{formatAmount(total)}</span></b></p>
             </section></div>
             <footer className="mt-6 border-t border-slate-400 pt-4 text-center"><p className="text-[10px] font-black">شكرًا لتسوقكم من متجر ميلانو</p><p className="mt-2 text-[7px] font-mono text-slate-500">ميلانو — فاتورة متجر إلكتروني</p></footer>
         </div>
