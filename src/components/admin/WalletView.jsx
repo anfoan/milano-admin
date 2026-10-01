@@ -33,6 +33,9 @@ const statusKey = status => {
 };
 const statusText = key => ({ new: 'طلب جديد', processing: 'قيد التجهيز', shipping: 'قيد التوصيل', completed: 'مكتمل', returned: 'مسترجع' }[key] || 'طلب جديد');
 const paymentText = value => ({ cod: 'الدفع عند الاستلام', cash: 'نقدي / كاش', wallet: 'المحفظة', jib_wallet: 'محفظة جيب', bank: 'تحويل بنكي', whatsapp: 'تحويل واتساب' }[String(value || '').toLowerCase()] || '---');
+// Wallet invoice cards belong only to storefront checkout. POS and external
+// invoices remain available in the main orders/receipts sections.
+const isStorefrontInvoice = order => order?.isPOS !== true && order?.isExternal !== true;
 const movementMeta = type => ({ reward: { label: 'مكافأة طلب مكتمل', tone: 'emerald', sign: '+' }, reward_reversal: { label: 'استرجاع مكافأة', tone: 'rose', sign: '-' }, credit: { label: 'إضافة رصيد', tone: 'blue', sign: '+' }, bonus: { label: 'رصيد تشجيعي', tone: 'violet', sign: '+' }, debit: { label: 'خصم رصيد', tone: 'rose', sign: '-' }, spend: { label: 'استخدام الرصيد في طلب', tone: 'rose', sign: '-' } }[type] || { label: 'حركة محفظة', tone: 'slate', sign: '' });
 
 const WalletView = () => {
@@ -66,9 +69,10 @@ const WalletView = () => {
         return () => stops.forEach(stop => stop());
     }, []);
 
-    const completedOrders = useMemo(() => orders.filter(order => statusKey(order.status) === 'completed'), [orders]);
-    const inProgressOrders = useMemo(() => orders.filter(order => statusKey(order.status) !== 'completed'), [orders]);
-    const totalInvoiceValue = useMemo(() => orders.reduce((sum, order) => sum + Number(order.total || 0), 0), [orders]);
+    const storeOrders = useMemo(() => orders.filter(isStorefrontInvoice), [orders]);
+    const completedOrders = useMemo(() => storeOrders.filter(order => statusKey(order.status) === 'completed'), [storeOrders]);
+    const inProgressOrders = useMemo(() => storeOrders.filter(order => statusKey(order.status) !== 'completed'), [storeOrders]);
+    const totalInvoiceValue = useMemo(() => storeOrders.reduce((sum, order) => sum + Number(order.total || 0), 0), [storeOrders]);
     // This total is the exact sum shown beside «الرصيد الحالي بعد اكتمال الطلب»
     // for completed invoices only. Changing status removes or restores it immediately.
     const completedWalletRewardsTotal = useMemo(() => orders.reduce((sum, order) => {
@@ -76,11 +80,11 @@ const WalletView = () => {
         return sum + Math.max(0, Number(order.walletRewardAmount ?? settings.defaultReward ?? 0));
     }, 0), [orders, settings.defaultReward]);
     const walletMap = useMemo(() => new Map(wallets.map(wallet => [wallet.walletId || wallet.id, wallet])), [wallets]);
-    const visibleOrders = useMemo(() => orders.filter(order => {
+    const visibleOrders = useMemo(() => storeOrders.filter(order => {
         const key = `${order.orderId || ''} ${customerName(order)} ${customerPhone(order)}`.toLowerCase();
         const filterMatch = filter === 'all' || (filter === 'completed' ? statusKey(order.status) === 'completed' : statusKey(order.status) !== 'completed');
         return filterMatch && key.includes(search.trim().toLowerCase());
-    }), [orders, filter, search]);
+    }), [storeOrders, filter, search]);
     const visibleWallets = useMemo(() => wallets.filter(wallet => `${wallet.customerName || ''} ${wallet.phone || ''} ${wallet.walletId || wallet.id || ''}`.toLowerCase().includes(search.trim().toLowerCase())), [wallets, search]);
     const recentWalletTransactions = useMemo(() => walletTransactions.slice(0, 8), [walletTransactions]);
     const walletCurrencyText = walletCurrencyLabel(walletDisplayCurrency);
@@ -241,9 +245,9 @@ const WalletView = () => {
 
 
 
-        <section className="rounded-[18px] border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 md:flex-row-reverse md:items-center md:justify-between"><div className="flex flex-wrap gap-2"><Filter active={filter === 'all'} tone="blue" onClick={() => setFilter('all')}>جميع الفواتير ({orders.length})</Filter><Filter active={filter === 'completed'} tone="emerald" onClick={() => setFilter('completed')}>فواتير مكتملة ومدفوعة ({completedOrders.length})</Filter><Filter active={filter === 'processing'} tone="maroon" onClick={() => setFilter('processing')}>فواتير قيد المعالجة ({inProgressOrders.length})</Filter></div><div className="relative w-full md:w-72"><Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="ابحث بالعميل أو الهاتف أو رقم الفاتورة..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-9 pl-3 text-right text-[10px] font-bold outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-white/5"/></div></div></section>
+        <section className="rounded-[18px] border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 md:flex-row-reverse md:items-center md:justify-between"><div className="flex flex-wrap gap-2"><Filter active={filter === 'all'} tone="blue" onClick={() => setFilter('all')}>جميع الفواتير ({storeOrders.length})</Filter><Filter active={filter === 'completed'} tone="emerald" onClick={() => setFilter('completed')}>فواتير مكتملة ومدفوعة ({completedOrders.length})</Filter><Filter active={filter === 'processing'} tone="maroon" onClick={() => setFilter('processing')}>فواتير قيد المعالجة ({inProgressOrders.length})</Filter></div><div className="relative w-full md:w-72"><Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="ابحث بالعميل أو الهاتف أو رقم الفاتورة..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-9 pl-3 text-right text-[10px] font-bold outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-white/5"/></div></div></section>
 
-        <section className="space-y-3">{visibleOrders.map((order, index) => <InvoiceCard key={order.id} order={order} wallet={walletMap.get(order.customerWalletId)} position={visibleOrders.length - index} isLatest={order.id === orders[0]?.id} rewarding={rewarding === order.id} deleting={deletingOrderId === order.id} defaultReward={settings.defaultReward} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onReward={() => issueReward(order)} onEdit={() => setEditingOrder(order)} onDelete={() => removeOrder(order)} onPrint={() => setPrintingOrder(order)} onChangeStatus={status => saveStatus(order, status)} onManageWallet={() => { const wallet = walletMap.get(order.customerWalletId); if (wallet) setManagingWallet({ wallet, order }); else setNotice('لا توجد محفظة مرتبطة بهذه الفاتورة بعد.'); }}/>) }{visibleOrders.length === 0 && <div className="rounded-[18px] border border-slate-200 bg-white py-16 text-center text-sm font-bold text-slate-400 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]">لا توجد فواتير مطابقة للبحث الحالي.</div>}</section>
+        <section className="space-y-3">{visibleOrders.map((order, index) => <InvoiceCard key={order.id} order={order} wallet={walletMap.get(order.customerWalletId)} position={visibleOrders.length - index} isLatest={order.id === storeOrders[0]?.id} rewarding={rewarding === order.id} deleting={deletingOrderId === order.id} defaultReward={settings.defaultReward} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onReward={() => issueReward(order)} onEdit={() => setEditingOrder(order)} onDelete={() => removeOrder(order)} onPrint={() => setPrintingOrder(order)} onChangeStatus={status => saveStatus(order, status)} onManageWallet={() => { const wallet = walletMap.get(order.customerWalletId); if (wallet) setManagingWallet({ wallet, order }); else setNotice('لا توجد محفظة مرتبطة بهذه الفاتورة بعد.'); }}/>) }{visibleOrders.length === 0 && <div className="rounded-[18px] border border-slate-200 bg-white py-16 text-center text-sm font-bold text-slate-400 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]">لا توجد فواتير مطابقة للبحث الحالي.</div>}</section>
 
         {rewardModalOpen && <RewardSettingsModal amount={settings.defaultReward} currencyCode={walletDisplayCurrency} saving={savingReward} onClose={() => setRewardModalOpen(false)} onSave={value => saveReward(toWalletBase(value))}/>}
         {managingWallet && <WalletAdjustmentModal wallet={managingWallet.wallet} order={managingWallet.order} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingWalletAdjustment} onClose={() => setManagingWallet(null)} onSave={saveWalletAdjustment}/>}
