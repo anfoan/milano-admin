@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { collection, deleteDoc, doc, onSnapshot, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, onSnapshot, runTransaction, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Package, Pencil, Printer, Save, Search, Trash2, Truck, Wallet, WalletCards, WalletMinimal, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
@@ -19,6 +19,16 @@ const hashWalletPassword = async password => {
     const bytes = new TextEncoder().encode(`milano-wallet-v1:${password}`);
     const digest = await crypto.subtle.digest('SHA-256', bytes);
     return Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+};
+const normalizeWalletCustomerPhone = value => {
+    const digits = String(value || '')
+        .replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
+        .replace(/[^0-9]/g, '');
+    return digits.startsWith('967') && digits.length === 12 ? digits.slice(3) : digits;
+};
+const walletIdForCustomerPhone = value => {
+    const phone = normalizeWalletCustomerPhone(value);
+    return phone.length >= 7 ? `phone-${phone}` : '';
 };
 const customerName = order => order.formData?.name || order.customer?.name || order.customerName || order.name || 'عميل المتجر';
 const customerPhone = order => order.formData?.fullPhone || order.formData?.phone || order.customer?.phone || order.phone || '---';
@@ -56,6 +66,10 @@ const WalletView = () => {
     const [walletDisplayCurrency, setWalletDisplayCurrency] = useState('YER');
     const [managingWallet, setManagingWallet] = useState(null);
     const [savingWalletAdjustment, setSavingWalletAdjustment] = useState(false);
+    const [customerDataOpen, setCustomerDataOpen] = useState(false);
+    const [customerSearch, setCustomerSearch] = useState('');
+    const [editingCustomerWallet, setEditingCustomerWallet] = useState(null);
+    const [savingCustomerProfile, setSavingCustomerProfile] = useState(false);
     const spendLedgerSyncRef = useRef(new Set());
     const rewardSyncRef = useRef(new Set());
 
@@ -86,6 +100,10 @@ const WalletView = () => {
         return filterMatch && key.includes(search.trim().toLowerCase());
     }), [storeOrders, filter, search]);
     const visibleWallets = useMemo(() => wallets.filter(wallet => `${wallet.customerName || ''} ${wallet.phone || ''} ${wallet.walletId || wallet.id || ''}`.toLowerCase().includes(search.trim().toLowerCase())), [wallets, search]);
+    const customerWallets = useMemo(() => wallets
+        .filter(wallet => normalizeWalletCustomerPhone(wallet.phone).length >= 7)
+        .filter(wallet => `${wallet.customerName || ''} ${wallet.phone || ''}`.toLowerCase().includes(customerSearch.trim().toLowerCase()))
+        .sort((a, b) => String(a.phone || '').localeCompare(String(b.phone || ''))), [wallets, customerSearch]);
     const recentWalletTransactions = useMemo(() => walletTransactions.slice(0, 8), [walletTransactions]);
     const walletCurrencyText = walletCurrencyLabel(walletDisplayCurrency);
     const walletAmount = value => walletConvertedAmount(value, walletDisplayCurrency);
@@ -221,6 +239,50 @@ const WalletView = () => {
             setNotice('تعذّر حفظ تعديل رصيد العميل.');
         } finally { setSavingWalletAdjustment(false); }
     };
+    const saveCustomerProfile = async draft => {
+        const phone = normalizeWalletCustomerPhone(draft.phone);
+        const nextWalletId = walletIdForCustomerPhone(phone);
+        const password = String(draft.password || '');
+        if (!nextWalletId) { setNotice('أدخل رقم هاتف صحيح للعميل.'); return; }
+        if (password && !isValidWalletPassword(password)) { setNotice('كلمة المرور يجب أن تكون من 4 إلى 6 أرقام إنجليزية.'); return; }
+        setSavingCustomerProfile(true);
+        try {
+            const sourceWallet = draft.wallet;
+            const sourceId = sourceWallet.id;
+            await runTransaction(db, async transaction => {
+                const sourceRef = doc(db, 'customer_wallets', sourceId);
+                const sourceSnapshot = await transaction.get(sourceRef);
+                if (!sourceSnapshot.exists()) throw new Error('WALLET_NOT_FOUND');
+                const source = sourceSnapshot.data();
+                const sourceWalletId = source.walletId || sourceId;
+                const passwordPatch = password ? { pinHash: await hashWalletPassword(password), pinConfigured: true } : {};
+                if (sourceId === nextWalletId) {
+                    transaction.update(sourceRef, { walletId: nextWalletId, phone, ...passwordPatch, updatedAt: serverTimestamp() });
+                    return;
+                }
+                const targetRef = doc(db, 'customer_wallets', nextWalletId);
+                const targetSnapshot = await transaction.get(targetRef);
+                if (targetSnapshot.exists()) throw new Error('PHONE_ALREADY_REGISTERED');
+                transaction.set(targetRef, { ...source, walletId: nextWalletId, phone, ...passwordPatch, updatedAt: serverTimestamp() });
+                transaction.delete(sourceRef);
+                orders.filter(order => order.customerWalletId === sourceId || order.customerWalletId === sourceWalletId || order.walletRewardWalletId === sourceId || order.walletRewardWalletId === sourceWalletId).forEach(order => {
+                    const update = { updatedAt: serverTimestamp() };
+                    if (order.customerWalletId === sourceId || order.customerWalletId === sourceWalletId) update.customerWalletId = nextWalletId;
+                    if (order.walletRewardWalletId === sourceId || order.walletRewardWalletId === sourceWalletId) update.walletRewardWalletId = nextWalletId;
+                    update.formData = { ...(order.formData || {}), fullPhone: phone };
+                    transaction.update(doc(db, 'orders', order.id), update);
+                });
+                walletTransactions.filter(item => item.walletId === sourceId || item.walletId === sourceWalletId).forEach(item => {
+                    transaction.update(doc(db, 'wallet_transactions', item.id), { walletId: nextWalletId, phone });
+                });
+            });
+            setEditingCustomerWallet(null);
+            setNotice('تم حفظ بيانات العميل وربط محفظته برقم الهاتف المحدّث.');
+        } catch (error) {
+            console.error('Customer wallet profile save failed:', error);
+            setNotice(error?.message === 'PHONE_ALREADY_REGISTERED' ? 'رقم الهاتف هذا مسجل مسبقًا في محفظة ميلانو.' : 'تعذّر حفظ بيانات العميل. حاول مرة أخرى.');
+        } finally { setSavingCustomerProfile(false); }
+    };
     const removeOrder = async order => {
         const confirmed = window.confirm(`هل أنت متأكد من حذف الفاتورة ${order.orderId || order.id}؟
 
@@ -245,7 +307,12 @@ const WalletView = () => {
 
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Metric tone="emerald" icon={<CheckCircle2 size={18}/>} label="إجمالي فواتير المتجر المكتملة" value={completedOrders.length}/><Metric tone="blue" icon={<Package size={18}/>} label="إجمالي كافة فواتير المتجر" value={storeOrders.length}/><Metric tone="violet" icon={<Gift size={18}/>} label="مبيعات الفواتير المكتملة للمتجر" value={<span dir="ltr" className="inline-flex items-baseline gap-1 tabular-nums"><span dir="rtl" className="font-['Cairo',Arial,sans-serif] text-[13px] font-black leading-none text-slate-700 dark:text-slate-100">{walletCurrencyText}</span><span className="text-[15px]" style={{ fontFamily: 'Arial, Helvetica, sans-serif', lineHeight: 'inherit', fontWeight: 'inherit' }}>{walletAmount(totalInvoiceValue)}</span></span>}/><Metric tone="emerald" icon={<Wallet size={18}/>} label="إجمالي أرصدة محافظ العملاء" value={<span dir="ltr" className="inline-flex items-center gap-1 font-sans tabular-nums not-italic"><span className="font-['Arial','Helvetica',sans-serif] not-italic font-bold leading-none">$</span><span>{walletAmount(completedWalletRewardsTotal)}</span></span>} openDigits/></section>
 
-
+        <section className="overflow-hidden rounded-[18px] border border-blue-200 bg-white shadow-sm dark:border-blue-400/25 dark:bg-[#1a1d23]">
+            <button type="button" onClick={() => setCustomerDataOpen(value => !value)} className="flex w-full items-center justify-between gap-3 bg-blue-50/85 px-4 py-3 text-right transition hover:bg-blue-100/80 dark:bg-blue-400/10 dark:hover:bg-blue-400/15">
+                <div className="flex items-center gap-2"><div className="rounded-xl border border-blue-200 bg-white/80 p-2 text-blue-600 shadow-sm dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-300"><WalletCards size={18}/></div><div><h2 className="text-sm font-black text-blue-800 dark:text-blue-100">بيانات العملاء</h2><p className="mt-0.5 text-[9px] font-bold text-blue-700/70 dark:text-blue-200/70">البحث برقم الهاتف وتعديل رقم العميل أو إعادة تعيين كلمة المرور</p></div></div><div className="flex items-center gap-2"><span className="rounded-lg border border-blue-200 bg-white/70 px-2 py-1 text-[10px] font-black text-blue-700 dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">{wallets.filter(wallet => normalizeWalletCustomerPhone(wallet.phone).length >= 7).length}</span><ChevronDown size={17} className={`text-blue-600 transition ${customerDataOpen ? 'rotate-180' : ''}`}/></div>
+            </button>
+            {customerDataOpen && <div className="space-y-3 border-t border-blue-100 p-3 dark:border-blue-400/15"><div className="relative"><Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400"/><input dir="ltr" value={customerSearch} onChange={event => setCustomerSearch(event.target.value)} placeholder="ابحث برقم هاتف العميل..." className="w-full rounded-xl border border-blue-200 bg-blue-50/40 py-2.5 pr-9 pl-3 text-right text-[11px] font-bold outline-none transition focus:border-blue-500 dark:border-blue-400/25 dark:bg-blue-400/5"/></div><div className="space-y-2">{customerWallets.map(wallet => <article key={wallet.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-right dark:border-white/10 dark:bg-white/[0.035]"><button type="button" onClick={() => setEditingCustomerWallet(wallet)} title="تعديل بيانات العميل" className="rounded-lg border border-blue-200 bg-blue-50 p-2 text-blue-600 transition hover:bg-blue-100 dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-300"><Pencil size={14}/></button><div className="min-w-0 flex-1"><div className="flex items-center justify-end gap-2"><span dir="ltr" className="font-mono text-[12px] font-black text-slate-800 dark:text-white">{normalizeWalletCustomerPhone(wallet.phone)}</span><span className="text-[10px] font-black text-slate-500 dark:text-slate-300">رقم الهاتف:</span></div><div className="mt-1 flex items-center justify-end gap-2"><span className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[9px] font-black text-amber-700 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200"><KeyRound size={11}/>{wallet.pinConfigured ? 'محمي — إعادة تعيين متاحة' : 'غير مُنشأة بعد'}</span><span className="text-[10px] font-black text-slate-500 dark:text-slate-300">كلمة المرور:</span></div></div></article>)}{customerWallets.length === 0 && <p className="rounded-xl border border-dashed border-blue-200 py-6 text-center text-[10px] font-bold text-slate-400 dark:border-blue-400/20">لا توجد بيانات عميل مطابقة لرقم الهاتف.</p>}</div></div>}
+        </section>
 
         <section className="rounded-[18px] border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 md:flex-row-reverse md:items-center md:justify-between"><div className="flex flex-wrap gap-2"><Filter active={filter === 'all'} tone="blue" onClick={() => setFilter('all')}>جميع الفواتير ({storeOrders.length})</Filter><Filter active={filter === 'completed'} tone="emerald" onClick={() => setFilter('completed')}>فواتير مكتملة ومدفوعة ({completedOrders.length})</Filter><Filter active={filter === 'processing'} tone="maroon" onClick={() => setFilter('processing')}>فواتير قيد المعالجة ({inProgressOrders.length})</Filter></div><div className="relative w-full md:w-72"><Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="ابحث بالعميل أو الهاتف أو رقم الفاتورة..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-9 pl-3 text-right text-[10px] font-bold outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-white/5"/></div></div></section>
 
@@ -253,6 +320,7 @@ const WalletView = () => {
 
         {rewardModalOpen && <RewardSettingsModal amount={settings.defaultReward} currencyCode={walletDisplayCurrency} saving={savingReward} onClose={() => setRewardModalOpen(false)} onSave={value => saveReward(toWalletBase(value))}/>}
         {managingWallet && <WalletAdjustmentModal wallet={managingWallet.wallet} order={managingWallet.order} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingWalletAdjustment} onClose={() => setManagingWallet(null)} onSave={saveWalletAdjustment}/>}
+        {editingCustomerWallet && <CustomerWalletProfileModal wallet={editingCustomerWallet} saving={savingCustomerProfile} onClose={() => setEditingCustomerWallet(null)} onSave={saveCustomerProfile}/>}
         {notice && <div dir="rtl" className="fixed inset-x-0 bottom-5 z-[160] mx-auto w-fit max-w-[calc(100vw-2rem)] -translate-x-5 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-center text-xs font-black text-emerald-700 shadow-xl dark:border-emerald-400/40 dark:bg-[#183127] dark:text-emerald-200">{notice}</div>}
         {editingOrder && <InvoiceEditModal key={editingOrder.id} order={editingOrder} wallet={walletMap.get(editingOrder.customerWalletId)} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} onClose={() => setEditingOrder(null)} onSave={draft => saveInvoice({ ...draft, total: toWalletBase(draft.total), walletRewardOverride: toWalletBase(draft.walletRewardOverride), walletBalance: toWalletBase(draft.walletBalance) })}/>}
         {printingOrder && <InvoicePreview order={printingOrder} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onClose={() => setPrintingOrder(null)}/>}
@@ -283,6 +351,12 @@ const WalletAdjustmentModal = ({ wallet, order, defaultReward, currencyCode, cur
         });
     };
     return <div className="fixed inset-0 z-[190] flex items-center justify-center bg-slate-950/70 p-3 backdrop-blur-sm"><form dir="rtl" onSubmit={submit} className="w-full max-w-[405px] overflow-hidden rounded-[22px] border border-white/10 bg-[#171c28] text-white shadow-2xl"><header dir="ltr" className="flex items-center justify-between border-b border-white/10 px-5 py-4"><button type="button" onClick={onClose} className="text-slate-400 transition hover:text-rose-400"><X size={19}/></button><div dir="rtl" className="flex items-center gap-2"><div className="rounded-lg border border-emerald-400/25 bg-emerald-400/10 p-1.5 text-emerald-300"><Wallet size={16}/></div><h2 className="text-sm font-black">تعديل رصيد محفظة العميل ({currencyLabel})</h2></div></header><div className="space-y-3 px-5 py-4"><div className="flex items-center justify-between text-[9px] font-bold text-slate-400"><span>معرّف العميل (هاتف / جهاز):</span><span dir="ltr" className="font-mono text-slate-200">هاتف: {wallet.phone || customerPhone(order)}</span></div><section className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-3"><div className="flex items-center justify-between gap-3"><div className="text-right"><p className="text-[11px] font-black text-emerald-200">إجمالي الرصيد الحالي لهذا العميل:</p><p className="mt-1 text-[8px] font-bold text-emerald-200/70">هذا المبلغ يتغير عند حفظ الرصيد الجديد أو إضافة رصيد مستقل.</p></div><span dir="ltr" className="font-mono text-sm font-black text-emerald-300">$ {formatAmount(Number(wallet.balance || 0))}</span></div></section><section className="rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3"><div className="flex items-center justify-between gap-3"><p className="text-[10px] font-black text-slate-200">مكافأة الفاتورة ({order?.orderId || order?.id || '---'}):</p><span dir="ltr" className="font-mono text-[11px] font-black text-slate-200">$ {Number(displayReward).toLocaleString('en-US', { maximumFractionDigits: currencyCode === 'SAR' ? 2 : 0 })}</span></div><p className="mt-1.5 text-[8px] font-bold leading-4 text-amber-300">مكافأة الفاتورة لا ترتفع إلى الرصيد الحالي لهذا العميل إلا عند اكتمال الطلب.</p></section><label className="block text-right"><span className="mb-1 block text-[10px] font-black text-slate-200">الرصيد الجديد ($):</span><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-emerald-300">$</span><input dir="ltr" required inputMode="decimal" value={targetBalance} onChange={event => setTargetBalance(event.target.value.replace(/[^0-9.]/g, ''))} className="h-10 w-full rounded-xl border border-white/10 bg-[#0d111a] py-2 pl-8 pr-3 text-right font-mono text-sm font-black text-white outline-none transition focus:border-emerald-400"/></div></label><section className="rounded-xl border border-blue-400/35 bg-blue-500/10 p-3"><div className="flex items-center justify-between gap-3"><span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-200"><span className="text-base leading-none">+</span> إضافة رصيد جديد غير المكافأة</span><span className="text-[8px] font-bold text-blue-200/80">إضافة مباشرة</span></div><div className="relative mt-2"><span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-blue-300">$</span><input dir="ltr" inputMode="decimal" value={additionalCredit} onChange={event => setAdditionalCredit(event.target.value.replace(/[^0-9.]/g, ''))} placeholder="أدخل مبلغاً إضافياً (مثلاً: 50)" className="h-10 w-full rounded-xl border border-blue-300/20 bg-[#0d111a] py-2 pl-8 pr-3 text-right font-mono text-[11px] font-black text-white outline-none placeholder:font-['Cairo'] placeholder:text-right placeholder:text-[9px] placeholder:font-bold placeholder:text-slate-500 focus:border-blue-400"/></div><p className="mt-2 text-[8px] font-bold leading-4 text-slate-400">عند الحفظ، يضاف هذا المبلغ إلى الرصيد الإجمالي لهذا العميل دون ربطه بمكافأة الفاتورة.</p></section></div><footer className="flex items-center gap-5 border-t border-white/10 px-5 py-3"><button disabled={saving} className="rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-black text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 disabled:opacity-60">{saving ? 'جاري الحفظ...' : 'حفظ الرصيد'}</button><button type="button" onClick={onClose} className="text-xs font-black text-slate-400 transition hover:text-white">إلغاء</button></footer></form></div>;
+};
+const CustomerWalletProfileModal = ({ wallet, saving, onClose, onSave }) => {
+    const [phone, setPhone] = useState(normalizeWalletCustomerPhone(wallet.phone));
+    const [password, setPassword] = useState('');
+    const submit = event => { event.preventDefault(); onSave({ wallet, phone, password }); };
+    return <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm"><form dir="rtl" onSubmit={submit} className="w-full max-w-[420px] overflow-hidden rounded-[22px] bg-white shadow-2xl dark:bg-[#1a1d23]"><header dir="ltr" className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-white/10"><button type="button" onClick={onClose} className="text-slate-400 transition hover:text-rose-500"><X size={19}/></button><div dir="rtl" className="flex items-center gap-2"><div className="rounded-lg border border-blue-200 bg-blue-50 p-1.5 text-blue-600 dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-300"><Pencil size={15}/></div><h2 className="text-sm font-black">تعديل بيانات العميل</h2></div></header><div className="space-y-4 px-5 py-4"><Field label="رقم الهاتف" required><input dir="ltr" required inputMode="tel" value={phone} onChange={event => setPhone(event.target.value)} placeholder="737032191" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center font-mono text-sm font-black outline-none transition focus:border-blue-500 dark:border-white/10 dark:bg-white/5"/></Field><Field label="كلمة المرور"><div className="relative"><KeyRound size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500"/><input dir="ltr" type="password" inputMode="numeric" value={password} onChange={event => setPassword(event.target.value.replace(/[^0-9]/g, '').slice(0, 6))} placeholder="اتركه فارغًا للإبقاء على الحالية" className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-9 text-center font-mono text-sm font-black outline-none transition placeholder:font-['Cairo'] placeholder:text-[10px] focus:border-blue-500 dark:border-white/10 dark:bg-white/5"/></div><p className="mt-1 text-[8px] font-bold leading-4 text-slate-400">كلمة المرور الحالية لا تُعرض لأسباب أمنية. أدخل كلمة جديدة من 4 إلى 6 أرقام لإعادة تعيينها.</p></Field><div className="rounded-xl border border-blue-200 bg-blue-50/70 px-3 py-2.5 text-[9px] font-bold leading-5 text-blue-700 dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">تعديل رقم الهاتف ينقل رصيد المحفظة والفواتير المرتبطة إلى الرقم الجديد بعد التحقق من عدم تسجيله مسبقًا.</div></div><footer className="flex items-center gap-4 border-t border-slate-100 px-5 py-3 dark:border-white/10"><button disabled={saving} className="inline-flex items-center gap-1 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-blue-600/20 disabled:opacity-60"><Save size={15}/>{saving ? 'جاري الحفظ...' : 'حفظ البيانات'}</button><button type="button" onClick={onClose} className="text-xs font-black text-slate-500">إلغاء</button></footer></form></div>;
 };
 const Metric = ({ tone, icon, label, value, openDigits = false }) => {
     const accent = tone === 'emerald' ? { icon: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-300', value: 'text-emerald-600 dark:text-emerald-300' } : tone === 'blue' ? { icon: 'bg-blue-50 text-blue-600 dark:bg-blue-400/10 dark:text-blue-300', value: 'text-amber-600 dark:text-amber-300' } : { icon: 'bg-violet-50 text-violet-600 dark:bg-violet-400/10 dark:text-violet-300', value: 'text-slate-800 dark:text-white' };
