@@ -222,14 +222,16 @@ const WalletView = () => {
         } finally { setSavingWalletAdjustment(false); }
     };
     const removeOrder = async order => {
-        if (!window.confirm(`هل تريد حذف الفاتورة ${order.orderId || ''}؟`)) return;
         setDeletingOrderId(order.id);
+        const priorOrders = orders;
+        // Remove the card immediately; the Firestore deletion removes it from every order list.
+        setOrders(previous => previous.filter(item => item.id !== order.id));
         try {
-            // Same direct deletion path used by the working main orders list.
             await deleteDoc(doc(db, 'orders', order.id));
             setNotice('تم حذف الفاتورة بنجاح.');
         } catch (error) {
             console.error('Wallet invoice deletion failed:', error);
+            setOrders(priorOrders);
             setNotice('تعذّر حذف الفاتورة. تأكد من صلاحية لوحة التحكم ثم حاول مرة أخرى.');
         } finally { setDeletingOrderId(''); }
     };
@@ -248,7 +250,7 @@ const WalletView = () => {
 
         {rewardModalOpen && <RewardSettingsModal amount={settings.defaultReward} currencyCode={walletDisplayCurrency} saving={savingReward} onClose={() => setRewardModalOpen(false)} onSave={value => saveReward(toWalletBase(value))}/>}
         {managingWallet && <WalletAdjustmentModal wallet={managingWallet.wallet} order={managingWallet.order} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingWalletAdjustment} onClose={() => setManagingWallet(null)} onSave={saveWalletAdjustment}/>}
-        {notice && <div dir="rtl" className="fixed bottom-5 left-1/2 right-auto z-[160] w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-center text-xs font-black text-emerald-700 shadow-xl dark:border-emerald-400/40 dark:bg-[#183127] dark:text-emerald-200">{notice}</div>}
+        {notice && <div dir="rtl" className="fixed inset-x-0 bottom-5 z-[160] mx-auto w-fit max-w-[calc(100vw-2rem)] rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-center text-xs font-black text-emerald-700 shadow-xl dark:border-emerald-400/40 dark:bg-[#183127] dark:text-emerald-200">{notice}</div>}
         {editingOrder && <InvoiceEditModal key={editingOrder.id} order={editingOrder} wallet={walletMap.get(editingOrder.customerWalletId)} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} onClose={() => setEditingOrder(null)} onSave={draft => saveInvoice({ ...draft, total: toWalletBase(draft.total), walletRewardOverride: toWalletBase(draft.walletRewardOverride), walletBalance: toWalletBase(draft.walletBalance) })}/>}
         {printingOrder && <InvoicePreview order={printingOrder} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onClose={() => setPrintingOrder(null)}/>}
     </div>;
