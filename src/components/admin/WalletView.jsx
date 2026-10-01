@@ -398,13 +398,10 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .join('');
         printWindow.document.write(`<!doctype html><html dir="rtl"><head><meta charset="UTF-8"><base href="${window.location.origin}/"><title>فاتورة متجر ميلانو</title>${copiedStyles}<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"><style>
             @page { size: A4 portrait; margin: 0; }
-            html, body { min-height: 100vh !important; margin: 0 !important; padding: 16px !important; background: #1f2937 !important; }
+            html, body { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; background: #fff !important; }
             * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .wallet-print-host { display: block !important; width: 530px !important; max-width: calc(100vw - 32px) !important; min-height: 0 !important; margin: 0 auto !important; padding: 0 !important; background: #fff !important; border-radius: 22px !important; box-shadow: 0 14px 36px rgba(0,0,0,.30) !important; overflow: hidden !important; }
-            .wallet-invoice-paper { display: block !important; width: 100% !important; height: auto !important; min-height: 0 !important; max-height: none !important; margin: 0 !important; padding: 12px 20px 20px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: visible !important; page-break-inside: avoid !important; break-inside: avoid !important; background: #fff !important; }
-            .wallet-print-toolbar { display: flex; align-items: center; justify-content: flex-start; gap: 10px; padding: 14px 24px; background: rgba(255,255,255,.96); border-bottom: 1px solid #e5e7eb; direction: ltr; }
-            .wallet-print-toolbar button { border: 0; border-radius: 9px; padding: 9px 18px; background: #111827; color: #fff; font: 900 11px Cairo, Arial, sans-serif; cursor: pointer; }
-            .wallet-print-toolbar button.close { background: transparent; color: #9ca3af; font-size: 20px; padding: 0 6px; }
+            .wallet-print-host { display: block !important; width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; overflow: hidden !important; }
+            .wallet-invoice-paper { display: block !important; width: 210mm !important; height: 277mm !important; min-height: 277mm !important; max-height: 277mm !important; margin: 0 !important; padding: 20px 40px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; page-break-inside: avoid !important; break-inside: avoid !important; background: #fff !important; }
             .wallet-invoice-paper > header img { display: block !important; width: 72px !important; height: 72px !important; max-width: 72px !important; max-height: 72px !important; min-width: 72px !important; min-height: 72px !important; border-radius: 14px !important; clip-path: inset(0 round 14px) !important; object-fit: contain !important; flex: 0 0 72px !important; }
             .wallet-invoice-paper table img { display: block !important; width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; min-width: 40px !important; min-height: 40px !important; object-fit: cover !important; }
             .wallet-invoice-paper { direction: rtl !important; color: #111827 !important; font-family: Cairo, Arial, sans-serif !important; line-height: 1.45 !important; }
@@ -452,18 +449,20 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-invoice-paper > footer p { margin: 0 !important; }
             .wallet-invoice-paper table, .wallet-invoice-paper tbody, .wallet-invoice-paper tr { page-break-inside: avoid !important; break-inside: avoid !important; }
             @media print {
-                html, body { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; background: #fff !important; }
-                .wallet-print-toolbar { display: none !important; }
                 .wallet-invoice-paper table td:nth-child(4) { font-size: 13px !important; line-height: 1.2 !important; }
-                .wallet-print-host { width: 210mm !important; max-width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; }
-                .wallet-invoice-paper { width: 210mm !important; height: 277mm !important; min-height: 277mm !important; max-height: 277mm !important; margin: 0 !important; padding: 20px 40px !important; overflow: hidden !important; }
             }
-        </style></head><body><main class="wallet-print-host"><div class="wallet-print-toolbar"><button onclick="window.print()">طباعة الفاتورة</button><button class="close" onclick="window.close()" aria-label="إغلاق">×</button></div>${invoice.outerHTML}</main></body></html>`);
+        </style></head><body><main class="wallet-print-host">${invoice.outerHTML}</main></body></html>`);
         printWindow.document.close();
-        printWindow.focus();
+        printWindow.onload = async () => {
+            try { await printWindow.document.fonts?.ready; } catch (_) { /* Font loading must not block printing. */ }
+            window.setTimeout(() => {
+                printWindow.focus();
+                printWindow.print();
+            }, 180);
+        };
+        printWindow.onafterprint = () => printWindow.close();
     };
     return <div className="wallet-print-overlay fixed inset-0 z-[250] isolate overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-sm">
-        <style>{`@page { size: A4 portrait; margin: 0; } @media print { html, body, #root { width: 210mm !important; min-width: 210mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; } body * { visibility: hidden !important; } .wallet-print-overlay, .wallet-print-overlay * { visibility: visible !important; } .wallet-print-overlay { position: static !important; display: block !important; width: 210mm !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; background: #fff !important; backdrop-filter: none !important; } .wallet-invoice-paper { width: 210mm !important; max-width: 210mm !important; max-height: none !important; min-height: 240mm !important; height: auto !important; margin: 0 !important; padding: 20px 40px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; page-break-after: avoid !important; break-after: avoid-page !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .wallet-invoice-paper table, .wallet-invoice-paper tr { page-break-inside: avoid !important; } .wallet-invoice-actions { display: none !important; } }`}</style>
         <div dir="rtl" id="wallet-printable-invoice" className="wallet-invoice-paper mx-auto my-1 max-h-[calc(100vh-24px)] w-full max-w-[560px] overflow-y-auto rounded-[20px] border border-slate-200 bg-white px-5 py-3 text-slate-900 shadow-[0_16px_45px_rgba(15,23,42,0.28)] dark:border-white dark:bg-white dark:text-slate-900">
             <div className="wallet-invoice-actions mb-3 flex items-center justify-between border-b border-slate-100 pb-3">
                 <button onClick={onClose} className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-rose-500"><X size={18}/></button>
