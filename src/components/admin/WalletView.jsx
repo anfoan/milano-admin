@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { collection, deleteDoc, doc, onSnapshot, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Package, Pencil, Printer, Save, Search, Trash2, Truck, Wallet, WalletCards, WalletMinimal, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
-import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, reverseWalletRewardForOrder, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
+import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { adjustCustomerWalletBalance, ensureWalletSpendLedgerForOrder, setCustomerWalletBalance } from '../../lib/walletLedger';
 
 const toMillis = value => value?.toMillis?.() || (value?.seconds ? value.seconds * 1000 : new Date(value || 0).getTime() || 0);
@@ -224,21 +224,10 @@ const WalletView = () => {
     const removeOrder = async order => {
         if (!window.confirm(`هل تريد حذف الفاتورة ${order.orderId || ''}؟`)) return;
         setDeletingOrderId(order.id);
-        let rewardRecovered = false;
         try {
-            // A ledger/reward inconsistency must never block deletion of an invoice.
-            if (order.walletRewardGranted && !order.walletRewardReversed) {
-                try {
-                    const result = await reverseWalletRewardForOrder(order.id);
-                    rewardRecovered = result?.reversed === true;
-                } catch (rewardError) {
-                    console.error('Wallet reward reversal skipped during deletion:', rewardError);
-                }
-            }
+            // Same direct deletion path used by the working main orders list.
             await deleteDoc(doc(db, 'orders', order.id));
-            setNotice(rewardRecovered
-                ? 'تم حذف الفاتورة واسترجاع مكافأتها المرتبطة.'
-                : 'تم حذف الفاتورة بنجاح.');
+            setNotice('تم حذف الفاتورة بنجاح.');
         } catch (error) {
             console.error('Wallet invoice deletion failed:', error);
             setNotice('تعذّر حذف الفاتورة. تأكد من صلاحية لوحة التحكم ثم حاول مرة أخرى.');
