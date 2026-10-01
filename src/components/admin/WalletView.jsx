@@ -376,7 +376,7 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
     const total = Number(order.total || subtotal + delivery - discount);
     return <div className="wallet-print-overlay fixed inset-0 z-[250] isolate overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-sm">
         <style>{`@media print { body { margin: 0 !important; background: #fff !important; } .wallet-print-overlay { position: static !important; overflow: visible !important; padding: 0 !important; background: #fff !important; } .wallet-invoice-paper { width: 210mm !important; max-width: 210mm !important; max-height: none !important; min-height: 148mm !important; margin: 0 auto !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; } .wallet-invoice-actions { display: none !important; } }`}</style>
-        <div dir="rtl" className="wallet-invoice-paper mx-auto my-1 max-h-[calc(100vh-24px)] w-full max-w-[560px] overflow-y-auto rounded-[20px] border border-slate-200 bg-white px-5 py-4 text-slate-900 shadow-[0_16px_45px_rgba(15,23,42,0.28)] dark:border-white dark:bg-white dark:text-slate-900">
+        <div dir="rtl" className="wallet-invoice-paper mx-auto my-1 max-h-[calc(100vh-24px)] w-full max-w-[560px] overflow-y-auto rounded-[20px] border border-slate-200 bg-white px-5 py-3 text-slate-900 shadow-[0_16px_45px_rgba(15,23,42,0.28)] dark:border-white dark:bg-white dark:text-slate-900">
             <div className="wallet-invoice-actions mb-3 flex items-center justify-between border-b border-slate-100 pb-3">
                 <button onClick={onClose} className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-rose-500"><X size={18}/></button>
                 <button onClick={() => window.print()} className="rounded-lg bg-slate-900 px-4 py-2 text-[10px] font-black text-white shadow-sm">طباعة الفاتورة</button>
@@ -425,11 +425,11 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
                     }) : <tr><td colSpan="5" className="py-5 text-center font-bold text-slate-400">لا توجد منتجات مسجلة لهذه الفاتورة.</td></tr>}</tbody>
                 </table>
             </section>
-            <div dir="ltr" className="mt-6 flex justify-start"><section dir="rtl" className="w-[285px] rounded-lg border border-slate-200 bg-slate-50 p-3 text-[10px] font-bold">
-                <p className="flex justify-between gap-3"><span>المجموع الفرعي:</span><b dir="ltr">{formatAmount(subtotal)} {currencyLabel}</b></p>
-                {discount > 0 && <p className="mt-2 flex justify-between gap-3 text-rose-600"><span>الخصم:</span><b dir="ltr">{formatAmount(discount)} {currencyLabel}</b></p>}
-                <p className="mt-2 flex justify-between gap-3"><span>رسوم التوصيل:</span><b dir="ltr">{formatAmount(delivery)} {currencyLabel}</b></p>
-                <p className="mt-2 border-t border-dashed border-slate-300 pt-2 text-[15px] font-black"><span>الإجمالي:</span><b dir="ltr">{formatAmount(total)} {currencyLabel}</b></p>
+            <div dir="ltr" className="mt-5 flex justify-end"><section dir="rtl" className="w-[270px] rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-[10px] font-bold">
+                <p className="flex items-center justify-between gap-3"><span>المجموع الفرعي:</span><b dir="ltr" className="inline-flex items-center gap-1"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(subtotal)}</span></b></p>
+                {discount > 0 && <p className="mt-1.5 flex items-center justify-between gap-3 text-rose-600"><span>الخصم:</span><b dir="ltr" className="inline-flex items-center gap-1"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(discount)}</span></b></p>}
+                <p className="mt-1.5 flex items-center justify-between gap-3"><span>رسوم التوصيل:</span><b dir="ltr" className="inline-flex items-center gap-1"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(delivery)}</span></b></p>
+                <p className="mt-1.5 flex items-center justify-between gap-3 border-t border-dashed border-slate-300 pt-1.5 text-[14px] font-black"><span>الإجمالي:</span><b dir="ltr" className="inline-flex items-center gap-1"><span className="font-sans">{currencyLabel}</span><span className="font-mono">{formatAmount(total)}</span></b></p>
             </section></div>
             <footer className="mt-6 border-t border-slate-400 pt-4 text-center"><p className="text-[10px] font-black">شكرًا لتسوقكم من متجر ميلانو</p><p className="mt-2 text-[7px] font-mono text-slate-500">ميلانو — فاتورة متجر إلكتروني</p></footer>
         </div>
