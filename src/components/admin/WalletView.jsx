@@ -392,17 +392,22 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
         const invoice = source.cloneNode(true);
         invoice.querySelector('.wallet-invoice-actions')?.remove();
         invoice.querySelector('style')?.remove();
+        invoice.setAttribute('class', 'wallet-invoice-paper');
         const copiedStyles = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
             .map(node => `<link rel="stylesheet" href="${new URL(node.getAttribute('href'), window.location.href).href}">`)
             .join('');
         printWindow.document.write(`<!doctype html><html dir="rtl"><head><meta charset="UTF-8"><base href="${window.location.origin}/"><title>فاتورة متجر ميلانو</title>${copiedStyles}<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"><style>
             @page { size: A4 portrait; margin: 0; }
-            html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+            html, body { width: 210mm !important; height: 297mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
             * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .wallet-print-host { width: 100%; padding: 0; background: #fff; }
-            .wallet-invoice-paper { width: 210mm !important; min-height: 240mm !important; height: auto !important; margin: 0 auto !important; padding: 20px 40px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; page-break-after: avoid !important; break-after: avoid-page !important; page-break-inside: avoid !important; background: #fff !important; }
-            .wallet-invoice-paper table, .wallet-invoice-paper tr { page-break-inside: avoid !important; }
-            @media print { .wallet-print-host { padding: 0 !important; } }
+            .wallet-print-host { display: block !important; width: 210mm !important; height: 297mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
+            .wallet-invoice-paper { display: block !important; width: 210mm !important; height: 277mm !important; min-height: 277mm !important; max-height: 277mm !important; margin: 0 !important; padding: 20px 40px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; page-break-after: avoid !important; break-after: avoid-page !important; page-break-inside: avoid !important; break-inside: avoid !important; background: #fff !important; }
+            .wallet-invoice-paper table, .wallet-invoice-paper tbody, .wallet-invoice-paper tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+            @media print {
+                html, body { width: 210mm !important; height: 297mm !important; overflow: hidden !important; }
+                .wallet-print-host { width: 210mm !important; height: 297mm !important; overflow: hidden !important; }
+                .wallet-invoice-paper { width: 210mm !important; height: 277mm !important; max-height: 277mm !important; overflow: hidden !important; }
+            }
         </style></head><body><main class="wallet-print-host">${invoice.outerHTML}</main></body></html>`);
         printWindow.document.close();
         printWindow.focus();
