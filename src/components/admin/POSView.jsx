@@ -679,147 +679,47 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         }
     };
 
-    // Print Receipt
-    // Print Receipt (Thermal Printer Layout)
+    // Print POS invoice — uses the shared invoice logo maintained in Image Settings.
     const triggerPrint = (order) => {
-        const printWindow = window.open('', '_blank', 'width=400,height=600');
+        const printWindow = window.open('', '_blank', 'width=420,height=720');
         if (!printWindow) {
-            alert(isRTL ? "يرجى السماح بالنوافذ المنبثقة للطبع" : "Please allow popups for printing");
+            alert(isRTL ? 'يرجى السماح بالنوافذ المنبثقة للطبع' : 'Please allow popups for printing');
             return;
         }
 
-        const dateStr = order.createdAt?.toDate 
-            ? order.createdAt.toDate().toLocaleString(isRTL ? 'ar-YE' : 'en-GB') 
-            : new Date().toLocaleString();
-
-        const direction = isRTL ? 'rtl' : 'ltr';
-        
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html dir="${direction}">
-            <head>
-                <title>${isRTL ? 'فاتورة كاشير' : 'Receipt'}</title>
-                <meta charset="UTF-8">
-                <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-                <style>
-                    @page { size: 80mm auto; margin: 0; }
-                    body { font-family: 'Cairo', sans-serif; padding: 10px 15px; width: 72mm; margin: 0 auto; background: #fff; color: #000; font-size: 11px; }
-                    .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px; }
-                    .store-name { font-weight: 900; font-size: 16px; margin: 0; }
-                    .store-addr { font-size: 11px; color: #222; margin-top: 3px; font-weight: 600; }
-                    .store-phone { font-size: 11px; color: #222; margin-top: 1px; font-weight: 600; }
-                    .meta-row { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 9px; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-                    th { border-bottom: 1px solid #000; padding: 4px 0; font-size: 10px; font-weight: bold; text-align: ${isRTL ? 'right' : 'left'}; }
-                    td { padding: 4px 0; font-size: 10px; vertical-align: top; border-bottom: 1px dashed #eee; }
-                    .qty-col { text-align: center; }
-                    .price-col { text-align: ${isRTL ? 'left' : 'right'}; font-weight: bold; }
-                    .totals { margin-top: 8px; border-top: 1.5px solid #000; padding-top: 4px; }
-                    .total-row { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 2px; }
-                    .final-total { font-weight: 900; font-size: 14px; margin-top: 4px; border-top: 1px solid #000; padding-top: 4px; }
-                    .footer { text-align: center; margin-top: 15px; font-size: 9px; border-top: 1px dashed #000; padding-top: 8px; }
-                    .print-btn { width: 100%; padding: 8px; background: #000; color: #fff; border: none; margin-bottom: 10px; cursor: pointer; font-weight: bold; border-radius: 6px; font-family: 'Cairo', sans-serif; font-size: 12px; }
-                    @media print { 
-                        .print-btn { display: none; } 
-                        body { width: auto; padding: 5px; } 
-                    }
-                </style>
-            </head>
-            <body>
-                <button class="print-btn" onclick="window.print()">${isRTL ? 'طباعة الفاتورة' : 'Print Receipt'}</button>
-                <div class="header">
-                    <div class="store-name">${generalSettings?.storeName || (isRTL ? "متجر ميلانو الرياضي" : "Milano Sports")}</div>
-                    <div class="store-addr">${generalSettings?.storeAddress || ''}</div>
-                    <div class="store-phone">${generalSettings?.phoneNumber || ''}</div>
-                </div>
-                
-                <div class="meta-row" style="margin-top: 10px;">
-                    <span>${isRTL ? 'رقم الإيصال:' : 'Receipt ID:'}</span>
-                    <span style="font-weight: bold;">#${order.orderId}</span>
-                </div>
-                <div class="meta-row">
-                    <span>${isRTL ? 'التاريخ:' : 'Date:'}</span>
-                    <span>${dateStr}</span>
-                </div>
-                <div class="meta-row">
-                    <span>${isRTL ? 'العميل:' : 'Customer:'}</span>
-                    <span>${order.formData?.name || (isRTL ? 'زبون محلي' : 'Walk-in')}</span>
-                </div>
-                <div class="meta-row">
-                    <span>${isRTL ? 'طريقة الدفع:' : 'Payment:'}</span>
-                    <span>${
-                        order.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') :
-                        order.paymentMethod === 'transfer' ? (isRTL ? 'تحويل بنكي' : 'Bank Transfer') :
-                        order.paymentMethod === 'cash' || !order.paymentMethod || order.paymentMethod === 'manual' ? (isRTL ? 'نقدي / كاش' : 'Cash') :
-                        order.paymentMethod
-                    }</span>
-                </div>
-                <div class="meta-row">
-                    <span>${isRTL ? 'الحالة:' : 'Status:'}</span>
-                    <span style="font-weight: bold; color: ${order.status === 'cancelled' ? 'red' : 'green'};">
-                        ${order.status === 'cancelled' ? (isRTL ? 'مسترجع' : 'Refunded') : (isRTL ? 'مكتمل' : 'Completed')}
-                    </span>
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th width="50%">${isRTL ? 'الصنف' : 'Item'}</th>
-                            <th width="15%" class="qty-col">${isRTL ? 'كمية' : 'Qty'}</th>
-                            <th width="35%" class="price-col">${isRTL ? 'الإجمالي' : 'Total'}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${(order.cartItems || []).map(item => {
-                            const details = [item.selectedSize, item.selectedColor].filter(Boolean).join(' - ');
-                            // Remove hex color codes like #ff0000 from printed receipt
-                            const cleanDetails = details.replace(/#[a-fA-F0-9]{6}/g, '').replace(/#[a-fA-F0-9]{3}/g, '').replace(/\s*-\s*$/, '').replace(/^\s*-\s*/, '').trim();
-                            return `
-                                <tr>
-                                    <td>
-                                        <div style="font-weight: bold;">${item.title}</div>
-                                        ${cleanDetails ? `<div style="font-size: 8px; color: #555;">${cleanDetails}</div>` : ''}
-                                    </td>
-                                    <td class="qty-col">${item.quantity}</td>
-                                    <td class="price-col">${(item.price * item.quantity).toLocaleString()}</td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
-
-                <div class="totals">
-                    <div class="total-row">
-                        <span>${isRTL ? 'المجموع الفرعي:' : 'Subtotal:'}</span>
-                        <span>${(order.subTotal || 0).toLocaleString()} ${currency}</span>
-                    </div>
-                    ${order.discount ? `
-                        <div class="total-row" style="color: red;">
-                            <span>${isRTL ? 'الخصم اليدوي:' : 'Discount:'}</span>
-                            <span>-${Number(order.discount).toLocaleString()} ${currency}</span>
-                        </div>
-                    ` : ''}
-                    <div class="total-row final-total">
-                        <span>${isRTL ? 'الإجمالي النهائي:' : 'TOTAL:'}</span>
-                        <span>${(order.total || 0).toLocaleString()} ${currency}</span>
-                    </div>
-                </div>
-
-                <div class="footer">
-                    <div>${isRTL ? 'شكراً لزيارتكم!' : 'Thank you for visiting!'}</div>
-                    <div style="font-size: 8px; margin-top: 4px; color: #666;">Milano Store POS</div>
-                </div>
-            </body>
-            </html>
-        `;
-
+        const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
+        const toEnglishNumber = (value) => Number(value || 0).toLocaleString('en-US');
+        const paymentLabel = order.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet')
+            : order.paymentMethod === 'transfer' ? (isRTL ? 'تحويل بنكي' : 'Bank Transfer')
+            : order.paymentMethod === 'cash' || !order.paymentMethod || order.paymentMethod === 'manual' ? (isRTL ? 'نقدي / كاش' : 'Cash')
+            : order.paymentMethod;
+        const completed = order.status !== 'cancelled';
+        const statusLabel = completed ? (isRTL ? 'مكتمل' : 'Completed') : (isRTL ? 'مسترجع' : 'Refunded');
+        const date = order.createdAt?.toDate?.() || (order.date && !Number.isNaN(new Date(order.date).getTime()) ? new Date(order.date) : new Date());
+        const datePart = date.toLocaleDateString('en-GB');
+        const timePart = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/am/i, isRTL ? 'ص' : 'AM').replace(/pm/i, isRTL ? 'م' : 'PM');
+        const invoiceLogo = generalSettings?.invoiceLogo || '/admin-logo.png';
+        const logoUrl = /^https?:\/\//i.test(invoiceLogo) ? invoiceLogo : `${window.location.origin}${invoiceLogo.startsWith('/') ? '' : '/'}${invoiceLogo}`;
+        const fallbackLogo = `${window.location.origin}/admin-logo.png`;
+        const items = order.cartItems || [];
+        const subtotal = Number(order.subTotal ?? items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0));
+        const discount = Number(order.discount || 0);
+        const total = Number(order.total ?? Math.max(0, subtotal - discount));
+        const itemRows = items.map(item => {
+            const details = [item.selectedSize || item.size, item.selectedColor]
+                .filter(Boolean)
+                .join(' · ')
+                .replace(/#[a-fA-F0-9]{6}/g, '')
+                .replace(/#[a-fA-F0-9]{3}/g, '')
+                .replace(/\s*·\s*$/, '')
+                .trim();
+            return `<tr><td class="item-cell"><strong>${escapeHtml(item.title || '---')}</strong>${details ? `<small>${escapeHtml(details)}</small>` : ''}</td><td class="qty-cell">${toEnglishNumber(item.quantity || 1)}</td><td class="amount-cell">${toEnglishNumber(Number(item.price || 0) * Number(item.quantity || 1))}</td></tr>`;
+        }).join('') || `<tr><td colspan="3" class="empty">${isRTL ? 'لا توجد أصناف في الفاتورة' : 'No items in this invoice'}</td></tr>`;
+        const htmlContent = `<!doctype html><html dir="${isRTL ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><base href="${window.location.origin}/"><title>${isRTL ? 'فاتورة نقطة البيع' : 'POS Invoice'}</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet"><style>
+            @page{size:80mm auto;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#111;font-family:'Cairo',Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{width:80mm;margin:0 auto}.no-print{display:block}.print-btn{width:calc(100% - 16mm);margin:5mm 8mm 0;border:0;border-radius:9px;background:#111;color:#fff;padding:3.2mm;font:800 12px 'Cairo',sans-serif;cursor:pointer}.receipt{padding:6mm 6mm 8mm;background:#fff}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:4mm;padding-bottom:4mm;border-bottom:1px dashed #dedede}.store{min-width:0;flex:1;text-align:right}.store-name{font-size:20px;line-height:1.2;font-weight:900;letter-spacing:-.4px}.store-address,.store-phone{margin-top:1mm;color:#414141;font-size:10px;font-weight:700;line-height:1.55}.brand-logo{width:25mm;height:25mm;flex:0 0 25mm;object-fit:contain;border-radius:7mm;background:#111;padding:2mm}.meta{padding:4mm 0;border-bottom:1px dashed #dedede}.meta-row{display:grid;grid-template-columns:1fr 1fr;gap:3mm;min-height:6.1mm;align-items:baseline;font-size:11px}.meta-key{color:#666;font-weight:700;text-align:right}.meta-value{font-weight:900;text-align:left;overflow-wrap:anywhere}.meta-value.ltr{direction:ltr;font-family:Arial,sans-serif}.meta-value.status{color:${completed ? '#149a63' : '#dc2626'}}.items{width:100%;border-collapse:collapse;margin-top:4mm;table-layout:fixed}.items th{padding:0 0 3mm;border-bottom:1px solid #d9d9d9;color:#555;font-size:12px;font-weight:900}.items th.item-head{text-align:right;width:57%}.items th.qty-head{text-align:center;width:15%}.items th.amount-head{text-align:left;width:28%}.items td{padding:3.5mm 0;vertical-align:top;border-bottom:1px dashed #e2e2e2;font-size:11px}.item-cell{text-align:right;padding-left:2mm!important}.item-cell strong{display:block;font-size:12px;line-height:1.55}.item-cell small{display:block;margin-top:1px;color:#686868;font-size:10px;font-weight:700}.qty-cell{text-align:center;font-family:Arial,sans-serif;font-weight:900}.amount-cell{text-align:left;direction:ltr;font-family:Arial,sans-serif;font-size:12px;font-weight:900}.empty{text-align:center;color:#777;padding:6mm 0!important}.totals{margin-top:4mm;border-bottom:1px dashed #dedede;padding-bottom:4mm}.total-row{display:flex;justify-content:space-between;align-items:center;padding:1.4mm 0;font-size:12px;font-weight:700}.total-row .money{direction:ltr;font-family:Arial,sans-serif;font-weight:900}.total-row.discount{color:#d33}.total-row.final{margin-top:1.5mm;padding-top:3mm;border-top:1px solid #d9d9d9;color:#111;font-size:16px;font-weight:900}.total-row.final .money{font-size:16px}.footer{padding-top:4mm;text-align:center}.footer b{display:block;font-size:14px;font-weight:900}.footer span{display:block;margin-top:1mm;color:#666;font-family:Arial,sans-serif;font-size:10px;font-weight:700}@media print{.no-print{display:none!important}.receipt{padding:6mm 6mm 8mm}body{width:80mm}}
+        </style></head><body><button class="print-btn no-print" onclick="window.print()">${isRTL ? 'طباعة الفاتورة' : 'Print Invoice'}</button><main class="receipt"><header class="top"><section class="store"><div class="store-name">${escapeHtml(generalSettings?.storeName || (isRTL ? 'متجر ميلانو' : 'Milano Store'))}</div>${generalSettings?.storeAddress ? `<div class="store-address">${escapeHtml(generalSettings.storeAddress)}</div>` : ''}${generalSettings?.phoneNumber ? `<div class="store-phone" dir="ltr">${escapeHtml(generalSettings.phoneNumber)}</div>` : ''}</section><img class="brand-logo" src="${escapeHtml(logoUrl)}" alt="${isRTL ? 'شعار المتجر' : 'Store logo'}" onerror="this.onerror=null;this.src='${escapeHtml(fallbackLogo)}'"/></header><section class="meta"><div class="meta-row"><span class="meta-key">${isRTL ? 'رقم الإيصال:' : 'Receipt no.:'}</span><span class="meta-value ltr">${escapeHtml(order.orderId || order.id || '---')}</span></div><div class="meta-row"><span class="meta-key">${isRTL ? 'التاريخ:' : 'Date:'}</span><span class="meta-value ltr">${escapeHtml(`${datePart} ${timePart}`)}</span></div><div class="meta-row"><span class="meta-key">${isRTL ? 'العميل:' : 'Customer:'}</span><span class="meta-value">${escapeHtml(order.formData?.name || (isRTL ? 'زبون محلي' : 'Walk-in Customer'))}</span></div><div class="meta-row"><span class="meta-key">${isRTL ? 'طريقة الدفع:' : 'Payment:'}</span><span class="meta-value">${escapeHtml(paymentLabel)}</span></div><div class="meta-row"><span class="meta-key">${isRTL ? 'الحالة:' : 'Status:'}</span><span class="meta-value status">${escapeHtml(statusLabel)}</span></div></section><table class="items"><thead><tr><th class="item-head">${isRTL ? 'الصنف' : 'Item'}</th><th class="qty-head">${isRTL ? 'كمية' : 'Qty'}</th><th class="amount-head">${isRTL ? 'الإجمالي' : 'Total'}</th></tr></thead><tbody>${itemRows}</tbody></table><section class="totals"><div class="total-row"><span>${isRTL ? 'المجموع الفرعي:' : 'Subtotal:'}</span><span class="money">${toEnglishNumber(subtotal)} ${escapeHtml(currency)}</span></div>${discount > 0 ? `<div class="total-row discount"><span>${isRTL ? 'الخصم:' : 'Discount:'}</span><span class="money">- ${toEnglishNumber(discount)} ${escapeHtml(currency)}</span></div>` : ''}<div class="total-row final"><span>${isRTL ? 'الإجمالي النهائي:' : 'Final total:'}</span><span class="money">${toEnglishNumber(total)} ${escapeHtml(currency)}</span></div></section><footer class="footer"><b>${isRTL ? 'شكراً لزيارتكم!' : 'Thank you for visiting!'}</b><span>Milano Store POS</span></footer></main><script>window.onload=()=>{window.focus();setTimeout(()=>window.print(),350)}</script></body></html>`;
         printWindow.document.write(htmlContent);
         printWindow.document.close();
-        
-        // Trigger print after fonts load
-        setTimeout(() => {
-            printWindow.print();
-        }, 300);
     };
 
     // Generate Custom Date Sales Report
