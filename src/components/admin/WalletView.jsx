@@ -407,13 +407,13 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-invoice-paper table, .wallet-invoice-paper tbody, .wallet-invoice-paper tr { page-break-inside: avoid !important; break-inside: avoid !important; }
             @media print {
                 html, body { width: 210mm !important; height: 297mm !important; overflow: hidden !important; }
+                .wallet-print-toolbar { display: none !important; }
                 .wallet-print-host { width: 210mm !important; height: 297mm !important; overflow: hidden !important; }
                 .wallet-invoice-paper { width: 210mm !important; height: 277mm !important; max-height: 277mm !important; overflow: hidden !important; }
             }
-        </style></head><body><main class="wallet-print-host">${invoice.outerHTML}</main></body></html>`);
+        </style></head><body><div class="wallet-print-toolbar"><button onclick="window.print()">طباعة الفاتورة</button><button class="close" onclick="window.close()" aria-label="إغلاق">×</button></div><main class="wallet-print-host">${invoice.outerHTML}</main></body></html>`);
         printWindow.document.close();
         printWindow.focus();
-        printWindow.onload = () => window.setTimeout(() => printWindow.print(), 500);
     };
     return <div className="wallet-print-overlay fixed inset-0 z-[250] isolate overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-sm">
         <style>{`@page { size: A4 portrait; margin: 0; } @media print { html, body, #root { width: 210mm !important; min-width: 210mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; } body * { visibility: hidden !important; } .wallet-print-overlay, .wallet-print-overlay * { visibility: visible !important; } .wallet-print-overlay { position: static !important; display: block !important; width: 210mm !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; background: #fff !important; backdrop-filter: none !important; } .wallet-invoice-paper { width: 210mm !important; max-width: 210mm !important; max-height: none !important; min-height: 240mm !important; height: auto !important; margin: 0 !important; padding: 20px 40px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; page-break-after: avoid !important; break-after: avoid-page !important; page-break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .wallet-invoice-paper table, .wallet-invoice-paper tr { page-break-inside: avoid !important; } .wallet-invoice-actions { display: none !important; } }`}</style>
