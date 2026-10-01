@@ -450,6 +450,7 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             @media print {
                 html, body { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; background: #fff !important; }
                 .wallet-print-toolbar { display: none !important; }
+                .wallet-invoice-paper table td:nth-child(4) { font-size: 13px !important; line-height: 1.2 !important; }
                 .wallet-print-host { width: 210mm !important; max-width: 210mm !important; height: 297mm !important; min-height: 297mm !important; margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; overflow: hidden !important; }
                 .wallet-invoice-paper { width: 210mm !important; height: 277mm !important; min-height: 277mm !important; max-height: 277mm !important; margin: 0 !important; padding: 20px 40px !important; overflow: hidden !important; }
             }
