@@ -224,13 +224,21 @@ const WalletView = () => {
     const removeOrder = async order => {
         if (!window.confirm(`هل تريد حذف الفاتورة ${order.orderId || ''}؟`)) return;
         setDeletingOrderId(order.id);
+        let rewardRecovered = false;
         try {
-            // Restore an already-issued reward before the order document disappears.
+            // A ledger/reward inconsistency must never block deletion of an invoice.
             if (order.walletRewardGranted && !order.walletRewardReversed) {
-                await reverseWalletRewardForOrder(order.id);
+                try {
+                    const result = await reverseWalletRewardForOrder(order.id);
+                    rewardRecovered = result?.reversed === true;
+                } catch (rewardError) {
+                    console.error('Wallet reward reversal skipped during deletion:', rewardError);
+                }
             }
             await deleteDoc(doc(db, 'orders', order.id));
-            setNotice('تم حذف الفاتورة واسترجاع مكافأتها المرتبطة إن وجدت.');
+            setNotice(rewardRecovered
+                ? 'تم حذف الفاتورة واسترجاع مكافأتها المرتبطة.'
+                : 'تم حذف الفاتورة بنجاح.');
         } catch (error) {
             console.error('Wallet invoice deletion failed:', error);
             setNotice('تعذّر حذف الفاتورة. تأكد من صلاحية لوحة التحكم ثم حاول مرة أخرى.');
@@ -241,7 +249,7 @@ const WalletView = () => {
     return <div dir="rtl" className="mx-auto max-w-7xl space-y-3 rounded-[22px] bg-slate-50/80 p-3 font-['Cairo'] text-slate-800 dark:bg-[#0d1118] dark:text-white">
         <section className="rounded-[20px] border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div className="flex items-center gap-2"><div className="rounded-xl border border-emerald-100 bg-emerald-50 p-2 text-emerald-600 shadow-sm dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-300"><Wallet size={19}/></div><div className="min-w-0"><div className="flex items-center gap-2"><h1 className="text-lg font-black leading-5">قسم المحفظة والفواتير</h1><span className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[9px] font-black text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200">مكافآت المتجر <Gift className="mr-1 inline" size={11}/></span></div><p className="mt-1 text-[10px] font-bold text-slate-400">إدارة فواتير العملاء وتحديث الرصيد تلقائيًا في محفظتهم عند اكتمال الطلب</p></div></div><div dir="ltr" className="flex items-center gap-2 self-start lg:self-auto"><div dir="rtl" className="flex flex-col items-stretch gap-0.5"><button onClick={() => setWalletDisplayCurrency('YER')} className={`rounded-[5px] px-2 py-[2px] text-[8px] font-black leading-3 shadow-sm transition ${walletDisplayCurrency === 'YER' ? 'bg-emerald-600 text-white shadow-emerald-600/25' : 'border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300'}`}>ريال يمني</button><button onClick={() => setWalletDisplayCurrency('SAR')} className={`rounded-[5px] px-2 py-[2px] text-[8px] font-black leading-3 shadow-sm transition ${walletDisplayCurrency === 'SAR' ? 'bg-emerald-600 text-white shadow-emerald-600/25' : 'border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300'}`}>ريال سعودي</button></div><div className="inline-flex h-8 min-w-[118px] items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 text-emerald-600 shadow-sm dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200"><button type="button" onClick={() => setRewardModalOpen(true)} title="تعديل مبلغ المكافأة" className="rounded-md p-1 transition hover:bg-emerald-100 dark:hover:bg-emerald-400/15"><Pencil size={13}/></button><span className="font-sans text-sm font-black">$</span><span className="font-mono text-sm font-black tabular-nums">{walletAmount(settings.defaultReward)}</span><Wallet size={14}/></div></div></div></section>
 
-        <section className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Metric tone="emerald" icon={<CheckCircle2 size={18}/>} label="إجمالي فواتير المتجر المكتملة" value={completedOrders.length}/><Metric tone="blue" icon={<Package size={18}/>} label="إجمالي كافة فواتير المتجر" value={orders.length}/><Metric tone="violet" icon={<Gift size={18}/>} label="مبيعات الفواتير المكتملة للمتجر" value={<span dir="ltr" className="inline-flex items-baseline gap-1 tabular-nums"><span dir="rtl" className="font-sans text-[10px] font-black text-slate-600 dark:text-slate-100">{walletCurrencyText}</span><span className="font-mono">{walletAmount(totalInvoiceValue)}</span></span>}/><Metric tone="emerald" icon={<Wallet size={18}/>} label="إجمالي أرصدة محافظ العملاء" value={<span dir="ltr" className="inline-flex items-center gap-1 font-sans tabular-nums not-italic"><span className="font-['Arial','Helvetica',sans-serif] not-italic font-bold leading-none">$</span><span>{walletAmount(completedWalletRewardsTotal)}</span></span>} openDigits/></section>
+        <section className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Metric tone="emerald" icon={<CheckCircle2 size={18}/>} label="إجمالي فواتير المتجر المكتملة" value={completedOrders.length}/><Metric tone="blue" icon={<Package size={18}/>} label="إجمالي كافة فواتير المتجر" value={storeOrders.length}/><Metric tone="violet" icon={<Gift size={18}/>} label="مبيعات الفواتير المكتملة للمتجر" value={<span dir="ltr" className="inline-flex items-baseline gap-1 tabular-nums"><span dir="rtl" className="font-sans text-[10px] font-black text-slate-600 dark:text-slate-100">{walletCurrencyText}</span><span className="font-mono">{walletAmount(totalInvoiceValue)}</span></span>}/><Metric tone="emerald" icon={<Wallet size={18}/>} label="إجمالي أرصدة محافظ العملاء" value={<span dir="ltr" className="inline-flex items-center gap-1 font-sans tabular-nums not-italic"><span className="font-['Arial','Helvetica',sans-serif] not-italic font-bold leading-none">$</span><span>{walletAmount(completedWalletRewardsTotal)}</span></span>} openDigits/></section>
 
 
 
@@ -251,7 +259,7 @@ const WalletView = () => {
 
         {rewardModalOpen && <RewardSettingsModal amount={settings.defaultReward} currencyCode={walletDisplayCurrency} saving={savingReward} onClose={() => setRewardModalOpen(false)} onSave={value => saveReward(toWalletBase(value))}/>}
         {managingWallet && <WalletAdjustmentModal wallet={managingWallet.wallet} order={managingWallet.order} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingWalletAdjustment} onClose={() => setManagingWallet(null)} onSave={saveWalletAdjustment}/>}
-        {notice && <div className="fixed bottom-5 left-1/2 z-[160] -translate-x-1/2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-xs font-black text-emerald-700 shadow-xl dark:border-emerald-400/40 dark:bg-[#183127] dark:text-emerald-200">{notice}</div>}
+        {notice && <div dir="rtl" className="fixed bottom-5 left-1/2 right-auto z-[160] w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-center text-xs font-black text-emerald-700 shadow-xl dark:border-emerald-400/40 dark:bg-[#183127] dark:text-emerald-200">{notice}</div>}
         {editingOrder && <InvoiceEditModal key={editingOrder.id} order={editingOrder} wallet={walletMap.get(editingOrder.customerWalletId)} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} onClose={() => setEditingOrder(null)} onSave={draft => saveInvoice({ ...draft, total: toWalletBase(draft.total), walletRewardOverride: toWalletBase(draft.walletRewardOverride), walletBalance: toWalletBase(draft.walletBalance) })}/>}
         {printingOrder && <InvoicePreview order={printingOrder} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onClose={() => setPrintingOrder(null)}/>}
     </div>;
