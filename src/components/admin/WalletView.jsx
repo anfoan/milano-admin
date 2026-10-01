@@ -61,7 +61,7 @@ const WalletView = () => {
 
     useEffect(() => {
         const stops = [
-            onSnapshot(collection(db, 'orders'), snap => setOrders(snap.docs.map(item => ({ id: item.id, ...item.data() })).sort((a, b) => toMillis(b.createdAt || b.timestamp) - toMillis(a.createdAt || a.timestamp))), error => console.error('Wallet orders listener:', error)),
+            onSnapshot(collection(db, 'orders'), snap => setOrders(snap.docs.map(item => ({ ...item.data(), id: item.id })).sort((a, b) => toMillis(b.createdAt || b.timestamp) - toMillis(a.createdAt || a.timestamp))), error => console.error('Wallet orders listener:', error)),
             onSnapshot(collection(db, 'customer_wallets'), snap => setWallets(snap.docs.map(item => ({ id: item.id, ...item.data() }))), error => console.error('Wallet balance listener:', error)),
             onSnapshot(collection(db, 'wallet_transactions'), snap => setWalletTransactions(snap.docs.map(item => ({ id: item.id, ...item.data() })).sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt))), error => console.error('Wallet transaction listener:', error)),
             onSnapshot(doc(db, 'settings', 'wallet'), snap => { if (snap.exists()) setSettings(previous => ({ ...previous, ...snap.data() })); setWalletSettingsLoaded(true); }, error => { console.error('Wallet settings listener:', error); setWalletSettingsLoaded(true); })
