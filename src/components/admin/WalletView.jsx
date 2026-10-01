@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { collection, deleteDoc, doc, onSnapshot, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Package, Pencil, Printer, Save, Search, Trash2, Truck, Wallet, WalletCards, WalletMinimal, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
-import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
+import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, reverseWalletRewardForOrder, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { adjustCustomerWalletBalance, ensureWalletSpendLedgerForOrder, setCustomerWalletBalance } from '../../lib/walletLedger';
 
 const toMillis = value => value?.toMillis?.() || (value?.seconds ? value.seconds * 1000 : new Date(value || 0).getTime() || 0);
@@ -46,6 +46,7 @@ const WalletView = () => {
     const [editingOrder, setEditingOrder] = useState(null);
     const [printingOrder, setPrintingOrder] = useState(null);
     const [rewarding, setRewarding] = useState('');
+    const [deletingOrderId, setDeletingOrderId] = useState('');
     const [savingReward, setSavingReward] = useState(false);
     const [rewardModalOpen, setRewardModalOpen] = useState(false);
     const [notice, setNotice] = useState('');
@@ -218,8 +219,18 @@ const WalletView = () => {
     };
     const removeOrder = async order => {
         if (!window.confirm(`هل تريد حذف الفاتورة ${order.orderId || ''}؟`)) return;
-        try { await deleteDoc(doc(db, 'orders', order.id)); setNotice('تم حذف الفاتورة.'); }
-        catch (error) { console.error(error); setNotice('تعذّر حذف الفاتورة.'); }
+        setDeletingOrderId(order.id);
+        try {
+            // Restore an already-issued reward before the order document disappears.
+            if (order.walletRewardGranted && !order.walletRewardReversed) {
+                await reverseWalletRewardForOrder(order.id);
+            }
+            await deleteDoc(doc(db, 'orders', order.id));
+            setNotice('تم حذف الفاتورة واسترجاع مكافأتها المرتبطة إن وجدت.');
+        } catch (error) {
+            console.error('Wallet invoice deletion failed:', error);
+            setNotice('تعذّر حذف الفاتورة. تأكد من صلاحية لوحة التحكم ثم حاول مرة أخرى.');
+        } finally { setDeletingOrderId(''); }
     };
     const copy = async value => { await navigator.clipboard?.writeText(value || ''); setNotice('تم نسخ رقم الفاتورة.'); };
 
@@ -232,7 +243,7 @@ const WalletView = () => {
 
         <section className="rounded-[18px] border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 md:flex-row-reverse md:items-center md:justify-between"><div className="flex flex-wrap gap-2"><Filter active={filter === 'all'} tone="blue" onClick={() => setFilter('all')}>جميع الفواتير ({orders.length})</Filter><Filter active={filter === 'completed'} tone="emerald" onClick={() => setFilter('completed')}>فواتير مكتملة ومدفوعة ({completedOrders.length})</Filter><Filter active={filter === 'processing'} tone="maroon" onClick={() => setFilter('processing')}>فواتير قيد المعالجة ({inProgressOrders.length})</Filter></div><div className="relative w-full md:w-72"><Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="ابحث بالعميل أو الهاتف أو رقم الفاتورة..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-9 pl-3 text-right text-[10px] font-bold outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-white/5"/></div></div></section>
 
-        <section className="space-y-3">{visibleOrders.map((order, index) => <InvoiceCard key={order.id} order={order} wallet={walletMap.get(order.customerWalletId)} position={visibleOrders.length - index} isLatest={order.id === orders[0]?.id} rewarding={rewarding === order.id} defaultReward={settings.defaultReward} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onReward={() => issueReward(order)} onEdit={() => setEditingOrder(order)} onDelete={() => removeOrder(order)} onPrint={() => setPrintingOrder(order)} onChangeStatus={status => saveStatus(order, status)} onManageWallet={() => { const wallet = walletMap.get(order.customerWalletId); if (wallet) setManagingWallet({ wallet, order }); else setNotice('لا توجد محفظة مرتبطة بهذه الفاتورة بعد.'); }}/>) }{visibleOrders.length === 0 && <div className="rounded-[18px] border border-slate-200 bg-white py-16 text-center text-sm font-bold text-slate-400 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]">لا توجد فواتير مطابقة للبحث الحالي.</div>}</section>
+        <section className="space-y-3">{visibleOrders.map((order, index) => <InvoiceCard key={order.id} order={order} wallet={walletMap.get(order.customerWalletId)} position={visibleOrders.length - index} isLatest={order.id === orders[0]?.id} rewarding={rewarding === order.id} deleting={deletingOrderId === order.id} defaultReward={settings.defaultReward} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onReward={() => issueReward(order)} onEdit={() => setEditingOrder(order)} onDelete={() => removeOrder(order)} onPrint={() => setPrintingOrder(order)} onChangeStatus={status => saveStatus(order, status)} onManageWallet={() => { const wallet = walletMap.get(order.customerWalletId); if (wallet) setManagingWallet({ wallet, order }); else setNotice('لا توجد محفظة مرتبطة بهذه الفاتورة بعد.'); }}/>) }{visibleOrders.length === 0 && <div className="rounded-[18px] border border-slate-200 bg-white py-16 text-center text-sm font-bold text-slate-400 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]">لا توجد فواتير مطابقة للبحث الحالي.</div>}</section>
 
         {rewardModalOpen && <RewardSettingsModal amount={settings.defaultReward} currencyCode={walletDisplayCurrency} saving={savingReward} onClose={() => setRewardModalOpen(false)} onSave={value => saveReward(toWalletBase(value))}/>}
         {managingWallet && <WalletAdjustmentModal wallet={managingWallet.wallet} order={managingWallet.order} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingWalletAdjustment} onClose={() => setManagingWallet(null)} onSave={saveWalletAdjustment}/>}
@@ -275,7 +286,7 @@ const Filter = ({ active, tone, onClick, children }) => <button onClick={onClick
 
 const InvoiceMeta = ({ label, value, ltr = false, tone = '' }) => <div className="min-h-[62px] px-3 py-2 text-right"><p className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{label}</p><div dir={ltr ? 'ltr' : undefined} className={`mt-1 truncate text-[11px] font-black ${tone === 'emerald' ? 'text-emerald-600 dark:text-emerald-400' : tone === 'amber' ? 'text-amber-600 dark:text-amber-300' : 'text-slate-800 dark:text-slate-100'}`}>{value ?? '---'}</div></div>;
 
-const InvoiceCard = ({ order, wallet, position, isLatest, rewarding, defaultReward, formatAmount, currencyLabel, onReward, onEdit, onDelete, onPrint, onChangeStatus, onManageWallet }) => {
+const InvoiceCard = ({ order, wallet, position, isLatest, rewarding, deleting, defaultReward, formatAmount, currencyLabel, onReward, onEdit, onDelete, onPrint, onChangeStatus, onManageWallet }) => {
     const [statusMenuOpen, setStatusMenuOpen] = useState(false);
     const key = statusKey(order.status);
     const complete = key === 'completed';
@@ -304,7 +315,7 @@ const InvoiceCard = ({ order, wallet, position, isLatest, rewarding, defaultRewa
     return <article className="overflow-visible rounded-[18px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-[#10131d]">
         <div className="relative z-20 flex min-h-12 flex-wrap items-center justify-between gap-2 rounded-t-[18px] border-b border-slate-100 px-3 py-2.5 dark:border-slate-800">
             <div className="flex flex-wrap items-center gap-2"><span className="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-black text-slate-500 dark:bg-white/10 dark:text-slate-200">{position}</span><span dir="ltr" className="font-mono text-[11px] font-black text-blue-600 dark:text-blue-300">{order.orderId || order.id}</span><span className="text-[9px] font-bold text-slate-400">{orderDate(order.createdAt || order.date)}</span>{isLatest && <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-[9px] font-black text-blue-700 dark:border-blue-400/35 dark:bg-blue-400/15 dark:text-blue-200">أحدث فاتورة</span>}</div>
-            <div className="flex flex-wrap items-center gap-1.5"><div className="relative z-[80]"><button onClick={() => setStatusMenuOpen(value => !value)} className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[10px] font-black ${statusPillClass(key)}`}><ChevronDown size={13}/>{statusText(key)}</button>{statusMenuOpen && <div className="absolute left-0 top-full z-[90] mt-1 w-32 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-right shadow-xl dark:border-slate-700 dark:bg-[#252a35]">{choices.map(([value, label]) => <button key={value} onClick={() => { setStatusMenuOpen(false); onChangeStatus(value); }} className={`block w-full rounded-md border px-3 py-2 text-right text-[10px] font-black transition ${statusPillClass(value)} ${value === key ? 'ring-2 ring-slate-400/40 dark:ring-white/30' : 'opacity-90 hover:opacity-100'}`}>{label}</button>)}</div>}</div><button onClick={onPrint} className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[10px] font-black text-emerald-700 dark:border-emerald-400/35 dark:bg-emerald-400/15 dark:text-emerald-200"><Printer size={12}/> طباعة</button><button onClick={onEdit} className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-[10px] font-black text-blue-700 dark:border-blue-400/35 dark:bg-blue-400/15 dark:text-blue-200"><Pencil size={12}/> تعديل</button><button onClick={onDelete} className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-[10px] font-black text-rose-700 dark:border-rose-400/35 dark:bg-rose-400/15 dark:text-rose-200"><Trash2 size={12}/> حذف</button></div>
+            <div className="flex flex-wrap items-center gap-1.5"><div className="relative z-[80]"><button onClick={() => setStatusMenuOpen(value => !value)} className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[10px] font-black ${statusPillClass(key)}`}><ChevronDown size={13}/>{statusText(key)}</button>{statusMenuOpen && <div className="absolute left-0 top-full z-[90] mt-1 w-32 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-right shadow-xl dark:border-slate-700 dark:bg-[#252a35]">{choices.map(([value, label]) => <button key={value} onClick={() => { setStatusMenuOpen(false); onChangeStatus(value); }} className={`block w-full rounded-md border px-3 py-2 text-right text-[10px] font-black transition ${statusPillClass(value)} ${value === key ? 'ring-2 ring-slate-400/40 dark:ring-white/30' : 'opacity-90 hover:opacity-100'}`}>{label}</button>)}</div>}</div><button onClick={onPrint} className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[10px] font-black text-emerald-700 dark:border-emerald-400/35 dark:bg-emerald-400/15 dark:text-emerald-200"><Printer size={12}/> طباعة</button><button onClick={onEdit} className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-[10px] font-black text-blue-700 dark:border-blue-400/35 dark:bg-blue-400/15 dark:text-blue-200"><Pencil size={12}/> تعديل</button><button type="button" disabled={deleting} onClick={onDelete} className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-[10px] font-black text-rose-700 transition hover:bg-rose-100 disabled:cursor-wait disabled:opacity-60 dark:border-rose-400/35 dark:bg-rose-400/15 dark:text-rose-200 dark:hover:bg-rose-400/25"><Trash2 size={12}/>{deleting ? 'جاري الحذف...' : 'حذف'}</button></div>
         </div>
 
         <div className="mx-3 mt-3">
