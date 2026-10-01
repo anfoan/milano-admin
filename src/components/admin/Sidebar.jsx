@@ -199,10 +199,13 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                         <div key={item.id} className="space-y-1">
                             {item.id === 'wallet' ? <button
                                 onClick={() => setActiveTab(item.id)}
-                                className={`relative flex h-12 w-full items-center gap-3 rounded-2xl px-4 font-black transition-all duration-300 ${isSectionActive(item) ? 'bg-[#f4f4f4] text-slate-900 shadow-inner dark:bg-white/10 dark:text-white' : 'bg-[#f7f7f7] text-slate-900 hover:bg-[#f1f1f1] dark:bg-white/5 dark:text-white dark:hover:bg-white/10'}`}
+                                className={`relative flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 font-bold transition-all duration-300 group ${isSectionActive(item)
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
+                                    }`}
                             >
-                                <span className="text-slate-400 dark:text-slate-300">{item.icon}</span>
-                                <span className="flex-1 text-right text-[15px]">{item.name}</span>
+                                <span className={`${isSectionActive(item) ? 'text-white' : 'text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400'}`}>{item.icon}</span>
+                                <span className="flex-1 text-right text-base font-black">{item.name}</span>
                                 <span dir="ltr" className="inline-flex h-6 min-w-[54px] items-center justify-between gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-1.5 font-sans tabular-nums text-[10px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{Number(walletDisplayBalance || 0).toLocaleString('en-US')}</span></span>
                             </button> : <button
                                 onClick={() => {
