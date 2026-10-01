@@ -437,16 +437,16 @@ const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
             .wallet-invoice-product-name { display: block !important; order: 2 !important; flex: 1 1 auto !important; min-width: 0 !important; color: #111827 !important; font-size: 8px !important; font-weight: 900 !important; line-height: 1.2 !important; text-align: center !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
             .wallet-invoice-totals-wrap { display: flex !important; justify-content: flex-end !important; margin-top: 15px !important; }
             .wallet-invoice-totals { width: 270px !important; padding: 9px 11px 10px !important; border: 1px solid #e2e8f0 !important; border-radius: 7px !important; background: #f8fafc !important; font-size: 10px !important; font-weight: 700 !important; }
-            .wallet-invoice-total-row { display: flex !important; direction: rtl !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; min-height: 19px !important; margin: 0 !important; color: #1f2937 !important; white-space: nowrap !important; line-height: 1.25 !important; }
+            .wallet-invoice-total-row { display: flex !important; direction: ltr !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; min-height: 19px !important; margin: 0 !important; color: #1f2937 !important; white-space: nowrap !important; line-height: 1.25 !important; }
             .wallet-invoice-total-row + .wallet-invoice-total-row { margin-top: 2px !important; }
-            .wallet-invoice-total-label { color: #334155 !important; font-weight: 900 !important; }
-            .wallet-invoice-total-amount { display: flex !important; direction: ltr !important; align-items: center !important; justify-content: space-between !important; width: 126px !important; color: #111827 !important; font-size: 10px !important; font-weight: 900 !important; }
-            .wallet-invoice-currency { order: 1 !important; color: #475569 !important; font-weight: 700 !important; }
-            .wallet-invoice-total-number { order: 2 !important; color: #111827 !important; font-family: Arial, sans-serif !important; font-weight: 900 !important; }
+            .wallet-invoice-total-label { order: 2 !important; direction: rtl !important; margin-left: auto !important; color: #334155 !important; font-weight: 900 !important; text-align: right !important; }
+            .wallet-invoice-total-amount { display: flex !important; order: 1 !important; direction: ltr !important; align-items: center !important; justify-content: space-between !important; width: 132px !important; margin-right: auto !important; color: #111827 !important; font-size: 10px !important; font-weight: 900 !important; }
+            .wallet-invoice-currency { order: 1 !important; color: #475569 !important; font-weight: 700 !important; text-align: left !important; }
+            .wallet-invoice-total-number { order: 2 !important; color: #111827 !important; font-family: Arial, sans-serif !important; font-weight: 900 !important; text-align: right !important; }
             .wallet-invoice-discount, .wallet-invoice-discount * { color: #dc2626 !important; }
             .wallet-invoice-grand-total { min-height: 28px !important; margin-top: 5px !important; padding-top: 6px !important; border-top: 1px dashed #cbd5e1 !important; font-size: 13px !important; font-weight: 900 !important; }
             .wallet-invoice-grand-total .wallet-invoice-total-label { color: #111827 !important; }
-            .wallet-invoice-grand-total .wallet-invoice-total-amount { width: 138px !important; font-size: 13px !important; }
+            .wallet-invoice-grand-total .wallet-invoice-total-amount { width: 142px !important; font-size: 13px !important; }
             .wallet-invoice-grand-total .wallet-invoice-total-number, .wallet-invoice-grand-total .wallet-invoice-currency { color: #111827 !important; }
             .wallet-invoice-paper > footer { margin-top: 16px !important; padding-top: 12px !important; border-top: 1px solid #94a3b8 !important; text-align: center !important; }
             .wallet-invoice-paper > footer p { margin: 0 !important; }
