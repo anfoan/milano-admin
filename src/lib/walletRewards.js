@@ -37,7 +37,19 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
         const amount = amountOf(order.walletRewardOverride ?? settings.defaultReward ?? 500);
         if (settings.enabled === false || amount === 0) return { granted: false, reason: 'rewards-disabled' };
         if ((order.walletRewardGranted && !order.walletRewardReversed) || (rewardRecord && !rewardRecord.reversed)) {
-            return { granted: false, reason: 'already-granted' };
+            // Repair older invoices whose reward ledger exists but whose order flags were not saved.
+            if (rewardRecord && (!order.walletRewardGranted || order.walletRewardReversed)) {
+                transaction.update(orderRef, {
+                    walletRewardGranted: true,
+                    walletRewardReversed: false,
+                    walletRewardAmount: amountOf(rewardRecord.amount || order.walletRewardAmount),
+                    walletRewardGrantedAt: rewardRecord.issuedAt || rewardRecord.createdAt || serverTimestamp(),
+                    walletRewardReversedAt: null,
+                    walletRewardReversalAmount: 0,
+                    walletRewardReversalShortfall: 0,
+                });
+            }
+            return { granted: false, reason: 'already-granted', amount: amountOf(rewardRecord?.amount || order.walletRewardAmount) };
         }
 
         const walletRef = doc(db, 'customer_wallets', order.customerWalletId);

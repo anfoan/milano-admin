@@ -34,6 +34,7 @@ const WalletView = () => {
     const [wallets, setWallets] = useState([]);
     const [walletTransactions, setWalletTransactions] = useState([]);
     const [settings, setSettings] = useState({ defaultReward: 500, enabled: true });
+    const [walletSettingsLoaded, setWalletSettingsLoaded] = useState(false);
     const [filter, setFilter] = useState('all');
     const [search, setSearch] = useState('');
     const [editingOrder, setEditingOrder] = useState(null);
@@ -46,13 +47,14 @@ const WalletView = () => {
     const [managingWallet, setManagingWallet] = useState(null);
     const [savingWalletAdjustment, setSavingWalletAdjustment] = useState(false);
     const spendLedgerSyncRef = useRef(new Set());
+    const rewardSyncRef = useRef(new Set());
 
     useEffect(() => {
         const stops = [
             onSnapshot(collection(db, 'orders'), snap => setOrders(snap.docs.map(item => ({ id: item.id, ...item.data() })).sort((a, b) => toMillis(b.createdAt || b.timestamp) - toMillis(a.createdAt || a.timestamp))), error => console.error('Wallet orders listener:', error)),
             onSnapshot(collection(db, 'customer_wallets'), snap => setWallets(snap.docs.map(item => ({ id: item.id, ...item.data() }))), error => console.error('Wallet balance listener:', error)),
             onSnapshot(collection(db, 'wallet_transactions'), snap => setWalletTransactions(snap.docs.map(item => ({ id: item.id, ...item.data() })).sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt))), error => console.error('Wallet transaction listener:', error)),
-            onSnapshot(doc(db, 'settings', 'wallet'), snap => { if (snap.exists()) setSettings(previous => ({ ...previous, ...snap.data() })); })
+            onSnapshot(doc(db, 'settings', 'wallet'), snap => { if (snap.exists()) setSettings(previous => ({ ...previous, ...snap.data() })); setWalletSettingsLoaded(true); }, error => { console.error('Wallet settings listener:', error); setWalletSettingsLoaded(true); })
         ];
         return () => stops.forEach(stop => stop());
     }, []);
@@ -80,6 +82,23 @@ const WalletView = () => {
             ensureWalletSpendLedgerForOrder(order.id).catch(error => console.error('Wallet spend ledger sync:', error)).finally(() => spendLedgerSyncRef.current.delete(order.id));
         });
     }, [orders]);
+
+    // Reconcile every existing and newly updated invoice so the total wallet balance
+    // always receives the reward for completed orders and returns it on any other status.
+    useEffect(() => {
+        if (!walletSettingsLoaded) return;
+        orders.forEach(order => {
+            if (!order.id || !order.customerWalletId) return;
+            const completed = isCompletedOrderStatus(order.status);
+            const needsCredit = completed && (!order.walletRewardGranted || order.walletRewardReversed);
+            const needsReversal = !completed && order.walletRewardGranted && !order.walletRewardReversed;
+            if ((!needsCredit && !needsReversal) || rewardSyncRef.current.has(order.id)) return;
+            rewardSyncRef.current.add(order.id);
+            syncWalletRewardForOrderStatus(order.id, order.status)
+                .catch(error => console.error('Wallet reward reconciliation:', error))
+                .finally(() => rewardSyncRef.current.delete(order.id));
+        });
+    }, [orders, settings.defaultReward, settings.enabled, walletSettingsLoaded]);
 
     const saveReward = async (amount = settings.defaultReward) => {
         const defaultReward = Math.max(0, Number(amount || 0));
