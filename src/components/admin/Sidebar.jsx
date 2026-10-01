@@ -173,7 +173,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                 />
             )}
 
-            <aside className={`fixed inset-y-0 z-50 w-72 bg-white dark:bg-[#1c1c1e] h-screen border-gray-100 dark:border-white/5 flex flex-col pt-6 font-['Cairo'] overflow-y-auto scrollbar-hide transition-transform duration-300 ${isRTL ? 'right-0 border-l' : 'left-0 border-r'} ${isOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}`} dir={isRTL ? "rtl" : "ltr"}>
+            <aside className={`fixed inset-y-0 z-50 w-72 bg-white dark:bg-[#1c1c1e] h-screen border-gray-100 dark:border-white/5 flex flex-col pt-6 font-['Cairo'] overflow-hidden transition-transform duration-300 ${isRTL ? 'right-0 border-l' : 'left-0 border-r'} ${isOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}`} dir={isRTL ? "rtl" : "ltr"}>
                 <div className="px-5 mb-10 flex items-center justify-between">
                     <div
                         className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity translate-x-1"
@@ -194,7 +194,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                     </button>
                 </div>
 
-                <nav className={`relative ${restrictedTabs ? 'flex-1' : 'flex-none'} ml-4 border-l border-slate-200 px-4 pl-5 space-y-1 dark:border-white/15`}>
+                <nav className="admin-sidebar-section-scroll relative ml-4 min-h-0 flex-1 overflow-y-auto px-4 pl-5 space-y-1">
                     {menuItems.map((item) => (
                         <div key={item.id} className="space-y-1">
                             {item.id === 'wallet' ? <button

@@ -59,6 +59,52 @@ input[type=number] {
     scrollbar-width: none;
   }
 
+  /* A visible, draggable rail beside the dashboard sections. */
+  .admin-sidebar-section-scroll {
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(37, 99, 235, 0.62) transparent;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-sidebar-section-scroll::-webkit-scrollbar {
+    width: 9px;
+  }
+
+  .admin-sidebar-section-scroll::-webkit-scrollbar-track {
+    background: rgba(148, 163, 184, 0.14);
+    border-radius: 999px;
+    margin: 8px 0;
+  }
+
+  .admin-sidebar-section-scroll::-webkit-scrollbar-thumb {
+    min-height: 44px;
+    background: linear-gradient(180deg, rgba(96, 165, 250, 0.92), rgba(37, 99, 235, 0.76));
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 999px;
+    cursor: grab;
+  }
+
+  .admin-sidebar-section-scroll::-webkit-scrollbar-thumb:active {
+    cursor: grabbing;
+    background: linear-gradient(180deg, rgba(59, 130, 246, 1), rgba(29, 78, 216, 0.92));
+  }
+
+  .dark .admin-sidebar-section-scroll {
+    scrollbar-color: rgba(191, 219, 254, 0.72) transparent;
+  }
+
+  .dark .admin-sidebar-section-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  .dark .admin-sidebar-section-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(191, 219, 254, 0.9), rgba(96, 165, 250, 0.78));
+    background-clip: padding-box;
+  }
+
   .flip-rtl {
     @apply transition-transform;
   }
