@@ -486,8 +486,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     <th className="px-3" style={{ width: '10%' }}>{txt.th_code}</th>
                                     <th className="px-3" style={{ width: '30%' }}>{txt.th_name}</th>
                                     <th className="px-3" style={{ width: '35%' }}>{txt.th_sizes}</th>
-                                    <th className="px-3 text-center" style={{ width: '10%' }}>{txt.th_stock}</th>
-                                    <th className="px-3 text-center no-print" style={{ width: '10%' }}>{txt.th_actions}</th>
+                                    <th className="px-3 text-center text-gray-900 dark:text-white" style={{ width: '10%' }}>{txt.th_stock}</th>
+                                    <th className="px-3 text-center no-print text-gray-900 dark:text-white" style={{ width: '10%' }}>{txt.th_actions}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -564,8 +564,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     <th className="px-3" style={{ width: '10%' }}>
                                         <span className="text-green-600">{txt.th_total_sell}</span>
                                     </th>
-                                    <th className="px-3" style={{ width: '12%' }}>{txt.th_stock}</th>
-                                    <th className="px-3 no-print text-center" style={{ width: '6%' }}>{txt.th_actions}</th>
+                                    <th className="px-3 text-gray-900 dark:text-white" style={{ width: '12%' }}>{txt.th_stock}</th>
+                                    <th className="px-3 no-print text-center text-gray-900 dark:text-white" style={{ width: '6%' }}>{txt.th_actions}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 print:divide-gray-300">
@@ -674,7 +674,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
 
                                             {/* Sell Price - larger */}
                                             <td className="px-3">
-                                                <span className="text-sm font-black text-green-600 print:text-[10px]">{sellPrice.toLocaleString()}</span>
+                                                <span className="text-sm font-black text-gray-900 dark:text-white print:text-[10px]">{sellPrice.toLocaleString()}</span>
                                                 <span className="text-[10px] text-gray-400 font-bold block">{currency}</span>
                                             </td>
                                             {/* Total Sell (sell × stock) */}
