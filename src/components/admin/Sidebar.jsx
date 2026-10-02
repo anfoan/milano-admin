@@ -77,9 +77,11 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
     // The sidebar badge mirrors only the saved default customer-wallet reward.
     // It is intentionally independent of Jib Wallet payments and customer balances.
     const [walletRewardAmount, setWalletRewardAmount] = useState(0);
+    const [walletEnabled, setWalletEnabled] = useState(true);
     useEffect(() => {
         const unsubscribe = onSnapshot(doc(db, 'settings', 'wallet'), snapshot => {
             setWalletRewardAmount(Math.max(0, Number(snapshot.data()?.defaultReward || 0)));
+            setWalletEnabled(snapshot.data()?.enabled !== false);
         }, error => console.error('Sidebar wallet reward listener:', error));
         return () => unsubscribe();
     }, []);
@@ -206,7 +208,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                             >
                                 <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>{item.icon}</span>
                                 <span className="flex-1 whitespace-nowrap text-right text-base font-black">{item.name}</span>
-                                <span dir="ltr" className="inline-flex h-6 min-w-[54px] items-center justify-center gap-1 rounded-md border border-emerald-300 bg-emerald-100 px-1.5 font-sans tabular-nums text-[10px] font-black text-emerald-700 shadow-sm dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200"><span>$</span><span>{Number(walletRewardAmount || 0).toLocaleString('en-US')}</span></span>
+                                <span dir={walletEnabled ? 'ltr' : 'rtl'} className={`inline-flex h-6 min-w-[54px] items-center justify-center gap-1 rounded-md border px-1.5 text-[10px] font-black shadow-sm ${walletEnabled ? 'border-emerald-300 bg-emerald-100 font-sans tabular-nums text-emerald-700 dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200' : 'border-rose-300 bg-rose-100 text-rose-700 dark:border-rose-400/50 dark:bg-rose-400/15 dark:text-rose-200'}`}>{walletEnabled ? <><span>$</span><span>{Number(walletRewardAmount || 0).toLocaleString('en-US')}</span></> : 'موقفة'}</span>
                             </button> : <button
                                 onClick={() => {
                                     if (item.subItems) {

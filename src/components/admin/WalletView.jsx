@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { collection, deleteDoc, doc, onSnapshot, runTransaction, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Package, Pencil, Printer, Save, Search, Trash2, Truck, Wallet, WalletMinimal, X } from 'lucide-react';
+import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Package, Pencil, Power, Printer, Save, Search, Trash2, Truck, Wallet, WalletMinimal, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { adjustCustomerWalletBalance, ensureWalletSpendLedgerForOrder, setCustomerWalletBalance } from '../../lib/walletLedger';
@@ -62,6 +62,7 @@ const WalletView = () => {
     const [rewarding, setRewarding] = useState('');
     const [deletingOrderId, setDeletingOrderId] = useState('');
     const [savingReward, setSavingReward] = useState(false);
+    const [togglingWallet, setTogglingWallet] = useState(false);
     const [rewardModalOpen, setRewardModalOpen] = useState(false);
     const [notice, setNotice] = useState('');
     const [walletDisplayCurrency, setWalletDisplayCurrency] = useState('YER');
@@ -110,21 +111,23 @@ const WalletView = () => {
     const customerCredentialMap = useMemo(() => new Map(customerCredentials.map(credential => [credential.walletId || credential.id, credential])), [customerCredentials]);
     const recentWalletTransactions = useMemo(() => walletTransactions.slice(0, 8), [walletTransactions]);
     const walletCurrencyText = walletCurrencyLabel(walletDisplayCurrency);
+    const walletEnabled = settings.enabled !== false;
     const walletAmount = value => walletConvertedAmount(value, walletDisplayCurrency);
     const toWalletBase = value => walletBaseAmount(value, walletDisplayCurrency);
 
     useEffect(() => {
+        if (settings.enabled === false) return;
         orders.filter(order => Number(order.walletApplied || 0) > 0 && !order.walletSpendLedgerCreated).forEach(order => {
             if (spendLedgerSyncRef.current.has(order.id)) return;
             spendLedgerSyncRef.current.add(order.id);
             ensureWalletSpendLedgerForOrder(order.id).catch(error => console.error('Wallet spend ledger sync:', error)).finally(() => spendLedgerSyncRef.current.delete(order.id));
         });
-    }, [orders]);
+    }, [orders, settings.enabled]);
 
     // Reconcile every existing and newly updated invoice so the total wallet balance
     // always receives the reward for completed orders and returns it on any other status.
     useEffect(() => {
-        if (!walletSettingsLoaded) return;
+        if (!walletSettingsLoaded || settings.enabled === false) return;
         orders.forEach(order => {
             if (!order.id || !getOrderRewardWalletId(order)) return;
             const completed = isCompletedOrderStatus(order.status);
@@ -137,6 +140,33 @@ const WalletView = () => {
                 .finally(() => rewardSyncRef.current.delete(order.id));
         });
     }, [orders, settings.defaultReward, settings.enabled, walletSettingsLoaded]);
+
+    const toggleWalletEnabled = async enabled => {
+        if (enabled === walletEnabled || togglingWallet) return;
+        setTogglingWallet(true);
+        try {
+            await setDoc(doc(db, 'settings', 'wallet'), {
+                enabled,
+                defaultReward: Math.max(0, Number(settings.defaultReward || 0)),
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+            setSettings(previous => ({ ...previous, enabled }));
+            if (!enabled) {
+                setRewardModalOpen(false);
+                setCustomerDataOpen(false);
+                setManagingWallet(null);
+                setEditingOrder(null);
+                setEditingCustomerWallet(null);
+                setPrintingOrder(null);
+            }
+            setNotice(enabled
+                ? 'تم تفعيل المحفظة. عادت خدمات المحفظة للعمل في لوحة التحكم والمتجر.'
+                : 'تم تعطيل المحفظة. توقفت خدماتها واختفت من واجهة العملاء.');
+        } catch (error) {
+            console.error('Wallet activation update failed:', error);
+            setNotice('تعذّر تحديث حالة المحفظة. تأكد من صلاحية لوحة التحكم ثم حاول مرة أخرى.');
+        } finally { setTogglingWallet(false); }
+    };
 
     const saveReward = async (amount = settings.defaultReward) => {
         const defaultReward = Math.max(0, Number(amount || 0));
@@ -334,8 +364,9 @@ const WalletView = () => {
     const copy = async value => { await navigator.clipboard?.writeText(value || ''); setNotice('تم نسخ رقم الفاتورة.'); };
 
     return <div dir="rtl" className="mx-auto max-w-7xl space-y-3 rounded-[22px] bg-slate-50/80 p-3 font-['Cairo'] text-slate-800 dark:bg-[#0d1118] dark:text-white">
-        <section className="rounded-[20px] border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div className="flex items-center gap-2"><div className="rounded-xl border border-emerald-100 bg-emerald-50 p-2 text-emerald-600 shadow-sm dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-300"><Wallet size={19}/></div><div className="min-w-0"><div className="flex items-center gap-2"><h1 className="text-lg font-black leading-5">قسم المحفظة والفواتير</h1><span className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[9px] font-black text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200">مكافآت المتجر <Gift className="mr-1 inline" size={11}/></span></div><p className="mt-1 text-[10px] font-bold text-slate-400">إدارة فواتير العملاء وتحديث الرصيد تلقائيًا في محفظتهم عند اكتمال الطلب</p></div></div><div dir="ltr" className="flex items-center gap-2 self-start lg:self-auto"><div dir="rtl" className="flex flex-col items-stretch gap-0.5"><button onClick={() => setWalletDisplayCurrency('YER')} className={`rounded-[5px] px-2 py-[2px] text-[8px] font-black leading-3 shadow-sm transition ${walletDisplayCurrency === 'YER' ? 'bg-emerald-600 text-white shadow-emerald-600/25' : 'border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300'}`}>ريال يمني</button><button onClick={() => setWalletDisplayCurrency('SAR')} className={`rounded-[5px] px-2 py-[2px] text-[8px] font-black leading-3 shadow-sm transition ${walletDisplayCurrency === 'SAR' ? 'bg-emerald-600 text-white shadow-emerald-600/25' : 'border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300'}`}>ريال سعودي</button></div><div className="inline-flex h-8 min-w-[118px] items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 text-emerald-600 shadow-sm dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200"><button type="button" onClick={() => setRewardModalOpen(true)} title="تعديل مبلغ المكافأة" className="rounded-md p-1 transition hover:bg-emerald-100 dark:hover:bg-emerald-400/15"><Pencil size={13}/></button><span className="font-sans text-sm font-black">$</span><span className="font-mono text-sm font-black tabular-nums">{walletAmount(settings.defaultReward)}</span><Wallet size={14}/></div></div></div></section>
+        <section className="rounded-[20px] border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div className="flex items-center gap-2"><div className="rounded-xl border border-emerald-100 bg-emerald-50 p-2 text-emerald-600 shadow-sm dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-300"><Wallet size={19}/></div><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h1 className="text-lg font-black leading-5">قسم المحفظة والفواتير</h1><span className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[9px] font-black text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200">مكافآت المتجر <Gift className="mr-1 inline" size={11}/></span><div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50/90 p-1 shadow-sm dark:border-white/10 dark:bg-white/5"><span className={`px-1 text-[8px] font-black ${walletEnabled ? 'text-emerald-700 dark:text-emerald-200' : 'text-rose-600 dark:text-rose-200'}`}>{walletEnabled ? 'المحفظة مفعّلة' : 'المحفظة معطّلة'}</span><button type="button" disabled={togglingWallet} onClick={() => toggleWalletEnabled(true)} className={`rounded-md border px-2 py-1 text-[9px] font-black transition disabled:opacity-50 ${walletEnabled ? 'border-emerald-400 bg-emerald-100/85 text-emerald-700 ring-1 ring-emerald-300 dark:border-emerald-400/50 dark:bg-emerald-400/20 dark:text-emerald-200' : 'border-emerald-200 bg-emerald-50/75 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200'}`}>تفعيل</button><button type="button" disabled={togglingWallet} onClick={() => toggleWalletEnabled(false)} className={`rounded-md border px-2 py-1 text-[9px] font-black transition disabled:opacity-50 ${!walletEnabled ? 'border-rose-400 bg-rose-100/85 text-rose-700 ring-1 ring-rose-300 dark:border-rose-400/50 dark:bg-rose-400/20 dark:text-rose-200' : 'border-rose-200 bg-rose-50/75 text-rose-700 hover:bg-rose-100 dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-200'}`}>تعطيل</button></div></div><p className="mt-1 text-[10px] font-bold text-slate-400">إدارة فواتير العملاء وتحديث الرصيد تلقائيًا في محفظتهم عند اكتمال الطلب</p></div></div><div dir="ltr" className="flex items-center gap-2 self-start lg:self-auto">{walletEnabled && <><div dir="rtl" className="flex flex-col items-stretch gap-0.5"><button onClick={() => setWalletDisplayCurrency('YER')} className={`rounded-[5px] px-2 py-[2px] text-[8px] font-black leading-3 shadow-sm transition ${walletDisplayCurrency === 'YER' ? 'bg-emerald-600 text-white shadow-emerald-600/25' : 'border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300'}`}>ريال يمني</button><button onClick={() => setWalletDisplayCurrency('SAR')} className={`rounded-[5px] px-2 py-[2px] text-[8px] font-black leading-3 shadow-sm transition ${walletDisplayCurrency === 'SAR' ? 'bg-emerald-600 text-white shadow-emerald-600/25' : 'border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300'}`}>ريال سعودي</button></div><div className="inline-flex h-8 min-w-[118px] items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 text-emerald-600 shadow-sm dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200"><button type="button" onClick={() => setRewardModalOpen(true)} title="تعديل مبلغ المكافأة" className="rounded-md p-1 transition hover:bg-emerald-100 dark:hover:bg-emerald-400/15"><Pencil size={13}/></button><span className="font-sans text-sm font-black">$</span><span className="font-mono text-sm font-black tabular-nums">{walletAmount(settings.defaultReward)}</span><Wallet size={14}/></div></>}</div></div></section>
 
+        {!walletEnabled ? <section className="rounded-[20px] border border-rose-200 bg-white px-5 py-14 text-center shadow-sm dark:border-rose-400/25 dark:bg-[#1a1d23]"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-300"><Power size={22}/></div><h2 className="mt-4 text-base font-black">المحفظة متوقفة حاليًا</h2><p className="mx-auto mt-2 max-w-md text-[11px] font-bold leading-6 text-slate-500 dark:text-slate-300">توقفت المكافآت والخصم من الرصيد وإدارة فواتير المحفظة، كما اختفت المحفظة من واجهة العملاء في المتجر. استخدم زر تفعيل لإعادة جميع الخدمات.</p></section> : <>
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Metric tone="emerald" icon={<CheckCircle2 size={18}/>} label="إجمالي فواتير المتجر المكتملة" value={completedOrders.length}/><Metric tone="blue" icon={<Package size={18}/>} label="إجمالي كافة فواتير المتجر" value={storeOrders.length}/><Metric tone="violet" icon={<Gift size={18}/>} label="مبيعات الفواتير المكتملة للمتجر" value={<span dir="ltr" className="inline-flex items-baseline gap-1 tabular-nums"><span dir="rtl" className="font-['Cairo',Arial,sans-serif] text-[13px] font-black leading-none text-slate-700 dark:text-slate-100">{walletCurrencyText}</span><span className="text-[15px]" style={{ fontFamily: 'Arial, Helvetica, sans-serif', lineHeight: 'inherit', fontWeight: 'inherit' }}>{walletAmount(totalInvoiceValue)}</span></span>}/><Metric tone="emerald" icon={<Wallet size={18}/>} label="إجمالي أرصدة محافظ العملاء" value={<span dir="ltr" className="inline-flex items-center gap-1 font-sans tabular-nums not-italic"><span className="font-['Arial','Helvetica',sans-serif] not-italic font-bold leading-none">$</span><span>{walletAmount(completedWalletRewardsTotal)}</span></span>} openDigits/></section>
 
         <section className="rounded-[18px] border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 md:flex-row-reverse md:items-center md:justify-between"><div className="flex flex-wrap gap-2"><Filter active={filter === 'all'} tone="blue" onClick={() => setFilter('all')}>جميع الفواتير ({storeOrders.length})</Filter><Filter active={filter === 'completed'} tone="emerald" onClick={() => setFilter('completed')}>فواتير مكتملة ومدفوعة ({completedOrders.length})</Filter><Filter active={filter === 'processing'} tone="maroon" onClick={() => setFilter('processing')}>فواتير قيد المعالجة ({inProgressOrders.length})</Filter></div><div dir="ltr" className="flex w-full items-stretch gap-2 md:w-auto"><button dir="rtl" type="button" onClick={() => setCustomerDataOpen(value => !value)} className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-[10px] font-black text-blue-700 shadow-sm transition hover:bg-blue-100 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-200 dark:hover:bg-blue-400/15"><Wallet size={14}/><span>بيانات العملاء</span><span className="rounded-md bg-white/75 px-1.5 py-0.5 text-[8px] dark:bg-blue-400/15">{wallets.filter(wallet => normalizeWalletCustomerPhone(wallet.phone).length >= 7).length}</span><ChevronDown size={13} className={`transition ${customerDataOpen ? 'rotate-180' : ''}`}/></button><div dir="rtl" className="relative min-w-0 flex-1 md:w-72"><Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="ابحث بالعميل أو الهاتف أو رقم الفاتورة..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-9 pl-3 text-right text-[10px] font-bold outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-white/5"/></div></div></div></section>
@@ -346,6 +377,8 @@ const WalletView = () => {
         {managingWallet && <WalletAdjustmentModal wallet={managingWallet.wallet} order={managingWallet.order} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingWalletAdjustment} onClose={() => setManagingWallet(null)} onSave={saveWalletAdjustment}/>}
         {customerDataOpen && <CustomerDataModal wallets={customerWallets} credentials={customerCredentialMap} search={customerSearch} onSearch={setCustomerSearch} currencyLabel={walletCurrencyText} formatAmount={walletAmount} onClose={() => setCustomerDataOpen(false)} onEdit={wallet => { setCustomerProfileError(''); setCustomerDataOpen(false); setEditingCustomerWallet({ wallet, credential: customerCredentialMap.get(wallet.walletId || wallet.id) }); }}/>}
         {editingCustomerWallet && <CustomerWalletProfileModal wallet={editingCustomerWallet.wallet} credential={editingCustomerWallet.credential} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingCustomerProfile} error={customerProfileError} onClose={() => { setCustomerProfileError(''); setEditingCustomerWallet(null); }} onSave={draft => saveCustomerProfile({ ...draft, balance: toWalletBase(draft.balance) })}/>}
+        </>}
+
         {notice && <div dir="rtl" className="fixed inset-x-0 bottom-5 z-[160] mx-auto w-fit max-w-[calc(100vw-2rem)] -translate-x-5 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-center text-xs font-black text-emerald-700 shadow-xl dark:border-emerald-400/40 dark:bg-[#183127] dark:text-emerald-200">{notice}</div>}
         {editingOrder && <InvoiceEditModal key={editingOrder.id} order={editingOrder} wallet={walletMap.get(editingOrder.customerWalletId)} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} onClose={() => setEditingOrder(null)} onSave={draft => saveInvoice({ ...draft, total: toWalletBase(draft.total), walletRewardOverride: toWalletBase(draft.walletRewardOverride), walletBalance: toWalletBase(draft.walletBalance) })}/>}
         {printingOrder && <InvoicePreview order={printingOrder} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onClose={() => setPrintingOrder(null)}/>}
