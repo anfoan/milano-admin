@@ -1035,13 +1035,13 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
     // 3. Main POS Workstation Layout
     return (
-        <div className={`min-h-screen bg-[#f8f9fa] dark:bg-[#0a0a0b] flex flex-col font-['Cairo'] ${standalone ? 'p-4 md:p-6' : 'p-0'} transition-colors duration-300`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`min-h-screen bg-[#f8f9fa] dark:bg-[#0a0a0b] flex flex-col font-['Cairo'] ${standalone ? 'p-3 sm:p-4 lg:p-6' : 'p-0'} transition-colors duration-300`} dir={isRTL ? 'rtl' : 'ltr'}>
             
             {posSubView === 'dashboard' ? (
                 // --- POS DASHBOARD LANDING PAGE ---
-                <div className="flex-1 max-w-6xl mx-auto w-full p-6 flex flex-col gap-6 overflow-y-auto">
+                <div className="flex-1 max-w-6xl mx-auto w-full p-3 sm:p-4 lg:p-6 flex flex-col gap-4 lg:gap-6 overflow-y-auto">
                     {/* Header */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-white/5">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-gray-100 dark:border-white/5">
                         <div>
                             <h2 className="text-2xl font-black text-gray-800 dark:text-white">
                                 {isRTL ? "نقطة البيع" : "Point of Sale"}
@@ -1185,7 +1185,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 </div>
             ) : posSubView === 'sell' ? (
                 // --- TAB 1: SELL SCREEN ---
-                <div className="flex-1 flex flex-col gap-1 overflow-hidden">
+                <div className="flex-1 flex flex-col gap-1 overflow-visible lg:overflow-hidden">
                     {/* Header with Back Button */}
                     <div className="bg-white dark:bg-[#1c1c1e] p-2.5 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
@@ -1225,10 +1225,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         </div>
                     </div>
 
-                    <div className="flex-1 flex flex-col lg:flex-row gap-3 overflow-hidden">
+                    <div className="flex-1 flex flex-col lg:flex-row gap-3 overflow-visible lg:overflow-hidden">
                     
                     {/* Left Panel: Catalog Grid */}
-                    <div className="flex-1 bg-white dark:bg-[#1c1c1e] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col overflow-hidden h-[calc(100vh-10rem)]">
+                    <div className="flex-1 bg-white dark:bg-[#1c1c1e] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col overflow-hidden h-auto min-h-[46vh] lg:h-[calc(100vh-10rem)]">
                         {/* Search and Filters */}
                         <div className="p-2.5 border-b border-gray-100 dark:border-white/5 flex flex-col sm:flex-row gap-2">
                             <div className="relative flex-1">
@@ -1380,7 +1380,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     </div>
 
                     {/* Right Panel: Cart Workspace */}
-                    <div className="w-full lg:w-[420px] bg-white dark:bg-[#1c1c1e] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col h-[calc(100vh-10rem)] overflow-hidden">
+                    <div className="w-full lg:w-[420px] bg-white dark:bg-[#1c1c1e] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col h-auto min-h-[34vh] lg:h-[calc(100vh-10rem)] overflow-hidden">
                         {/* Cart Header */}
                         <div className="p-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 flex justify-between items-center">
                             <div className="flex items-center gap-2">

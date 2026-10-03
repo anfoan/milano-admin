@@ -371,7 +371,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
 
             {/* ===================== ACTION BAR ===================== */}
             <div className="space-y-5 no-print">
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-between pb-5 border-b border-gray-100">
+                <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between pb-5 border-b border-gray-100">
                     <div className="flex flex-wrap gap-2 items-center">
                         <button className="px-6 py-2.5 bg-blue-500 text-white rounded-xl font-black text-sm flex items-center gap-2 hover:bg-blue-600 transition shadow-lg shadow-blue-200">
                             <Plus size={18} /> {txt.add_stock}
@@ -420,7 +420,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                             </button>
                         )}
                     </div>
-                    <div className="flex-1 max-w-md relative">
+                    <div className="w-full md:flex-1 md:max-w-md relative">
                         <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-2.5 text-gray-400`} size={18} />
                         <input
                             type="search"
@@ -436,7 +436,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                 {/* ===================== FILTERS ===================== */}
                 <div className="space-y-3">
                     {/* Filter Tabs Row */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                         {filterTabs.map(tab => {
                             const c = colorMap[tab.color];
                             const isActive = filter === tab.id;

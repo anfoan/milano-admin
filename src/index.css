@@ -646,3 +646,62 @@ input[type=number] {
   .financial-report-card-wave::before,
   .financial-report-card-wave::after { animation: none; }
 }
+
+
+/* ==========================================================================
+   Admin dashboard responsive foundation
+   Phones and iPads use a drawer, safe gutters, natural card height and touch
+   scrolling. Desktop rail sizing remains unchanged from the xl breakpoint upward.
+   ========================================================================== */
+.admin-dashboard-root,
+.admin-dashboard-root > *,
+.admin-dashboard-root main {
+  min-width: 0;
+}
+
+.admin-dashboard-root .overflow-x-auto {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 1023px) {
+  .admin-dashboard-root {
+    width: 100%;
+    overflow-x: clip;
+  }
+
+  .admin-dashboard-root main {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .admin-dashboard-root .overflow-x-auto {
+    border-radius: inherit;
+  }
+
+  .admin-dashboard-root table {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+@media (max-width: 639px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Prevent Safari from zooming the whole dashboard when a compact input is focused. */
+  .admin-dashboard-root input:not([type='checkbox']):not([type='radio']),
+  .admin-dashboard-root select,
+  .admin-dashboard-root textarea {
+    font-size: 16px !important;
+  }
+
+  .admin-dashboard-root .financial-report-card-wave::before,
+  .admin-dashboard-root .financial-report-card-wave::after {
+    animation-duration: 3.4s;
+  }
+}

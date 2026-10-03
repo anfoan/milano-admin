@@ -1411,7 +1411,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                             />
                         </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex flex-wrap items-center gap-2 shrink-0">
                             <div className="flex items-center gap-1.5">
                                 <Calendar size={14} className="text-gray-400" />
                                 <span className="text-xs font-bold text-gray-400 whitespace-nowrap">{isRTL ? 'تحديد فترة المصروفات:' : 'Period:'}</span>
@@ -1428,7 +1428,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                             </select>
                         </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex flex-wrap items-center gap-2 shrink-0">
                             <div className="flex flex-col">
                                 <label className="text-[10px] text-gray-400 font-bold mb-0.5">{isRTL ? 'من تاريخ' : 'From'}</label>
                                 <input

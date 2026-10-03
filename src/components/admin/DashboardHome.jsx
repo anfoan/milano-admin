@@ -763,14 +763,14 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
     return (
         <div className="space-y-6 pb-10 font-['Cairo']" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             {/* Top Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {statsConfig.map((stat, idx) => (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
                         key={idx}
-                        className="bg-white dark:bg-[#1c1c1e] p-4 md:p-5 rounded-[24px] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col items-center text-center"
+                        className="bg-white dark:bg-[#1c1c1e] p-3 sm:p-4 md:p-5 rounded-[20px] md:rounded-[24px] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col items-center text-center"
                     >
                         <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${stat.color} flex items-center justify-center mb-3`}>
                             {stat.icon}
@@ -782,7 +782,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             </div>
 
             {/* Middle Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                 {/* 1. إجمالي المبيعات */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -827,7 +827,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                     <div className="absolute top-3 right-3 text-red-500">
                         <AlertTriangle size={16} />
                     </div>
-                    <div className="flex items-center gap-8 justify-center w-full mt-2">
+                    <div className="flex items-center gap-4 sm:gap-8 justify-center w-full mt-2">
                         {/* Low Stock (Orange) */}
                         <div className="flex flex-col items-center text-center">
                             <span className="text-gray-400 dark:text-gray-400 font-bold text-xs mb-1">منخفض المخزون</span>

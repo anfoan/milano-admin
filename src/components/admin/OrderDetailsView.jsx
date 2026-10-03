@@ -631,9 +631,9 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                     {/* Header Card - Redesigned */}
                     <div className="bg-white rounded-[20px] border border-gray-100 shadow-sm overflow-hidden">
                         {/* Card Header */}
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-start">
+                        <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-start gap-3">
                             <div>
-                                <h1 className="text-3xl font-black text-blue-800 mb-1">{txt.order_id}</h1>
+                                <h1 className="text-xl md:text-3xl font-black text-blue-800 mb-1">{txt.order_id}</h1>
                                 <p className="text-gray-400 font-mono text-lg font-bold" dir="ltr">{order.orderId}</p>
                             </div>
                             <div className="shrink-0">
@@ -649,11 +649,11 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                             </div>
                         </div>
 
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
                             {/* Right Column (Payment & Status) - First in Layout for RTL */}
                             <div className="space-y-6">
                                 {/* Payment Gateway Info */}
-                                <div className="flex items-center justify-start gap-2 text-gray-600 font-bold">
+                                <div className="flex flex-wrap items-center justify-start gap-2 text-gray-600 font-bold">
                                     <MessageCircle className="text-blue-600" size={20} />
                                     <span>{txt.payment_method}</span>
                                     {isEditing ? (
@@ -714,7 +714,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
 
                             {/* Left Column (Technical & Contact) */}
                             <div className="space-y-5">
-                                <div className="flex items-center justify-start gap-2 text-gray-600">
+                                <div className="flex flex-wrap items-center justify-start gap-2 text-gray-600">
                                     <span className="font-bold text-gray-400">{txt.email}</span>
                                     {isEditing ? (
                                         <input
@@ -806,7 +806,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                         </div>
 
                         {/* Delivery Location Footer */}
-                        <div className="border-t border-gray-100 p-6 bg-gray-50/50">
+                        <div className="border-t border-gray-100 p-4 md:p-6 bg-gray-50/50">
                             <h3 className="font-black text-gray-700 mb-4">{txt.delivery_location}</h3>
                             <div className="space-y-4">
                                 {isEditing ? (

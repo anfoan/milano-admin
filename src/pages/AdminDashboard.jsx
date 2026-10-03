@@ -44,7 +44,7 @@ const AdminDashboard = () => {
     const [selectedOrder, setSelectedOrder] = useState(null); // For Detail Page
     const [isEditMode, setIsEditMode] = useState(false); // For Detail Page Edit Mode
     const [selectedChatId, setSelectedChatId] = useState(null); // For Admin Chat
-    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768); // Open by default on desktop
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth >= 1280); // Drawer on phones and iPads; fixed rail only on large desktop
     const [lang, setLang] = useState(localStorage.getItem('adminLang') || 'ar'); // Admin Language
     const [generalSettings, setGeneralSettings] = useState({ currency: 'YER' });
     const [unreadCount, setUnreadCount] = useState(0); // For Inbox Badge
@@ -66,6 +66,15 @@ const AdminDashboard = () => {
         if (workerPerms.allowBonds) workerAllowedTabs.push('expenses');
         if (workerPerms.allowManualOrder) workerAllowedTabs.push('manual-order');
     }
+
+    // Keep the navigation drawer from consuming tablet content space after a rotation or resize.
+    useEffect(() => {
+        const closeDrawerOnCompactScreens = () => {
+            if (window.innerWidth < 1280) setIsSidebarOpen(false);
+        };
+        window.addEventListener('resize', closeDrawerOnCompactScreens);
+        return () => window.removeEventListener('resize', closeDrawerOnCompactScreens);
+    }, []);
 
     // Set default active tab on mount
     useEffect(() => {
@@ -388,9 +397,9 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="admin-dashboard-root min-h-screen bg-[#f8f9fa] dark:bg-[#0a0a0b] flex font-['Cairo'] overflow-hidden transition-colors duration-300" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-            {/* Sidebar for Desktop & Mobile - Fixed overlap by restoring md:relative */}
-            <div className={`fixed inset-y-0 ${lang === 'ar' ? 'right-0' : 'left-0'} z-50 md:relative transition-all duration-300 transform no-print ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
+        <div className="admin-dashboard-root min-h-screen min-w-0 bg-[#f8f9fa] dark:bg-[#0a0a0b] flex font-['Cairo'] overflow-x-clip transition-colors duration-300" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+            {/* Sidebar: overlay drawer through iPad widths, fixed rail on large desktops. */}
+                <div className={`fixed inset-y-0 ${lang === 'ar' ? 'right-0' : 'left-0'} z-50 xl:relative transition-all duration-300 transform no-print ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
                 <Sidebar
                     activeTab={activeTab}
                     setActiveTab={handleTabChange}
@@ -409,10 +418,10 @@ const AdminDashboard = () => {
             <AdminSidePanel isOpen={showRightPanel} onClose={() => setShowRightPanel(false)} lang={lang} />
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col h-screen overflow-hidden">
+            <div className="flex-1 flex min-w-0 flex-col h-screen overflow-hidden">
                 {/* Top Header Bar (Matching Screenshots) - Add no-print */}
-                <header className="h-20 bg-white dark:bg-[#1c1c1e] border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-4 md:px-6 shadow-sm dark:shadow-none z-30 transition-colors duration-300 no-print">
-                    <div className="flex items-center gap-6">
+                <header className="h-16 lg:h-20 bg-white dark:bg-[#1c1c1e] border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-3 sm:px-4 lg:px-6 shadow-sm dark:shadow-none z-30 transition-colors duration-300 no-print">
+                    <div className="flex min-w-0 items-center gap-3 lg:gap-6">
                         <button
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                             className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors"
@@ -420,7 +429,7 @@ const AdminDashboard = () => {
                             <Menu size={24} className="text-gray-600 dark:text-gray-300" />
                         </button>
 
-                        <div className="hidden md:flex items-center bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl px-4 py-2 w-80 relative">
+                        <div className="hidden lg:flex items-center bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl px-4 py-2 w-80 relative">
                             <Search size={18} className={`text-gray-400 ${lang === 'ar' ? 'ml-2' : 'mr-2'}`} />
                             <input
                                 type="text"
@@ -472,8 +481,8 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-3 ms-6">
+                    <div className="flex shrink-0 items-center gap-2 lg:gap-3">
+                        <div className="flex items-center gap-2 lg:gap-3 ms-0 lg:ms-6">
                             <ThemeToggle />
 
                             <AdminNotifications lang={lang} />
@@ -489,14 +498,14 @@ const AdminDashboard = () => {
                             </a>
                         </div>
 
-                        <div className="h-px w-6 bg-gray-200 dark:bg-white/10 rotate-90 mx-0 hidden md:block"></div>
+                        <div className="h-px w-6 bg-gray-200 dark:bg-white/10 rotate-90 mx-0 hidden lg:block"></div>
 
                         <div className="relative" ref={profileMenuRef}>
                             <button
                                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                                 className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 p-2 rounded-xl transition-colors"
                             >
-                                <div className="hidden md:flex flex-col items-end">
+                                <div className="hidden lg:flex flex-col items-end">
                                     <span className="text-sm font-black text-gray-800 dark:text-white">{txt.admin_name}</span>
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{txt.admin_role}</span>
                                 </div>
@@ -545,7 +554,7 @@ const AdminDashboard = () => {
                 </header>
 
                 {/* View Content (Scrollable) */}
-                <main className="flex-1 overflow-y-auto pt-2 px-4 md:pt-4 md:px-8 xl:px-10 relative">
+                <main className="flex-1 min-w-0 overflow-y-auto pt-3 px-3 sm:px-4 lg:pt-4 lg:px-8 xl:px-10 relative">
                     {renderView()}
                 </main>
             </div>

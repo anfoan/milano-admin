@@ -170,13 +170,13 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             {/* Mobile Overlay */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+                    className="fixed inset-0 bg-black/50 z-40 xl:hidden backdrop-blur-sm"
                     onClick={() => setIsOpen(false)}
                 />
             )}
 
-            <aside className={`admin-sidebar-section-scroll fixed inset-y-0 z-50 w-72 bg-white dark:bg-[#1c1c1e] h-screen border-gray-100 dark:border-white/5 flex flex-col overflow-y-auto pt-6 font-['Cairo'] transition-transform duration-300 ${isRTL ? 'right-0 border-l' : 'left-0 border-r'} ${isOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}`} dir={isRTL ? "rtl" : "ltr"}>
-                <div className="px-5 mb-10 flex items-center justify-between">
+            <aside className={`admin-sidebar-section-scroll fixed inset-y-0 z-50 w-[86vw] max-w-[18rem] xl:w-72 bg-white dark:bg-[#1c1c1e] h-screen border-gray-100 dark:border-white/5 flex flex-col overflow-y-auto pt-4 xl:pt-6 font-['Cairo'] transition-transform duration-300 ${isRTL ? 'right-0 border-l' : 'left-0 border-r'} ${isOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}`} dir={isRTL ? "rtl" : "ltr"}>
+                <div className="px-4 lg:px-5 mb-6 lg:mb-10 flex items-center justify-between">
                     <div
                         className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity translate-x-1"
                         onClick={() => window.location.reload()}
@@ -191,23 +191,23 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                         </div>
                     </div>
                     {/* Close button for mobile */}
-                    <button onClick={() => setIsOpen(false)} className="md:hidden p-2 text-gray-400 hover:text-red-500 transition-colors">
+                    <button onClick={() => setIsOpen(false)} className="xl:hidden p-2 text-gray-400 hover:text-red-500 transition-colors">
                         <LogOut size={20} className="rotate-180" />
                     </button>
                 </div>
 
-                <nav className="relative ml-1 flex-none px-4 pl-5 space-y-1">
+                <nav className="relative ml-1 flex-none px-3 lg:px-4 lg:pl-5 space-y-1">
                     {menuItems.map((item) => (
                         <div key={item.id} className="space-y-1">
                             {item.id === 'wallet' ? <button
                                 onClick={() => setActiveTab(item.id)}
-                                className={`relative flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 font-bold transition-all duration-300 group ${isSectionActive(item)
+                                className={`relative flex w-full items-center gap-4 rounded-2xl px-3 lg:px-4 py-3 lg:py-3.5 font-bold transition-all duration-300 group ${isSectionActive(item)
                                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                                     : 'text-slate-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}
                             >
                                 <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>{item.icon}</span>
-                                <span className="flex-1 whitespace-nowrap text-right text-base font-black">{item.name}</span>
+                                <span className="flex-1 whitespace-nowrap text-right text-sm lg:text-base font-black">{item.name}</span>
                                 <span dir={walletEnabled ? 'ltr' : 'rtl'} className={`inline-flex h-6 min-w-[54px] items-center justify-center gap-1 rounded-md border px-1.5 text-[10px] font-black shadow-sm ${walletEnabled ? 'border-emerald-300 bg-emerald-100 font-sans tabular-nums text-emerald-700 dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200' : 'border-rose-300 bg-rose-100 text-rose-700 dark:border-rose-400/50 dark:bg-rose-400/15 dark:text-rose-200'}`}>{walletEnabled ? <><span>$</span><span>{Number(walletRewardAmount || 0).toLocaleString('en-US')}</span></> : 'موقفة'}</span>
                             </button> : <button
                                 onClick={() => {
@@ -218,7 +218,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                         setActiveTab(item.id);
                                     }
                                 }}
-                                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 font-bold group ${isSectionActive(item)
+                                className={`w-full flex items-center gap-4 px-3 lg:px-4 py-3 lg:py-3.5 rounded-2xl transition-all duration-300 font-bold group ${isSectionActive(item)
                                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                                     : 'text-slate-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}
@@ -226,7 +226,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                 <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>
                                     {item.icon}
                                 </span>
-                                <span className="text-base font-black flex-1 flex items-center gap-3 whitespace-nowrap">
+                                <span className="text-sm lg:text-base font-black flex-1 flex items-center gap-3 whitespace-nowrap">
                                     <span>{item.name}</span>
                                     {item.id === 'inbox' && unreadCount > 0 && (
                                         <span className="inline-flex items-center justify-center w-6 h-6 bg-red-500 text-white text-[12px] rounded-full font-black shadow-md animate-pulse shrink-0">

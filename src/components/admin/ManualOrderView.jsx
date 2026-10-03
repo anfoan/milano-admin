@@ -718,7 +718,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                             className="space-y-6"
                         >
                             {/* Search Box */}
-                            <div className="bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm relative z-20">
+                            <div className="bg-white p-4 md:p-6 rounded-[20px] md:rounded-[24px] border border-gray-100 shadow-sm relative z-20">
                                 <div className="relative">
                                     <Search className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'right-4' : 'left-4'} text-gray-400`} size={20} />
                                     <input
@@ -737,7 +737,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                             filteredProducts.map(p => (
                                                 <div
                                                     key={p.id}
-                                                    className="p-4 hover:bg-gray-50 flex items-center justify-between border-b last:border-0 transition-colors"
+                                                    className="p-3 md:p-4 hover:bg-gray-50 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b last:border-0 transition-colors"
                                                 >
                                                     <div className="flex items-center gap-4">
                                                         <img src={p.mainImage || '/nav-logo.png'} className="w-12 h-12 rounded-lg object-cover" />
