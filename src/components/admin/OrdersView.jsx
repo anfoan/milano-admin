@@ -832,26 +832,18 @@ printWindow.onload = () => printWindow.print();
 
     // Selection Logic
     const toggleSelectAll = () => {
-        // Check if all orders on the CURRENT page are selected
-        const allCurrentSelected = currentOrders.every(o => selectedOrdersIds.includes(o.id));
-
-        if (allCurrentSelected) {
-            // Deselect only the orders on the current page
-            setSelectedOrdersIds(prev => prev.filter(id => !currentOrders.find(o => o.id === id)));
-        } else {
-            // Select all orders on the current page (keeping existing selections from other pages)
-            const newIds = currentOrders.map(o => o.id);
-            const combinedIds = Array.from(new Set([...selectedOrdersIds, ...newIds]));
-            setSelectedOrdersIds(combinedIds);
-        }
+        // Use functional state updates so quick checkbox clicks never race each other.
+        setSelectedOrdersIds(previousIds => {
+            const allCurrentSelected = currentOrders.every(order => previousIds.includes(order.id));
+            if (allCurrentSelected) return previousIds.filter(id => !currentOrders.some(order => order.id === id));
+            return Array.from(new Set([...previousIds, ...currentOrders.map(order => order.id)]));
+        });
     };
 
     const toggleSelectOrder = (id) => {
-        if (selectedOrdersIds.includes(id)) {
-            setSelectedOrdersIds(selectedOrdersIds.filter(selectedId => selectedId !== id));
-        } else {
-            setSelectedOrdersIds([...selectedOrdersIds, id]);
-        }
+        setSelectedOrdersIds(previousIds => previousIds.includes(id)
+            ? previousIds.filter(selectedId => selectedId !== id)
+            : [...previousIds, id]);
     };
 
     // Bulk Actions
@@ -909,7 +901,18 @@ printWindow.onload = () => printWindow.print();
 
         setIsBulkDeleting(true);
         try {
-            const results = await Promise.allSettled(orderIds.map(removeOrderPermanently));
+            // Deleting several orders used to run all reward transactions at once.
+            // Process them in a controlled sequence so Firestore snapshots do not flood
+            // the table and make the selected-invoice toolbar appear to shake.
+            const results = [];
+            for (const orderId of orderIds) {
+                try {
+                    await removeOrderPermanently(orderId);
+                    results.push({ status: 'fulfilled' });
+                } catch (reason) {
+                    results.push({ status: 'rejected', reason });
+                }
+            }
             const failedIds = orderIds.filter((_, index) => results[index].status === 'rejected');
 
             if (selectedOrder && !failedIds.includes(selectedOrder.id)) setSelectedOrder(null);
@@ -1206,7 +1209,7 @@ printWindow.onload = () => printWindow.print();
             </div>
 
             {/* Table Layout */}
-            <div className={`bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 lg:-mx-6 ${selectedOrdersIds.length > 0 ? 'pb-24' : ''}`}>
+            <div className={`bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden lg:-mx-6 ${selectedOrdersIds.length > 0 ? 'pb-24' : ''}`}>
                 <div className="overflow-x-auto relative">
                     <table className="w-full min-w-[1040px] table-fixed border-collapse text-[13px]">
                         <thead>
@@ -1410,12 +1413,8 @@ printWindow.onload = () => printWindow.print();
             </div>
 
             {/* Floating Bulk Actions Bar */}
-            <AnimatePresence>
-                {selectedOrdersIds.length > 0 && (
-                    <motion.div
-                        initial={{ y: 100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 100, opacity: 0 }}
+                {selectedOrdersIds.length > 0 && !showBulkDeleteConfirm && (
+                    <div
                         className="fixed bottom-4 left-3 right-3 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-auto bg-gray-900 text-white p-2 md:px-6 md:py-3 rounded-2xl md:rounded-full shadow-2xl z-50 flex flex-col md:flex-row items-center gap-3 md:gap-6 border border-gray-700"
                     >
                         <div className="flex items-center justify-between w-full md:w-auto gap-4">
@@ -1479,16 +1478,15 @@ printWindow.onload = () => printWindow.print();
                                 aria-label={txt.delete_selected}
                                 className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-400/45 bg-rose-500/15 text-rose-200 transition-colors hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                <Trash2 size={15} className={isBulkDeleting ? 'animate-pulse' : ''} />
+                                <Trash2 size={15} />
                             </button>
 
                             <button onClick={() => setSelectedOrdersIds([])} className="text-gray-400 hover:text-white hidden md:block mr-2">
                                 <X size={16} />
                             </button>
                         </div>
-                    </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
 
             {/* Confirmation Modal */}
             <AnimatePresence>
@@ -1536,21 +1534,9 @@ printWindow.onload = () => printWindow.print();
             </AnimatePresence>
 
             {/* Permanent deletion confirmation for invoices selected in the toolbar */}
-            <AnimatePresence>
-                {showBulkDeleteConfirm && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.94, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.94, opacity: 0 }}
-                            className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
-                            dir={isRTL ? 'rtl' : 'ltr'}
-                        >
+            {showBulkDeleteConfirm && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                        <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
                             <div className="p-7 text-center">
                                 <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border-4 border-rose-100 bg-rose-50 text-rose-500">
                                     <Trash2 size={30} />
@@ -1577,10 +1563,9 @@ printWindow.onload = () => printWindow.print();
                                     </button>
                                 </div>
                             </div>
-                        </motion.div>
-                    </motion.div>
+                        </div>
+                    </div>
                 )}
-            </AnimatePresence>
 
             {/* Invoice Preview opened by the eye button */}
             <AnimatePresence>
