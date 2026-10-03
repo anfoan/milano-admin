@@ -359,9 +359,12 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             return;
         }
 
-        // Apply Discount
+        // Apply the exact fixed amount for new coupons. Retain legacy percentage coupons safely.
+        const fixedCoupon = coupon.discountType === 'fixed' || Number(coupon.discountAmount || 0) > 0;
+        const couponDiscount = fixedCoupon
+            ? Math.min(subtotal, Math.max(0, Math.round(Number(coupon.discountAmount || 0))))
+            : Math.round(subtotal * (Number(coupon.discountPercent || 0) / 100));
         setAppliedCoupon(coupon);
-        const couponDiscount = Math.round(subtotal * (coupon.discountPercent / 100));
         setDiscount(couponDiscount);
     };
 
@@ -989,7 +992,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 {appliedCoupon && (
                                     <p className="text-[10px] font-bold text-emerald-500 flex items-center gap-1">
                                         <CheckCircle size={12} />
-                                        {txt.coupon_applied} ({appliedCoupon.discountPercent}%)
+                                        {txt.coupon_applied} ({(appliedCoupon.discountType === 'fixed' || Number(appliedCoupon.discountAmount || 0) > 0) ? formatPrice(Math.min(calculateSubtotal(), Number(appliedCoupon.discountAmount || 0)), orderCurrency) : `${appliedCoupon.discountPercent}%`})
                                     </p>
                                 )}
                             </div>

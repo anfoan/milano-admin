@@ -15,7 +15,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
     // Form State
     const [code, setCode] = useState('');
-    const [discountPercent, setDiscountPercent] = useState(0);
+    const [discountAmount, setDiscountAmount] = useState('');
     const [isUnlimited, setIsUnlimited] = useState(false);
     const [maxUses, setMaxUses] = useState(1);
     const [expiryDate, setExpiryDate] = useState('');
@@ -29,8 +29,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             cancel: "إلغاء",
             random: "عشوائي",
             code_placeholder: "كوبون",
-            discount_percent: "نسبة الخصم %",
-            discount_amount: "المبلغ",
+            discount_type: "الخصم",
+            discount_amount: "مبلغ الخصم الثابت",
+            discount_amount_placeholder: "0",
             unlimited_usage: "غير محدود الاستخدام",
             unlimited_desc: "تفعيل هذا الخيار يلغي الحد الأقصى",
             yes: "نعم",
@@ -57,7 +58,8 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             th_actions: "العمليات",
 
             // Alerts
-            alert_missing: "يرجى إدخال الكود ونسبة الخصم",
+            alert_missing: "يرجى إدخال الكود ومبلغ الخصم الثابت",
+            alert_amount: "أدخل مبلغ خصم ثابتًا أكبر من صفر",
             alert_success: "تم إضافة الكوبون بنجاح",
             alert_error: "حدث خطأ أثناء إضافة الكوبون",
             alert_confirm_delete: "هل أنت متأكد من حذف هذا الكوبون؟"
@@ -68,8 +70,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             cancel: "Cancel",
             random: "Random",
             code_placeholder: "CODE",
-            discount_percent: "Discount %",
-            discount_amount: "Amount",
+            discount_type: "Discount",
+            discount_amount: "Fixed discount amount",
+            discount_amount_placeholder: "0",
             unlimited_usage: "Unlimited Usage",
             unlimited_desc: "Enable to remove usage limit",
             yes: "Yes",
@@ -96,7 +99,8 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             th_actions: "Actions",
 
             // Alerts
-            alert_missing: "Please enter code and discount percentage",
+            alert_missing: "Please enter the code and fixed discount amount",
+            alert_amount: "Enter a fixed discount amount greater than zero",
             alert_success: "Coupon added successfully",
             alert_error: "Error adding coupon",
             alert_confirm_delete: "Are you sure you want to delete this coupon?"
@@ -113,18 +117,23 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const fromBaseCouponAmount = value => couponCurrency === 'SAR'
         ? Math.round(Math.max(0, Number(value || 0)) / (exchangeRate || 140))
         : Math.round(Math.max(0, Number(value || 0)));
-    // A percentage becomes an exact amount using the coupon's minimum-order
-    // value as its reference. The formatted value always follows dashboard currency.
-    const getDiscountAmount = (coupon) => {
-        const baseAmount = Number(coupon?.minOrderAmount || 0);
-        const percent = Number(coupon?.discountPercent || 0);
-        return baseAmount > 0 && percent > 0 ? Math.round(baseAmount * percent / 100) : null;
-    };
-    const formatDiscountAmount = (coupon) => {
+    const couponHasFixedAmount = coupon => coupon?.discountType === 'fixed' || Number(coupon?.discountAmount || 0) > 0;
+    const getDiscountAmount = coupon => couponHasFixedAmount(coupon)
+        ? Math.max(0, Math.round(Number(coupon?.discountAmount || 0)))
+        : null;
+    const formatDiscountAmount = coupon => {
         const amount = getDiscountAmount(coupon);
         return amount === null
-            ? (lang === 'ar' ? 'حدد الحد الأدنى للحساب' : 'Set minimum order to calculate')
+            ? (lang === 'ar' ? 'عيّن مبلغ خصم ثابتًا' : 'Set a fixed discount amount')
             : formatPrice(amount, couponCurrency);
+    };
+    const fixedDiscountBaseForSave = () => {
+        const displayedAmount = Math.max(0, Number(discountAmount || 0));
+        // Preserve the stored base amount when an unchanged SAR amount is rounded for display.
+        if (editingCoupon && displayedAmount === fromBaseCouponAmount(editingCoupon.discountAmount)) {
+            return Math.max(0, Number(editingCoupon.discountAmount || 0));
+        }
+        return toBaseCouponAmount(displayedAmount);
     };
     const minimumOrderBaseForSave = () => {
         const displayedMinimum = Math.max(0, Number(minOrderAmount || 0));
@@ -164,7 +173,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
         // Security & Validation Checks
         if (!code) return alert(txt.alert_missing);
-        if (discountPercent <= 0 || discountPercent > 100) return alert(lang === 'ar' ? 'نسبة الخصم يجب أن تكون بين 1 و 100' : 'Discount must be between 1 and 100');
+        if (Number(discountAmount) <= 0) return alert(txt.alert_amount);
         if (!isUnlimited && Number(maxUses) < 1) return alert(lang === 'ar' ? 'أقصى عدد للاستخدام يجب أن يكون 1 على الأقل' : 'Max uses must be at least 1');
         if (minOrderAmount < 0) return alert(lang === 'ar' ? 'مبلغ الحد الأدنى لا يمكن أن يكون سالباً' : 'Min order cannot be negative');
 
@@ -184,7 +193,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
             const couponData = {
                 code: code.toUpperCase(),
-                discountPercent: Number(discountPercent),
+                discountType: 'fixed',
+                discountAmount: fixedDiscountBaseForSave(),
+                discountPercent: 0,
                 maxUses: isUnlimited ? null : Math.max(1, Number(maxUses)),
                 expiryDate: expiryDate || null,
                 minOrderAmount: minimumOrderBaseForSave(),
@@ -206,7 +217,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
     const resetForm = () => {
         setCode('');
-        setDiscountPercent(0);
+        setDiscountAmount('');
         setIsUnlimited(false);
         setMaxUses(100);
         setExpiryDate('');
@@ -217,7 +228,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const editCoupon = (coupon) => {
         setEditingCoupon(coupon);
         setCode(coupon.code || '');
-        setDiscountPercent(Number(coupon.discountPercent || 0));
+        setDiscountAmount(fromBaseCouponAmount(coupon.discountAmount) || '');
         setIsUnlimited(Boolean(coupon.isUnlimited));
         setMaxUses(coupon.maxUses || 1);
         setExpiryDate(coupon.expiryDate || '');
@@ -291,26 +302,19 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                 />
                             </div>
 
-                            {/* Discount Slider */}
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center text-sm font-bold text-gray-500">
-                                    <span>{txt.discount_percent}</span>
-                                    <div className="flex items-end gap-3">
-                                        <span className="text-2xl text-pink-500 font-black">{discountPercent}%</span>
-                                        <span className="text-xs text-gray-500 font-black text-center leading-tight">
-                                            <span className="block text-[10px] text-gray-400">{txt.discount_amount}</span>
-                                            {Number(minOrderAmount) > 0 ? formatPrice(Math.round(toBaseCouponAmount(minOrderAmount) * Number(discountPercent) / 100), couponCurrency) : (lang === 'ar' ? 'حدد الحد الأدنى للحساب' : 'Set minimum order to calculate')}
-                                        </span>
-                                    </div>
-                                </div>
+                            {/* Fixed Discount Amount */}
+                            <div>
+                                <label className="block text-sm font-bold text-gray-600 mb-2">{txt.discount_amount} ({currency})</label>
                                 <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={discountPercent}
-                                    onChange={(e) => setDiscountPercent(e.target.value)}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    placeholder={txt.discount_amount_placeholder}
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-pink-500 outline-none font-black text-gray-900"
+                                    value={discountAmount}
+                                    onChange={e => setDiscountAmount(e.target.value)}
                                 />
+                                <p className="mt-2 text-xs font-bold text-gray-400">{lang === 'ar' ? 'هذا هو المبلغ الذي سيُخصم فعليًا عند استخدام الكوبون.' : 'This is the exact amount deducted when the coupon is used.'}</p>
                             </div>
 
                             {/* Unlimited Usage Toggle */}
@@ -430,10 +434,14 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                                     </span>
                                                 </td>
                                                 <td className="p-6 text-center">
-                                                    <span className="font-black text-pink-500 text-lg">{coupon.discountPercent}%</span>
+                                                    {couponHasFixedAmount(coupon) ? (
+                                                        <span className="inline-flex px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-xs font-black">{lang === 'ar' ? 'ثابت' : 'Fixed'}</span>
+                                                    ) : (
+                                                        <span className="font-black text-gray-400 text-sm">{coupon.discountPercent || 0}%</span>
+                                                    )}
                                                 </td>
-                                                <td className="p-6 text-center font-black text-gray-700 font-mono">
-                                                    <span className={getDiscountAmount(coupon) === null ? 'text-xs text-gray-400 font-bold' : ''}>
+                                                <td className="p-6 text-center font-black text-gray-700">
+                                                    <span className={getDiscountAmount(coupon) === null ? 'text-xs text-amber-600 font-bold' : 'font-mono'}>
                                                         {formatDiscountAmount(coupon)}
                                                     </span>
                                                 </td>
