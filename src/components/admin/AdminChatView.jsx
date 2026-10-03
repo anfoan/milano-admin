@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Paperclip, ArrowRight, ArrowLeft, Settings, X, Search, Image as ImageIcon } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, getDoc, orderBy, limit } from 'firebase/firestore';
-import { uploadToCloudinary } from '../../services/uploadService';
+import { uploadChatMedia } from '../../services/uploadService';
 
 const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
     const [messages, setMessages] = useState([]);
@@ -86,41 +86,46 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
 
     // Centralized upload service used instead of local function
 
-    const handleFileUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file || !chatId) return;
+    const chatMediaError = error => {
+        const code = error?.message || '';
+        if (code === 'CHAT_MEDIA_TYPE_NOT_ALLOWED') return lang === 'ar'
+            ? 'يسمح بإرسال الصور (JPEG، PNG، GIF، WEBP) أو الفيديوهات (MP4، WEBM، MOV) فقط.'
+            : 'Only JPEG, PNG, GIF, WEBP images or MP4, WEBM, MOV videos can be sent.';
+        if (code === 'CHAT_VIDEO_TOO_LARGE') return lang === 'ar'
+            ? 'حجم الفيديو كبير جداً. الحد الأقصى 30 ميجابايت.'
+            : 'The video is too large. Maximum size is 30 MB.';
+        if (code === 'CHAT_IMAGE_TOO_LARGE') return lang === 'ar'
+            ? 'حجم الصورة كبير جداً. الحد الأقصى 10 ميجابايت.'
+            : 'The image is too large. Maximum size is 10 MB.';
+        return lang === 'ar' ? 'تعذّر رفع الملف. حاول مرة أخرى.' : 'The file could not be uploaded. Please try again.';
+    };
 
-        // Security Validation
-        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        if (!validTypes.includes(file.type)) {
-            alert(lang === 'ar' ? "عذراً، يسمح فقط برفع الصور (JPEG, PNG, GIF, WEBP)." : "Sorry, only image files are allowed.");
-            return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) { // 5MB Limit
-            alert(lang === 'ar' ? "حجم الصورة كبير جداً. الحد الأقصى 5 ميجابايت." : "File size is too large. Max 5MB.");
-            return;
-        }
+    const handleFileUpload = async event => {
+        const input = event.target;
+        const file = input.files?.[0];
+        if (!file || !chatId) { input.value = ''; return; }
 
         try {
             setIsUploading(true);
-            const imageUrl = await uploadToCloudinary(file);
-            if (imageUrl) {
-                await addDoc(collection(db, "contact_messages", chatId, "messages"), {
-                    text: '',
-                    imageUrl: imageUrl,
-                    sender: 'admin',
-                    createdAt: serverTimestamp(),
-                });
-                // Update main doc status to replied
-                await updateDoc(doc(db, "contact_messages", chatId), { status: 'replied' });
-            }
+            const media = await uploadChatMedia(file);
+            await addDoc(collection(db, 'contact_messages', chatId, 'messages'), {
+                text: '',
+                mediaUrl: media.url,
+                mediaType: media.mediaType,
+                fileName: media.name,
+                fileSize: media.bytes,
+                // Compatibility for older image-only message readers.
+                imageUrl: media.mediaType === 'image' ? media.url : '',
+                sender: 'admin',
+                createdAt: serverTimestamp(),
+            });
+            await updateDoc(doc(db, 'contact_messages', chatId), { status: 'replied' });
         } catch (error) {
-            console.error("Error handling file upload:", error);
-            alert(lang === 'ar' ? "فشل رفع الصورة، حاول مرة أخرى." : "Image upload failed, please try again.");
+            console.error('Admin chat media upload failed:', error);
+            alert(chatMediaError(error));
         } finally {
             setIsUploading(false);
-            e.target.value = null; // Reset input
+            input.value = '';
         }
     };
 
@@ -209,8 +214,10 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                     </div>
                 )}
 
-                {messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.sender === 'admin' ? (isRTL ? 'flex-row' : 'flex-row-reverse') : (isRTL ? 'flex-row-reverse' : 'flex-row')} items - end gap - 3`}>
+                {messages.map((msg) => {
+                    const mediaUrl = msg.mediaUrl || msg.imageUrl;
+                    const isVideo = msg.mediaType === 'video' || (!msg.mediaType && /\.(mp4|webm|mov)(?:[?#]|$)/i.test(mediaUrl || ''));
+                    return <div key={msg.id} className={`flex ${msg.sender === 'admin' ? (isRTL ? 'flex-row' : 'flex-row-reverse') : (isRTL ? 'flex-row-reverse' : 'flex-row')} items-end gap-3`}>
                         {/* Avatar */}
                         <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white dark:border-zinc-800 shadow-sm flex-shrink-0">
                             <img
@@ -222,20 +229,19 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                         </div>
 
                         {/* Bubble */}
-                        <div className={`max - w - [70 %] relative group ${msg.imageUrl ? 'p-1.5 rounded-2xl' : 'px-5 py-3 rounded-2xl'
+                        <div className={`max-w-[70%] relative group ${mediaUrl ? 'p-1.5 rounded-2xl' : 'px-5 py-3 rounded-2xl'
                             } ${msg.sender === 'admin'
                                 ? 'bg-[#3b82f6] text-white rounded-br-sm'
                                 : 'bg-white dark:bg-zinc-900 text-gray-800 dark:text-gray-200 rounded-bl-sm border border-gray-100 dark:border-white/5 shadow-sm'
                             } `}>
-                            {msg.imageUrl ? (
+                            {mediaUrl ? (
                                 <div className="space-y-1">
                                     <div className="max-w-[300px] overflow-hidden rounded-xl bg-gray-50/10">
-                                        <img
-                                            src={msg.imageUrl}
-                                            alt="attachment"
-                                            className="w-full h-auto cursor-zoom-in hover:brightness-95 transition-all"
-                                            onClick={() => setSelectedImage(msg.imageUrl)}
-                                        />
+                                        {isVideo ? (
+                                            <video src={mediaUrl} controls preload="metadata" className="block max-h-[300px] w-full bg-black" />
+                                        ) : (
+                                            <img src={mediaUrl} alt="attachment" className="w-full h-auto cursor-zoom-in hover:brightness-95 transition-all" onClick={() => setSelectedImage(mediaUrl)} />
+                                        )}
                                     </div>
                                     <span className={`text-[8px] block ${msg.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
                                         {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : txt.just_now}
@@ -250,8 +256,8 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                                 </>
                             )}
                         </div>
-                    </div>
-                ))}
+                    </div>;
+                })}
 
                 {isUploading && (
                     <div className="flex justify-center py-2">
@@ -277,7 +283,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                             ref={fileInputRef}
                             onChange={handleFileUpload}
                             className="hidden"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime"
                         />
 
                         <button
