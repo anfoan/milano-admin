@@ -1262,7 +1262,7 @@ printWindow.onload = () => printWindow.print();
                                             {order.formData?.name || 'زائر'}
                                         </td>
                                         <td className={`py-2 ${isRTL ? 'pr-0 pl-2 text-right' : 'pl-0 pr-2 text-left'}`}>
-                                            <div title={getOrderProductsLabel(order)} className={`truncate whitespace-nowrap font-bold text-gray-700 ${isRTL ? 'translate-x-2' : '-translate-x-2'}`}>
+                                            <div title={getOrderProductsLabel(order)} className={`truncate whitespace-nowrap font-bold text-gray-700 ${isRTL ? 'translate-x-4' : '-translate-x-4'}`}>
                                                 {getOrderProductsLabel(order)}
                                             </div>
                                         </td>
