@@ -1,4 +1,4 @@
-import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
 export const isCompletedOrderStatus = (status) => {
@@ -7,6 +7,17 @@ export const isCompletedOrderStatus = (status) => {
 };
 
 const amountOf = value => Math.max(0, Number(value || 0));
+// Wallet rewards are only earned by orders worth at least 4,000 Yemeni riyals.
+// Wallet balances are stored in YER; SAR invoices are converted using the same
+// displayed wallet conversion rate before the eligibility comparison.
+export const WALLET_REWARD_MINIMUM_YER = 4000;
+export const WALLET_SAR_TO_YER_RATE = 140;
+export const orderTotalInYER = (order = {}) => {
+    const total = amountOf(order.total ?? order.grandTotal ?? order.totalAmount ?? order.amountDue);
+    const currency = String(order.currency || order.currencyCode || order.formData?.currency || 'YER').trim().toUpperCase();
+    return currency === 'SAR' ? total * WALLET_SAR_TO_YER_RATE : total;
+};
+export const isOrderEligibleForWalletReward = (order = {}) => orderTotalInYER(order) >= WALLET_REWARD_MINIMUM_YER;
 export const orderCustomerPhone = (order = {}) => String(order.formData?.fullPhone || order.formData?.phone || order.customer?.phone || order.phone || '').trim();
 export const normalizeWalletPhone = (value = '') => {
     const digits = orderCustomerPhone({ phone: value })
@@ -39,6 +50,15 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
         if (!orderSnapshot.exists()) return { granted: false, reason: 'order-missing' };
         const order = orderSnapshot.data();
         if (!isCompletedOrderStatus(order.status)) return { granted: false, reason: 'not-completed' };
+        if (!isOrderEligibleForWalletReward(order)) {
+            return {
+                granted: false,
+                eligible: false,
+                reason: 'below-minimum-order-total',
+                minimum: WALLET_REWARD_MINIMUM_YER,
+                totalYER: orderTotalInYER(order),
+            };
+        }
         const resolvedWalletId = getOrderRewardWalletId(order);
         if (!resolvedWalletId) return { granted: false, reason: 'no-customer-phone' };
 
@@ -224,8 +244,25 @@ export const reverseWalletRewardForOrder = async (orderId) => {
     });
 };
 
-export const syncWalletRewardForOrderStatus = async (orderId, status) => (
-    isCompletedOrderStatus(status)
-        ? grantWalletRewardForCompletedOrder(orderId)
-        : reverseWalletRewardForOrder(orderId)
-);
+export const syncWalletRewardForOrderStatus = async (orderId, status) => {
+    if (!isCompletedOrderStatus(status)) return reverseWalletRewardForOrder(orderId);
+
+    const orderRef = doc(db, 'orders', orderId);
+    const orderSnapshot = await getDoc(orderRef);
+    if (!orderSnapshot.exists()) return { granted: false, reason: 'order-missing' };
+
+    const order = orderSnapshot.data();
+    if (isOrderEligibleForWalletReward(order)) return grantWalletRewardForCompletedOrder(orderId);
+
+    // Correct any earlier reward that may have been issued before the minimum
+    // invoice-total policy existed, then leave this invoice without a reward.
+    const reversal = await reverseWalletRewardForOrder(orderId);
+    return {
+        ...reversal,
+        granted: false,
+        eligible: false,
+        reason: 'below-minimum-order-total',
+        minimum: WALLET_REWARD_MINIMUM_YER,
+        totalYER: orderTotalInYER(order),
+    };
+};

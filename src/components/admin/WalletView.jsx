@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { collection, deleteDoc, doc, onSnapshot, runTransaction, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Package, Pencil, Power, Printer, Save, Search, Trash2, Truck, Wallet, WalletMinimal, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
-import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
+import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, isOrderEligibleForWalletReward, syncWalletRewardForOrderStatus, WALLET_REWARD_MINIMUM_YER } from '../../lib/walletRewards';
 import { adjustCustomerWalletBalance, ensureWalletSpendLedgerForOrder, setCustomerWalletBalance } from '../../lib/walletLedger';
 import InvoiceTemplate from '../InvoiceTemplate';
 
@@ -96,7 +96,7 @@ const WalletView = ({ generalSettings }) => {
     // This total is the exact sum shown beside «الرصيد الحالي بعد اكتمال الطلب»
     // for completed invoices only. Changing status removes or restores it immediately.
     const completedWalletRewardsTotal = useMemo(() => orders.reduce((sum, order) => {
-        if (!isCompletedOrderStatus(order.status)) return sum;
+        if (!isCompletedOrderStatus(order.status) || !isOrderEligibleForWalletReward(order)) return sum;
         return sum + Math.max(0, Number(order.walletRewardAmount ?? settings.defaultReward ?? 0));
     }, 0), [orders, settings.defaultReward]);
     const walletMap = useMemo(() => new Map(wallets.map(wallet => [wallet.walletId || wallet.id, wallet])), [wallets]);
@@ -126,15 +126,16 @@ const WalletView = ({ generalSettings }) => {
         });
     }, [orders, settings.enabled]);
 
-    // Reconcile every existing and newly updated invoice so the total wallet balance
-    // always receives the reward for completed orders and returns it on any other status.
+    // Reconcile existing and updated invoices: only eligible completed orders earn
+    // a reward, and any previously issued ineligible reward is returned.
     useEffect(() => {
         if (!walletSettingsLoaded || settings.enabled === false) return;
         orders.forEach(order => {
             if (!order.id || !getOrderRewardWalletId(order)) return;
             const completed = isCompletedOrderStatus(order.status);
-            const needsCredit = completed && (!order.walletRewardGranted || order.walletRewardReversed);
-            const needsReversal = !completed && order.walletRewardGranted && !order.walletRewardReversed;
+            const eligible = isOrderEligibleForWalletReward(order);
+            const needsCredit = completed && eligible && (!order.walletRewardGranted || order.walletRewardReversed);
+            const needsReversal = (!completed || !eligible) && order.walletRewardGranted && !order.walletRewardReversed;
             if ((!needsCredit && !needsReversal) || rewardSyncRef.current.has(order.id)) return;
             rewardSyncRef.current.add(order.id);
             syncWalletRewardForOrderStatus(order.id, order.status)
@@ -185,7 +186,11 @@ const WalletView = ({ generalSettings }) => {
         setRewarding(order.id);
         try {
             const result = await grantWalletRewardForCompletedOrder(order.id);
-            setNotice(result.granted ? `تم إيداع $ ${walletAmount(result.amount)} ${walletCurrencyText} في محفظة العميل.` : 'هذه المكافأة مودعة مسبقًا أو غير متاحة لهذا الطلب.');
+            setNotice(result.granted
+                ? `تم إيداع $ ${walletAmount(result.amount)} ${walletCurrencyText} في محفظة العميل.`
+                : result.reason === 'below-minimum-order-total'
+                    ? `لا تُضاف مكافأة لهذه الفاتورة لأن إجماليها أقل من ${WALLET_REWARD_MINIMUM_YER.toLocaleString('en-US')} ريال يمني.`
+                    : 'هذه المكافأة مودعة مسبقًا أو غير متاحة لهذا الطلب.');
         } catch (error) { console.error(error); setNotice('تعذّر إيداع المكافأة.'); }
         finally { setRewarding(''); }
     };
@@ -193,7 +198,11 @@ const WalletView = ({ generalSettings }) => {
         try {
             await updateDoc(doc(db, 'orders', order.id), { status, updatedAt: serverTimestamp() });
             const walletResult = await syncWalletRewardForOrderStatus(order.id, status);
-            setNotice(walletResult.reversed ? `تم تحديث الحالة واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.` : 'تم تحديث حالة الفاتورة.');
+            setNotice(walletResult.reversed
+                ? `تم تحديث الحالة واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.`
+                : walletResult.reason === 'below-minimum-order-total'
+                    ? `تم تحديث الحالة. لا تُضاف مكافأة لأن إجمالي الفاتورة أقل من ${WALLET_REWARD_MINIMUM_YER.toLocaleString('en-US')} ريال يمني.`
+                    : 'تم تحديث حالة الفاتورة.');
         } catch (error) { console.error(error); setNotice('تعذّر تعديل حالة الفاتورة.'); }
     };
     const saveInvoice = async (draft) => {
@@ -238,7 +247,7 @@ const WalletView = ({ generalSettings }) => {
             }
             const walletResult = await syncWalletRewardForOrderStatus(draft.id, draft.status);
             setEditingOrder(null);
-            setNotice(walletResult.reversed ? `تم حفظ التعديلات واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.` : 'تم حفظ تعديلات الفاتورة.');
+            setNotice(walletResult.reversed ? `تم حفظ التعديلات واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.` : walletResult.reason === 'below-minimum-order-total' ? `تم حفظ التعديلات. لا تُضاف مكافأة لأن إجمالي الفاتورة أقل من ${WALLET_REWARD_MINIMUM_YER.toLocaleString('en-US')} ريال يمني.` : 'تم حفظ تعديلات الفاتورة.');
         } catch (error) { console.error(error); setNotice('تعذّر حفظ تعديلات الفاتورة.'); }
     };
     const saveWalletAdjustment = async draft => {
@@ -553,8 +562,10 @@ const InvoiceCard = ({ order, wallet, position, isLatest, rewarding, deleting, d
     const key = statusKey(order.status);
     const complete = key === 'completed';
     const items = order.cartItems || [];
-    // Completed invoices without a recorded cycle immediately show the live configured reward.
-    const reward = Number(order.walletRewardAmount ?? defaultReward ?? 0);
+    const rewardEligible = isOrderEligibleForWalletReward(order);
+    const rewardGranted = rewardEligible && order.walletRewardGranted && !order.walletRewardReversed;
+    // An invoice below the minimum never displays or earns a wallet reward.
+    const reward = rewardEligible ? Number(order.walletRewardAmount ?? defaultReward ?? 0) : 0;
     const stageIndex = { new: 0, processing: 1, shipping: 2, completed: 3, returned: 0 }[key] ?? 0;
     const stages = [{ label: 'قيد المراجعة', Icon: Clock3, tone: 'orange' }, { label: 'قيد التجهيز', Icon: Package, tone: 'violet' }, { label: 'قيد التوصيل', Icon: Truck, tone: 'blue' }, { label: 'مكتمل', Icon: complete ? Check : MapPin, tone: 'emerald' }];
     const choices = [['new', 'طلب جديد'], ['processing', 'قيد التجهيز'], ['shipping', 'قيد التوصيل'], ['completed', 'مكتمل'], ['returned', 'مسترجع']];
@@ -593,7 +604,7 @@ const InvoiceCard = ({ order, wallet, position, isLatest, rewarding, deleting, d
 
         <div dir="rtl" className="mx-3 mt-2 flex min-h-[44px] flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-right shadow-inner shadow-emerald-900/5 dark:border-emerald-500/40 dark:bg-[#081d25] dark:shadow-black/25">
             <div className="flex min-w-0 items-center gap-2 text-[10px] font-black text-slate-700 dark:text-white"><div className="rounded-lg border border-emerald-200 bg-emerald-100 p-1 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300"><Wallet size={13} strokeWidth={2.4}/></div><span className="whitespace-nowrap">إجمالي الرصيد الحالي لهذا العميل: <span className="text-[9px] text-emerald-700 dark:text-emerald-200">{currencyLabel}</span></span><span dir="ltr" className="whitespace-nowrap font-mono text-emerald-700 dark:text-emerald-400">$ {formatAmount(currentWalletBalance)}</span><span className="whitespace-nowrap text-[10px] font-bold text-slate-500 dark:text-slate-300">(هاتف: {customerPhone(order)})</span></div>
-            <div className="flex flex-wrap items-center gap-2"><span className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[8px] font-black ${complete ? 'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300' : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/40 dark:bg-amber-400/10 dark:text-amber-300'}`}><CheckCircle2 size={10}/>{complete ? <>تم إيداع مكافأة <span dir="ltr">(${formatAmount(reward)})</span> واختبار رصيد الفاتورة <span dir="ltr">(${formatAmount(invoiceBalance)})</span></> : <>مكافأة الفاتورة <span dir="ltr">(${formatAmount(reward)})</span> لا ترتفع إلا عند اكتمال الطلب</>}</span><button onClick={onManageWallet} className="rounded-lg border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-[9px] font-black text-emerald-700 transition hover:bg-emerald-200 dark:border-emerald-400/45 dark:bg-emerald-400/10 dark:text-emerald-300 dark:hover:bg-emerald-400/20">تعديل الرصيد</button></div>
+            <div className="flex flex-wrap items-center gap-2"><span className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[8px] font-black ${!rewardEligible ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/40 dark:bg-rose-400/10 dark:text-rose-200' : rewardGranted ? 'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300' : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/40 dark:bg-amber-400/10 dark:text-amber-300'}`}><CheckCircle2 size={10}/>{!rewardEligible ? <>لا تنطبق مكافأة المحفظة: إجمالي الفاتورة أقل من {WALLET_REWARD_MINIMUM_YER.toLocaleString('en-US')} ريال يمني</> : rewardGranted ? <>تم إيداع مكافأة <span dir="ltr">(${formatAmount(reward)})</span> واختبار رصيد الفاتورة <span dir="ltr">(${formatAmount(invoiceBalance)})</span></> : complete ? <>جاري إيداع مكافأة الفاتورة <span dir="ltr">(${formatAmount(reward)})</span></> : <>مكافأة الفاتورة <span dir="ltr">(${formatAmount(reward)})</span> لا ترتفع إلا عند اكتمال الطلب</>}</span><button onClick={onManageWallet} className="rounded-lg border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-[9px] font-black text-emerald-700 transition hover:bg-emerald-200 dark:border-emerald-400/45 dark:bg-emerald-400/10 dark:text-emerald-300 dark:hover:bg-emerald-400/20">تعديل الرصيد</button></div>
         </div>
 
         <div className="mx-3 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 divide-y divide-slate-200 dark:border-slate-800 dark:bg-[#111522] dark:divide-slate-800">

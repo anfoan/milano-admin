@@ -464,6 +464,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             const orderData = {
                 orderId,
                 status: 'completed',
+                currency: generalSettings?.currency || 'YER',
                 paymentMethod: paymentMethod, // 'cash', 'card', 'transfer'
                 createdAt: serverTimestamp(),
                 date: new Date().toLocaleDateString(isRTL ? 'ar-EG' : 'en-GB'),
