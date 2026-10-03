@@ -93,44 +93,30 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
     const printRef = useRef(null);
 
-    // Auto-calculate dates based on reportPeriod
-    useEffect(() => {
-        if (reportPeriod === 'custom') return;
-
+    const handleReportPeriodChange = nextPeriod => {
+        setReportPeriod(nextPeriod);
+        if (nextPeriod === 'custom') return;
         const now = new Date();
-        let start = new Date();
-        let end = new Date();
-
-        if (reportPeriod === 'this_week') {
-            const dayOfWeek = now.getDay();
-            start.setDate(now.getDate() - dayOfWeek);
-            start.setHours(0, 0, 0, 0);
-            
+        let start = new Date(now);
+        let end = new Date(now);
+        if (nextPeriod === 'this_week') {
+            start.setDate(now.getDate() - now.getDay());
             end.setDate(start.getDate() + 6);
-            end.setHours(23, 59, 59, 999);
-        } else if (reportPeriod === 'this_month') {
+        } else if (nextPeriod === 'this_month') {
             start = new Date(now.getFullYear(), now.getMonth(), 1);
-            end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-        } else if (reportPeriod === 'this_year') {
+            end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        } else if (nextPeriod === 'this_year') {
             start = new Date(now.getFullYear(), 0, 1);
-            end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
-        } else if (reportPeriod.startsWith('month_')) {
-            const monthIdx = parseInt(reportPeriod.split('_')[1], 10) - 1;
-            const year = now.getFullYear();
-            start = new Date(year, monthIdx, 1);
-            end = new Date(year, monthIdx + 1, 0, 23, 59, 59, 999);
+            end = new Date(now.getFullYear(), 11, 31);
+        } else if (nextPeriod.startsWith('month_')) {
+            const monthIdx = parseInt(nextPeriod.split('_')[1], 10) - 1;
+            start = new Date(now.getFullYear(), monthIdx, 1);
+            end = new Date(now.getFullYear(), monthIdx + 1, 0);
         }
-
-        const formatDate = (d) => {
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${y}-${m}-${day}`;
-        };
-
+        const formatDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         setReportStartDate(formatDate(start));
         setReportEndDate(formatDate(end));
-    }, [reportPeriod]);
+    };
 
     // Check Auth Status (either Admin user or Local Worker)
     useEffect(() => {
@@ -1682,7 +1668,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         <Calendar className={`absolute top-2.5 ${isRTL ? 'right-2' : 'left-2'} text-gray-400`} size={12} />
                                         <select
                                             value={reportPeriod}
-                                            onChange={(e) => setReportPeriod(e.target.value)}
+                                            onChange={(e) => handleReportPeriodChange(e.target.value)}
                                             className={`bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-lg ${isRTL ? 'pr-6 pl-2' : 'pl-6 pr-2'} py-1 text-xs outline-none font-bold text-gray-800 dark:text-white`}
                                         >
                                             <option value="custom">{isRTL ? "فترة مخصصة" : "Custom Period"}</option>

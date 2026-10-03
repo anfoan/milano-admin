@@ -1,15 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Bell, Check, ShoppingBag, Clock, MessageSquare, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, where, orderBy, onSnapshot, limit, updateDoc, doc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '../../context/CurrencyContext';
 
 const AdminNotifications = ({ lang: propLang }) => {
     const { formatPrice } = useCurrency();
-    const [notifications, setNotifications] = useState([]);
-    const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [activeToast, setActiveToast] = useState(null);
     
@@ -18,14 +15,10 @@ const AdminNotifications = ({ lang: propLang }) => {
     const lastMessageCount = useRef(0);
     const lastNotifiedId = useRef(localStorage.getItem('milano_last_notified_order_id') || '');
 
-    const [lang, setLang] = useState(propLang || localStorage.getItem('adminLang') || 'ar');
+    const lang = propLang || localStorage.getItem('adminLang') || 'ar';
     const isRTL = lang === 'ar';
-
-    useEffect(() => {
-        setLang(propLang || localStorage.getItem('adminLang') || 'ar');
-    }, [propLang]);
     const dropdownRef = useRef(null);
-    const navigate = useNavigate();
+    const toastTimerRef = useRef(null);
 
     const [orderNotifications, setOrderNotifications] = useState([]);
     const [messageNotifications, setMessageNotifications] = useState([]);
@@ -52,10 +45,11 @@ const AdminNotifications = ({ lang: propLang }) => {
         };
 
         const showToast = (item) => {
+            window.clearTimeout(toastTimerRef.current);
             setActiveToast(item);
             playNotificationSound();
-            // Auto hide after 6 seconds
-            setTimeout(() => setActiveToast(null), 6000);
+            // Keep one controlled timer so repeated snapshots cannot stack visual toasts.
+            toastTimerRef.current = window.setTimeout(() => setActiveToast(null), 6000);
         };
 
         const unsubscribeOrders = onSnapshot(orderQ, (snapshot) => {
@@ -106,18 +100,19 @@ const AdminNotifications = ({ lang: propLang }) => {
             unsubscribeOrders();
             unsubscribeFullOrders();
             unsubscribeMessages();
+            window.clearTimeout(toastTimerRef.current);
         };
     }, []);
 
-
-    useEffect(() => {
-        const combined = [
+    // These values are fully derived from the two realtime sources. Keeping them out
+    // of a second effect avoids an extra header render after every snapshot.
+    const { notifications, unreadCount } = useMemo(() => {
+        const notifications = [
             ...orderNotifications.map(o => ({ ...o, type: 'order', sortDate: o.createdAt?.toDate ? o.createdAt.toDate() : new Date(o.date) })),
             ...messageNotifications.map(m => ({ ...m, type: 'message', sortDate: m.createdAt?.toDate ? m.createdAt.toDate() : new Date(m.date) }))
         ].sort((a, b) => b.sortDate - a.sortDate);
-
-        setNotifications(combined);
-        setUnreadCount(combined.filter(n => (n.type === 'order' && n.status === 'new' && !n.adminViewed) || (n.type === 'message' && n.status === 'new')).length);
+        const unreadCount = notifications.filter(n => (n.type === 'order' && n.status === 'new' && !n.adminViewed) || (n.type === 'message' && n.status === 'new')).length;
+        return { notifications, unreadCount };
     }, [orderNotifications, messageNotifications]);
 
     const handleMarkAsRead = async () => {

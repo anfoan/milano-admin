@@ -149,65 +149,43 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
         return true;
     };
 
-    // Auto-calculate dates based on Expenses period
-    useEffect(() => {
-        if (expensesPeriod === 'custom' || expensesPeriod === 'all') {
-            if (expensesPeriod === 'all') {
-                setExpensesStartDate('');
-                setExpensesEndDate('');
-            }
-            return;
-        }
+    const getPresetDateRange = selectedPeriod => {
+        if (selectedPeriod === 'all' || selectedPeriod === 'custom') return { startDate: '', endDate: '' };
         const now = new Date();
-        let start = new Date();
-        let end = new Date();
-        if (expensesPeriod === 'this_week') {
+        let start = new Date(now);
+        let end = new Date(now);
+        if (selectedPeriod === 'this_week') {
             const dayOfWeek = now.getDay();
             start.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-            start.setHours(0, 0, 0, 0);
             end.setDate(start.getDate() + 6);
-            end.setHours(23, 59, 59, 999);
-        } else if (expensesPeriod === 'this_month') {
+        } else if (selectedPeriod === 'this_month') {
             start = new Date(now.getFullYear(), now.getMonth(), 1);
-            end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-        } else if (expensesPeriod === 'this_year') {
+            end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        } else if (selectedPeriod === 'this_year') {
             start = new Date(now.getFullYear(), 0, 1);
-            end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+            end = new Date(now.getFullYear(), 11, 31);
         }
-        const formatDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        setExpensesStartDate(formatDate(start));
-        setExpensesEndDate(formatDate(end));
-    }, [expensesPeriod]);
+        const formatDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        return { startDate: formatDate(start), endDate: formatDate(end) };
+    };
 
-    // Auto-calculate dates based on Bonds period
-    useEffect(() => {
-        if (bondsPeriod === 'custom' || bondsPeriod === 'all') {
-            if (bondsPeriod === 'all') {
-                setBondsStartDate('');
-                setBondsEndDate('');
-            }
-            return;
+    const handleExpensesPeriodChange = nextPeriod => {
+        const range = getPresetDateRange(nextPeriod);
+        setExpensesPeriod(nextPeriod);
+        if (nextPeriod !== 'custom') {
+            setExpensesStartDate(range.startDate);
+            setExpensesEndDate(range.endDate);
         }
-        const now = new Date();
-        let start = new Date();
-        let end = new Date();
-        if (bondsPeriod === 'this_week') {
-            const dayOfWeek = now.getDay();
-            start.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-            start.setHours(0, 0, 0, 0);
-            end.setDate(start.getDate() + 6);
-            end.setHours(23, 59, 59, 999);
-        } else if (bondsPeriod === 'this_month') {
-            start = new Date(now.getFullYear(), now.getMonth(), 1);
-            end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-        } else if (bondsPeriod === 'this_year') {
-            start = new Date(now.getFullYear(), 0, 1);
-            end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+    };
+
+    const handleBondsPeriodChange = nextPeriod => {
+        const range = getPresetDateRange(nextPeriod);
+        setBondsPeriod(nextPeriod);
+        if (nextPeriod !== 'custom') {
+            setBondsStartDate(range.startDate);
+            setBondsEndDate(range.endDate);
         }
-        const formatDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        setBondsStartDate(formatDate(start));
-        setBondsEndDate(formatDate(end));
-    }, [bondsPeriod]);
+    };
 
     // Filtered Expenses
     const filteredExpenses = expenses.filter(e => {
@@ -1418,7 +1396,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                             </div>
                             <select
                                 value={expensesPeriod}
-                                onChange={(e) => setExpensesPeriod(e.target.value)}
+                                onChange={(e) => handleExpensesPeriodChange(e.target.value)}
                                 className="px-3 py-2 text-xs font-bold border border-gray-200 dark:border-white/5 rounded-lg bg-white dark:bg-[#2c2c2e] dark:text-white"
                             >
                                 <option value="all">{isRTL ? 'الكل' : 'All'}</option>
@@ -1597,7 +1575,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                             </div>
                             <select
                                 value={bondsPeriod}
-                                onChange={(e) => setBondsPeriod(e.target.value)}
+                                onChange={(e) => handleBondsPeriodChange(e.target.value)}
                                 className="px-3 py-2 text-xs font-bold border border-gray-200 dark:border-white/5 rounded-lg bg-white dark:bg-[#2c2c2e] dark:text-white"
                             >
                                 <option value="all">{isRTL ? 'الكل' : 'All'}</option>

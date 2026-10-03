@@ -36,7 +36,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('');
+    // Determine worker access before the first render so no empty view flashes briefly.
+    const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
+    const workerPerms = isWorker ? JSON.parse(sessionStorage.getItem('posWorkerPermissions') || '{}') : {};
+    const workerAllowedTabs = [];
+    if (isWorker) {
+        if (workerPerms.allowViewHistory || workerPerms.allowOnlyPrint) workerAllowedTabs.push('pos');
+        if (workerPerms.allowExpenses || workerPerms.allowBonds) workerAllowedTabs.push('expenses');
+        if (workerPerms.allowManualOrder) workerAllowedTabs.push('manual-order');
+    }
+    const [activeTab, setActiveTab] = useState(() => isWorker ? (workerAllowedTabs[0] || '') : 'overview');
     const [showRightPanel, setShowRightPanel] = useState(false); // Right Panel State
     const [showProfileMenu, setShowProfileMenu] = useState(false); // Profile Menu State
     const [settingsSection, setSettingsSection] = useState(null); // Settings Section State
@@ -54,19 +63,6 @@ const AdminDashboard = () => {
     const [isSearchFocused, setIsSearchFocused] = useState(false); // Search Focus State
     const [searchIndex, setSearchIndex] = useState({ products: [], orders: [] }); // Data Index
 
-    // Worker Check
-    const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
-    const workerPerms = isWorker ? JSON.parse(sessionStorage.getItem('posWorkerPermissions') || '{}') : {};
-
-    // Define allowed tabs for workers
-    const workerAllowedTabs = [];
-    if (isWorker) {
-        if (workerPerms.allowViewHistory || workerPerms.allowOnlyPrint) workerAllowedTabs.push('pos');
-        if (workerPerms.allowExpenses) workerAllowedTabs.push('expenses');
-        if (workerPerms.allowBonds) workerAllowedTabs.push('expenses');
-        if (workerPerms.allowManualOrder) workerAllowedTabs.push('manual-order');
-    }
-
     // Keep the navigation drawer from consuming tablet content space after a rotation or resize.
     useEffect(() => {
         const closeDrawerOnCompactScreens = () => {
@@ -74,15 +70,6 @@ const AdminDashboard = () => {
         };
         window.addEventListener('resize', closeDrawerOnCompactScreens);
         return () => window.removeEventListener('resize', closeDrawerOnCompactScreens);
-    }, []);
-
-    // Set default active tab on mount
-    useEffect(() => {
-        if (isWorker && workerAllowedTabs.length > 0 && activeTab === '') {
-            setActiveTab(workerAllowedTabs[0]);
-        } else if (!isWorker && activeTab === '') {
-            setActiveTab('overview');
-        }
     }, []);
 
     const allNavShortcuts = [
@@ -285,10 +272,14 @@ const AdminDashboard = () => {
     };
 
     const handleTabChange = (tab) => {
-        if (tab === 'settings') {
-            setSettingsSection(null);
+        if (!tab || tab === activeTab) {
+            if (window.innerWidth < 1280) setIsSidebarOpen(false);
+            return;
         }
+        if (tab === 'settings') setSettingsSection(null);
         setActiveTab(tab);
+        // A drawer should never remain layered over the newly selected view on phone/tablet.
+        if (window.innerWidth < 1280) setIsSidebarOpen(false);
     };
 
     const handleEditProduct = (product) => {
@@ -399,7 +390,7 @@ const AdminDashboard = () => {
     return (
         <div className="admin-dashboard-root min-h-screen min-w-0 bg-[#f8f9fa] dark:bg-[#0a0a0b] flex font-['Cairo'] overflow-x-clip transition-colors duration-300" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             {/* Sidebar: overlay drawer through iPad widths, fixed rail on large desktops. */}
-                <div className={`fixed inset-y-0 ${lang === 'ar' ? 'right-0' : 'left-0'} z-50 xl:relative transition-all duration-300 transform no-print ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
+                <div className={`fixed inset-y-0 ${lang === 'ar' ? 'right-0' : 'left-0'} z-50 xl:relative transition-[width] duration-300 transform no-print ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
                 <Sidebar
                     activeTab={activeTab}
                     setActiveTab={handleTabChange}

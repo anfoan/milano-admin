@@ -200,7 +200,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                         <div key={item.id} className="space-y-1">
                             {item.id === 'wallet' ? <button
                                 onClick={() => setActiveTab(item.id)}
-                                className={`relative flex w-full items-center gap-4 rounded-2xl px-3 lg:px-4 py-3 lg:py-3.5 font-bold transition-all duration-300 group ${isSectionActive(item)
+                                className={`relative flex w-full items-center gap-4 rounded-2xl px-3 lg:px-4 py-3 lg:py-3.5 font-bold transition-colors duration-200 group ${isSectionActive(item)
                                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                                     : 'text-slate-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}
@@ -217,7 +217,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                         setActiveTab(item.id);
                                     }
                                 }}
-                                className={`w-full flex items-center gap-4 px-3 lg:px-4 py-3 lg:py-3.5 rounded-2xl transition-all duration-300 font-bold group ${isSectionActive(item)
+                                className={`w-full flex items-center gap-4 px-3 lg:px-4 py-3 lg:py-3.5 rounded-2xl transition-colors duration-200 font-bold group ${isSectionActive(item)
                                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                                     : 'text-slate-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}

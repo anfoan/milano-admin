@@ -46,19 +46,19 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
         return () => { unsubPurchases(); unsubProducts(); };
     }, []);
 
-    useEffect(() => {
-        if (period === 'all' || period === 'custom') {
-            if (period === 'all') { setStartDate(''); setEndDate(''); }
-            return;
-        }
+    const handlePeriodChange = nextPeriod => {
+        setPeriod(nextPeriod);
+        if (nextPeriod === 'all') { setStartDate(''); setEndDate(''); return; }
+        if (nextPeriod === 'custom') return;
         const now = new Date();
         const start = new Date(now);
-        if (period === 'this_month') start.setDate(1);
-        if (period === 'this_year') { start.setMonth(0, 1); }
-        if (period === 'this_week') start.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-        const fmt = d => d.toISOString().slice(0, 10);
-        setStartDate(fmt(start)); setEndDate(fmt(now));
-    }, [period]);
+        if (nextPeriod === 'this_month') start.setDate(1);
+        if (nextPeriod === 'this_year') start.setMonth(0, 1);
+        if (nextPeriod === 'this_week') start.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        const fmt = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        setStartDate(fmt(start));
+        setEndDate(fmt(now));
+    };
 
     const matchingProducts = useMemo(() => {
         const needle = String(newItem.productName || '').trim().toLowerCase();
@@ -202,7 +202,7 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                     <div className="relative min-w-0 flex-1"><Search size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"/><input value={search} onChange={e => setSearch(e.target.value)} placeholder={t.search} className="h-9 w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pr-9 pl-3 text-xs font-bold outline-none placeholder:text-gray-400 focus:border-blue-400"/></div>
                     <div className="flex shrink-0 flex-wrap items-center gap-1 rounded-xl bg-gray-100 p-1">{[['all', t.all], ['paid', t.paidStatus], ['deferred', t.partial], ['pending', t.unpaid]].map(([key, label]) => <button key={key} onClick={() => setStatusFilter(key)} className={`rounded-lg px-3 py-1.5 text-xs font-black transition-colors ${statusFilter === key ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-600' : 'text-gray-600 hover:bg-white'}`}>{label}</button>)}</div>
-                    <div className="flex shrink-0 items-center gap-2"><span className="text-[11px] font-black text-gray-500">{t.period}:</span><select value={period} onChange={e => setPeriod(e.target.value)} className="h-9 min-w-[92px] rounded-xl border border-gray-200 bg-white px-3 text-xs font-black text-gray-700 outline-none focus:border-blue-400"><option value="all">{t.all}</option><option value="this_week">{t.thisWeek}</option><option value="this_month">{t.thisMonth}</option><option value="this_year">{t.thisYear}</option></select></div>
+                    <div className="flex shrink-0 items-center gap-2"><span className="text-[11px] font-black text-gray-500">{t.period}:</span><select value={period} onChange={e => handlePeriodChange(e.target.value)} className="h-9 min-w-[92px] rounded-xl border border-gray-200 bg-white px-3 text-xs font-black text-gray-700 outline-none focus:border-blue-400"><option value="all">{t.all}</option><option value="this_week">{t.thisWeek}</option><option value="this_month">{t.thisMonth}</option><option value="this_year">{t.thisYear}</option></select></div>
                     <div className="flex shrink-0 flex-wrap items-center gap-2"><label className="flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-2.5 text-[10px] font-black text-gray-500"><span>{isRTL ? 'من' : 'From'}</span><input lang="en" dir="ltr" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-[112px] bg-transparent text-center font-mono text-[10px] font-bold text-gray-700 outline-none"/></label><label className="flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-2.5 text-[10px] font-black text-gray-500"><span>{isRTL ? 'إلى' : 'To'}</span><input lang="en" dir="ltr" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-[112px] bg-transparent text-center font-mono text-[10px] font-bold text-gray-700 outline-none"/></label></div>
                 </div>
             </div>

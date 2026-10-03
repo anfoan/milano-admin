@@ -29,6 +29,17 @@ const isoDay = (value) => {
 };
 
 const dayAtNoon = (value) => value ? new Date(`${value}T12:00:00`) : null;
+const financialPresetRange = (period) => {
+    const today = new Date();
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const start = new Date(end);
+    if (period === 'week') start.setDate(end.getDate() - 6);
+    if (period === 'month') start.setDate(end.getDate() - 29);
+    if (period === 'quarter') start.setMonth(end.getMonth() - 2, 1);
+    if (period === 'half') start.setMonth(end.getMonth() - 5, 1);
+    if (period === 'year') start.setMonth(0, 1);
+    return { startDate: isoDay(start), endDate: isoDay(end) };
+};
 const escapeHtml = (value) => String(value ?? '').replace(/[<>&"']/g, char => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#039;' }[char]));
 
 const MetricCard = ({ title, hint, amount, currencyLabel, icon, tone, badge }) => (
@@ -114,19 +125,22 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
         return () => listeners.forEach(unsubscribe => unsubscribe());
     }, []);
 
-    useEffect(() => {
-        if (period === 'custom') return;
-        const today = new Date();
-        const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const start = new Date(end);
-        if (period === 'week') start.setDate(end.getDate() - 6);
-        if (period === 'month') start.setDate(end.getDate() - 29);
-        if (period === 'quarter') start.setMonth(end.getMonth() - 2, 1);
-        if (period === 'half') start.setMonth(end.getMonth() - 5, 1);
-        if (period === 'year') start.setMonth(0, 1);
-        setStartDate(isoDay(start));
-        setEndDate(isoDay(end));
-    }, [period]);
+    // A predefined period is calculated synchronously from one state value.
+    // Custom inputs keep their own values. This prevents a second, visibly delayed
+    // render whenever a period button is selected.
+    const activeDateRange = useMemo(() => period === 'custom'
+        ? { startDate, endDate }
+        : financialPresetRange(period), [period, startDate, endDate]);
+    const activeStartDate = activeDateRange.startDate;
+    const activeEndDate = activeDateRange.endDate;
+    const handleFinancialPeriodChange = nextPeriod => {
+        if (nextPeriod !== 'custom') {
+            const range = financialPresetRange(nextPeriod);
+            setStartDate(range.startDate);
+            setEndDate(range.endDate);
+        }
+        setPeriod(nextPeriod);
+    };
 
     const money = (value) => `${Number(value || 0).toLocaleString('en-US')} ${currencyLabel}`;
     const number = (value) => Number(value || 0).toLocaleString('en-US');
@@ -136,7 +150,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
     };
     const isInRange = (value) => {
         const key = isoDay(value);
-        return Boolean(key) && (!startDate || key >= startDate) && (!endDate || key <= endDate);
+        return Boolean(key) && (!activeStartDate || key >= activeStartDate) && (!activeEndDate || key <= activeEndDate);
     };
     const toNumber = (value) => {
         if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
@@ -203,10 +217,10 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
             : (productCostMap[String(line?.id || line?.productId || line?.title || line?.name || '').trim()] || 0);
         return sum + toNumber(line?.quantity ?? line?.qty ?? 1) * lineCost;
     }, 0);
-    const activeOrders = useMemo(() => orders.filter(order => !isCancelled(order.status) && isInRange(orderDate(order))), [orders, startDate, endDate]);
-    const filteredPurchases = useMemo(() => purchases.filter(item => isInRange(purchaseDate(item))), [purchases, startDate, endDate]);
-    const filteredExpenses = useMemo(() => expenses.filter(item => isInRange(expenseDate(item))), [expenses, startDate, endDate]);
-    const filteredBonds = useMemo(() => bonds.filter(item => isInRange(bondDate(item))), [bonds, startDate, endDate]);
+    const activeOrders = useMemo(() => orders.filter(order => !isCancelled(order.status) && isInRange(orderDate(order))), [orders, activeStartDate, activeEndDate]);
+    const filteredPurchases = useMemo(() => purchases.filter(item => isInRange(purchaseDate(item))), [purchases, activeStartDate, activeEndDate]);
+    const filteredExpenses = useMemo(() => expenses.filter(item => isInRange(expenseDate(item))), [expenses, activeStartDate, activeEndDate]);
+    const filteredBonds = useMemo(() => bonds.filter(item => isInRange(bondDate(item))), [bonds, activeStartDate, activeEndDate]);
     const receiptBonds = useMemo(() => filteredBonds.filter(isReceiptBond), [filteredBonds]);
     const paymentBonds = useMemo(() => filteredBonds.filter(isPaymentBond), [filteredBonds]);
 
@@ -256,8 +270,8 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
     }, [allTransactions, search, categoryFilter, paymentFilter, lang]);
 
     const chartBuckets = useMemo(() => {
-        const start = dayAtNoon(startDate) || new Date();
-        const end = dayAtNoon(endDate) || new Date();
+        const start = dayAtNoon(activeStartDate) || new Date();
+        const end = dayAtNoon(activeEndDate) || new Date();
         const days = Math.max(1, Math.floor((end - start) / 86400000) + 1);
         const bucketCount = period === 'week' ? 7 : period === 'month' ? 30 : period === 'quarter' ? 12 : period === 'half' ? 6 : period === 'year' ? 12 : Math.min(days, 31);
         const bucketSize = period === 'quarter' ? 7 : period === 'half' || period === 'year' ? 31 : 1;
@@ -277,7 +291,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
             });
         }
         return buckets;
-    }, [period, startDate, endDate, isRTL]);
+    }, [period, activeStartDate, activeEndDate, isRTL]);
 
     const chartData = useMemo(() => chartBuckets.map(bucket => {
         const within = (value) => { const date = toDate(value); return date && date >= bucket.start && date <= new Date(bucket.end.getFullYear(), bucket.end.getMonth(), bucket.end.getDate(), 23, 59, 59); };
@@ -320,7 +334,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
     const printReport = () => {
         const popup = window.open('', '_blank', 'width=1000,height=850');
         if (!popup) { alert(isRTL ? 'يرجى السماح بالنوافذ المنبثقة للطباعة.' : 'Please allow popups to print.'); return; }
-        const reportRange = `${formatDate(startDate)} — ${formatDate(endDate)}`;
+        const reportRange = `${formatDate(activeStartDate)} — ${formatDate(activeEndDate)}`;
         const logoPath = generalSettings?.invoiceLogo || '/admin-new-icon.png';
         const logo = logoPath.startsWith('http') ? logoPath : `${window.location.origin}${logoPath}`;
         const cards = metricCards.map(card => `<div class="metric"><span>${escapeHtml(card.title)}</span><b>${escapeHtml(card.amount)} <small>${escapeHtml(currencyLabel)}</small></b></div>`).join('');
@@ -342,7 +356,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
 
         <section className="rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-[#1d1d20]">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex flex-wrap items-center gap-1.5">{[['week', t.week], ['month', t.month], ['quarter', t.quarter], ['half', t.half], ['year', t.year]].map(([key, label]) => <button key={key} onClick={() => setPeriod(key)} className={`h-8 rounded-lg px-3.5 text-[10px] font-black transition-all ${period === key ? 'bg-[#2563eb] text-white shadow-sm shadow-blue-500/30' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200'}`}>{label}</button>)}<select value={period === 'custom' ? 'custom' : ''} onChange={event => setPeriod(event.target.value)} className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[10px] font-black text-slate-700 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white"><option value="" disabled>{t.custom}</option><option value="custom">{t.custom}</option></select></div>
+                <div className="flex flex-wrap items-center gap-1.5">{[['week', t.week], ['month', t.month], ['quarter', t.quarter], ['half', t.half], ['year', t.year]].map(([key, label]) => <button key={key} onClick={() => handleFinancialPeriodChange(key)} className={`h-8 rounded-lg px-3.5 text-[10px] font-black transition-all ${period === key ? 'bg-[#2563eb] text-white shadow-sm shadow-blue-500/30' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200'}`}>{label}</button>)}<select value={period === 'custom' ? 'custom' : ''} onChange={event => handleFinancialPeriodChange(event.target.value)} className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[10px] font-black text-slate-700 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white"><option value="" disabled>{t.custom}</option><option value="custom">{t.custom}</option></select></div>
                 <div className="flex flex-wrap items-center gap-2 px-2 text-[10px] font-black text-slate-500"><span>{t.period}</span><span className="text-blue-600">{activePeriodDetail}</span>{period === 'custom' && <><label className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 dark:border-white/10 dark:bg-white/5"><CalendarDays size={13}/><input lang="en" dir="ltr" type="date" value={startDate} onChange={event => { setPeriod('custom'); setStartDate(event.target.value); }} className="w-[105px] bg-transparent text-center font-mono text-[10px] outline-none"/></label><label className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 dark:border-white/10 dark:bg-white/5"><input lang="en" dir="ltr" type="date" value={endDate} onChange={event => { setPeriod('custom'); setEndDate(event.target.value); }} className="w-[105px] bg-transparent text-center font-mono text-[10px] outline-none"/></label></>}</div>
             </div>
         </section>
@@ -366,7 +380,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {} }) => {
             <div className="overflow-x-auto"><table className="w-full min-w-[960px] text-[10px]"><thead className="border-b border-slate-200 bg-slate-50 text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"><tr>{[t.type, t.description, t.entity, t.date, t.paymentMethod, t.status, t.amount].map(label => <th key={label} className={`px-3 py-3 font-black ${label === t.amount ? 'pr-8 text-right' : 'text-center'}`}>{label}</th>)}</tr></thead><tbody className="divide-y divide-slate-100 dark:divide-white/5">{visibleTransactions.length === 0 ? <tr><td colSpan="7" className="px-3 py-14 text-center text-xs font-bold text-slate-400">{t.noTransactions}</td></tr> : visibleTransactions.map(row => <tr key={row.id} className="transition-colors hover:bg-blue-50/30 dark:hover:bg-white/5"><td className="px-3 py-3 text-center"><span className="inline-flex items-center gap-1"><ChevronLeft size={13} className="text-slate-400"/><span className={`inline-flex rounded-full px-2 py-1 font-black ring-1 ${typeClass(row.type)}`}>{typeText(row.type)}</span></span></td><td className="px-3 py-3 text-center font-bold text-slate-700 dark:text-slate-200"><span dir="ltr" className="font-mono text-[9px] text-slate-700 dark:text-slate-300">{row.reference}</span><span className="mx-1 text-slate-300">/</span>{row.description}</td><td className="px-3 py-3 text-center font-bold text-slate-700 dark:text-slate-200">{row.entity}</td><td dir="ltr" className="px-3 py-3 text-center font-mono text-[9px] text-slate-500 dark:text-slate-300">{formatDate(row.date)}</td><td className="px-3 py-3 text-center"><span className={`inline-flex rounded-full px-2 py-1 font-black ring-1 ${paymentClass(row.payment)}`}>{paymentText(row.payment)}</span></td><td className="px-3 py-3 text-center"><span className={`inline-flex rounded-full px-2 py-1 text-[9px] font-black ring-1 ${statusClass(row.status)}`}>{row.status}</span></td><td className="px-3 py-3 text-right font-mono text-[10px] font-black text-emerald-600 dark:text-emerald-300"><div dir="rtl" className="flex items-baseline justify-start gap-1.5 whitespace-nowrap"><span dir="ltr">{number(row.amount)}</span><span className="font-['Cairo'] text-[11px] font-black text-slate-700 dark:text-slate-100">{currencyLabel}</span></div></td></tr>)}</tbody></table></div>
         </section>
 
-        {reportOpen && <div className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-950/65 p-3 backdrop-blur-sm md:p-6"><div className="max-h-[96vh] w-full max-w-[780px] overflow-y-auto rounded-2xl bg-white shadow-2xl"><div className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-5"><div className="flex items-center gap-3"><div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-600"><FileText size={15}/></div><div><h2 className="text-[11px] font-black text-slate-900">{t.reportPreview}</h2><p className="text-[9px] font-bold text-slate-400">{t.reportPreviewHint}</p></div></div><div className="flex items-center gap-2"><button onClick={printReport} className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-red-600 px-3 text-[10px] font-black text-white"><Printer size={13}/>{t.print}</button><button onClick={() => setReportOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100"><X size={17}/></button></div></div><div className="bg-slate-100 p-4 md:p-6"><article className="rounded-2xl bg-white p-5 text-slate-900 shadow-sm md:p-8"><header className="flex items-start justify-between border-b-2 border-slate-800 pb-4"><div><h3 className="text-[22px] font-black">{isRTL ? 'متجر ميلانو' : 'Milano Store'}</h3><p className="mt-1 text-[9px] font-bold text-slate-500">{isRTL ? 'نظام إدارة التقارير المالية' : 'Financial reports management system'}</p></div><div className="text-left"><span className="rounded-md bg-slate-900 px-2.5 py-1 text-[9px] font-black text-white">{t.officialReport}</span><p dir="ltr" className="mt-2 font-mono text-[9px] font-bold text-slate-500">{t.reportNumber}</p></div></header><div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[9px] font-black text-slate-600"><span>{t.fiscalPeriod}: <b className="text-slate-900">{activePeriodDetail}</b></span><span dir="ltr">{formatDate(startDate)} — {formatDate(endDate)}</span><span>{currencyLabel}</span></div><h4 className="mt-5 text-right text-[10px] font-black">{t.first}</h4><div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">{metricCards.map(card => <div key={card.key} className={`rounded-lg border p-2.5 text-center ${previewTone[card.key]}`}><p className="text-[8px] font-black text-slate-600">{card.title}</p><p dir="ltr" className="mt-1 font-mono text-[11px] font-black text-slate-900">{card.amount} <span className="text-[8px]">{currencyLabel}</span></p></div>)}</div><h4 className="mt-5 text-right text-[10px] font-black">{t.second}</h4><div className="mt-2 overflow-x-auto rounded-lg border border-slate-200"><table className="w-full text-[8px]"><thead className="bg-slate-100"><tr>{[t.financialItem, t.category, t.amount, t.notes].map(label => <th key={label} className="px-2 py-2 text-center font-black">{label}</th>)}</tr></thead><tbody>{summaryRows.map(row => <tr key={row.title} className="border-t border-slate-100"><td className="px-2 py-2 text-center font-bold">{row.title}</td><td className={`px-2 py-2 text-center font-black ${row.color}`}>{row.category}</td><td dir="ltr" className="px-2 py-2 text-center font-mono font-black">{money(row.value)}</td><td className="px-2 py-2 text-center text-slate-500">{row.note}</td></tr>)}</tbody></table></div><h4 className="mt-5 text-right text-[10px] font-black">{t.third}</h4><div className="mt-2 overflow-hidden rounded-lg border border-slate-200"><table className="w-full text-[8px]"><thead className="bg-slate-100"><tr>{[t.date, t.type, t.description, t.entity, t.paymentMethod, t.amount].map(label => <th key={label} className="px-2 py-2 text-center font-black">{label}</th>)}</tr></thead><tbody>{visibleTransactions.slice(0, 15).map(row => <tr key={row.id} className="border-t border-slate-100"><td dir="ltr" className="px-2 py-2 text-center font-mono">{formatDate(row.date)}</td><td className="px-2 py-2 text-center font-bold">{typeText(row.type)}</td><td className="px-2 py-2 text-center">{row.reference} — {row.description}</td><td className="px-2 py-2 text-center">{row.entity}</td><td className="px-2 py-2 text-center">{paymentText(row.payment)}</td><td dir="ltr" className="px-2 py-2 text-center font-mono font-black">{money(row.amount)}</td></tr>)}</tbody></table></div><footer className="mt-7 flex justify-between border-t border-slate-200 pt-5 text-center text-[9px] font-black text-slate-600"><div>{t.accountant}<div className="mt-6 w-24 border-b border-dashed border-slate-400"></div></div><div>{t.manager}<div className="mt-6 w-24 border-b border-dashed border-slate-400"></div></div><div>{t.stamp}<div className="mt-3 flex h-11 w-11 items-center justify-center rounded-full border border-dashed border-slate-300 text-[7px] text-slate-400">ميلانو</div></div></footer></article></div><div className="flex items-center justify-between border-t border-slate-200 bg-white px-5 py-3"><span className="text-[9px] font-bold text-slate-400">{t.ready}</span><div className="flex gap-2"><button onClick={() => setReportOpen(false)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-black text-slate-600">{t.close}</button><button onClick={printReport} className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[10px] font-black text-white"><Download size={13}/>{t.print}</button></div></div></div></div>}
+        {reportOpen && <div className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-950/65 p-3 backdrop-blur-sm md:p-6"><div className="max-h-[96vh] w-full max-w-[780px] overflow-y-auto rounded-2xl bg-white shadow-2xl"><div className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-5"><div className="flex items-center gap-3"><div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-600"><FileText size={15}/></div><div><h2 className="text-[11px] font-black text-slate-900">{t.reportPreview}</h2><p className="text-[9px] font-bold text-slate-400">{t.reportPreviewHint}</p></div></div><div className="flex items-center gap-2"><button onClick={printReport} className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-red-600 px-3 text-[10px] font-black text-white"><Printer size={13}/>{t.print}</button><button onClick={() => setReportOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100"><X size={17}/></button></div></div><div className="bg-slate-100 p-4 md:p-6"><article className="rounded-2xl bg-white p-5 text-slate-900 shadow-sm md:p-8"><header className="flex items-start justify-between border-b-2 border-slate-800 pb-4"><div><h3 className="text-[22px] font-black">{isRTL ? 'متجر ميلانو' : 'Milano Store'}</h3><p className="mt-1 text-[9px] font-bold text-slate-500">{isRTL ? 'نظام إدارة التقارير المالية' : 'Financial reports management system'}</p></div><div className="text-left"><span className="rounded-md bg-slate-900 px-2.5 py-1 text-[9px] font-black text-white">{t.officialReport}</span><p dir="ltr" className="mt-2 font-mono text-[9px] font-bold text-slate-500">{t.reportNumber}</p></div></header><div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[9px] font-black text-slate-600"><span>{t.fiscalPeriod}: <b className="text-slate-900">{activePeriodDetail}</b></span><span dir="ltr">{formatDate(activeStartDate)} — {formatDate(activeEndDate)}</span><span>{currencyLabel}</span></div><h4 className="mt-5 text-right text-[10px] font-black">{t.first}</h4><div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">{metricCards.map(card => <div key={card.key} className={`rounded-lg border p-2.5 text-center ${previewTone[card.key]}`}><p className="text-[8px] font-black text-slate-600">{card.title}</p><p dir="ltr" className="mt-1 font-mono text-[11px] font-black text-slate-900">{card.amount} <span className="text-[8px]">{currencyLabel}</span></p></div>)}</div><h4 className="mt-5 text-right text-[10px] font-black">{t.second}</h4><div className="mt-2 overflow-x-auto rounded-lg border border-slate-200"><table className="w-full text-[8px]"><thead className="bg-slate-100"><tr>{[t.financialItem, t.category, t.amount, t.notes].map(label => <th key={label} className="px-2 py-2 text-center font-black">{label}</th>)}</tr></thead><tbody>{summaryRows.map(row => <tr key={row.title} className="border-t border-slate-100"><td className="px-2 py-2 text-center font-bold">{row.title}</td><td className={`px-2 py-2 text-center font-black ${row.color}`}>{row.category}</td><td dir="ltr" className="px-2 py-2 text-center font-mono font-black">{money(row.value)}</td><td className="px-2 py-2 text-center text-slate-500">{row.note}</td></tr>)}</tbody></table></div><h4 className="mt-5 text-right text-[10px] font-black">{t.third}</h4><div className="mt-2 overflow-hidden rounded-lg border border-slate-200"><table className="w-full text-[8px]"><thead className="bg-slate-100"><tr>{[t.date, t.type, t.description, t.entity, t.paymentMethod, t.amount].map(label => <th key={label} className="px-2 py-2 text-center font-black">{label}</th>)}</tr></thead><tbody>{visibleTransactions.slice(0, 15).map(row => <tr key={row.id} className="border-t border-slate-100"><td dir="ltr" className="px-2 py-2 text-center font-mono">{formatDate(row.date)}</td><td className="px-2 py-2 text-center font-bold">{typeText(row.type)}</td><td className="px-2 py-2 text-center">{row.reference} — {row.description}</td><td className="px-2 py-2 text-center">{row.entity}</td><td className="px-2 py-2 text-center">{paymentText(row.payment)}</td><td dir="ltr" className="px-2 py-2 text-center font-mono font-black">{money(row.amount)}</td></tr>)}</tbody></table></div><footer className="mt-7 flex justify-between border-t border-slate-200 pt-5 text-center text-[9px] font-black text-slate-600"><div>{t.accountant}<div className="mt-6 w-24 border-b border-dashed border-slate-400"></div></div><div>{t.manager}<div className="mt-6 w-24 border-b border-dashed border-slate-400"></div></div><div>{t.stamp}<div className="mt-3 flex h-11 w-11 items-center justify-center rounded-full border border-dashed border-slate-300 text-[7px] text-slate-400">ميلانو</div></div></footer></article></div><div className="flex items-center justify-between border-t border-slate-200 bg-white px-5 py-3"><span className="text-[9px] font-bold text-slate-400">{t.ready}</span><div className="flex gap-2"><button onClick={() => setReportOpen(false)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-black text-slate-600">{t.close}</button><button onClick={printReport} className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[10px] font-black text-white"><Download size={13}/>{t.print}</button></div></div></div></div>}
     </div>;
 };
 
