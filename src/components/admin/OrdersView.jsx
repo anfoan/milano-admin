@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Printer, Search, FileDown, Trash2, Clock, CheckCircle, XCircle, MapPin, Phone, User, ShoppingBag, MessageCircle, Truck, X, Layers, ChevronDown, AlertTriangle, RefreshCw, Pencil } from 'lucide-react';
 import { db } from '../../lib/firebase';
-import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
+import { reverseWalletRewardForOrder, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { reconcilePendingCustomerOrder } from '../../lib/pendingOrderSync';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -79,6 +79,11 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
             select_status: 'حدد الحالة...',
             change_status: 'تغيير الحالة',
             print_invoices: 'طباعة الفواتير',
+            delete_selected: 'حذف الفواتير المحددة',
+            bulk_delete_title: 'حذف الفواتير المحددة؟',
+            bulk_delete_desc: 'سيتم حذف {count} فاتورة نهائياً من قائمة الطلبات. ستُسترجع مكافأة المحفظة المرتبطة بالفاتورة تلقائياً إن وُجدت. لا يمكن التراجع عن هذا الإجراء.',
+            bulk_delete_confirm: 'حذف الفواتير',
+            bulk_delete_error: 'تعذر حذف بعض الفواتير المحددة. لم تُحذف الفواتير التي تعذر معالجتها.',
             confirm_modal_title: 'هل أنت متأكد؟',
             confirm_modal_desc: 'سيتم تغيير حالة {count} طلب إلى «{status}».',
             confirm_modal_note: 'ملاحظة: سيتم استثناء الطلبات التي حالتها (ملغي) من هذا التغيير.',
@@ -145,6 +150,11 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
             select_status: 'Select Status...',
             change_status: 'Change Status',
             print_invoices: 'Print Invoices',
+            delete_selected: 'Delete selected invoices',
+            bulk_delete_title: 'Delete selected invoices?',
+            bulk_delete_desc: '{count} invoices will be permanently removed from the orders list. Any linked wallet reward will be reversed automatically. This action cannot be undone.',
+            bulk_delete_confirm: 'Delete invoices',
+            bulk_delete_error: 'Some selected invoices could not be deleted. Invoices that could not be processed remain unchanged.',
             confirm_modal_title: 'Are you sure?',
             confirm_modal_desc: 'You are about to change the status of {count} orders to "{status}".',
             confirm_modal_note: 'Note: Cancelled orders will be excluded from this change.',
@@ -845,6 +855,8 @@ printWindow.onload = () => printWindow.print();
     // Bulk Actions
     const [bulkStatus, setBulkStatus] = useState('');
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
     // Bulk Actions
     const openBulkStatusModal = () => {
@@ -879,6 +891,39 @@ printWindow.onload = () => printWindow.print();
         }
     };
 
+    // Deleting an invoice must also reverse any completion reward first, so a
+    // customer cannot retain a wallet credit from an invoice that no longer exists.
+    const removeOrderPermanently = async (orderId) => {
+        await reverseWalletRewardForOrder(orderId);
+        await deleteDoc(doc(db, 'orders', orderId));
+    };
+
+    const confirmBulkDelete = async () => {
+        const orderIds = [...new Set(selectedOrdersIds)].filter(Boolean);
+        if (orderIds.length === 0) {
+            setShowBulkDeleteConfirm(false);
+            return;
+        }
+
+        setIsBulkDeleting(true);
+        try {
+            const results = await Promise.allSettled(orderIds.map(removeOrderPermanently));
+            const failedIds = orderIds.filter((_, index) => results[index].status === 'rejected');
+
+            if (selectedOrder && !failedIds.includes(selectedOrder.id)) setSelectedOrder(null);
+            setSelectedOrdersIds(failedIds);
+            setBulkStatus('');
+            setShowBulkDeleteConfirm(false);
+
+            if (failedIds.length > 0) {
+                console.error('Bulk order deletion failures:', results.filter(result => result.status === 'rejected'));
+                alert(txt.bulk_delete_error);
+            }
+        } finally {
+            setIsBulkDeleting(false);
+        }
+    };
+
     const updateStatus = async (orderId, newStatus) => {
         try {
             const orderRef = doc(db, "orders", orderId);
@@ -893,7 +938,7 @@ printWindow.onload = () => printWindow.print();
     const deleteOrder = async (orderId) => {
         if (!window.confirm(txt.alert_delete)) return;
         try {
-            await deleteDoc(doc(db, "orders", orderId));
+            await removeOrderPermanently(orderId);
             if (selectedOrder?.id === orderId) setSelectedOrder(null);
             if (selectedOrdersIds.includes(orderId)) {
                 setSelectedOrdersIds(selectedOrdersIds.filter(id => id !== orderId));
@@ -1404,6 +1449,16 @@ printWindow.onload = () => printWindow.print();
                                 <span>{txt.print_invoices}</span>
                             </button>
 
+                            <button
+                                onClick={() => setShowBulkDeleteConfirm(true)}
+                                disabled={isBulkDeleting}
+                                title={txt.delete_selected}
+                                aria-label={txt.delete_selected}
+                                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-400/45 bg-rose-500/15 text-rose-200 transition-colors hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                <Trash2 size={15} className={isBulkDeleting ? 'animate-pulse' : ''} />
+                            </button>
+
                             <button onClick={() => setSelectedOrdersIds([])} className="text-gray-400 hover:text-white hidden md:block mr-2">
                                 <X size={16} />
                             </button>
@@ -1447,6 +1502,53 @@ printWindow.onload = () => printWindow.print();
                                     <button
                                         onClick={() => setShowConfirmModal(false)}
                                         className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold flex-1"
+                                    >
+                                        {txt.cancel_btn}
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Permanent deletion confirmation for invoices selected in the toolbar */}
+            <AnimatePresence>
+                {showBulkDeleteConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.94, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.94, opacity: 0 }}
+                            className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+                            dir={isRTL ? 'rtl' : 'ltr'}
+                        >
+                            <div className="p-7 text-center">
+                                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border-4 border-rose-100 bg-rose-50 text-rose-500">
+                                    <Trash2 size={30} />
+                                </div>
+                                <h3 className="mb-3 text-xl font-black text-gray-900">{txt.bulk_delete_title}</h3>
+                                <p className="mb-6 text-sm font-bold leading-6 text-gray-500">
+                                    {txt.bulk_delete_desc.replace('{count}', selectedOrdersIds.length)}
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={confirmBulkDelete}
+                                        disabled={isBulkDeleting}
+                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-rose-500 px-5 py-3 text-sm font-black text-white shadow-lg shadow-rose-500/25 transition-colors hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                        <Trash2 size={16} />
+                                        {isBulkDeleting ? (lang === 'ar' ? 'جارٍ الحذف...' : 'Deleting...') : txt.bulk_delete_confirm}
+                                    </button>
+                                    <button
+                                        onClick={() => setShowBulkDeleteConfirm(false)}
+                                        disabled={isBulkDeleting}
+                                        className="flex-1 rounded-xl bg-gray-100 px-5 py-3 text-sm font-black text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                         {txt.cancel_btn}
                                     </button>
