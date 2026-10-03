@@ -4,7 +4,7 @@ import {
     TrendingUp, PieChart as PieChartIcon, ExternalLink, Copy, QrCode,
     Users, Phone, MapPin, Search, Eye, X, Send,
     Inbox, AlertTriangle, Calendar, Monitor, Globe, Printer, FileText,
-    ArrowRightCircle, UserPlus, ShoppingBag, Info, Package
+    ArrowRightCircle, UserPlus, ShoppingBag, ShoppingBasket, Info, Package
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,6 +21,8 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             profit: "صافي الربح",
             reviews: "آراء العملاء",
             pending_orders: "طلبات غير مكتملة",
+            total_purchases: "إجمالي المشتريات",
+            purchase_invoices: "فواتير مشتريات",
             visitors_today: "الزائرين اليوم",
             visitors_yesterday: "جميع زائرين المتجر",
 
@@ -73,6 +75,8 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             profit: "Net Profit",
             reviews: "Reviews",
             pending_orders: "Pending Orders",
+            total_purchases: "Total Purchases",
+            purchase_invoices: "purchase invoices",
             visitors_today: "Visitors Today",
             visitors_yesterday: "All store visitors",
 
@@ -145,6 +149,8 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
         todayVisitors: 0,
         allTimeVisitors: 0,
         totalSales: 0,
+        totalPurchases: 0,
+        purchaseInvoices: 0,
         stockValue: 0,
         stockQty: 0,
         lowStock: 0,
@@ -411,6 +417,20 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             setDashboardStats(prev => ({ ...prev, allTimeVisitors: total }));
         });
 
+        // Purchase invoices are kept in their own collection. This listener makes
+        // the dashboard card update immediately after any purchase is added, edited,
+        // or deleted from the Purchases section.
+        const unsubPurchases = onSnapshot(collection(db, "purchases"), (snapshot) => {
+            const totalPurchases = snapshot.docs.reduce((sum, purchase) => {
+                return sum + Math.max(0, Number(purchase.data().total || 0));
+            }, 0);
+            setDashboardStats(prev => ({
+                ...prev,
+                totalPurchases,
+                purchaseInvoices: snapshot.size
+            }));
+        }, error => console.error('Purchases dashboard listener:', error));
+
         const savedStatus = localStorage.getItem('store_status');
         if (savedStatus) setStoreOpen(savedStatus === 'open');
 
@@ -419,6 +439,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             unsubReviews();
             unsubToday();
             unsubAllTime();
+            unsubPurchases();
             clearTimeout(safetyTimer);
         };
     }, []);
@@ -782,12 +803,29 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             </div>
 
             {/* Middle Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-                {/* 1. إجمالي المبيعات */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                {/* إجمالي المشتريات */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
+                    className="bg-white dark:bg-[#1c1c1e] p-5 rounded-[24px] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col items-center text-center relative overflow-hidden"
+                >
+                    <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mb-3">
+                        <ShoppingBasket className="text-emerald-500" />
+                    </div>
+                    <span className="text-xl font-black text-gray-800 dark:text-white mb-1">
+                        {(dashboardStats.totalPurchases || 0).toLocaleString('en-US')} {currency}
+                    </span>
+                    <span className="text-gray-400 dark:text-gray-400 font-bold text-xs">{txt.total_purchases}</span>
+                    <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">({dashboardStats.purchaseInvoices || 0} {txt.purchase_invoices})</span>
+                </motion.div>
+
+                {/* 1. إجمالي المبيعات */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
                     className="bg-white dark:bg-[#1c1c1e] p-5 rounded-[24px] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col items-center text-center relative overflow-hidden"
                 >
                     <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-3">
@@ -804,7 +842,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
+                    transition={{ delay: 0.6 }}
                     className="bg-white dark:bg-[#1c1c1e] p-5 rounded-[24px] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col items-center text-center relative overflow-hidden"
                 >
                     <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mb-3">
@@ -821,7 +859,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
+                    transition={{ delay: 0.7 }}
                     className="bg-white dark:bg-[#1c1c1e] p-5 rounded-[24px] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col items-center justify-center relative overflow-hidden"
                 >
                     <div className="absolute top-3 right-3 text-red-500">
