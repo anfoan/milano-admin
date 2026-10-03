@@ -1206,12 +1206,12 @@ printWindow.onload = () => printWindow.print();
             </div>
 
             {/* Table Layout */}
-            <div className={`bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 ${selectedOrdersIds.length > 0 ? 'pb-24' : ''}`}>
+            <div className={`bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 lg:-mx-6 ${selectedOrdersIds.length > 0 ? 'pb-24' : ''}`}>
                 <div className="overflow-x-auto relative">
-                    <table className="w-full min-w-[1160px] table-fixed border-collapse">
+                    <table className="w-full min-w-[1040px] table-fixed border-collapse">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-100 text-gray-400 font-bold text-xs">
-                                <th className="p-3 md:px-6 md:py-4 text-center w-12">
+                                <th className="w-11 p-2 text-center">
                                     <input
                                         type="checkbox"
                                         className="w-5 h-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
@@ -1219,15 +1219,15 @@ printWindow.onload = () => printWindow.print();
                                         onChange={toggleSelectAll}
                                     />
                                 </th>
-                                <th className="w-[130px] whitespace-nowrap p-3 text-center">{txt.th_order_id}</th>
-                                <th className={`w-[120px] whitespace-nowrap p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_name}</th>
-                                <th className={`w-[190px] whitespace-nowrap p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_product_size}</th>
-                                <th className={`w-[130px] whitespace-nowrap p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_price}</th>
-                                <th className="w-[108px] whitespace-nowrap p-3 text-center">{txt.th_status}</th>
-                                <th className="w-[92px] whitespace-nowrap p-3 text-center">{txt.th_payment}</th>
-                                <th className="w-[112px] whitespace-nowrap p-3 text-center">{txt.th_phone}</th>
-                                <th className="w-[102px] whitespace-nowrap p-3 text-center">{txt.th_date}</th>
-                                <th className="w-[136px] whitespace-nowrap p-3 text-center">{txt.th_details}</th>
+                                <th className="w-[120px] whitespace-nowrap p-2 text-center">{txt.th_order_id}</th>
+                                <th className={`w-[105px] whitespace-nowrap p-2 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_name}</th>
+                                <th className={`w-[155px] whitespace-nowrap p-2 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_product_size}</th>
+                                <th className={`w-[105px] whitespace-nowrap p-2 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_price}</th>
+                                <th className="w-[96px] whitespace-nowrap p-2 text-center">{txt.th_status}</th>
+                                <th className="w-16 whitespace-nowrap p-2 text-center">{txt.th_payment}</th>
+                                <th className="w-[112px] whitespace-nowrap p-2 text-center">{txt.th_phone}</th>
+                                <th className="w-[90px] whitespace-nowrap p-2 text-center">{txt.th_date}</th>
+                                <th className="w-[122px] whitespace-nowrap p-2 text-center">{txt.th_details}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -1242,7 +1242,7 @@ printWindow.onload = () => printWindow.print();
                             ) : (
                                 currentOrders.map((order) => (
                                     <tr key={order.id} className={`hover:bg-blue-50/50 transition-colors group ${selectedOrdersIds.includes(order.id) ? 'bg-blue-50/30' : ''}`}>
-                                        <td className="p-3 md:p-6 text-center">
+                                        <td className="p-2 text-center">
                                             <input
                                                 type="checkbox"
                                                 className="w-5 h-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
@@ -1250,23 +1250,23 @@ printWindow.onload = () => printWindow.print();
                                                 onChange={() => toggleSelectOrder(order.id)}
                                             />
                                         </td>
-                                        <td className="p-3 md:py-3 md:px-4 text-center">
+                                        <td className="p-1 text-center">
                                             <button
                                                 onClick={() => onViewOrder && onViewOrder(order)}
-                                                className="font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg text-sm group-hover:bg-white group-hover:shadow-sm transition-all border border-blue-100 hover:scale-105 active:scale-95 whitespace-nowrap"
+                                                className="whitespace-nowrap rounded-lg border border-blue-100 bg-blue-50 px-2 py-1.5 font-mono text-[11px] font-bold text-blue-600 transition-all hover:scale-105 hover:bg-white hover:shadow-sm active:scale-95"
                                             >
                                                 {order.orderId}
                                             </button>
                                         </td>
-                                        <td className="p-3 font-bold text-gray-700 whitespace-nowrap">
+                                        <td className="p-2 font-bold text-gray-700 whitespace-nowrap">
                                             {order.formData?.name || 'زائر'}
                                         </td>
-                                        <td className="p-3">
+                                        <td className="p-2">
                                             <div title={getOrderProductsLabel(order)} className="truncate whitespace-nowrap font-bold text-gray-700">
                                                 {getOrderProductsLabel(order)}
                                             </div>
                                         </td>
-                                        <td className="p-3">
+                                        <td className="p-2">
                                             <div className="flex flex-col items-start gap-0.5 whitespace-nowrap font-black text-gray-800">
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="text-sm md:text-base">
@@ -1276,26 +1276,26 @@ printWindow.onload = () => printWindow.print();
                                                 {order.deliveryCost > 0 && <span className="text-[9px] text-gray-400 font-normal">{lang === 'ar' ? 'شامل التوصيل' : 'Inc. Delivery'}</span>}
                                             </div>
                                         </td>
-                                        <td className="p-3 md:py-3 md:px-4 text-center">
+                                        <td className="p-1.5 text-center">
                                             <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border ${getStatusColor(order.status)}`}>
                                                 <span className={`w-1.5 h-1.5 rounded-full ${getStatusColor(order.status).replace('bg-', 'bg-current-').replace('text-', 'bg-').split(' ')[1]}`}></span>
                                                 {getStatusLabel(order.status)}
                                             </span>
                                         </td>
-                                        <td className="p-3 md:py-3 md:px-4">
+                                        <td className="p-1.5">
                                             <div className="flex justify-center">
                                                 <div title={order.formData?.paymentMethod === 'whatsapp' ? "WhatsApp" : "الدفع عند الاستلام"}>
                                                     <img src="/cash-on-delivery.png" alt="توصيل الطلبات" className="w-10 object-contain" />
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-3 md:py-3 md:px-4 text-center">
-                                            <div className="flex items-center justify-center gap-2 bg-gray-50 border border-gray-100 rounded-lg px-3 py-1.5 w-fit mx-auto">
+                                        <td className="p-1.5 text-center">
+                                            <div className="mx-auto flex w-fit items-center justify-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5">
                                                 <span className="font-mono text-xs text-gray-600 font-bold" dir="ltr">{order.formData?.phone}</span>
                                                 <Phone size={12} className="text-gray-400" />
                                             </div>
                                         </td>
-                                        <td className="p-3 md:py-3 md:px-4 text-center">
+                                        <td className="p-1.5 text-center">
                                             <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
                                                 <span className="text-[11px] font-bold text-gray-600 font-mono">
                                                     {(() => {
@@ -1321,25 +1321,25 @@ printWindow.onload = () => printWindow.print();
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="p-2 md:py-3 md:px-3 text-center">
-                                            <div className="flex items-center justify-center gap-2">
+                                        <td className="p-1 text-center">
+                                            <div className="flex items-center justify-center gap-1">
                                                 <button
                                                     onClick={() => handlePrintSingleInvoice(order)}
-                                                    className="w-9 h-9 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 shadow-sm active:scale-95 transition-all"
+                                                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-600 shadow-sm transition-all hover:bg-gray-200 active:scale-95"
                                                     title={lang === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice'}
                                                 >
                                                     <Printer size={17} />
                                                 </button>
                                                 <button
                                                     onClick={() => onViewOrder && onViewOrder(order, true)}
-                                                    className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 shadow-md shadow-blue-500/20 active:scale-95 transition-all"
+                                                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95"
                                                     title={lang === 'ar' ? 'تعديل الطلب' : 'Edit Order'}
                                                 >
                                                     <Pencil size={18} />
                                                 </button>
                                                 <button
                                                     onClick={() => deleteOrder(order.id)}
-                                                    className="w-9 h-9 rounded-lg bg-red-500 text-white flex items-center justify-center hover:bg-red-600 shadow-md shadow-red-500/20 active:scale-95 transition-all"
+                                                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500 text-white shadow-md shadow-red-500/20 transition-all hover:bg-red-600 active:scale-95"
                                                     title={lang === 'ar' ? 'حذف الطلب' : 'Delete Order'}
                                                 >
                                                     <Trash2 size={18} />
