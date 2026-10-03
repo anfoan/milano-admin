@@ -187,7 +187,6 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                         </div>
                         <div className="flex flex-col justify-center">
                             <span className="text-[20px] font-black text-slate-950 dark:text-white leading-tight translate-y-0.5">{txt.milano}</span>
-                            <span className="text-[10px] font-bold text-slate-700 dark:text-white capitalize tracking-wide translate-y-[-2px]">{txt.panel}</span>
                         </div>
                     </div>
                     {/* Close button for mobile */}
