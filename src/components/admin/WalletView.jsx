@@ -4,6 +4,7 @@ import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Packa
 import { db } from '../../lib/firebase';
 import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { adjustCustomerWalletBalance, ensureWalletSpendLedgerForOrder, setCustomerWalletBalance } from '../../lib/walletLedger';
+import InvoiceTemplate from '../InvoiceTemplate';
 
 const toMillis = value => value?.toMillis?.() || (value?.seconds ? value.seconds * 1000 : new Date(value || 0).getTime() || 0);
 const WALLET_SAR_EXCHANGE_RATE = 140;
@@ -48,7 +49,7 @@ const paymentText = value => ({ cod: 'الدفع عند الاستلام', cash:
 const isStorefrontInvoice = order => order?.isPOS !== true && order?.isExternal !== true;
 const movementMeta = type => ({ reward: { label: 'مكافأة طلب مكتمل', tone: 'emerald', sign: '+' }, reward_reversal: { label: 'استرجاع مكافأة', tone: 'rose', sign: '-' }, credit: { label: 'إضافة رصيد', tone: 'blue', sign: '+' }, bonus: { label: 'رصيد تشجيعي', tone: 'violet', sign: '+' }, debit: { label: 'خصم رصيد', tone: 'rose', sign: '-' }, spend: { label: 'استخدام الرصيد في طلب', tone: 'rose', sign: '-' } }[type] || { label: 'حركة محفظة', tone: 'slate', sign: '' });
 
-const WalletView = () => {
+const WalletView = ({ generalSettings }) => {
     const [orders, setOrders] = useState([]);
     const [wallets, setWallets] = useState([]);
     const [walletTransactions, setWalletTransactions] = useState([]);
@@ -59,6 +60,7 @@ const WalletView = () => {
     const [search, setSearch] = useState('');
     const [editingOrder, setEditingOrder] = useState(null);
     const [printingOrder, setPrintingOrder] = useState(null);
+    const invoicePopupRef = useRef(null);
     const [rewarding, setRewarding] = useState('');
     const [deletingOrderId, setDeletingOrderId] = useState('');
     const [savingReward, setSavingReward] = useState(false);
@@ -363,6 +365,123 @@ const WalletView = () => {
     };
     const copy = async value => { await navigator.clipboard?.writeText(value || ''); setNotice('تم نسخ رقم الفاتورة.'); };
 
+    const openWalletInvoice = order => {
+        // Open in the button's click event so browsers do not block the preview.
+        const popup = window.open('', '_blank', 'width=1000,height=900');
+        if (!popup) {
+            setNotice('يرجى السماح بالنوافذ المنبثقة لعرض الفاتورة وطباعتها.');
+            return;
+        }
+        invoicePopupRef.current = popup;
+        popup.document.write('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>جاري تجهيز الفاتورة</title></head><body>جاري تجهيز الفاتورة...</body></html>');
+        popup.document.close();
+        setPrintingOrder(order);
+    };
+
+    useEffect(() => {
+        if (!printingOrder) return;
+        const popup = invoicePopupRef.current;
+        const content = document.getElementById('wallet-printable-single-invoice');
+        if (!popup || popup.closed || !content) {
+            setPrintingOrder(null);
+            setNotice('تعذّر فتح معاينة الفاتورة. حاول مرة أخرى.');
+            return;
+        }
+        // Identical InvoiceTemplate markup and print rules to the Orders single-invoice preview.
+        // No separate wallet print design, no page-level window.print(), and no second template.
+        const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+            .map(node => node.tagName === 'LINK'
+                ? `<link rel="stylesheet" href="${new URL(node.getAttribute('href'), window.location.href).href}">`
+                : node.outerHTML)
+            .join('');
+        popup.document.open();
+        popup.document.write(`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>طباعة فاتورة المحفظة</title>
+            <base href="${window.location.origin}/">
+            ${styles}
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+            <style>
+                @page { size: A4 portrait; margin: 0; }
+                html, body { margin: 0 !important; padding: 0 !important; background: #f3f4f6 !important; }
+                body { font-family: 'Cairo', Arial, sans-serif; }
+                .print-toolbar {
+                    position: sticky; top: 0; z-index: 20; display: flex; justify-content: center;
+                    padding: 16px; background: rgba(255,255,255,.96); box-shadow: 0 2px 12px rgba(15,23,42,.10);
+                }
+                .print-button {
+                    border: 0; border-radius: 10px; background: #2563eb; color: #fff; padding: 11px 28px;
+                    font: 700 15px Cairo, Arial, sans-serif; cursor: pointer; box-shadow: 0 6px 14px rgba(37,99,235,.25);
+                }
+                .print-button:hover { background: #1d4ed8; }
+                .print-container { width: 100% !important; padding: 28px 0 40px; }
+                .print-page {
+                    width: 210mm !important;
+                    min-height: 240mm !important;
+                    height: auto !important;
+                    margin: 0 auto !important;
+                    padding: 20px 40px !important;
+                    page-break-after: avoid !important;
+                    break-after: avoid-page !important;
+                    page-break-inside: avoid !important;
+                    background: #fff !important;
+                    box-shadow: 0 10px 30px rgba(15,23,42,.18) !important;
+                    border: 1px solid #e5e7eb !important;
+                    border-radius: 30px !important;
+                    overflow: hidden !important;
+                }
+                /* Keep preview and A4 output at the same width, scaling only invoices
+                   that cannot otherwise fit on a single sheet. */
+                .invoice-preview .print-page {
+                    zoom: var(--wallet-fit-scale, 1) !important;
+                    width: var(--wallet-fit-width, 210mm) !important;
+                    min-height: var(--wallet-fit-min-height, 240mm) !important;
+                }
+                .print\:hidden, [data-html2canvas-ignore="true"] { display: none !important; }
+                table, tr { page-break-inside: avoid !important; }
+                * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                @media print {
+                    html, body { background: #fff !important; }
+                    .print-toolbar { display: none !important; }
+                    .print-container { padding: 0 !important; }
+                    .print-page {
+                        box-shadow: none !important; border: 0 !important; border-radius: 0 !important;
+                        margin: 0 !important; width: 210mm !important; min-height: 240mm !important;
+                    }
+                    .print-page thead th { background-color: #111317 !important; color: #fff !important; }
+                    .print-page table, .print-page th, .print-page td { border-color: #9ca3af !important; }
+                }
+            </style>
+            <script>
+                async function fitWalletInvoiceToA4() {
+                    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+                    await Promise.all(Array.from(document.images, image => image.complete ? Promise.resolve() : new Promise(resolve => {
+                        image.onload = resolve; image.onerror = resolve;
+                        setTimeout(resolve, 5000);
+                    })));
+                    const page = document.querySelector('.invoice-preview .print-page');
+                    if (!page) return;
+                    const root = document.documentElement;
+                    ['--wallet-fit-scale', '--wallet-fit-width', '--wallet-fit-min-height'].forEach(name => root.style.removeProperty(name));
+                    const scale = Math.min(1, (285 * 96 / 25.4) / page.scrollHeight);
+                    if (scale < 1) {
+                        root.style.setProperty('--wallet-fit-scale', String(scale));
+                        root.style.setProperty('--wallet-fit-width', (210 / scale) + 'mm');
+                        root.style.setProperty('--wallet-fit-min-height', '0');
+                    }
+                }
+                window.addEventListener('load', fitWalletInvoiceToA4);
+                async function printWalletInvoice() {
+                    await fitWalletInvoiceToA4();
+                    window.focus(); window.print();
+                }
+            <\/script></head><body>
+            <div class="print-toolbar no-print"><button type="button" class="print-button" onclick="printWalletInvoice()">طباعة الفاتورة</button></div>
+            <div class="invoice-preview">${content.innerHTML}</div>
+            </body></html>`);
+        popup.document.close();
+        popup.focus();
+        setPrintingOrder(null);
+    }, [printingOrder]);
+
     return <div dir="rtl" className="mx-auto max-w-7xl space-y-3 rounded-[22px] bg-slate-50/80 p-3 font-['Cairo'] text-slate-800 dark:bg-[#0d1118] dark:text-white">
         <section className="rounded-[20px] border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div className="flex items-center gap-2"><div className="rounded-xl border border-emerald-100 bg-emerald-50 p-2 text-emerald-600 shadow-sm dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-300"><Wallet size={19}/></div><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h1 className="text-lg font-black leading-5">قسم المحفظة والفواتير</h1><span className="shrink-0 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[9px] font-black text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200">مكافآت المتجر <Gift className="mr-1 inline" size={11}/></span><div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50/90 p-1 shadow-sm dark:border-white/10 dark:bg-white/5"><span className={`px-1 text-[8px] font-black ${walletEnabled ? 'text-emerald-700 dark:text-emerald-200' : 'text-rose-600 dark:text-rose-200'}`}>{walletEnabled ? 'المحفظة مفعّلة' : 'المحفظة معطّلة'}</span><button type="button" disabled={togglingWallet} onClick={() => toggleWalletEnabled(true)} className={`rounded-md border px-2 py-1 text-[9px] font-black transition disabled:opacity-50 ${walletEnabled ? 'border-emerald-400 bg-emerald-100/85 text-emerald-700 ring-1 ring-emerald-300 dark:border-emerald-400/50 dark:bg-emerald-400/20 dark:text-emerald-200' : 'border-emerald-200 bg-emerald-50/75 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200'}`}>تفعيل</button><button type="button" disabled={togglingWallet} onClick={() => toggleWalletEnabled(false)} className={`rounded-md border px-2 py-1 text-[9px] font-black transition disabled:opacity-50 ${!walletEnabled ? 'border-rose-400 bg-rose-100/85 text-rose-700 ring-1 ring-rose-300 dark:border-rose-400/50 dark:bg-rose-400/20 dark:text-rose-200' : 'border-rose-200 bg-rose-50/75 text-rose-700 hover:bg-rose-100 dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-200'}`}>تعطيل</button></div></div><p className="mt-1 text-[10px] font-bold text-slate-400">إدارة فواتير العملاء وتحديث الرصيد تلقائيًا في محفظتهم عند اكتمال الطلب</p></div></div><div dir="ltr" className="flex items-center gap-2 self-start lg:self-auto">{walletEnabled && <><div dir="rtl" className="flex flex-col items-stretch gap-0.5"><button onClick={() => setWalletDisplayCurrency('YER')} className={`rounded-[5px] px-2 py-[2px] text-[8px] font-black leading-3 shadow-sm transition ${walletDisplayCurrency === 'YER' ? 'bg-emerald-600 text-white shadow-emerald-600/25' : 'border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300'}`}>ريال يمني</button><button onClick={() => setWalletDisplayCurrency('SAR')} className={`rounded-[5px] px-2 py-[2px] text-[8px] font-black leading-3 shadow-sm transition ${walletDisplayCurrency === 'SAR' ? 'bg-emerald-600 text-white shadow-emerald-600/25' : 'border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300'}`}>ريال سعودي</button></div><div className="inline-flex h-8 min-w-[118px] items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 text-emerald-600 shadow-sm dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200"><button type="button" onClick={() => setRewardModalOpen(true)} title="تعديل مبلغ المكافأة" className="rounded-md p-1 transition hover:bg-emerald-100 dark:hover:bg-emerald-400/15"><Pencil size={13}/></button><span className="font-sans text-sm font-black">$</span><span className="font-mono text-sm font-black tabular-nums">{walletAmount(settings.defaultReward)}</span><Wallet size={14}/></div></>}</div></div></section>
 
@@ -371,7 +490,7 @@ const WalletView = () => {
 
         <section className="rounded-[18px] border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]"><div className="flex flex-col gap-3 md:flex-row-reverse md:items-center md:justify-between"><div className="flex flex-wrap gap-2"><Filter active={filter === 'all'} tone="blue" onClick={() => setFilter('all')}>جميع الفواتير ({storeOrders.length})</Filter><Filter active={filter === 'completed'} tone="emerald" onClick={() => setFilter('completed')}>فواتير مكتملة ومدفوعة ({completedOrders.length})</Filter><Filter active={filter === 'processing'} tone="maroon" onClick={() => setFilter('processing')}>فواتير قيد المعالجة ({inProgressOrders.length})</Filter></div><div dir="ltr" className="flex w-full items-stretch gap-2 md:w-auto"><button dir="rtl" type="button" onClick={() => setCustomerDataOpen(value => !value)} className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-[10px] font-black text-blue-700 shadow-sm transition hover:bg-blue-100 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-200 dark:hover:bg-blue-400/15"><Wallet size={14}/><span>بيانات العملاء</span><span className="rounded-md bg-white/75 px-1.5 py-0.5 text-[8px] dark:bg-blue-400/15">{wallets.filter(wallet => normalizeWalletCustomerPhone(wallet.phone).length >= 7).length}</span><ChevronDown size={13} className={`transition ${customerDataOpen ? 'rotate-180' : ''}`}/></button><div dir="rtl" className="relative min-w-0 flex-1 md:w-72"><Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="ابحث بالعميل أو الهاتف أو رقم الفاتورة..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-9 pl-3 text-right text-[10px] font-bold outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-white/5"/></div></div></div></section>
 
-        <section className="space-y-3">{visibleOrders.map((order, index) => <InvoiceCard key={order.id} order={order} wallet={walletMap.get(order.customerWalletId)} position={visibleOrders.length - index} isLatest={order.id === storeOrders[0]?.id} rewarding={rewarding === order.id} deleting={deletingOrderId === order.id} defaultReward={settings.defaultReward} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onReward={() => issueReward(order)} onEdit={() => setEditingOrder(order)} onDelete={() => removeOrder(order)} onPrint={() => setPrintingOrder(order)} onChangeStatus={status => saveStatus(order, status)} onManageWallet={() => { const wallet = walletMap.get(order.customerWalletId); if (wallet) setManagingWallet({ wallet, order }); else setNotice('لا توجد محفظة مرتبطة بهذه الفاتورة بعد.'); }}/>) }{visibleOrders.length === 0 && <div className="rounded-[18px] border border-slate-200 bg-white py-16 text-center text-sm font-bold text-slate-400 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]">لا توجد فواتير مطابقة للبحث الحالي.</div>}</section>
+        <section className="space-y-3">{visibleOrders.map((order, index) => <InvoiceCard key={order.id} order={order} wallet={walletMap.get(order.customerWalletId)} position={visibleOrders.length - index} isLatest={order.id === storeOrders[0]?.id} rewarding={rewarding === order.id} deleting={deletingOrderId === order.id} defaultReward={settings.defaultReward} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onReward={() => issueReward(order)} onEdit={() => setEditingOrder(order)} onDelete={() => removeOrder(order)} onPrint={() => openWalletInvoice(order)} onChangeStatus={status => saveStatus(order, status)} onManageWallet={() => { const wallet = walletMap.get(order.customerWalletId); if (wallet) setManagingWallet({ wallet, order }); else setNotice('لا توجد محفظة مرتبطة بهذه الفاتورة بعد.'); }}/>) }{visibleOrders.length === 0 && <div className="rounded-[18px] border border-slate-200 bg-white py-16 text-center text-sm font-bold text-slate-400 shadow-sm dark:border-white/10 dark:bg-[#1a1d23]">لا توجد فواتير مطابقة للبحث الحالي.</div>}</section>
 
         {rewardModalOpen && <RewardSettingsModal amount={settings.defaultReward} currencyCode={walletDisplayCurrency} saving={savingReward} onClose={() => setRewardModalOpen(false)} onSave={value => saveReward(toWalletBase(value))}/>}
         {managingWallet && <WalletAdjustmentModal wallet={managingWallet.wallet} order={managingWallet.order} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingWalletAdjustment} onClose={() => setManagingWallet(null)} onSave={saveWalletAdjustment}/>}
@@ -381,7 +500,7 @@ const WalletView = () => {
 
         {notice && <div dir="rtl" className="fixed inset-x-0 bottom-5 z-[160] mx-auto w-fit max-w-[calc(100vw-2rem)] -translate-x-5 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-center text-xs font-black text-emerald-700 shadow-xl dark:border-emerald-400/40 dark:bg-[#183127] dark:text-emerald-200">{notice}</div>}
         {editingOrder && <InvoiceEditModal key={editingOrder.id} order={editingOrder} wallet={walletMap.get(editingOrder.customerWalletId)} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} onClose={() => setEditingOrder(null)} onSave={draft => saveInvoice({ ...draft, total: toWalletBase(draft.total), walletRewardOverride: toWalletBase(draft.walletRewardOverride), walletBalance: toWalletBase(draft.walletBalance) })}/>}
-        {printingOrder && <InvoicePreview order={printingOrder} formatAmount={walletAmount} currencyLabel={walletCurrencyText} onClose={() => setPrintingOrder(null)}/>}
+        {printingOrder && <div style={{ position: 'fixed', left: '-10000px', top: 0 }}><div id="wallet-printable-single-invoice"><InvoiceTemplate orders={[printingOrder]} lang="ar" generalSettings={generalSettings} hideHeader={true}/></div></div>}
     </div>;
 };
 
@@ -499,95 +618,5 @@ const InvoiceEditModal = ({ order, wallet, defaultReward, currencyCode, currency
     return <div className="fixed inset-0 z-[180] flex items-center justify-center bg-black/55 p-3 backdrop-blur-sm"><div dir="rtl" className="flex max-h-[calc(100vh-24px)] w-full max-w-[650px] flex-col overflow-hidden rounded-[22px] bg-white shadow-2xl dark:bg-[#1a1d23]"><header dir="ltr" className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-white/10"><button onClick={onClose} className="text-slate-300 transition hover:text-rose-500"><X size={20}/></button><div dir="rtl" className="flex items-center gap-1 text-right"><Pencil size={15} className="text-blue-600"/><h2 className="text-sm font-black">تعديل الفاتورة رقم <span dir="ltr">({order.orderId || order.id})</span></h2></div></header><div className="overflow-y-auto px-5 py-4"><div className="space-y-3"><Field label="اسم العميل" required><input value={draft.formData?.name || ''} onChange={event => changeField('name', event.target.value)} placeholder="اسم العميل" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-right text-xs font-bold outline-none transition focus:border-blue-500 dark:border-white/10 dark:bg-white/5" required/></Field><div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><Field label="رقم الهاتف" required><input dir="ltr" value={draft.formData?.fullPhone || draft.formData?.phone || ''} onChange={event => changeField('fullPhone', event.target.value)} placeholder="رقم الهاتف" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-right text-xs font-bold outline-none transition focus:border-blue-500 dark:border-white/10 dark:bg-white/5 text-right" required/></Field><Field label="المدينة"><input value={draft.formData?.city || ''} onChange={event => changeField('city', event.target.value)} placeholder="المدينة" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-right text-xs font-bold outline-none transition focus:border-blue-500 dark:border-white/10 dark:bg-white/5"/></Field></div><Field label="كلمة المرور"><div className="relative w-full max-w-[300px]"><KeyRound size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500"/><input dir="ltr" type="password" inputMode="numeric" value={draft.walletPassword} onChange={event => setDraft(previous => ({ ...previous, walletPassword: event.target.value.replace(/[^0-9]/g, '').slice(0, 6) }))} placeholder={wallet?.pinConfigured ? 'اتركه فارغًا لإبقاء كلمة المرور الحالية' : 'أنشئ كلمة مرور من 4 إلى 6 أرقام'} className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-3 pr-8 text-center font-mono text-[11px] font-bold outline-none transition placeholder:font-['Cairo'] placeholder:text-right placeholder:text-[9px] placeholder:font-bold focus:border-blue-500 dark:border-white/10 dark:bg-white/5"/></div><p className="mt-1 max-w-[300px] text-[8px] font-bold leading-4 text-slate-400">يُحفظ الرقم بأمان ولا يُعرض بعد الحفظ. إدخال قيمة جديدة يستبدل كلمة المرور الحالية للعميل.</p></Field><Field label="العنوان التفصيلي"><input value={draft.formData?.address || ''} onChange={event => changeField('address', event.target.value)} placeholder="العنوان التفصيلي" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-right text-xs font-bold outline-none transition focus:border-blue-500 dark:border-white/10 dark:bg-white/5"/></Field><div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><Field label={`إجمالي المبلغ (${currencyLabel})`}><input dir="ltr" inputMode="decimal" value={draft.total} onChange={event => setDraft(previous => ({ ...previous, total: event.target.value.replace(/[^0-9.]/g, '') }))} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-right text-xs font-bold outline-none transition focus:border-blue-500 dark:border-white/10 dark:bg-white/5 text-center font-mono"/></Field><Field label="حالة الفاتورة"><select value={draft.status || 'new'} onChange={event => setDraft(previous => ({ ...previous, status: event.target.value }))} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-right text-xs font-bold outline-none transition focus:border-blue-500 dark:border-white/10 dark:bg-white/5 cursor-pointer"><option value="new">طلب جديد</option><option value="processing">قيد التجهيز</option><option value="shipping">قيد التوصيل</option><option value="completed">مكتمل</option><option value="returned">مسترجع</option></select></Field></div><section className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-3 dark:border-emerald-400/30 dark:bg-emerald-400/10"><div className="grid min-h-[58px] grid-cols-[1fr_auto_1fr] items-center gap-3"><div className="text-right"><p className="text-[10px] font-black text-emerald-700 dark:text-emerald-200">إجمالي الرصيد الحالي لهذا العميل:</p><p className="mt-1 text-[8px] font-bold text-emerald-700/75 dark:text-emerald-200/75">الرصيد المتاح في محفظة العميل قبل اعتماد الفاتورة</p></div><label dir="ltr" title="تعديل الرصيد الحالي" className="relative w-28 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-center font-mono text-sm font-black text-emerald-600 shadow-sm transition focus-within:border-emerald-500 dark:border-emerald-400/25 dark:bg-white/10 dark:text-emerald-200"><span className="absolute left-3 top-1/2 -translate-y-1/2">$</span><input aria-label="إجمالي الرصيد الحالي لهذا العميل" dir="ltr" inputMode="decimal" value={draft.walletBalance} onChange={event => setDraft(previous => ({ ...previous, walletBalance: event.target.value.replace(/[^0-9.]/g, '') }))} className="w-full bg-transparent pl-4 text-center font-mono text-sm font-black text-emerald-600 outline-none dark:text-emerald-200"/></label><div aria-hidden="true"/></div></section><section className="rounded-xl border border-blue-200 bg-blue-50/70 p-3 dark:border-blue-400/30 dark:bg-blue-400/10"><label className="flex items-center justify-between gap-3"><span className="text-[10px] font-black text-blue-700 dark:text-blue-200">مبلغ رصيد جديد بعد اكتمال الفاتورة ($ - {currencyLabel})</span><div className="relative w-28"><span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-blue-600">$</span><input dir="ltr" inputMode="decimal" value={draft.walletRewardOverride} onChange={event => setDraft(previous => ({ ...previous, walletRewardOverride: event.target.value.replace(/[^0-9.]/g, '') }))} className="w-full rounded-lg border border-blue-200 bg-white py-2 pl-7 pr-2 text-center font-mono text-sm font-black text-blue-600 outline-none focus:border-blue-500 dark:border-blue-400/30 dark:bg-white/10 dark:text-blue-200"/></div></label><p className="mt-2 text-[8px] font-bold leading-4 text-amber-700 dark:text-amber-200">يُضاف هذا الرصيد مرة واحدة فقط عند اختيار حالة «مكتمل» وعدم وجود مكافأة سابقة للفاتورة.</p></section><Field label="ملاحظات الفاتورة"><textarea value={draft.adminNote} onChange={event => setDraft(previous => ({ ...previous, adminNote: event.target.value }))} placeholder="اكتب ملاحظة داخلية إن وجدت" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-right text-xs font-bold outline-none transition focus:border-blue-500 dark:border-white/10 dark:bg-white/5 min-h-20 resize-none py-2"/></Field></div></div><footer className="flex shrink-0 items-center gap-4 border-t border-slate-100 px-5 py-3 dark:border-white/10"><button onClick={() => onSave(draft)} className="inline-flex items-center gap-1 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-blue-600/20"><Save size={15}/> حفظ التعديلات</button><button onClick={onClose} className="text-xs font-black text-slate-500">إلغاء</button></footer></div></div>;
 };
 const Field = ({ label, required, children }) => <label className="block text-right"><span className="mb-1 block text-[10px] font-black text-slate-600 dark:text-slate-200">{label}{required && <span className="mr-1 text-rose-500">*</span>}</span>{children}</label>;
-const InvoicePreview = ({ order, formatAmount, currencyLabel, onClose }) => {
-    const items = order.cartItems || order.items || [];
-    const dateValue = order.createdAt?.toDate?.() || new Date(order.createdAt || order.date || Date.now());
-    const dateText = Number.isNaN(dateValue.getTime()) ? '---' : dateValue.toISOString().slice(0, 10);
-    const country = order.formData?.country === 'Yemen' ? 'اليمن' : (order.formData?.country || 'اليمن');
-    const address = order.formData?.address || order.formData?.city || order.formData?.region || '---';
-    const phone = order.formData?.fullPhone || order.formData?.phone || order.phone || '---';
-    const payment = paymentText(order.paymentMethod || order.formData?.paymentMethod);
-    const itemSubtotal = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0);
-    const subtotal = Number(order.subTotal ?? order.subtotal ?? itemSubtotal);
-    const delivery = Number(order.deliveryCost || 0);
-    const productDiscount = Number(order.discount || order.discountAmount || 0);
-    const couponDiscount = Math.round(subtotal * (Number(order.discountPercentage || 0) / 100));
-    const discount = productDiscount + couponDiscount;
-    const total = Number(order.total || subtotal + delivery - discount);
-    const printWalletInvoice = () => {
-        window.print();
-    };
-    return <div className="wallet-print-overlay fixed inset-0 z-[250] isolate overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-sm">
-        <style>{`@page { size: A4 portrait; margin: 0; }
-            .wallet-invoice-currency, .wallet-invoice-inline-currency { font-size: 11px !important; font-family: Cairo, Arial, sans-serif !important; font-weight: 700 !important; }
-            .wallet-invoice-total-number, .wallet-invoice-line-number { font-family: Arial, sans-serif !important; font-variant-numeric: normal !important; font-feature-settings: normal !important; }
-            @media print {
-                html, body { width: 210mm !important; min-width: 210mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; overflow: visible !important; }
-                body * { visibility: hidden !important; }
-                .wallet-print-overlay, .wallet-print-overlay * { visibility: visible !important; }
-                .wallet-print-overlay { position: static !important; display: block !important; width: 210mm !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; background: #fff !important; backdrop-filter: none !important; }
-                .wallet-invoice-actions { display: none !important; }
-                .wallet-invoice-paper { display: block !important; width: 210mm !important; max-width: none !important; min-height: 0 !important; height: auto !important; margin: 0 !important; border-radius: 20px !important; box-shadow: none !important; overflow: visible !important; page-break-inside: avoid !important; break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                .wallet-invoice-paper table, .wallet-invoice-paper tbody, .wallet-invoice-paper tr { page-break-inside: avoid !important; break-inside: avoid !important; }
-            }`}</style>
-        <div dir="rtl" id="wallet-printable-invoice" className="wallet-invoice-paper mx-auto my-1 max-h-[calc(100vh-24px)] w-full max-w-[560px] overflow-y-auto rounded-[20px] border border-slate-200 bg-white px-5 py-3 text-slate-900 shadow-[0_16px_45px_rgba(15,23,42,0.28)] dark:border-white dark:bg-white dark:text-slate-900">
-            <div className="wallet-invoice-actions mb-3 flex items-center justify-between border-b border-slate-100 pb-3">
-                <button onClick={onClose} className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-rose-500"><X size={18}/></button>
-                <button onClick={printWalletInvoice} className="rounded-lg bg-slate-900 px-4 py-2 text-[10px] font-black text-white shadow-sm">طباعة الفاتورة</button>
-            </div>
-            <header className="flex items-start justify-between gap-5 border-b border-slate-800 pb-5">
-                <div className="text-right">
-                    <h1 className="text-[27px] font-black leading-none tracking-tight">فاتورة</h1>
-                    <p className="mt-2 text-[13px] font-black text-slate-500">متجر ميلانو</p>
-                    <div className="mt-4 space-y-1 text-[9px] font-bold text-slate-800">
-                        <p>تاريخ الطلب: <span dir="ltr" className="mr-2 font-mono">{dateText}</span></p>
-                        <p>رقم الطلب: <span dir="ltr" className="mr-2 font-mono">{order.orderId || order.id}</span></p>
-                    </div>
-                </div>
-                <img src="/admin-logo.png" onError={event => { event.currentTarget.src = '/nav-logo.png'; }} alt="شعار متجر ميلانو" className="h-[72px] w-[72px] rounded-[15px] border-2 border-slate-100 bg-black object-contain p-1 shadow-sm"/>
-            </header>
-            <section className="wallet-invoice-customer mt-6 rounded-lg border border-slate-400 bg-slate-50/70 px-4 pb-4 pt-3">
-                <h2 className="wallet-invoice-customer-title border-b border-slate-400 pb-3 text-[13px] font-black">بيانات العميل</h2>
-                <div className="wallet-invoice-customer-grid mt-4 grid grid-cols-2 gap-x-8 gap-y-3 text-[9px] font-bold">
-                    <p className="wallet-invoice-customer-row"><span>اسم المشتري:</span><b>{customerName(order)}</b></p>
-                    <p className="wallet-invoice-customer-row"><span>الدولة:</span><b>{country}</b></p>
-                    <p className="wallet-invoice-customer-row"><span>العنوان:</span><b>{address}</b></p>
-                    <p className="wallet-invoice-customer-row"><span>رقم الهاتف:</span><b dir="ltr">{phone}</b></p>
-                    <p className="wallet-invoice-customer-row"><span>المدينة:</span><b>{order.formData?.city || order.formData?.governorate || '---'}</b></p>
-                    <p className="wallet-invoice-customer-row"><span>طريقة الدفع:</span><b>{payment}</b></p>
-                </div>
-            </section>
-            <section className="mt-5">
-                <h2 className="mb-3 text-[15px] font-black">تفاصيل الفاتورة</h2>
-                <table className="w-full table-fixed border-collapse border border-slate-400 text-[9px]">
-                    <thead className="bg-[#111317] text-white"><tr>
-                        <th className="wallet-invoice-product-column w-[32%] border-l border-slate-500 px-2 py-2 text-right font-black">اسم المنتج</th>
-                        <th className="w-[16%] border-l border-slate-500 px-2 py-2 text-center font-black">المقاس</th>
-                        <th className="w-[20%] border-l border-slate-500 px-2 py-2 text-center font-black">السعر</th>
-                        <th className="w-[12%] border-l border-slate-500 px-2 py-2 text-center font-black">الكمية</th>
-                        <th className="w-[20%] px-2 py-2 text-center font-black">الإجمالي</th>
-                    </tr></thead>
-                    <tbody>{items.length ? items.map((item, index) => {
-                        const lineTotal = Number(item.price || 0) * Number(item.quantity || 1);
-                        return <tr key={`${item.id || item.title || 'item'}-${index}`} className="border-t border-slate-400">
-                            <td className="wallet-invoice-product-cell border-l border-slate-400 px-2 py-2"><div className="wallet-invoice-product-content flex items-center gap-2"><img src={item.image || item.imageUrl || item.images?.[0] || '/nav-logo.png'} onError={event => { event.currentTarget.src = '/nav-logo.png'; }} alt="" className="wallet-invoice-product-image h-10 w-10 shrink-0 rounded-md border border-slate-300 object-cover"/><span className="wallet-invoice-product-name font-black leading-4">{item.title || item.name || 'منتج المتجر'}</span></div></td>
-                            <td className="border-l border-slate-400 px-2 py-2 text-center font-black">{item.selectedSize || item.size || item.variant || '---'}</td>
-                            <td dir="rtl" className="border-l border-slate-400 px-2 py-2 text-center font-black"><span dir="ltr" className="wallet-invoice-line-number">{formatAmount(item.price)}</span> <span className="wallet-invoice-inline-currency">{currencyLabel}</span></td>
-                            <td dir="ltr" className="border-l border-slate-400 px-2 py-2 text-center font-mono font-black">{Number(item.quantity || 1)}</td>
-                            <td dir="rtl" className="px-2 py-2 text-center font-black"><span dir="ltr" className="wallet-invoice-line-number">{formatAmount(lineTotal)}</span> <span className="wallet-invoice-inline-currency">{currencyLabel}</span></td>
-                        </tr>;
-                    }) : <tr><td colSpan="5" className="py-5 text-center font-bold text-slate-400">لا توجد منتجات مسجلة لهذه الفاتورة.</td></tr>}</tbody>
-                </table>
-            </section>
-            <div dir="ltr" className="wallet-invoice-totals-wrap mt-5 flex justify-end"><section dir="rtl" className="wallet-invoice-totals w-[270px] rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-[10px] font-bold">
-                <p className="wallet-invoice-total-row"><span className="wallet-invoice-total-label">المجموع الفرعي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number font-sans">{formatAmount(subtotal)}</span></b></p>
-                <p className="wallet-invoice-total-row wallet-invoice-discount"><span className="wallet-invoice-total-label">الخصم:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number font-sans">- {formatAmount(discount)}</span></b></p>
-                <p className="wallet-invoice-total-row"><span className="wallet-invoice-total-label">رسوم التوصيل:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number font-sans">{formatAmount(delivery)}</span></b></p>
-                <p className="wallet-invoice-total-row wallet-invoice-grand-total"><span className="wallet-invoice-total-label">الإجمالي:</span><b dir="ltr" className="wallet-invoice-total-amount"><span className="wallet-invoice-currency">{currencyLabel}</span><span className="wallet-invoice-total-number font-sans">{formatAmount(total)}</span></b></p>
-            </section></div>
-            <footer className="mt-6 border-t border-slate-400 pt-4 text-center"><p className="text-[10px] font-black">شكرًا لتسوقكم من متجر ميلانو</p><p className="mt-2 text-[7px] font-mono text-slate-500">ميلانو — فاتورة متجر إلكتروني</p></footer>
-        </div>
-    </div>;
-};
 
 export default WalletView;
