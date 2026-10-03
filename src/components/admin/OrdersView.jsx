@@ -1044,7 +1044,7 @@ printWindow.onload = () => printWindow.print();
     }, 0);
 
     return (
-        <div className="-mt-1 space-y-4 font-['Cairo'] relative" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="-mt-1 space-y-4 font-['Cairo'] text-sm relative" dir={isRTL ? "rtl" : "ltr"}>
             {/* Hidden Printable Component - Wrapped in Ref Div */}
             <div style={{ position: 'fixed', left: '-10000px', top: 0 }}>
                 <div id="printable-invoices">
@@ -1161,7 +1161,7 @@ printWindow.onload = () => printWindow.print();
                     <input
                         type="text"
                         placeholder={txt.search_placeholder}
-                        className={`h-11 w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-4 pr-12 text-sm font-bold outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${isRTL ? 'text-right' : 'text-left'}`}
+                        className={`h-11 w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-4 pr-12 text-[13px] font-bold outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${isRTL ? 'text-right' : 'text-left'}`}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -1199,8 +1199,8 @@ printWindow.onload = () => printWindow.print();
                         onClick={() => setFilterStatus(stat.filter)}
                         className={`rounded-2xl border-b-4 bg-white px-3 py-2.5 shadow-sm transition-all hover:shadow-md md:px-3.5 md:py-3 ${stat.color} ${filterStatus === stat.filter ? 'bg-gray-50 ring-2 ring-blue-500/10' : 'opacity-80 hover:opacity-100'}`}
                     >
-                        <div className="text-xl md:text-2xl font-black mb-1">{stat.value}</div>
-                        <div className="text-[10px] md:text-xs font-bold">{stat.label}</div>
+                        <div className="mb-1 text-lg font-black md:text-xl">{stat.value}</div>
+                        <div className="text-[10px] font-bold md:text-[11px]">{stat.label}</div>
                     </button>
                 ))}
             </div>
@@ -1208,9 +1208,9 @@ printWindow.onload = () => printWindow.print();
             {/* Table Layout */}
             <div className={`bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 lg:-mx-6 ${selectedOrdersIds.length > 0 ? 'pb-24' : ''}`}>
                 <div className="overflow-x-auto relative">
-                    <table className="w-full min-w-[1040px] table-fixed border-collapse">
+                    <table className="w-full min-w-[1040px] table-fixed border-collapse text-[13px]">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100 text-gray-400 font-bold text-xs">
+                            <tr className="bg-gray-50 border-b border-gray-100 text-[11px] font-bold text-gray-400">
                                 <th className="w-11 p-2 text-center">
                                     <input
                                         type="checkbox"
@@ -1269,7 +1269,7 @@ printWindow.onload = () => printWindow.print();
                                         <td className="p-2">
                                             <div className="flex flex-col items-start gap-0.5 whitespace-nowrap font-black text-gray-800">
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="text-sm md:text-base">
+                                                    <span className="text-xs md:text-sm">
                                                         {formatPrice(order.subTotal ? (order.subTotal - (order.discount || 0) + (order.deliveryCost || 0)) : order.total, generalSettings?.currency || 'YER')}
                                                     </span>
                                                 </div>
@@ -1277,7 +1277,7 @@ printWindow.onload = () => printWindow.print();
                                             </div>
                                         </td>
                                         <td className="p-1.5 text-center">
-                                            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border ${getStatusColor(order.status)}`}>
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold border rounded-full ${getStatusColor(order.status)}`}>
                                                 <span className={`w-1.5 h-1.5 rounded-full ${getStatusColor(order.status).replace('bg-', 'bg-current-').replace('text-', 'bg-').split(' ')[1]}`}></span>
                                                 {getStatusLabel(order.status)}
                                             </span>
@@ -1291,13 +1291,13 @@ printWindow.onload = () => printWindow.print();
                                         </td>
                                         <td className="p-1.5 text-center">
                                             <div className="mx-auto flex w-fit items-center justify-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5">
-                                                <span className="font-mono text-xs text-gray-600 font-bold" dir="ltr">{order.formData?.phone}</span>
+                                                <span className="font-mono text-[11px] font-bold text-gray-600" dir="ltr">{order.formData?.phone}</span>
                                                 <Phone size={12} className="text-gray-400" />
                                             </div>
                                         </td>
                                         <td className="p-1.5 text-center">
                                             <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
-                                                <span className="text-[11px] font-bold text-gray-600 font-mono">
+                                                <span className="text-[10px] font-bold text-gray-600 font-mono">
                                                     {(() => {
                                                         const locale = lang === 'ar' ? 'ar-YE' : 'en-GB';
                                                         if (order.createdAt && typeof order.createdAt.toDate === 'function') {
@@ -1308,7 +1308,7 @@ printWindow.onload = () => printWindow.print();
                                                         return order.date;
                                                     })()}
                                                 </span>
-                                                <span className="text-[10px] text-gray-400 font-mono">
+                                                <span className="text-[9px] text-gray-400 font-mono">
                                                     {(() => {
                                                         const locale = lang === 'ar' ? 'ar-YE' : 'en-GB';
                                                         if (order.createdAt && typeof order.createdAt.toDate === 'function') {
