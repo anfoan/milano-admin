@@ -616,7 +616,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                 />
                                 {formData.price && (
                                     <p className="text-[10px] font-bold text-blue-500 px-2">
-                                        {txt.sar_preview} {convertPrice(Number(formData.price), 'SAR').toFixed(2)} SAR
+                                        {txt.sar_preview} {Math.round(convertPrice(Number(formData.price), 'SAR')).toLocaleString('en-US')} SAR
                                     </p>
                                 )}
                                 {errors.price && <p className="text-[10px] font-bold text-red-500 px-2 animate-in fade-in slide-in-from-top-1">سعر البيع مطلوب</p>}
@@ -654,7 +654,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                 />
                                 {formData.costPrice && (
                                     <p className="text-[10px] font-bold text-blue-500 px-2">
-                                        {txt.sar_preview} {convertPrice(Number(formData.costPrice), 'SAR').toFixed(2)} SAR
+                                        {txt.sar_preview} {Math.round(convertPrice(Number(formData.costPrice), 'SAR')).toLocaleString('en-US')} SAR
                                     </p>
                                 )}
                                 {errors.costPrice && <p className="text-[10px] font-bold text-red-500 px-2 animate-in fade-in slide-in-from-top-1">سعر التكلفة مطلوب</p>}

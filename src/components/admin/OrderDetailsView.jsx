@@ -41,7 +41,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
     const toDisplayPrice = (valInYER) => {
         const val = Number(valInYER) || 0;
         if (isSAR) {
-            return Number((val / rate).toFixed(2));
+            return Math.round(val / rate);
         }
         return val;
     };

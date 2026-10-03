@@ -56,12 +56,11 @@ export const CurrencyProvider = ({ children }) => {
         const isRTL = document.documentElement.dir === 'rtl' || localStorage.getItem('adminLang') === 'ar' || localStorage.getItem('i18nextLng') === 'ar';
         const symbol = currency === 'SAR' ? (isRTL ? 'ريال سعودي' : 'SAR') : (isRTL ? 'ريال يمني' : 'YER');
         
-        // Precision: 2 decimals for SAR, whole number for YER
-        const precision = currency === 'SAR' ? 2 : 0;
-        
-        const formatted = converted.toLocaleString('en-US', {
-            minimumFractionDigits: precision,
-            maximumFractionDigits: precision
+        // Customer-facing prices use complete currency units only. Calculations
+        // retain their original precision; only the displayed amount is rounded.
+        const formatted = Math.round(converted).toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
 
         return isRTL ? `${formatted} ${symbol}` : `${symbol} ${formatted}`;

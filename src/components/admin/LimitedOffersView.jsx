@@ -1066,7 +1066,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                                                     <span>{(editingId === product.id
                                                         ? (product.price - (product.price * editValue / 100))
                                                         : (product.isOfferPaused ? product.pausedPriceAfterDiscount : product.priceAfterDiscount)
-                                                    )?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</span>
+                                                    )?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                                                     <span className="text-[9px] text-green-700 font-bold">{currency}</span>
                                                 </div>
                                             </td>
