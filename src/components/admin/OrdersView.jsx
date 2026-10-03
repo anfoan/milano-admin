@@ -64,7 +64,8 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
             stat_completed: 'مكتمل',
             stat_cancelled: 'ملغي',
             th_order_id: 'رقم الطلب',
-            th_name: 'الاسم',
+            th_name: 'اسم العميل',
+            th_product_size: 'اسم المنتج + المقاس',
             th_price: 'السعر الكلي',
             th_status: 'الحالة',
             th_payment: 'توصيل الطلبات',
@@ -135,7 +136,8 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
             stat_completed: 'Completed',
             stat_cancelled: 'Cancelled',
             th_order_id: 'Order ID',
-            th_name: 'Name',
+            th_name: 'Customer Name',
+            th_product_size: 'Product + Size',
             th_price: 'Total Price',
             th_status: 'Status',
             th_payment: 'Payment',
@@ -1013,6 +1015,21 @@ printWindow.onload = () => printWindow.print();
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+    // Match the receipt-history convention: append the size only when the
+    // purchased item actually has one, while keeping all invoice products in
+    // a single line inside the orders list.
+    const getOrderProductsLabel = (order) => {
+        const items = Array.isArray(order?.cartItems)
+            ? order.cartItems
+            : (Array.isArray(order?.items) ? order.items : []);
+        const label = items.map(item => {
+            const productName = item?.title || item?.name || item?.productName || '';
+            const size = item?.selectedSize || item?.size || '';
+            return productName ? `${productName}${size ? ` / ${size}` : ''}` : '';
+        }).filter(Boolean).join(' • ');
+        return label || '---';
+    };
+
     const ordersToPrint = selectedOrdersIds.length > 0
         ? orders.filter(o => selectedOrdersIds.includes(o.id))
         : filteredOrders;
@@ -1027,7 +1044,7 @@ printWindow.onload = () => printWindow.print();
     }, 0);
 
     return (
-        <div className="space-y-6 font-['Cairo'] relative" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="-mt-1 space-y-4 font-['Cairo'] relative" dir={isRTL ? "rtl" : "ltr"}>
             {/* Hidden Printable Component - Wrapped in Ref Div */}
             <div style={{ position: 'fixed', left: '-10000px', top: 0 }}>
                 <div id="printable-invoices">
@@ -1138,28 +1155,28 @@ printWindow.onload = () => printWindow.print();
                     </div>
                 )}
             </AnimatePresence>
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <div className="w-full md:w-96 relative">
-                    <Search className="absolute right-4 top-3.5 text-gray-400" size={20} />
+            <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm md:flex-row md:px-5">
+                <div className="relative w-full md:w-[420px]">
+                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={19} />
                     <input
                         type="text"
                         placeholder={txt.search_placeholder}
-                        className={`w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all font-bold text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                        className={`h-11 w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-4 pr-12 text-sm font-bold outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${isRTL ? 'text-right' : 'text-left'}`}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="flex gap-2 w-full md:w-auto">
+                <div className="flex w-full gap-2 md:w-auto">
                     <button
                         onClick={openPDFModal}
-                        className="flex-1 md:flex-none px-6 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition flex items-center justify-center gap-2 shadow-lg shadow-red-500/20"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-2.5 font-bold text-white shadow-lg shadow-red-500/20 transition hover:bg-red-600 md:flex-none"
                     >
                         <Printer size={20} />
                         <span>{txt.invoice_pdf}</span>
                     </button>
                     <button
                         onClick={openExcelModal} // Opens modal for now, or could change to direct excel if needed
-                        className="flex-1 md:flex-none px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 md:flex-none"
                     >
                         <FileDown size={20} />
                         <span>{txt.export_excel}</span>
@@ -1168,7 +1185,7 @@ printWindow.onload = () => printWindow.print();
             </div>
 
             {/* Header Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6 lg:gap-4">
                 {[
                     { label: txt.stat_all, value: orders.length, color: 'border-blue-500 text-blue-600', filter: 'all' },
                     { label: txt.stat_new, value: orders.filter(o => o.status === 'new').length, color: 'border-yellow-500 text-yellow-600', filter: 'new' },
@@ -1180,7 +1197,7 @@ printWindow.onload = () => printWindow.print();
                     <button
                         key={idx}
                         onClick={() => setFilterStatus(stat.filter)}
-                        className={`bg-white p-3 md:p-3.5 rounded-2xl border-b-4 shadow-sm hover:shadow-md transition-all ${stat.color} ${filterStatus === stat.filter ? 'bg-gray-50 ring-2 ring-blue-500/10' : 'opacity-80 hover:opacity-100'}`}
+                        className={`rounded-2xl border-b-4 bg-white px-3 py-2.5 shadow-sm transition-all hover:shadow-md md:px-3.5 md:py-3 ${stat.color} ${filterStatus === stat.filter ? 'bg-gray-50 ring-2 ring-blue-500/10' : 'opacity-80 hover:opacity-100'}`}
                     >
                         <div className="text-xl md:text-2xl font-black mb-1">{stat.value}</div>
                         <div className="text-[10px] md:text-xs font-bold">{stat.label}</div>
@@ -1191,7 +1208,7 @@ printWindow.onload = () => printWindow.print();
             {/* Table Layout */}
             <div className={`bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 ${selectedOrdersIds.length > 0 ? 'pb-24' : ''}`}>
                 <div className="overflow-x-auto relative">
-                    <table className="w-full min-w-[850px] border-collapse">
+                    <table className="w-full min-w-[1160px] table-fixed border-collapse">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-100 text-gray-400 font-bold text-xs">
                                 <th className="p-3 md:px-6 md:py-4 text-center w-12">
@@ -1202,24 +1219,25 @@ printWindow.onload = () => printWindow.print();
                                         onChange={toggleSelectAll}
                                     />
                                 </th>
-                                <th className="p-3 md:p-3 text-center">{txt.th_order_id}</th>
-                                <th className={`p-3 md:p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_name}</th>
-                                <th className={`p-3 md:p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_price}</th>
-                                <th className="p-3 md:p-3 text-center">{txt.th_status}</th>
-                                <th className="p-3 md:p-3 text-center">{txt.th_payment}</th>
-                                <th className="p-3 md:p-3 text-center">{txt.th_phone}</th>
-                                <th className="p-3 md:p-3 text-center">{txt.th_date}</th>
-                                <th className="p-3 md:p-3 text-center">{txt.th_details}</th>
+                                <th className="w-[130px] whitespace-nowrap p-3 text-center">{txt.th_order_id}</th>
+                                <th className={`w-[120px] whitespace-nowrap p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_name}</th>
+                                <th className={`w-[190px] whitespace-nowrap p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_product_size}</th>
+                                <th className={`w-[130px] whitespace-nowrap p-3 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_price}</th>
+                                <th className="w-[108px] whitespace-nowrap p-3 text-center">{txt.th_status}</th>
+                                <th className="w-[92px] whitespace-nowrap p-3 text-center">{txt.th_payment}</th>
+                                <th className="w-[112px] whitespace-nowrap p-3 text-center">{txt.th_phone}</th>
+                                <th className="w-[102px] whitespace-nowrap p-3 text-center">{txt.th_date}</th>
+                                <th className="w-[136px] whitespace-nowrap p-3 text-center">{txt.th_details}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
                                 <tr>
-                                    <td colSpan="9" className="text-center py-20 text-gray-400">{txt.loading}</td>
+                                    <td colSpan="10" className="text-center py-20 text-gray-400">{txt.loading}</td>
                                 </tr>
                             ) : filteredOrders.length === 0 ? (
                                 <tr>
-                                    <td colSpan="9" className="text-center py-20 text-gray-400 font-bold">{txt.no_orders}</td>
+                                    <td colSpan="10" className="text-center py-20 text-gray-400 font-bold">{txt.no_orders}</td>
                                 </tr>
                             ) : (
                                 currentOrders.map((order) => (
@@ -1240,11 +1258,16 @@ printWindow.onload = () => printWindow.print();
                                                 {order.orderId}
                                             </button>
                                         </td>
-                                        <td className="p-3 md:p-3 font-bold text-gray-700 whitespace-nowrap">
+                                        <td className="p-3 font-bold text-gray-700 whitespace-nowrap">
                                             {order.formData?.name || 'زائر'}
                                         </td>
-                                        <td className="p-3 md:py-3 md:px-4">
-                                            <div className="font-black text-gray-800 flex flex-col items-start gap-0.5 whitespace-nowrap">
+                                        <td className="p-3">
+                                            <div title={getOrderProductsLabel(order)} className="truncate whitespace-nowrap font-bold text-gray-700">
+                                                {getOrderProductsLabel(order)}
+                                            </div>
+                                        </td>
+                                        <td className="p-3">
+                                            <div className="flex flex-col items-start gap-0.5 whitespace-nowrap font-black text-gray-800">
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="text-sm md:text-base">
                                                         {formatPrice(order.subTotal ? (order.subTotal - (order.discount || 0) + (order.deliveryCost || 0)) : order.total, generalSettings?.currency || 'YER')}
@@ -1332,7 +1355,7 @@ printWindow.onload = () => printWindow.print();
                                 <td colSpan="3" className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'} font-black text-gray-400 uppercase italic`}>
                                     {txt.total_footer}
                                 </td>
-                                <td colSpan="3" className="px-6 py-3 font-black">
+                                <td colSpan="4" className="px-6 py-3 font-black">
                                     <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-6">
                                         <div className="flex items-center gap-1.5 text-green-600">
                                             <span className="text-sm md:text-sm">{totalSales.toLocaleString()}</span>
