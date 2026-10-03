@@ -7,17 +7,23 @@ export const isCompletedOrderStatus = (status) => {
 };
 
 const amountOf = value => Math.max(0, Number(value || 0));
-// Wallet rewards are only earned by orders worth at least 4,000 Yemeni riyals.
-// Wallet balances are stored in YER; SAR invoices are converted using the same
-// displayed wallet conversion rate before the eligibility comparison.
+// Wallet rewards are only earned from the approved invoice floor:
+// 4,000 Yemeni riyals or 28 Saudi riyals, according to the invoice currency.
 export const WALLET_REWARD_MINIMUM_YER = 4000;
+export const WALLET_REWARD_MINIMUM_SAR = 28;
 export const WALLET_SAR_TO_YER_RATE = 140;
+export const orderCurrencyCode = (order = {}) => String(order.currency || order.currencyCode || order.formData?.currency || 'YER').trim().toUpperCase();
 export const orderTotalInYER = (order = {}) => {
     const total = amountOf(order.total ?? order.grandTotal ?? order.totalAmount ?? order.amountDue);
-    const currency = String(order.currency || order.currencyCode || order.formData?.currency || 'YER').trim().toUpperCase();
+    const currency = orderCurrencyCode(order);
     return currency === 'SAR' ? total * WALLET_SAR_TO_YER_RATE : total;
 };
-export const isOrderEligibleForWalletReward = (order = {}) => orderTotalInYER(order) >= WALLET_REWARD_MINIMUM_YER;
+export const walletRewardMinimumForOrder = (order = {}) => orderCurrencyCode(order) === 'SAR'
+    ? WALLET_REWARD_MINIMUM_SAR
+    : WALLET_REWARD_MINIMUM_YER;
+export const isOrderEligibleForWalletReward = (order = {}) => orderCurrencyCode(order) === 'SAR'
+    ? amountOf(order.total ?? order.grandTotal ?? order.totalAmount ?? order.amountDue) >= WALLET_REWARD_MINIMUM_SAR
+    : orderTotalInYER(order) >= WALLET_REWARD_MINIMUM_YER;
 export const orderCustomerPhone = (order = {}) => String(order.formData?.fullPhone || order.formData?.phone || order.customer?.phone || order.phone || '').trim();
 export const normalizeWalletPhone = (value = '') => {
     const digits = orderCustomerPhone({ phone: value })
@@ -55,7 +61,8 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
                 granted: false,
                 eligible: false,
                 reason: 'below-minimum-order-total',
-                minimum: WALLET_REWARD_MINIMUM_YER,
+                minimum: walletRewardMinimumForOrder(order),
+                currency: orderCurrencyCode(order),
                 totalYER: orderTotalInYER(order),
             };
         }
@@ -262,7 +269,8 @@ export const syncWalletRewardForOrderStatus = async (orderId, status) => {
         granted: false,
         eligible: false,
         reason: 'below-minimum-order-total',
-        minimum: WALLET_REWARD_MINIMUM_YER,
+        minimum: walletRewardMinimumForOrder(order),
+        currency: orderCurrencyCode(order),
         totalYER: orderTotalInYER(order),
     };
 };
