@@ -5,6 +5,7 @@ import { collection, query, orderBy, onSnapshot, doc, deleteDoc, addDoc, updateD
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const [coupons, setCoupons] = useState([]);
@@ -19,6 +20,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const [maxUses, setMaxUses] = useState(1);
     const [expiryDate, setExpiryDate] = useState('');
     const [minOrderAmount, setMinOrderAmount] = useState('');
+    const { formatPrice, exchangeRate } = useCurrency();
 
     const t = {
         ar: {
@@ -34,7 +36,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             yes: "نعم",
             no: "لا",
             expiry_date: "تاريخ الانتهاء (اختياري)",
-            min_order: `الحد الأدنى للطلب (${getLocalizedCurrency('YER', 'ar')})`,
+            min_order: 'الحد الأدنى للطلب',
             min_order_placeholder: "0 (اختياري)",
             max_uses: "أقصى عدد من الاستخدامات",
             max_uses_placeholder: "1",
@@ -73,7 +75,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             yes: "Yes",
             no: "No",
             expiry_date: "Expiry Date (Optional)",
-            min_order: `Min Order Amount (${getLocalizedCurrency('YER', 'en')})`,
+            min_order: 'Min Order Amount',
             min_order_placeholder: "0 (Optional)",
             max_uses: "Max Uses",
             max_uses_placeholder: "1",
@@ -103,10 +105,16 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
     const txt = t[lang];
     const isRTL = lang === 'ar';
-    const currency = getLocalizedCurrency(generalSettings?.currency || 'YER', lang);
-    const discountCurrencyLabel = lang === 'ar' ? 'ريال يمني' : currency;
-    // The exact discount is calculated at checkout from the order subtotal.
-    // In this list, use the configured minimum order as the transparent preview basis.
+    const couponCurrency = generalSettings?.currency === 'SAR' ? 'SAR' : 'YER';
+    const currency = getLocalizedCurrency(couponCurrency, lang);
+    const toBaseCouponAmount = value => couponCurrency === 'SAR'
+        ? Math.round(Math.max(0, Number(value || 0)) * (exchangeRate || 140))
+        : Math.round(Math.max(0, Number(value || 0)));
+    const fromBaseCouponAmount = value => couponCurrency === 'SAR'
+        ? Math.round(Math.max(0, Number(value || 0)) / (exchangeRate || 140))
+        : Math.round(Math.max(0, Number(value || 0)));
+    // A percentage becomes an exact amount using the coupon's minimum-order
+    // value as its reference. The formatted value always follows dashboard currency.
     const getDiscountAmount = (coupon) => {
         const baseAmount = Number(coupon?.minOrderAmount || 0);
         const percent = Number(coupon?.discountPercent || 0);
@@ -114,7 +122,18 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     };
     const formatDiscountAmount = (coupon) => {
         const amount = getDiscountAmount(coupon);
-        return amount === null ? (lang === 'ar' ? 'حسب قيمة الطلب' : 'Based on order') : `${amount.toLocaleString()} ${discountCurrencyLabel}`;
+        return amount === null
+            ? (lang === 'ar' ? 'حدد الحد الأدنى للحساب' : 'Set minimum order to calculate')
+            : formatPrice(amount, couponCurrency);
+    };
+    const minimumOrderBaseForSave = () => {
+        const displayedMinimum = Math.max(0, Number(minOrderAmount || 0));
+        // Do not change an existing stored base amount merely because its SAR
+        // display is rounded to a whole riyal.
+        if (editingCoupon && displayedMinimum === fromBaseCouponAmount(editingCoupon.minOrderAmount)) {
+            return Math.max(0, Number(editingCoupon.minOrderAmount || 0));
+        }
+        return toBaseCouponAmount(displayedMinimum);
     };
 
     useEffect(() => {
@@ -168,7 +187,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                 discountPercent: Number(discountPercent),
                 maxUses: isUnlimited ? null : Math.max(1, Number(maxUses)),
                 expiryDate: expiryDate || null,
-                minOrderAmount: Number(minOrderAmount) || 0,
+                minOrderAmount: minimumOrderBaseForSave(),
                 usedCount: editingCoupon ? Number(editingCoupon.usedCount || 0) : 0,
                 isUnlimited,
                 createdAt: editingCoupon?.createdAt || serverTimestamp(),
@@ -202,7 +221,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
         setIsUnlimited(Boolean(coupon.isUnlimited));
         setMaxUses(coupon.maxUses || 1);
         setExpiryDate(coupon.expiryDate || '');
-        setMinOrderAmount(coupon.minOrderAmount || '');
+        setMinOrderAmount(fromBaseCouponAmount(coupon.minOrderAmount) || '');
         setIsAdding(true);
     };
 
@@ -280,7 +299,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                         <span className="text-2xl text-pink-500 font-black">{discountPercent}%</span>
                                         <span className="text-xs text-gray-500 font-black text-center leading-tight">
                                             <span className="block text-[10px] text-gray-400">{txt.discount_amount}</span>
-                                            {Number(minOrderAmount) > 0 ? `${Math.round(Number(minOrderAmount) * Number(discountPercent) / 100).toLocaleString()} ${discountCurrencyLabel}` : (lang === 'ar' ? 'حسب قيمة الطلب' : 'Based on order')}
+                                            {Number(minOrderAmount) > 0 ? formatPrice(Math.round(toBaseCouponAmount(minOrderAmount) * Number(discountPercent) / 100), couponCurrency) : (lang === 'ar' ? 'حدد الحد الأدنى للحساب' : 'Set minimum order to calculate')}
                                         </span>
                                     </div>
                                 </div>
@@ -327,7 +346,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
                             {/* Min Order Amount */}
                             <div>
-                                <label className="block text-sm font-bold text-gray-600 mb-2">{txt.min_order}</label>
+                                <label className="block text-sm font-bold text-gray-600 mb-2">{txt.min_order} ({currency})</label>
                                 <input
                                     type="number"
                                     placeholder={txt.min_order_placeholder}
