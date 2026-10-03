@@ -1597,7 +1597,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             </div>
             ) : (
                 // --- TAB 2: RECEIPTS LOG ---
-                <div className="flex-1 flex flex-col gap-2 overflow-hidden">
+                <div className="flex-1 flex flex-col gap-2 overflow-visible lg:overflow-hidden">
                     {/* Header with Back Button */}
                     <div className="bg-white dark:bg-[#1c1c1e] py-2 px-4 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
@@ -1635,36 +1635,36 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-white dark:bg-[#1c1c1e] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm pt-4 pb-5 px-5 flex flex-col gap-2 overflow-hidden h-[calc(100vh-10rem)]">
+                    <div className="flex-1 bg-white dark:bg-[#1c1c1e] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm pt-4 pb-5 px-3 sm:px-5 flex flex-col gap-2 overflow-visible lg:overflow-hidden h-auto lg:h-[calc(100vh-10rem)]">
                     {/* Payment totals use the same visible period/search filter as the invoice table. */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-1">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-1">
                         {[
                             { id: 'cash', label: isRTL ? 'نقدي / كاش' : 'Cash', cls: 'bg-green-500/15 text-green-700 dark:text-green-300' },
                             { id: 'card', label: isRTL ? 'محفظة جيب' : 'Jib Wallet', cls: 'bg-purple-500/15 text-purple-700 dark:text-purple-300' },
                             { id: 'transfer', label: isRTL ? 'تحويل بنكي' : 'Bank Transfer', cls: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300' }
                         ].map(method => (
-                            <div key={method.id} className={`rounded-2xl px-4 py-3 text-center font-black ${method.cls}`}>
-                                <div className="text-xs">{method.label}</div>
-                                <div className="font-mono text-lg mt-1">{paymentTotals[method.id].toLocaleString()} {currency}</div>
+                            <div key={method.id} className={`rounded-xl sm:rounded-2xl px-2 py-2 sm:px-4 sm:py-3 text-center font-black ${method.cls}`}>
+                                <div className="text-[9px] sm:text-xs">{method.label}</div>
+                                <div className="font-mono text-[11px] sm:text-lg mt-1 whitespace-nowrap">{paymentTotals[method.id].toLocaleString()} {currency}</div>
                             </div>
                         ))}
                     </div>
                     {/* Receipts Summary Header */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+                        <div className="p-3 sm:p-4 bg-gray-50 dark:bg-white/5 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
                             <div>
                                 <span className="text-[10px] text-gray-400 font-bold block uppercase">{isRTL ? "إجمالي مبيعات الشهر" : "Month's Total Sales"}</span>
-                                <h3 className="text-xl font-black text-gray-800 dark:text-white mt-1 font-mono">{monthlySalesSum.toLocaleString()} {currency}</h3>
+                                <h3 className="text-sm sm:text-xl font-black text-gray-800 dark:text-white mt-1 font-mono whitespace-nowrap">{monthlySalesSum.toLocaleString()} {currency}</h3>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-green-50 dark:bg-green-500/10 text-green-500 flex items-center justify-center">
                                 <DollarSign size={20} />
                             </div>
                         </div>
                         
-                        <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
+                        <div className="p-3 sm:p-4 bg-gray-50 dark:bg-white/5 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
                             <div>
                                 <span className="text-[10px] text-gray-400 font-bold block uppercase">{isRTL ? "عدد إيصالات الشهر" : "Month's Receipts Count"}</span>
-                                <h3 className="text-xl font-black text-gray-800 dark:text-white mt-1 font-mono">{monthlySalesCount}</h3>
+                                <h3 className="text-lg sm:text-xl font-black text-gray-800 dark:text-white mt-1 font-mono">{monthlySalesCount}</h3>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center">
                                 <Printer size={20} />
@@ -1673,7 +1673,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
                         {/* Date Range Report Tools — Admin Only */}
                         {isAdminManager && (
-                        <div className="md:col-span-2 p-4 bg-blue-50/30 dark:bg-blue-500/5 rounded-2xl border border-blue-500/10 flex flex-wrap items-center justify-between gap-3">
+                        <div className="col-span-2 md:col-span-2 p-3 sm:p-4 bg-blue-50/30 dark:bg-blue-500/5 rounded-xl sm:rounded-2xl border border-blue-500/10 flex flex-wrap items-center justify-between gap-3">
                             <div className="flex flex-wrap items-center gap-3">
                                 <div className="flex flex-col">
                                     <label className="text-[9px] text-gray-400 font-black mb-1">{isRTL ? "تحديد الفترة" : "Period"}</label>
@@ -1743,7 +1743,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     </div>
 
                     {/* Search and Table */}
-                    <div className="flex-1 flex flex-col overflow-hidden">
+                    <div className="flex flex-1 flex-col min-h-0 overflow-visible lg:overflow-hidden">
                         <div className="mb-4">
                             <div className="relative max-w-md">
                                 <Search className="absolute top-2.5 right-3 text-gray-400" size={16} />
@@ -1758,8 +1758,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         </div>
 
                         {/* Receipts Table */}
-                        <div className="flex-1 overflow-y-auto scrollbar-hide border border-gray-100 dark:border-white/5 rounded-2xl">
-                            <table className="w-full text-start text-xs font-bold text-gray-800 dark:text-gray-200">
+                        <div className="min-h-[280px] flex-1 overflow-auto border border-gray-100 dark:border-white/5 rounded-2xl">
+                            <table className="w-full min-w-[960px] text-start text-xs font-bold text-gray-800 dark:text-gray-200">
                                 <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 font-black uppercase text-[10px] sticky top-0 z-10">
                                     <tr>
                                         <th className="p-3 w-8 text-center">#</th>
