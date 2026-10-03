@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import {
-    LayoutDashboard, Package, ShoppingCart, Percent,
+    LayoutDashboard, Box, ShoppingCart, ShoppingBasket, ClipboardList, Plus, Percent,
     UserX, MessageSquare, Settings, CreditCard,
     Palette, Truck, Briefcase, Inbox, Users,
     PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt, BarChart3, Wallet
@@ -88,15 +88,15 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
 
     const allMenuItems = [
         { id: 'overview', name: txt.overview, icon: <LayoutDashboard size={20} /> },
-        { id: 'purchases', name: txt.purchases, icon: <ShoppingCart size={20} /> },
+        { id: 'purchases', name: txt.purchases, icon: <ShoppingBasket size={20} /> },
         {
             id: 'products',
             name: txt.products,
-            icon: <Package size={20} />,
+            icon: <Box size={20} />,
             subItems: [
-                { id: 'add-product', name: txt.add_product },
-                { id: 'product-list', name: txt.product_list },
-                { id: 'inventory', name: txt.inventory },
+                { id: 'add-product', name: txt.add_product, icon: <Plus size={16} strokeWidth={2.4} /> },
+                { id: 'product-list', name: txt.product_list, icon: <Box size={15} /> },
+                { id: 'inventory', name: txt.inventory, icon: <ClipboardList size={15} /> },
             ]
         },
         {
@@ -104,9 +104,9 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             name: txt.orders,
             icon: <ShoppingBag size={20} />,
             subItems: [
-                { id: 'orders', name: txt.orders_list },
-                { id: 'pos', name: isRTL ? 'نقطة البيع' : 'Point of Sale' },
-                { id: 'manual-order', name: txt.manual_order }
+                { id: 'orders', name: txt.orders_list, icon: <ClipboardList size={15} /> },
+                { id: 'pos', name: isRTL ? 'نقطة البيع' : 'Point of Sale', icon: <ShoppingCart size={15} /> },
+                { id: 'manual-order', name: txt.manual_order, icon: <Plus size={16} strokeWidth={2.4} /> }
             ]
         },
         { id: 'wallet', name: txt.wallet, icon: <Wallet size={20} /> },
@@ -255,8 +255,10 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                                 : 'text-slate-800 dark:text-white hover:text-slate-950 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
                                                 }`}
                                         >
-                                            <div className={`w-1.5 h-1.5 rounded-full ${activeTab === sub.id ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
-                                            {sub.name}
+                                            <span className={`flex h-4 w-4 shrink-0 items-center justify-center ${activeTab === sub.id ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-300'}`}>
+                                                {sub.icon || <span className={`h-1.5 w-1.5 rounded-full ${activeTab === sub.id ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`} />}
+                                            </span>
+                                            <span>{sub.name}</span>
                                         </button>
                                     ))}
                                 </div>
