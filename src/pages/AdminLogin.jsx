@@ -24,8 +24,11 @@ const AdminLogin = () => {
         try {
             const input = username.trim();
             
+            // The primary `milano` username must use Firebase Auth, not the worker lookup.
+            const isPrimaryAdmin = input.toLowerCase() === 'milano';
+
             // Check if it's a worker login (either no @, or ends with @milano-store.com)
-            if (!isEmail(input) || isWorkerEmail(input)) {
+            if (!isPrimaryAdmin && (!isEmail(input) || isWorkerEmail(input))) {
                 // === WORKER LOGIN ===
                 const workerUsername = isWorkerEmail(input) 
                     ? input.replace(/@milano-store\.com$/i, '') 
