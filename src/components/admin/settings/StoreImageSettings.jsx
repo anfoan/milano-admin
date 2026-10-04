@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Save, Image as ImageIcon, Upload, X, ArrowRight, ChevronLeft, Loader2, Receipt, Tag } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
-import { uploadToCloudinary } from '../../../services/uploadService';
+import { uploadSettingsImage } from '../../../services/uploadService';
 
 const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
     const [loading, setLoading] = useState(true);
@@ -125,32 +125,36 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
         return true;
     };
 
-    const handleFileChange = async (e, type) => {
-        const file = e.target.files[0];
+    const handleFileChange = async (event, type) => {
+        const input = event.target;
+        const file = input.files?.[0];
         if (!file) return;
 
-        // Security Validation
         if (!validateFile(file)) {
-            e.target.value = ''; // Reset input
+            input.value = '';
             return;
         }
 
-        setUploading(prev => ({ ...prev, [type]: true }));
+        setUploading(previous => ({ ...previous, [type]: true }));
         try {
+            // Every active image setting uses the same centered square crop.
+            // This accepts any source dimensions and preserves a consistent frame.
             const croppedFile = await cropToSquare(file);
-            const imageUrl = await uploadToCloudinary(croppedFile, `store-${type}`);
-            if (imageUrl) {
-                const newImages = type in { nike: true, adidas: true, puma: true, lacoste: true }
-                    ? { ...images, brands: { ...(images.brands || {}), [type]: imageUrl } }
-                    : { ...images, [type]: imageUrl };
-                setImages(newImages);
-                // Auto save on upload success
-                await setDoc(doc(db, "settings", "images"), newImages, { merge: true });
-            }
+            const imageUrl = await uploadSettingsImage(croppedFile, `store-${type}`);
+            const isBrand = ['nike', 'adidas', 'puma', 'lacoste'].includes(type);
+            const newImages = isBrand
+                ? { ...images, brands: { ...(images.brands || {}), [type]: imageUrl } }
+                : { ...images, [type]: imageUrl };
+
+            // Persist first: a preview is never shown as changed unless Firestore saved it.
+            await setDoc(doc(db, 'settings', 'images'), newImages, { merge: true });
+            setImages(newImages);
         } catch (error) {
             console.error(`Error uploading ${type}:`, error);
+            alert(txt.upload_error);
         } finally {
-            setUploading(prev => ({ ...prev, [type]: false }));
+            setUploading(previous => ({ ...previous, [type]: false }));
+            input.value = '';
         }
     };
 

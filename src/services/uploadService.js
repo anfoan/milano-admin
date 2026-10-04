@@ -51,7 +51,42 @@ export const uploadChatMedia = async file => {
     };
 };
 
-// Existing product and settings upload API: intentionally image-only.
+// Store settings use the existing unsigned Milano uploader as a fallback.
+// This keeps profile, invoice, and brand images working even when preview builds do
+// not inject Vite environment variables.
+const SETTINGS_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_SETTINGS_CLOUD_NAME
+    || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+    || CHAT_CLOUD_NAME;
+const SETTINGS_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_SETTINGS_UPLOAD_PRESET
+    || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+    || CHAT_UPLOAD_PRESET;
+
+const appendImageFile = (formData, file, fileName) => {
+    if (file instanceof Blob && !(file instanceof File)) {
+        formData.append('file', file, `${fileName}.jpg`);
+    } else {
+        formData.append('file', file);
+    }
+};
+
+export const uploadSettingsImage = async (file, fileName = 'store-image') => {
+    const formData = new FormData();
+    appendImageFile(formData, file, fileName);
+    formData.append('upload_preset', SETTINGS_UPLOAD_PRESET);
+    formData.append('cloud_name', SETTINGS_CLOUD_NAME);
+
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${SETTINGS_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData,
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload.secure_url) {
+        throw new Error(payload?.error?.message || 'SETTINGS_IMAGE_UPLOAD_FAILED');
+    }
+    return payload.secure_url;
+};
+
+// Existing product upload API: intentionally retains its environment-only behavior.
 export const uploadToCloudinary = async (file, fileName = 'image') => {
     const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
