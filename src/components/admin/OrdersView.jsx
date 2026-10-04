@@ -1222,9 +1222,9 @@ printWindow.onload = () => printWindow.print();
                                         onChange={toggleSelectAll}
                                     />
                                 </th>
-                                <th className="w-[120px] whitespace-nowrap p-2 text-center">{txt.th_order_id}</th>
-                                <th className={`w-[105px] whitespace-nowrap p-2 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_name}</th>
-                                <th className={`w-[155px] whitespace-nowrap p-2 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_product_size}</th>
+                                <th className="w-[120px] whitespace-nowrap p-2 text-center"><span className={isRTL ? 'inline-block translate-x-4' : 'inline-block -translate-x-4'}>{txt.th_order_id}</span></th>
+                                <th className={`w-[105px] whitespace-nowrap p-2 ${isRTL ? 'text-right' : 'text-left'}`}><span className={isRTL ? 'inline-block translate-x-4' : 'inline-block -translate-x-4'}>{txt.th_name}</span></th>
+                                <th className={`w-[155px] whitespace-nowrap p-2 ${isRTL ? 'text-right' : 'text-left'}`}><span className={isRTL ? 'inline-block translate-x-4' : 'inline-block -translate-x-4'}>{txt.th_product_size}</span></th>
                                 <th className={`w-[105px] whitespace-nowrap p-2 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.th_price}</th>
                                 <th className="w-[96px] whitespace-nowrap p-2 text-center">{txt.th_status}</th>
                                 <th className="w-16 whitespace-nowrap p-2 text-center">{txt.th_payment}</th>
@@ -1256,16 +1256,16 @@ printWindow.onload = () => printWindow.print();
                                         <td className="p-1 text-center">
                                             <button
                                                 onClick={() => onViewOrder && onViewOrder(order)}
-                                                className="whitespace-nowrap rounded-lg border border-blue-100 bg-blue-50 px-2 py-1.5 font-mono text-[11px] font-bold text-blue-600 transition-all hover:scale-105 hover:bg-white hover:shadow-sm active:scale-95"
+                                                className={`whitespace-nowrap rounded-lg border border-blue-100 bg-blue-50 px-2 py-1.5 font-mono text-[11px] font-bold text-blue-600 transition-all hover:scale-105 hover:bg-white hover:shadow-sm active:scale-95 ${isRTL ? 'translate-x-4' : '-translate-x-4'}`}
                                             >
                                                 {order.orderId}
                                             </button>
                                         </td>
                                         <td className="p-2 font-bold text-gray-700 whitespace-nowrap">
-                                            {order.formData?.name || 'زائر'}
+                                            <span className={`inline-block ${isRTL ? 'translate-x-4' : '-translate-x-4'}`}>{order.formData?.name || 'زائر'}</span>
                                         </td>
                                         <td className={`py-2 ${isRTL ? 'pr-0 pl-2 text-right' : 'pl-0 pr-2 text-left'}`}>
-                                            <div title={getOrderProductsLabel(order)} className={`truncate whitespace-nowrap font-bold text-gray-700 ${isRTL ? 'translate-x-4' : '-translate-x-4'}`}>
+                                            <div title={getOrderProductsLabel(order)} className={`truncate whitespace-nowrap font-bold text-gray-700 ${isRTL ? 'translate-x-8' : '-translate-x-8'}`}>
                                                 {getOrderProductsLabel(order)}
                                             </div>
                                         </td>
