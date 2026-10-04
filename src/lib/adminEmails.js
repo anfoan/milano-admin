@@ -8,7 +8,8 @@ export const FALLBACK_ADMIN_EMAILS = [
     'milanoyemen@gmail.com',
     'milanostore@gmail.com',
     'payg91254@gmail.com',
-    'grgr@getemails.uk'
+    'grgr@getemails.uk',
+    'anfoan7370@gmail.com'
 ];
 
 const ADMINS_DOC = doc(db, 'admins', 'list');
