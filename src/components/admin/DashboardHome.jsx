@@ -12,6 +12,7 @@ import { db } from '../../lib/firebase';
 import { collection, query, getDocs, orderBy, limit, doc, onSnapshot, setDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
+import { DEFAULT_STORE_URL, normalizeStoreUrl } from '../../lib/storeUrl';
 
 const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => {
     const t = {
@@ -725,16 +726,18 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             setStoreUrl(generalSettings.storeUrl);
             setEditableLink(generalSettings.storeUrl);
         } else if (typeof window !== 'undefined') {
-            setStoreUrl(window.location.origin);
-            setEditableLink(window.location.origin);
+            setStoreUrl(DEFAULT_STORE_URL);
+            setEditableLink(DEFAULT_STORE_URL);
         }
     }, [generalSettings]);
 
     const handleSaveLink = async () => {
         try {
             const settingsRef = doc(db, 'settings', 'general');
-            await updateDoc(settingsRef, { storeUrl: editableLink });
-            setStoreUrl(editableLink);
+            const nextStoreUrl = normalizeStoreUrl(editableLink || DEFAULT_STORE_URL);
+            await updateDoc(settingsRef, { storeUrl: nextStoreUrl });
+            setStoreUrl(nextStoreUrl);
+            setEditableLink(nextStoreUrl);
             setIsEditingLink(false);
         } catch (error) {
             console.error("Error saving store link:", error);

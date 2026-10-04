@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Save, AlertCircle, MapPin, ChevronLeft, Plus, ChevronDown, Search, Globe } from 'lucide-react';
 import { db } from '../../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { DEFAULT_STORE_URL } from '../../../lib/storeUrl';
 
 const countries = [
     { name: 'Yemen', code: '+967', flag: 'ye' },
@@ -41,7 +42,7 @@ const GeneralSettingsForm = ({ onBack, lang = 'ar' }) => {
         countryCode: '+967', // Default
         countryFlag: 'ye',   // Default
         googleMapLink: '',
-        storeUrl: ''
+        storeUrl: DEFAULT_STORE_URL
     });
     const [isCountryOpen, setIsCountryOpen] = useState(false);
     const [countrySearch, setCountrySearch] = useState('');
@@ -171,7 +172,7 @@ const GeneralSettingsForm = ({ onBack, lang = 'ar' }) => {
                 const docRef = doc(db, "settings", "general");
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    setFormData(prev => ({ ...prev, ...docSnap.data() }));
+                    setFormData(prev => ({ ...prev, ...docSnap.data(), storeUrl: docSnap.data().storeUrl || prev.storeUrl || DEFAULT_STORE_URL }));
                 }
             } catch (error) {
                 console.error("Error fetching settings:", error);

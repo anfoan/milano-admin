@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Save, Globe, Info, ExternalLink, Link2, CheckCircle } from 'lucide-react';
 import { db } from '../../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { DEFAULT_STORE_URL, normalizeStoreUrl } from '../../../lib/storeUrl';
 
 const StoreDomainSettings = ({ lang = 'ar' }) => {
     const [loading, setLoading] = useState(true);
@@ -48,7 +49,7 @@ const StoreDomainSettings = ({ lang = 'ar' }) => {
                 const docRef = doc(db, "settings", "general");
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    setStoreUrl(docSnap.data().storeUrl || '');
+                    setStoreUrl(normalizeStoreUrl(docSnap.data().storeUrl || DEFAULT_STORE_URL));
                 }
             } catch (error) {
                 console.error("Error fetching settings:", error);
@@ -71,7 +72,9 @@ const StoreDomainSettings = ({ lang = 'ar' }) => {
             const docSnap = await getDoc(docRef);
             const currentData = docSnap.exists() ? docSnap.data() : {};
             
-            await setDoc(docRef, { ...currentData, storeUrl: storeUrl });
+            const nextStoreUrl = normalizeStoreUrl(storeUrl || DEFAULT_STORE_URL);
+            await setDoc(docRef, { ...currentData, storeUrl: nextStoreUrl });
+            setStoreUrl(nextStoreUrl);
             alert(txt.success);
         } catch (error) {
             console.error("Error saving domain:", error);
