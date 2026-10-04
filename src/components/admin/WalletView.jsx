@@ -4,6 +4,7 @@ import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Packa
 import { db } from '../../lib/firebase';
 import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, isOrderEligibleForWalletReward, syncWalletRewardForOrderStatus, WALLET_REWARD_MINIMUM_SAR, WALLET_REWARD_MINIMUM_YER } from '../../lib/walletRewards';
 import { adjustCustomerWalletBalance, ensureWalletSpendLedgerForOrder, setCustomerWalletBalance } from '../../lib/walletLedger';
+import { deleteCustomerOrderHistory, syncCustomerOrderHistory, syncCustomerOrderHistoryById } from '../../lib/customerOrderHistory';
 import InvoiceTemplate from '../InvoiceTemplate';
 
 const toMillis = value => value?.toMillis?.() || (value?.seconds ? value.seconds * 1000 : new Date(value || 0).getTime() || 0);
@@ -80,6 +81,7 @@ const WalletView = ({ generalSettings }) => {
     const [customerProfileError, setCustomerProfileError] = useState('');
     const spendLedgerSyncRef = useRef(new Set());
     const rewardSyncRef = useRef(new Set());
+    const customerHistorySyncRef = useRef(new Set());
 
     useEffect(() => {
         const stops = [
@@ -119,6 +121,17 @@ const WalletView = ({ generalSettings }) => {
     const walletEnabled = settings.enabled !== false;
     const walletAmount = value => walletConvertedAmount(value, walletDisplayCurrency);
     const toWalletBase = value => walletBaseAmount(value, walletDisplayCurrency);
+
+    useEffect(() => {
+        // Preserve a complete customer-facing archive for every existing storefront
+        // invoice. The signature prevents unchanged snapshot data from rewriting it.
+        orders.filter(isStorefrontInvoice).forEach(order => {
+            const signature = `${order.id}:${order.status}:${order.total}:${order.walletRewardAmount}:${order.walletRewardGranted}:${order.walletRewardReversed}:${order.updatedAt?.seconds || order.updatedAt || ''}`;
+            if (!order.id || customerHistorySyncRef.current.has(signature)) return;
+            customerHistorySyncRef.current.add(signature);
+            syncCustomerOrderHistory(order).catch(error => console.error('Customer order history sync:', error));
+        });
+    }, [orders]);
 
     useEffect(() => {
         if (settings.enabled === false) return;
@@ -201,6 +214,7 @@ const WalletView = ({ generalSettings }) => {
         try {
             await updateDoc(doc(db, 'orders', order.id), { status, updatedAt: serverTimestamp() });
             const walletResult = await syncWalletRewardForOrderStatus(order.id, status);
+            await syncCustomerOrderHistoryById(order.id);
             setNotice(walletResult.reversed
                 ? `تم تحديث الحالة واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.`
                 : walletResult.reason === 'below-minimum-order-total'
@@ -249,6 +263,7 @@ const WalletView = ({ generalSettings }) => {
                 });
             }
             const walletResult = await syncWalletRewardForOrderStatus(draft.id, draft.status);
+            await syncCustomerOrderHistoryById(draft.id);
             setEditingOrder(null);
             setNotice(walletResult.reversed ? `تم حفظ التعديلات واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.` : walletResult.reason === 'below-minimum-order-total' ? `تم حفظ التعديلات. لا تُضاف مكافأة لأن إجمالي الفاتورة أقل من ${walletRewardMinimumText(draft)}.` : 'تم حفظ تعديلات الفاتورة.');
         } catch (error) { console.error(error); setNotice('تعذّر حفظ تعديلات الفاتورة.'); }
@@ -367,6 +382,7 @@ const WalletView = ({ generalSettings }) => {
         try {
             // Delete the shared orders document so both Wallet and Orders listeners remove it.
             await deleteDoc(doc(db, 'orders', order.id));
+            await deleteCustomerOrderHistory(order);
             // Remove it locally as well, so Wallet updates immediately without waiting for a snapshot.
             setOrders(previous => previous.filter(item => item.id !== order.id));
             setNotice('');

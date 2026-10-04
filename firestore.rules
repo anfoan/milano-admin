@@ -1,8 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // وظيفة للتحقق من أن المستخدم هو أدمن موثوق (Whitelist)
     function isAdmin() {
       return request.auth != null &&
         (request.auth.token.email == 'ah3992222@gmail.com' ||
@@ -12,72 +10,151 @@ service cloud.firestore {
          request.auth.token.email == 'grgr@getemails.uk');
     }
 
-    // 1. سجل تسجيل الدخول - للأدمن فقط
-    match /login_history/{document=**} {
-      allow read, write: if isAdmin();
+    // Storefront wallet operations are available only while the administrator enables them.
+    function walletIsEnabled() {
+      return !exists(/databases/$(database)/documents/settings/wallet) ||
+        get(/databases/$(database)/documents/settings/wallet).data.enabled != false;
     }
 
-    // 2. الطلبات - الزبون ينشئ فقط، والأدمن يتحكم في الباقي
+    // Public store catalogue and storefront settings; write access stays admin-only.
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /coupons/{couponId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /settings/pos/workers/{workerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /daily_stats/{statId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Customer orders can be created by the store, but remain private to administrators.
     match /orders/{orderId} {
       allow create: if true;
       allow read, update, delete, list: if isAdmin();
     }
 
-    // 3. القسائم والخصومات
-    match /coupons/{couponId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
+    // Wallet IDs are random device-bound IDs. Visitors can retrieve only a known wallet document,
+    // never list wallet records. They cannot add balance, edit another document's identity, or
+    // alter store data. Balance credits and wallet history remain administrator-only.
+    match /customer_wallets/{walletId} {
+      allow get: if walletIsEnabled() || isAdmin();
+      allow list: if isAdmin();
+      allow create: if walletIsEnabled() && request.resource.data.walletId == walletId &&
+        request.resource.data.balance is number &&
+        (request.resource.data.balance == 0 || validInitialStoreReward()) &&
+        request.resource.data.pinConfigured == true &&
+        request.resource.data.deviceBound == true &&
+        request.resource.data.phone is string &&
+        request.resource.data.pinHash is string &&
+        request.resource.data.keys().hasOnly(['walletId', 'phone', 'balance', 'pinHash', 'pinConfigured', 'deviceBound', 'createdAt', 'updatedAt']);
+      allow update: if isAdmin() || validWalletPinUpdate() || validWalletDebit();
+      allow delete: if isAdmin();
 
-    // 4. المنتجات والأقسام
-    match /products/{doc=**} {
-      allow read: if true;
-      allow create, delete: if isAdmin();
-      // الموظف المسجّل يعدّل المخزون (stock / sizeStocks) فقط — ممنوع يلمس الأسعار أو الأسماء أو الصور
-      allow update: if isAdmin() || (request.auth != null && 
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['price', 'costPrice', 'name', 'code', 'variants', 'mainImage', 'images', 'category', 'description', 'active']));
-    }
-    match /categories/{doc=**} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
+      // A customer receives the configured store reward only on the first creation
+      // of their phone-linked wallet. Existing balances stay unchanged and protected.
+      function validInitialStoreReward() {
+        return walletIsEnabled() && exists(/databases/$(database)/documents/settings/wallet) &&
+          request.resource.data.balance == get(/databases/$(database)/documents/settings/wallet).data.defaultReward;
+      }
+      function validWalletPinUpdate() {
+        return walletIsEnabled() && request.resource.data.walletId == resource.data.walletId &&
+          request.resource.data.balance == resource.data.balance &&
+          request.resource.data.pinConfigured == true &&
+          request.resource.data.deviceBound == true &&
+          request.resource.data.phone is string &&
+          request.resource.data.pinHash is string &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['phone', 'pinHash', 'pinConfigured', 'deviceBound', 'updatedAt']);
+      }
+      function validWalletDebit() {
+        return walletIsEnabled() && request.resource.data.walletId == resource.data.walletId &&
+          request.resource.data.balance is number &&
+          request.resource.data.balance >= 0 &&
+          request.resource.data.balance < resource.data.balance &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['balance', 'updatedAt']);
+      }
 
-    // 5. الإعدادات العامة للمتجر
-    match /settings/{doc=**} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
+      // Movement documents are stored under the random device-bound wallet ID.
+      // Customers can read this history from their own wallet screen; only the
+      // authenticated dashboard writes audit entries.
+      match /transactions/{transactionId} {
+        allow get, list: if walletIsEnabled() || isAdmin();
+        allow create, update, delete: if isAdmin();
+      }
 
-    // ★★★ مستخدمي نقطة البيع (الموظفين) ★★★
-    match /settings/pos/workers/{workerId} {
-      allow read: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin();
+      // Storefront invoices are mirrored beneath the phone/device wallet. This gives
+      // customers a durable «طلباتك» history without exposing the global orders list.
+      // A visitor can create only the history document that is written atomically with
+      // their newly-created storefront order. Afterwards only the administrator can
+      // alter or remove that invoice record.
+      match /orders/{historyOrderId} {
+        allow get, list: if true;
+        allow create: if request.resource.data.historyVersion == 1 &&
+          request.resource.data.orderType == 'storefront' &&
+          request.resource.data.customerWalletId == walletId &&
+          request.resource.data.sourceOrderId == historyOrderId &&
+          existsAfter(/databases/$(database)/documents/orders/$(historyOrderId)) &&
+          getAfter(/databases/$(database)/documents/orders/$(historyOrderId)).data.customerWalletId == walletId &&
+          getAfter(/databases/$(database)/documents/orders/$(historyOrderId)).data.orderId == request.resource.data.orderId;
+        allow update, delete: if isAdmin();
+      }
+    }
+    // Plaintext support PINs are isolated from the public wallet document.
+    // Customers cannot read these records; only the authenticated dashboard can.
+    match /wallet_customer_credentials/{walletId} {
+      allow get, list: if isAdmin();
+      allow create, update: if walletIsEnabled() && request.resource.data.walletId == walletId &&
+        request.resource.data.phone is string &&
+        request.resource.data.password is string &&
+        request.resource.data.password.matches('^[0-9]{4,6}$') &&
+        request.resource.data.keys().hasOnly(['walletId', 'phone', 'password', 'createdAt', 'updatedAt']);
       allow delete: if isAdmin();
     }
 
-    // 6. رسائل "تواصل معنا" والدردشة (Support Chat)
+    match /wallet_transactions/{transactionId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /login_history/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    match /admins/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    match /expenses/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    match /bonds/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Customer support and reviews retain their existing storefront behavior.
     match /contact_messages/{messageId} {
       allow create: if true;
       allow read, update: if true;
       allow list, delete: if isAdmin();
-
       match /messages/{chatId} {
         allow read, create: if true;
         allow update, delete: if isAdmin();
       }
     }
-
-    // 7. تقييمات المتجر (Reviews)
     match /reviews/{reviewId} {
       allow read, create: if true;
       allow update, delete: if isAdmin();
-    }
-
-    // 8. أي بيانات أخرى: قراءة للكل وكتابة للأدمن فقط
-    match /{document=**} {
-      allow read: if true;
-      allow write: if isAdmin();
     }
   }
 }

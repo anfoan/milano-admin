@@ -7,6 +7,7 @@ import {
 import { doc, updateDoc, collection, onSnapshot, query, limit } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
+import { syncCustomerOrderHistoryById } from '../../lib/customerOrderHistory';
 import ImageWithFallback from '../ImageWithFallback';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import { useCurrency } from '../../context/CurrencyContext';
@@ -309,6 +310,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
 
             await updateDoc(doc(db, "orders", order.id), updates);
             await syncWalletRewardForOrderStatus(order.id, newStatus);
+            await syncCustomerOrderHistoryById(order.id);
             setStatus(newStatus);
         } catch (error) {
             console.error("Error updating status:", error);
@@ -437,6 +439,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
             await updateDoc(doc(db, "orders", order.id), updates);
             // If the phone was just recorded on a completed invoice, reconcile its reward now.
             await syncWalletRewardForOrderStatus(order.id, order.status);
+            await syncCustomerOrderHistoryById(order.id);
 
             // Sync with parent state if callback provided
             if (onUpdate) {

@@ -3,6 +3,7 @@ import { Printer, Search, FileDown, Trash2, Clock, CheckCircle, XCircle, MapPin,
 import { db } from '../../lib/firebase';
 import { reverseWalletRewardForOrder, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { reconcilePendingCustomerOrder } from '../../lib/pendingOrderSync';
+import { deleteCustomerOrderHistory, isStorefrontCustomerOrder, syncCustomerOrderHistory, syncCustomerOrderHistoryById } from '../../lib/customerOrderHistory';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useReactToPrint } from 'react-to-print';
@@ -212,6 +213,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
     const [selectedOrdersIds, setSelectedOrdersIds] = useState([]);
     const [productCostMap, setProductCostMap] = useState({});
     const pendingSyncIdsRef = useRef(new Set());
+    const customerHistorySyncRef = useRef(new Set());
 
     // Excel/PDF Export State
     const [showExportModal, setShowExportModal] = useState(false);
@@ -813,6 +815,12 @@ printWindow.onload = () => printWindow.print();
                     .catch(error => console.error('Pending customer order reconciliation failed:', order.id, error))
                     .finally(() => pendingSyncIdsRef.current.delete(order.id));
             });
+            fetchedOrders.filter(isStorefrontCustomerOrder).forEach(order => {
+                const signature = `${order.id}:${order.status}:${order.total}:${order.walletRewardAmount}:${order.walletRewardGranted}:${order.walletRewardReversed}:${order.updatedAt?.seconds || order.updatedAt || ''}`;
+                if (customerHistorySyncRef.current.has(signature)) return;
+                customerHistorySyncRef.current.add(signature);
+                syncCustomerOrderHistory(order).catch(error => console.error('Customer order history sync:', error));
+            });
         });
 
     return () => unsubscribe();
@@ -874,6 +882,7 @@ printWindow.onload = () => printWindow.print();
                 const orderRef = doc(db, "orders", order.id);
                 await updateDoc(orderRef, { status: bulkStatus });
                 await syncWalletRewardForOrderStatus(order.id, bulkStatus);
+                await syncCustomerOrderHistoryById(order.id);
             }));
             setSelectedOrdersIds([]);
             setBulkStatus('');
@@ -888,8 +897,10 @@ printWindow.onload = () => printWindow.print();
     // Deleting an invoice must also reverse any completion reward first, so a
     // customer cannot retain a wallet credit from an invoice that no longer exists.
     const removeOrderPermanently = async (orderId) => {
+        const order = orders.find(item => item.id === orderId);
         await reverseWalletRewardForOrder(orderId);
         await deleteDoc(doc(db, 'orders', orderId));
+        if (order) await deleteCustomerOrderHistory(order);
     };
 
     const confirmBulkDelete = async () => {
@@ -934,6 +945,7 @@ printWindow.onload = () => printWindow.print();
             const orderRef = doc(db, "orders", orderId);
             await updateDoc(orderRef, { status: newStatus });
             await syncWalletRewardForOrderStatus(orderId, newStatus);
+            await syncCustomerOrderHistoryById(orderId);
         } catch (error) {
             console.error("Error updating status:", error);
             alert(txt.alert_status_update_error);
