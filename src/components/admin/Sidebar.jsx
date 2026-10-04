@@ -202,7 +202,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                 onClick={() => setActiveTab(item.id)}
                                 className={`relative flex w-full items-center gap-4 rounded-2xl px-3 lg:px-4 py-3 lg:py-3.5 font-bold transition-colors duration-200 group ${isSectionActive(item)
                                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                    : 'text-slate-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
+                                    : 'text-slate-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}
                             >
                                 <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>{item.icon}</span>
@@ -219,7 +219,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                 }}
                                 className={`w-full flex items-center gap-4 px-3 lg:px-4 py-3 lg:py-3.5 rounded-2xl transition-colors duration-200 font-bold group ${isSectionActive(item)
                                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                    : 'text-slate-900 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
+                                    : 'text-slate-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}
                             >
                                 <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>
