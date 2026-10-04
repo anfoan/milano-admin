@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Mail, User, ShieldCheck, Loader2 } from 'lucide-react';
+import { Lock, Mail, User, ShieldCheck, Loader2, Eye, EyeOff } from 'lucide-react';
 import { auth, db } from '../lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, query, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -8,6 +8,7 @@ import { collection, query, getDocs, addDoc, serverTimestamp } from 'firebase/fi
 const AdminLogin = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -164,14 +165,23 @@ const AdminLogin = () => {
                         <label className="text-sm font-black text-gray-700 dark:text-gray-300 block mr-1">كلمة المرور</label>
                         <div className="relative">
                             <input
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-[#2a2e35] border border-gray-100 dark:border-white/5 rounded-2xl py-4 pr-12 pl-4 outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#2a2e35] transition-all font-bold text-gray-900 dark:text-white"
+                                className="w-full bg-gray-50 dark:bg-[#2a2e35] border border-gray-100 dark:border-white/5 rounded-2xl py-4 pr-12 pl-12 outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#2a2e35] transition-all font-bold text-gray-900 dark:text-white"
                                 placeholder="••••••••"
                                 required
                             />
                             <Lock className="absolute top-4 right-4 text-gray-400" size={20} />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((visible) => !visible)}
+                                className="absolute top-3 left-3 p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                                title={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
                         </div>
                     </div>
 
