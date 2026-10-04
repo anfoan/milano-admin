@@ -3,7 +3,8 @@ import { Settings, Lock, Shield, Clock, Trash2, Loader2, Check, AlertTriangle, M
 import { useAuth } from '../../context/AuthContext';
 import { updateProfile, verifyBeforeUpdateEmail, updatePassword, deleteUser, sendEmailVerification, signOut, reauthenticateWithCredential, EmailAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
 import { addAdminEmail } from '../../lib/adminEmails';
-import { auth } from '../../lib/firebase';
+import { auth, db } from '../../lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 const AccountSettingsView = ({ lang = 'ar' }) => {
@@ -14,7 +15,8 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
     // Forms State
     const [formData, setFormData] = useState({
         displayName: '',
-        email: ''
+        email: '',
+        username: 'milano'
     });
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -42,9 +44,19 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
         if (currentUser) {
             setFormData(prev => ({
                 ...prev,
-                displayName: currentUser.displayName || (lang === 'ar' ? 'متجر ميلانو' : 'Milano Store'),
-                email: currentUser.email || ''
+                displayName: '',
+                email: currentUser.email || '',
+                username: 'milano'
             }));
+            getDoc(doc(db, 'settings', 'admin_account')).then((snap) => {
+                if (!snap.exists()) return;
+                const account = snap.data();
+                setFormData(prev => ({
+                    ...prev,
+                    username: account.username || 'milano',
+                    email: account.email || prev.email
+                }));
+            }).catch(() => {});
         }
 
         // Fetch IP and Session Info
@@ -89,7 +101,7 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
 
         fetchSessionInfo();
 
-    }, [currentUser]);
+    }, [currentUser, lang]);
 
     // Handlers
     const handleChange = (e) => {
@@ -128,7 +140,8 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
             },
             general: {
                 display_name: "الاسم الكامل",
-                email: "البريد الإلكتروني",
+                username: "اسم المستخدم",
+                email: "البريد الإلكتروني للمالك",
                 verified: "موثق",
                 save: "حفظ",
                 change: "تغيير"
@@ -204,7 +217,8 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
             },
             general: {
                 display_name: "Full Name",
-                email: "Email Address",
+                username: "Username",
+                email: "Owner Email Address",
                 verified: "Verified",
                 save: "Save",
                 change: "Change"
@@ -266,8 +280,17 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
         setMessage({ type: '', text: '' });
         try {
             if (currentUser && formData.displayName !== currentUser.displayName) {
-                await updateProfile(currentUser, { displayName: formData.displayName });
+                await updateProfile(currentUser, { displayName: '' });
             }
+            const username = formData.username.trim();
+            if (!username || username.includes('@') || /\s/.test(username)) {
+                throw new Error('invalid-username');
+            }
+            await setDoc(doc(db, 'settings', 'admin_account'), {
+                username,
+                email: formData.email.trim(),
+                updatedAt: new Date().toISOString()
+            }, { merge: true });
             if (currentUser && formData.email !== currentUser.email) {
                 await verifyBeforeUpdateEmail(currentUser, formData.email);
                 // Auto-add the new email to the admin list so the client can log in immediately
@@ -417,8 +440,8 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
                         <div className="space-y-6">
                             <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl p-6 border border-gray-100 dark:border-white/5 shadow-sm space-y-5">
                                 <div>
-                                    <label className={`block text-xs font-bold text-gray-500 mb-1.5 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.general.display_name}</label>
-                                    <input type="text" name="displayName" value={formData.displayName} onChange={handleChange} className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white" />
+                                    <label className={`block text-xs font-bold text-gray-500 mb-1.5 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.general.username}</label>
+                                    <input type="text" name="username" value={formData.username} onChange={handleChange} dir="ltr" className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white text-left" placeholder="milano" required />
                                 </div>
                                 <button onClick={handleSaveGeneral} disabled={loading} className="bg-[#4f46e5] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#4338ca] text-sm flex items-center gap-2">{loading && <Loader2 className="animate-spin" size={16} />}{txt.general.save}</button>
                             </div>

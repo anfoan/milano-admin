@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Mail, User, ShieldCheck, Loader2, Eye, EyeOff } from 'lucide-react';
 import { auth, db } from '../lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { collection, query, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, getDocs, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 
 const AdminLogin = () => {
     const [username, setUsername] = useState('');
@@ -23,9 +23,22 @@ const AdminLogin = () => {
 
         try {
             const input = username.trim();
-            
-            // The primary `milano` username must use Firebase Auth, not the worker lookup.
-            const isPrimaryAdmin = input.toLowerCase() === 'milano';
+            let adminAccount = { username: 'milano', email: 'anfoan7370@gmail.com' };
+            try {
+                const accountSnap = await getDoc(doc(db, 'settings', 'admin_account'));
+                if (accountSnap.exists()) {
+                    const account = accountSnap.data();
+                    adminAccount = {
+                        username: account.username || adminAccount.username,
+                        email: account.email || adminAccount.email
+                    };
+                }
+            } catch (accountError) {
+                console.warn('Admin account settings unavailable; using defaults.', accountError);
+            }
+
+            // The configured owner username uses Firebase Auth, not the worker lookup.
+            const isPrimaryAdmin = input.toLowerCase() === adminAccount.username.toLowerCase();
 
             // Check if it's a worker login (either no @, or ends with @milano-store.com)
             if (!isPrimaryAdmin && (!isEmail(input) || isWorkerEmail(input))) {
@@ -71,8 +84,8 @@ const AdminLogin = () => {
                 // === ADMIN LOGIN (Firebase Auth) ===
                 // The independent project uses the friendly primary username `milano`.
                 // It is backed by a private Firebase Auth email so Firestore rules remain secure.
-                const loginEmail = input.toLowerCase() === 'milano'
-                    ? 'anfoan7370@gmail.com'
+                const loginEmail = isPrimaryAdmin
+                    ? adminAccount.email
                     : input;
                 const userCredential = await signInWithEmailAndPassword(auth, loginEmail, password);
 
