@@ -206,7 +206,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                     }`}
                             >
                                 <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>{item.icon}</span>
-                                <span className="flex-1 whitespace-nowrap text-right text-sm lg:text-base font-black">{item.name}</span>
+                                <span className="flex-1 whitespace-nowrap text-right text-base font-black">{item.name}</span>
                                 <span dir={walletEnabled ? 'ltr' : 'rtl'} className={`inline-flex h-6 min-w-[54px] items-center justify-center gap-1 rounded-md border px-1.5 text-[10px] font-black shadow-sm ${walletEnabled ? 'border-emerald-300 bg-emerald-100 font-sans tabular-nums text-emerald-700 dark:border-emerald-400/50 dark:bg-emerald-400/15 dark:text-emerald-200' : 'border-rose-300 bg-rose-100 text-rose-700 dark:border-rose-400/50 dark:bg-rose-400/15 dark:text-rose-200'}`}>{walletEnabled ? <><span>$</span><span>{Number(walletRewardAmount || 0).toLocaleString('en-US')}</span></> : 'موقفة'}</span>
                             </button> : <button
                                 onClick={() => {
@@ -225,7 +225,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                 <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>
                                     {item.icon}
                                 </span>
-                                <span className="text-sm lg:text-base font-black flex-1 flex items-center gap-3 whitespace-nowrap">
+                                <span className="text-base font-black flex-1 flex items-center gap-3 whitespace-nowrap">
                                     <span>{item.name}</span>
                                     {item.id === 'inbox' && unreadCount > 0 && (
                                         <span className="inline-flex items-center justify-center w-6 h-6 bg-red-500 text-white text-[12px] rounded-full font-black shadow-md animate-pulse shrink-0">
