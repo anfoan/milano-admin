@@ -441,7 +441,7 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
                             <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl p-6 border border-gray-100 dark:border-white/5 shadow-sm space-y-5">
                                 <div>
                                     <label className={`block text-xs font-bold text-gray-500 mb-1.5 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.general.username}</label>
-                                    <input type="text" name="username" value={formData.username} onChange={handleChange} dir="ltr" className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white text-left" placeholder="milano" required />
+                                    <input type="text" name="username" value={formData.username} onChange={handleChange} dir="ltr" className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold text-gray-700 dark:text-white text-right" placeholder="milano" required />
                                 </div>
                                 <button onClick={handleSaveGeneral} disabled={loading} className="bg-[#4f46e5] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#4338ca] text-sm flex items-center gap-2">{loading && <Loader2 className="animate-spin" size={16} />}{txt.general.save}</button>
                             </div>
