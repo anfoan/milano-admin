@@ -65,7 +65,12 @@ const AdminLogin = () => {
                 }
             } else {
                 // === ADMIN LOGIN (Firebase Auth) ===
-                const userCredential = await signInWithEmailAndPassword(auth, username, password);
+                // The independent project uses the friendly primary username `milano`.
+                // It is backed by a private Firebase Auth email so Firestore rules remain secure.
+                const loginEmail = input.toLowerCase() === 'milano'
+                    ? 'milano@milano-store.com'
+                    : input;
+                const userCredential = await signInWithEmailAndPassword(auth, loginEmail, password);
 
                 // Log Session
                 try {
