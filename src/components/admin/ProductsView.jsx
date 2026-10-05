@@ -10,6 +10,7 @@ import { db } from '../../lib/firebase';
 import { collection, query, getDocs, doc, deleteDoc, updateDoc, addDoc, serverTimestamp, increment } from 'firebase/firestore';
 import { uploadToCloudinary } from '../../services/uploadService';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
+import VideoShowcaseManager from './VideoShowcaseManager';
 
 const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSearchQuery }) => {
     const t = {
@@ -413,9 +414,17 @@ const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSe
     };
 
     // Category List View (Matching Image 0)
+    if (view === 'videos') {
+        return <VideoShowcaseManager lang={lang} onBack={() => setView('categories')} />;
+    }
+
     if (view === 'categories') {
         return (
             <div className="space-y-4 font-['Cairo']" dir={isRTL ? "rtl" : "ltr"}>
+                <button onClick={() => setView('videos')} className="w-full rounded-[22px] border border-purple-200 bg-gradient-to-l from-purple-700 to-indigo-600 text-white p-4 md:p-5 flex items-center justify-between gap-4 shadow-lg shadow-purple-200/40 hover:scale-[1.005] transition-transform">
+                    <span className="flex items-center gap-3 text-right"><span className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center text-xl">🎬</span><span><strong className="block text-base md:text-lg font-black">إضافة فيديوهات متحركة</strong><small className="block text-purple-100 font-bold mt-1">أضف ريلز إعلانية صامتة تظهر أسفل أقسام المتجر</small></span></span>
+                    <ChevronRight size={22} className={isRTL ? 'rotate-180' : ''} />
+                </button>
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                     <div className="flex-1 relative">
                         <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-3.5 text-gray-400`} size={20} />

@@ -150,7 +150,7 @@ const AdminLogin = () => {
                         <img src="/admin-new-icon.png" className="w-full h-full object-cover rounded-[28px]" alt="Admin Badge" />
                     </div>
                     <h1 className="text-2xl font-black text-gray-800 dark:text-white">لوحة تحكم ميلانو</h1>
-                    <p className="text-gray-400 font-bold mt-2">برجاء تسجيل الدخول للمتابعة</p>
+                    <p className="text-gray-400 font-bold mt-2">يرجاء تسجيل الدخول للمتابعة</p>
                 </div>
 
                 {error && (

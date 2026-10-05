@@ -119,3 +119,29 @@ export const uploadToCloudinary = async (file, fileName = 'image') => {
         return null;
     }
 };
+
+// Promotional storefront reels use the same unsigned Cloudinary account as settings.
+export const uploadVideoToCloudinary = async (file, fileName = 'promotional-video') => {
+    if (!file || !String(file.type || '').startsWith('video/')) return null;
+    // Cloudinary's resumable upload accepts sequential chunks, so duration and
+    // file size are not constrained by the browser request body.
+    const chunkSize = 20 * 1024 * 1024;
+    const uploadId = (globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`).replace(/-/g, '');
+    let uploadedUrl = null;
+    for (let start = 0; start < file.size; start += chunkSize) {
+        const end = Math.min(start + chunkSize, file.size) - 1;
+        const formData = new FormData();
+        formData.append('file', file.slice(start, end + 1), fileName);
+        formData.append('upload_preset', SETTINGS_UPLOAD_PRESET);
+        formData.append('cloud_name', SETTINGS_CLOUD_NAME);
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${SETTINGS_CLOUD_NAME}/video/upload`, {
+            method: 'POST',
+            headers: { 'Content-Range': `bytes ${start}-${end}/${file.size}`, 'X-Unique-Upload-Id': uploadId },
+            body: formData,
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload?.error?.message || 'VIDEO_UPLOAD_FAILED');
+        if (payload.secure_url) uploadedUrl = payload.secure_url;
+    }
+    return uploadedUrl;
+};
