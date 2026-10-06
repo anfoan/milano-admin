@@ -2,9 +2,22 @@ import React from 'react';
 import { getLocalizedCurrency } from "../lib/currencyUtils";
 import { useCurrency } from "../context/CurrencyContext";
 
+const getInvoiceItemPrices = (item) => {
+    const currentPrice = Number(item?.price ?? 0);
+    const discountedPrice = Number(item?.priceAfterDiscount ?? item?.discountedPrice ?? item?.salePrice ?? currentPrice);
+    const originalPrice = Number(item?.originalPrice ?? item?.priceBeforeDiscount ?? item?.regularPrice ?? currentPrice);
+    return {
+        original: Number.isFinite(originalPrice) ? originalPrice : currentPrice,
+        discounted: Number.isFinite(discountedPrice) ? discountedPrice : currentPrice,
+    };
+};
+
 const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, generalSettings, hideHeader = false }, ref) => {
     const { formatPrice } = useCurrency();
     const currency = generalSettings?.currency || 'YER';
+    const previewWidth = typeof window !== 'undefined' && window.innerWidth < 640
+        ? 'calc(100vw - 2rem)'
+        : '170mm';
     return (
         <div ref={ref} className="w-full" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
@@ -33,6 +46,9 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
             {/* Printable Content - Centered */}
             <div className="flex justify-center pb-20 print:p-0 print:block">
                 <div ref={ref} className="print-container">
+                    <style type="text/css" media="screen">
+                        {`.invoice-preview-page { width: min(170mm, calc(100vw - 2rem)) !important; max-width: min(170mm, calc(100vw - 2rem)) !important; min-height: 0 !important; height: auto !important; box-sizing: border-box; overflow: visible !important; } .invoice-preview-page table { width: 100%; table-layout: fixed; } .invoice-preview-page table th { white-space: nowrap !important; font-size: 11px !important; } .invoice-preview-page table td { font-size: 11px !important; line-height: 1.25 !important; } .invoice-preview-page table col:nth-child(1) { width: 43% !important; } .invoice-preview-page table col:nth-child(2) { width: 10% !important; } .invoice-preview-page table col:nth-child(3) { width: 20% !important; } .invoice-preview-page table col:nth-child(4) { width: 9% !important; } .invoice-preview-page table col:nth-child(5) { width: 18% !important; } @media (max-width: 639px) { .invoice-preview-page { width: calc(100vw - 2rem) !important; max-width: calc(100vw - 2rem) !important; } .invoice-preview-page table th, .invoice-preview-page table td { font-size: 9px !important; } }`}
+                    </style>
                     <style type="text/css" media="print">
                         {`
                         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
@@ -59,8 +75,8 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                         `}
                     </style>
                     {orders.map((order) => (
-                        <div key={order.id} className="print-page flex flex-col bg-white shadow-xl mb-4 print:shadow-none print:mb-0 rounded-[30px] print:rounded-none" dir="rtl"
-                            style={{ width: '210mm', minHeight: '148mm', padding: '20px 40px', margin: '0 auto', fontFamily: "'Cairo', sans-serif" }}>
+                        <div key={order.id} className="print-page invoice-preview-page flex flex-col bg-white shadow-xl mb-4 px-4 py-4 sm:px-8 sm:py-6 print:shadow-none print:mb-0 rounded-[24px] print:rounded-none" dir="rtl"
+                            style={{ width: previewWidth, maxWidth: previewWidth, minHeight: 0, height: 'auto', margin: '0 auto', fontFamily: "'Cairo', sans-serif" }}>
 
                             {/* 1. Header Section */}
                             <div className="flex justify-between items-start mb-10 pb-4 border-b-2 border-slate-800">
@@ -86,38 +102,38 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                             </div>
 
                             {/* 2. Customer Info Card */}
-                            <div className="mb-4 bg-gray-50 rounded-lg p-4 border border-gray-400 print:bg-gray-50 print:border-gray-400" style={{ paddingTop: '12px', paddingBottom: '20px' }}>
-                                <h3 style={{ paddingTop: '22px', paddingBottom: '14px', marginBottom: '20px' }} className={`font-black text-lg text-gray-800 border-b border-gray-400 \${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? 'بيانات العميل' : 'Customer Details'}</h3>
-                                <div className={`grid grid-cols-2 gap-y-3 gap-x-8 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-                                    <div className="flex justify-start gap-2 items-center">
+                            <div className="mb-5 bg-gray-50 rounded-lg p-4 border border-gray-400 print:bg-gray-50 print:border-gray-400">
+                                <h3 className={`font-black text-lg text-gray-800 border-b border-gray-400 pb-3 mb-4 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? 'بيانات العميل' : 'Customer Details'}</h3>
+                                <div className={`grid grid-cols-2 gap-y-3 gap-x-4 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+                                    <div className="flex min-w-0 items-center justify-start gap-2 whitespace-nowrap">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'اسم المشتري:' : 'Name:'}</span>
-                                        <span className="font-black text-sm text-[#111317] leading-none mb-0.5">{order.formData?.name || '---'}</span>
+                                        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-black text-sm text-[#111317] leading-none">{order.formData?.name || '---'}</span>
                                     </div>
-                                    <div className="flex justify-start gap-2 items-center">
+                                    <div className="flex min-w-0 items-center justify-start gap-2 whitespace-nowrap">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'الدولة:' : 'Country:'}</span>
-                                        <span className="font-black text-sm text-[#111317] leading-none mb-0.5">
+                                        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-black text-sm text-[#111317] leading-none">
                                             {order.formData?.country === 'Yemen' && lang === 'ar' ? 'اليمن' : (order.formData?.country || 'Yemen')}
                                         </span>
                                     </div>
 
                                     {/* Row 2: Address - Country */}
-                                    <div className="flex justify-start gap-2 items-center">
+                                    <div className="flex min-w-0 items-center justify-start gap-2 whitespace-nowrap">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'العنوان:' : 'Address:'}</span>
-                                        <span className="font-black text-sm text-[#111317] leading-none mb-0.5">{order.formData?.address || '---'}</span>
+                                        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-black text-sm text-[#111317] leading-none">{order.formData?.address || '---'}</span>
                                     </div>
-                                    <div className="flex justify-start gap-2 items-center">
+                                    <div className="flex min-w-0 items-center justify-start gap-2 whitespace-nowrap">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'رقم الهاتف:' : 'Phone:'}</span>
-                                        <span className="font-black text-sm text-[#111317] leading-none mb-0.5">{order.formData?.phone || '---'}</span>
+                                        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-black text-sm text-[#111317] leading-none">{order.formData?.phone || '---'}</span>
                                     </div>
 
                                     {/* Row 3: City - Payment Method */}
-                                    <div className="flex justify-start gap-2 items-center">
+                                    <div className="flex min-w-0 items-center justify-start gap-2 whitespace-nowrap">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'المدينة:' : 'City:'}</span>
-                                        <span className="font-black text-sm text-[#111317] leading-none mb-0.5">{order.formData?.city || order.formData?.governorate || '---'}</span>
+                                        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-black text-sm text-[#111317] leading-none">{order.formData?.city || order.formData?.governorate || '---'}</span>
                                     </div>
-                                    <div className="flex justify-start gap-2 items-center">
+                                    <div className="flex min-w-0 items-center justify-start gap-2 whitespace-nowrap">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'طريقة الدفع:' : 'Payment Method:'}</span>
-                                        <span className="font-black text-sm text-[#111317] leading-none mb-0.5">
+                                        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-black text-sm text-[#111317] leading-none">
                                             {(() => {
                                                 const method = order.paymentMethod || order.formData?.paymentMethod;
                                                 if (method === 'whatsapp') return (lang === 'ar' ? 'واتساب' : 'WhatsApp');
@@ -130,20 +146,27 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                             </div>
 
                             {/* 3. Products Table */}
-                            <div className="mb-8">
-                                <h3 className={`font-black text-xl mb-4 text-gray-800 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? 'تفاصيل الفاتورة' : 'Invoice Details'}</h3>
-                                <table className={`w-full ${lang === 'ar' ? 'text-right' : 'text-left'} border-collapse border border-gray-400`}>
+                            <div className="mb-5">
+                                <h3 className={`font-black text-lg sm:text-xl mb-3 text-gray-800 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? 'تفاصيل الفاتورة' : 'Invoice Details'}</h3>
+                                <table className={`w-full table-fixed ${lang === 'ar' ? 'text-right' : 'text-left'} border-collapse border border-gray-400`} style={{ tableLayout: 'fixed' }}>
+                                    <colgroup>
+                                        <col style={{ width: '43%' }} /><col style={{ width: '10%' }} /><col style={{ width: '20%' }} /><col style={{ width: '9%' }} /><col style={{ width: '18%' }} />
+                                    </colgroup>
                                     <thead style={{ backgroundColor: '#111317', color: '#ffffff' }} className="bg-[#111317] text-white print:bg-[#111317] print:text-white">
                                         <tr>
-                                            <th style={{ padding: '10px 16px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className={`text-sm font-bold border-l border-gray-500 w-[56%] \${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? 'اسم المنتج' : 'Item'}</th>
-                                            <th style={{ padding: '10px 16px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-sm font-bold text-center border-l border-gray-500 w-[7%]">{lang === 'ar' ? 'المقاس' : 'Size'}</th>
-                                            <th style={{ padding: '10px 16px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-sm font-bold text-center border-l border-gray-500 w-[15%]">{lang === 'ar' ? 'السعر' : 'Price'}</th>
-                                            <th style={{ padding: '10px 16px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-sm font-bold text-center border-l border-gray-500 w-[7%]">{lang === 'ar' ? 'الكمية' : 'Qty'}</th>
-                                            <th style={{ padding: '10px 16px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-sm font-bold text-center w-[15%]">{lang === 'ar' ? 'الإجمالي' : 'Total'}</th>
+                                            <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className={`text-sm font-bold border-l border-gray-500 w-[48%] ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? 'اسم المنتج' : 'Item'}</th>
+                                            <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-xs sm:text-sm font-bold text-center border-l border-gray-500 w-[10%] whitespace-nowrap">{lang === 'ar' ? 'المقاس' : 'Size'}</th>
+                                            <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-xs sm:text-sm font-bold text-center border-l border-gray-500 w-[20%] whitespace-nowrap">{lang === 'ar' ? 'سعر الحبه' : 'Unit Price'}</th>
+                                            <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-xs sm:text-sm font-bold text-center border-l border-gray-500 w-[9%] whitespace-nowrap">{lang === 'ar' ? 'الكمية' : 'Qty'}</th>
+                                            <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-xs sm:text-sm font-bold text-center w-[18%] whitespace-nowrap">{lang === 'ar' ? 'الإجمالي' : 'Total'}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-400 bg-white">
-                                        {order.cartItems?.map((item, idx) => (
+                                        {order.cartItems?.map((item, idx) => {
+                                            const itemPrices = getInvoiceItemPrices(item);
+                                            const itemCurrency = order.currency || currency || 'YER';
+                                            const hasItemDiscount = itemPrices.original > itemPrices.discounted;
+                                            return (
                                             <tr key={idx}>
                                                 <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="border-l border-gray-400">
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -167,30 +190,31 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                                     </span>
                                                 </td>
                                                 <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-bold text-gray-600 border-l border-gray-400 whitespace-nowrap">
-                                                    {item.originalPrice && item.originalPrice > item.price ? (
+                                                    {hasItemDiscount ? (
                                                         <div className="flex flex-col items-center">
-                                                            <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>{formatPrice(item.originalPrice, currency)}</span>
-                                                            <span className="text-red-600">{formatPrice(item.price, currency)}</span>
+                                                            <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>{formatPrice(itemPrices.original, itemCurrency)}</span>
+                                                            <span className="font-black text-red-600">{formatPrice(itemPrices.discounted, itemCurrency)}</span>
                                                         </div>
                                                     ) : (
-                                                        <span>{formatPrice(item.price, currency)}</span>
+                                                        <span>{formatPrice(itemPrices.discounted, itemCurrency)}</span>
                                                     )}
                                                 </td>
                                                 <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-bold text-gray-600 border-l border-gray-400">
                                                     <span>{item.quantity || 1}</span>
                                                 </td>
                                                 <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-black text-[#111317] whitespace-nowrap">
-                                                    <span>{formatPrice((item.price || 0) * (item.quantity || 1), currency)}</span>
+                                                    <span>{formatPrice(itemPrices.discounted * (item.quantity || 1), itemCurrency)}</span>
                                                 </td>
                                             </tr>
-                                        ))}
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
 
                             {/* 4. Totals & Footer */}
-                            <div className={`flex ${lang === 'ar' ? 'justify-start' : 'justify-end'} mt-4 px-4`}>
-                                <div className="w-[60%] bg-gray-50 rounded-lg p-4 border border-gray-200 print:bg-gray-50 print:border-gray-200" style={{ paddingBottom: '24px' }}>
+                            <div className={`flex ${lang === 'ar' ? 'justify-start' : 'justify-end'} mt-1 px-0`}>
+                                <div className="w-full max-w-[360px] bg-gray-50 rounded-lg p-3 border border-gray-200 print:bg-gray-50 print:border-gray-200">
                                     <div className="space-y-2">
                                         <div className={`flex justify-between items-center text-gray-600 text-sm font-bold`}>
                                             <span>{lang === 'ar' ? 'المجموع الفرعي:' : 'Subtotal:'}</span>
@@ -226,7 +250,7 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                 </div>
                             </div>
 
-                            <div className="mt-8 mb-4 text-center border-t border-gray-400 pt-6">
+                            <div className="mt-5 mb-0 text-center border-t border-gray-400 pt-4">
                                 <p className="text-gray-900 font-bold mb-1 text-xs">{lang === 'ar' ? 'شكراً لتسوقكم من متجر ميلانو' : 'Thank you for shopping with Milano Store'}</p>
                                 <p className="text-gray-900 font-mono text-[10px]">{window.location.hostname}</p>
                             </div>
