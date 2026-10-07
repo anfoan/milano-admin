@@ -955,6 +955,16 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
     // 1. Render Login Screen if not authenticated
     if (!isAuthenticated) {
+        if (!standalone) {
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0a0a0b] font-['Cairo']">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-gray-500 font-bold">{isRTL ? "جاري تهيئة نقطة البيع..." : "Preparing point of sale..."}</p>
+                    </div>
+                </div>
+            );
+        }
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0b] flex items-center justify-center p-4 font-['Cairo']" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="max-w-md w-full bg-white dark:bg-[#1c1c1e] rounded-[32px] p-8 shadow-2xl border border-gray-100 dark:border-white/5">
