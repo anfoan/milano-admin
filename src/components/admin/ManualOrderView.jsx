@@ -3,7 +3,7 @@ import {
     User, Phone, MapPin, ShoppingBag, Plus, Trash2,
     Search, CheckCircle, ChevronRight, ChevronLeft,
     Printer, ArrowRight, AlertTriangle, Package,
-    Truck, DollarSign, X
+    Truck, CreditCard, ArrowLeftRight, DollarSign, X
 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import {
@@ -707,13 +707,32 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-black text-gray-700 block">{txt.payment_method}</label>
-                                <textarea
-                                    rows={2}
-                                    value={formData.paymentMethod}
-                                    onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 transition-all font-bold resize-none"
-                                    placeholder={txt.payment_placeholder}
-                                />
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, paymentMethod: 'cash' })}
+                                        className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'cash' ? 'border-green-500/60 bg-green-500/15 text-green-700 font-black' : 'border-gray-200 text-gray-400 hover:bg-gray-100'}`}
+                                    >
+                                        <DollarSign size={16} />
+                                        <span className="text-[10px]">{isRTL ? 'نقدي / كاش' : 'Cash'}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, paymentMethod: 'card' })}
+                                        className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'card' ? 'border-purple-500/60 bg-purple-500/15 text-purple-700 font-black' : 'border-gray-200 text-gray-400 hover:bg-gray-100'}`}
+                                    >
+                                        <CreditCard size={16} />
+                                        <span className="text-[10px]">{isRTL ? 'محفظة جيب' : 'Jib Wallet'}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, paymentMethod: 'transfer' })}
+                                        className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'transfer' ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-700 font-black' : 'border-gray-200 text-gray-400 hover:bg-gray-100'}`}
+                                    >
+                                        <ArrowLeftRight size={16} />
+                                        <span className="text-[10px]">{isRTL ? 'تحويل بنكي' : 'Bank Transfer'}</span>
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     )}
