@@ -491,7 +491,7 @@ const AdminDashboard = () => {
 
                         <div className="h-px w-6 bg-gray-200 dark:bg-white/10 rotate-90 mx-0 hidden lg:block"></div>
 
-                        <div className="relative" ref={profileMenuRef}>
+                        {!isWorker && <div className="relative" ref={profileMenuRef}>
                             <button
                                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                                 className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 p-2 rounded-xl transition-colors"
@@ -527,9 +527,9 @@ const AdminDashboard = () => {
                                     </button>
                                 </div>
                             )}
-                        </div>
+                        </div>}
 
-                        <button
+                        {!isWorker && <button
                             onClick={() => setShowRightPanel(true)}
                             className="relative p-2.5 bg-green-500/15 dark:bg-green-400/10 hover:bg-green-500/25 rounded-xl transition-colors"
                             title={lang === 'ar' ? 'فتح صندوق الوارد' : 'Open Inbox'}
@@ -540,7 +540,7 @@ const AdminDashboard = () => {
                                     {unreadCount > 99 ? '99+' : unreadCount}
                                 </span>
                             )}
-                        </button>
+                        </button>}
                     </div>
                 </header>
 
