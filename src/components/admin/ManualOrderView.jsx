@@ -12,15 +12,13 @@ import {
     onSnapshot
 } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import { useCurrency } from '../../context/CurrencyContext';
 import InvoiceTemplate from '../InvoiceTemplate';
 
 const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
     const isRTL = lang === 'ar';
-    const { formatPrice } = useCurrency();
+    const { formatPrice, convertPrice, exchangeRate } = useCurrency();
     const [orderCurrency, setOrderCurrency] = useState(generalSettings?.currency || 'YER');
-    const currency = getLocalizedCurrency(orderCurrency, lang);
 
     useEffect(() => { setOrderCurrency(generalSettings?.currency || 'YER'); }, [generalSettings?.currency]);
 
@@ -376,9 +374,20 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
 
         setLoading(true);
         try {
-            const subtotal = calculateSubtotal();
-            const deliveryCost = getDeliveryCost();
-            const total = (subtotal + deliveryCost) - discount;
+            const subtotalInYER = calculateSubtotal();
+            const deliveryCostInYER = getDeliveryCost();
+            const totalInYER = (subtotalInYER + deliveryCostInYER) - discount;
+            const convertedCartItems = cartItems.map(item => ({
+                ...item,
+                priceInYER: item.price,
+                originalPriceInYER: item.originalPrice,
+                price: convertPrice(item.price, orderCurrency),
+                originalPrice: convertPrice(item.originalPrice, orderCurrency)
+            }));
+            const subtotal = convertPrice(subtotalInYER, orderCurrency);
+            const deliveryCost = convertPrice(deliveryCostInYER, orderCurrency);
+            const convertedDiscount = convertPrice(discount, orderCurrency);
+            const total = convertPrice(totalInYER, orderCurrency);
             const orderId = `MIL-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
             const orderData = {
@@ -393,11 +402,16 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                     city: formData.region, // For compatibility with InvoiceTemplate
                     country: 'Yemen'
                 },
-                cartItems,
+                cartItems: convertedCartItems,
                 subTotal: subtotal,
                 deliveryCost,
-                discount,
+                discount: convertedDiscount,
                 total,
+                subtotalInYER,
+                deliveryCostInYER,
+                discountInYER: discount,
+                totalInYER,
+                exchangeRate,
                 isExternal: true // Flag to distinguish
             };
 
@@ -677,11 +691,14 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-black text-gray-700 block">عملة الفاتورة والطلب</label>
-                                    <input
-                                        value={currency}
-                                        readOnly
-                                        className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl font-bold text-gray-600 cursor-not-allowed"
-                                    />
+                                    <select
+                                        value={orderCurrency}
+                                        onChange={(e) => setOrderCurrency(e.target.value)}
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-800 focus:border-blue-500 transition-all"
+                                    >
+                                        <option value="YER">ريال يمني (YER)</option>
+                                        <option value="SAR">ريال سعودي (SAR)</option>
+                                    </select>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-black text-gray-700 block">{txt.delivery_type}</label>
@@ -753,11 +770,11 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                                         <div className="text-sm md:text-base font-black text-blue-600">
                                                             {p.priceAfterDiscount && p.priceAfterDiscount < p.price ? (
                                                                 <div className="flex flex-col items-end">
-                                                                    <span>{p.priceAfterDiscount.toLocaleString()} {currency}</span>
-                                                                    <span className="text-xs text-gray-400 line-through font-normal">{p.price?.toLocaleString()} {currency}</span>
+                                                                    <span>{formatPrice(p.priceAfterDiscount, orderCurrency)}</span>
+                                                                    <span className="text-xs text-gray-400 line-through font-normal">{formatPrice(p.price, orderCurrency)}</span>
                                                                 </div>
                                                             ) : (
-                                                                <span>{p.price?.toLocaleString()} {currency}</span>
+                                                                <span>{formatPrice(p.price, orderCurrency)}</span>
                                                             )}
                                                         </div>
                                                         <button
