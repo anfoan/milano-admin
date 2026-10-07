@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Bell, Check, ShoppingBag, Clock, MessageSquare, X } from 'lucide-react';
-import { db } from '../../lib/firebase';
+import { db, auth } from '../../lib/firebase';
+import { signInAnonymously } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, limit, updateDoc, doc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCurrency } from '../../context/CurrencyContext';
@@ -22,6 +23,54 @@ const AdminNotifications = ({ lang: propLang }) => {
 
     const [orderNotifications, setOrderNotifications] = useState([]);
     const [messageNotifications, setMessageNotifications] = useState([]);
+    const [authReady, setAuthReady] = useState(false);
+    const notificationAudioRef = useRef(null);
+
+    // Workers use a local login, so prepare their Firebase anonymous session
+    // before starting the notification listeners.
+    useEffect(() => {
+        let mounted = true;
+        const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            if (isWorker && !user) {
+                try {
+                    await signInAnonymously(auth);
+                } catch (error) {
+                    console.error('Worker notification auth failed', error);
+                    return;
+                }
+            }
+            if (mounted) setAuthReady(true);
+        });
+        return () => {
+            mounted = false;
+            unsubscribe();
+        };
+    }, []);
+
+    // Browsers require a user gesture before allowing later notification audio.
+    useEffect(() => {
+        const unlockAudio = () => {
+            if (!notificationAudioRef.current) {
+                notificationAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+                notificationAudioRef.current.volume = 0.01;
+            }
+            const audio = notificationAudioRef.current;
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.volume = 1;
+            }).catch(() => {});
+            window.removeEventListener('pointerdown', unlockAudio);
+            window.removeEventListener('keydown', unlockAudio);
+        };
+        window.addEventListener('pointerdown', unlockAudio, { once: true });
+        window.addEventListener('keydown', unlockAudio, { once: true });
+        return () => {
+            window.removeEventListener('pointerdown', unlockAudio);
+            window.removeEventListener('keydown', unlockAudio);
+        };
+    }, []);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -36,11 +85,15 @@ const AdminNotifications = ({ lang: propLang }) => {
 
     // New Listeners for both Orders and Messages
     useEffect(() => {
+        if (!authReady) return undefined;
         const orderQ = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(1));
         const messageQ = query(collection(db, "contact_messages"), where("status", "==", "new"), orderBy("createdAt", "desc"), limit(1));
 
         const playNotificationSound = () => {
-             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+             const audio = notificationAudioRef.current || new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+             notificationAudioRef.current = audio;
+             audio.volume = 1;
+             audio.currentTime = 0;
              audio.play().catch(e => console.log("Audio play failed", e));
         };
 
@@ -102,7 +155,7 @@ const AdminNotifications = ({ lang: propLang }) => {
             unsubscribeMessages();
             window.clearTimeout(toastTimerRef.current);
         };
-    }, []);
+    }, [authReady]);
 
     // These values are fully derived from the two realtime sources. Keeping them out
     // of a second effect avoids an extra header render after every snapshot.
