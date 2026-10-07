@@ -136,13 +136,22 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             }
             
             if (isWorker) {
-                setIsAuthenticated(true);
                 setIsAdminManager(false);
-                // Ensure anonymous Firebase auth exists even for restored sessions
-                // (worker login is local username/password, not Firebase Auth)
+                // Worker credentials are local, so wait for the anonymous Firebase
+                // session before starting any products/orders listeners. Starting
+                // those listeners while auth is still null causes empty receipts
+                // and permission errors for workers only.
                 if (!user) {
-                    signInAnonymously(auth).catch(e => console.error("Anonymous sign-in error:", e));
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (e) {
+                        console.error("Anonymous sign-in error:", e);
+                        setIsAuthenticated(false);
+                        setAuthLoading(false);
+                        return;
+                    }
                 }
+                setIsAuthenticated(true);
             } else {
                 setIsAuthenticated(false);
             }
