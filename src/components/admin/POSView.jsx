@@ -3,7 +3,7 @@ import {
     Calculator, Search, Plus, Minus, Trash2, CreditCard, User, 
     Printer, LogOut, CheckCircle, AlertTriangle, Clock, Calendar,
     Edit, X, ShoppingCart, RefreshCw, Layers, DollarSign, ArrowLeftRight,
-    RotateCcw, Monitor, History, BarChart3, ArrowLeft, ArrowRight, ChevronDown
+    RotateCcw, Monitor, Store, History, BarChart3, ArrowLeft, ArrowRight, ChevronDown
 } from 'lucide-react';
 import { db, auth } from '../../lib/firebase';
 import { signInAnonymously, signOut } from 'firebase/auth';
@@ -1188,7 +1188,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             </button>
                             <div>
                                 <h2 className="text-sm font-black text-gray-800 dark:text-white leading-tight">
-                                    {isRTL ? "صالة البيع المباشر" : "POS Sell Screen"}
+                                    {isRTL ? "نقطة البيع المباشر" : "POS Sell Screen"}
                                 </h2>
                                 <span className="text-[9px] text-gray-400 font-bold leading-none">
                                     {isRTL ? `المشغل: ${isAdminManager ? 'المدير العام' : 'كاشير المحل'}` : `Operator: ${isAdminManager ? 'Admin' : 'Cashier'}`}
@@ -1612,8 +1612,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 onClick={() => setPosSubView('sell')}
                                 className="px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-black text-[10px] rounded-lg transition-all flex items-center gap-1.5"
                             >
-                                <Monitor size={12} />
-                                <span>{isRTL ? "صالة البيع" : "POS Terminal"}</span>
+                                <Store size={12} />
+                                <span>{isRTL ? "نقطة البيع" : "POS Terminal"}</span>
                             </button>
                             <button
                                 onClick={handleLogout}
