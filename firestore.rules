@@ -16,7 +16,8 @@ service cloud.firestore {
     // Their access is limited to operational reads and stock/expense writes.
     function isPOSWorker() {
       return request.auth != null &&
-        request.auth.token.firebase.sign_in_provider == 'anonymous';
+        (request.auth.token.firebase.sign_in_provider == 'anonymous' ||
+         request.auth.token.email == null);
     }
 
     // Storefront wallet operations are available only while the administrator enables them.

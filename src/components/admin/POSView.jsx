@@ -9,7 +9,7 @@ import { db, auth } from '../../lib/firebase';
 import { signInAnonymously, signOut } from 'firebase/auth';
 import { getAdminEmails, FALLBACK_ADMIN_EMAILS } from '../../lib/adminEmails';
 import { 
-    collection, doc, getDoc, getDocs, addDoc, updateDoc, 
+    collection, doc, getDoc, getDocs, updateDoc, writeBatch, 
     deleteDoc, query, orderBy, increment, serverTimestamp, 
     onSnapshot 
 } from 'firebase/firestore';
@@ -442,6 +442,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         }
 
         setAuthLoading(true);
+        let checkoutStage = 'بدء البيع';
         try {
             const subtotal = calculateSubtotal();
             const total = calculateTotal();
@@ -480,51 +481,53 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             };
 
             let savedOrderDocumentId = editingOrderId || '';
-            if (editingOrderId) {
-                // Retrieve original order to restore stock first
-                const origDoc = await getDoc(doc(db, "orders", editingOrderId));
-                if (origDoc.exists()) {
-                    const origData = origDoc.data();
-                    for (const item of (origData.cartItems || [])) {
-                        const pRef = doc(db, "products", item.id);
-                        const updates = { stock: increment(item.quantity) };
-                        if (item.selectedSize) {
-                            updates[`sizeStocks.${item.selectedSize}`] = increment(item.quantity);
-                                }
-                                await updateDoc(pRef, updates);
-                            }
-                            }
+            const stockDeltas = new Map();
+            const addStockDelta = (item, delta) => {
+                if (!item?.id) return;
+                const entry = stockDeltas.get(item.id) || { stock: 0, sizes: {} };
+                entry.stock += delta * Number(item.quantity || 0);
+                if (item.selectedSize) {
+                    entry.sizes[item.selectedSize] = (entry.sizes[item.selectedSize] || 0) + delta * Number(item.quantity || 0);
+                }
+                stockDeltas.set(item.id, entry);
+            };
 
-                            await updateDoc(doc(db, "orders", editingOrderId), {
-                    ...orderData,
-                    updatedAt: serverTimestamp()
-                });
-                
-                setLastCreatedOrderId(orderId);
-                setLastCreatedOrderData({ id: editingOrderId, ...orderData });
-            } else {
-                // Create new document
-                const docRef = await addDoc(collection(db, "orders"), orderData);
-                savedOrderDocumentId = docRef.id;
-                setLastCreatedOrderId(orderId);
-                setLastCreatedOrderData({ id: docRef.id, ...orderData });
+            const orderRef = editingOrderId
+                ? doc(db, "orders", editingOrderId)
+                : doc(collection(db, "orders"));
+            if (editingOrderId) {
+                checkoutStage = 'قراءة الفاتورة السابقة';
+                const origDoc = await getDoc(orderRef);
+                if (origDoc.exists()) {
+                    for (const item of (origDoc.data().cartItems || [])) addStockDelta(item, 1);
+                }
             }
+            for (const item of cartItems) addStockDelta(item, -1);
+
+            checkoutStage = editingOrderId ? 'حفظ تعديل الفاتورة والمخزون' : 'حفظ الفاتورة والمخزون';
+            const batch = writeBatch(db);
+            if (editingOrderId) {
+                batch.update(orderRef, { ...orderData, updatedAt: serverTimestamp() });
+            } else {
+                batch.set(orderRef, orderData);
+                savedOrderDocumentId = orderRef.id;
+            }
+            for (const [productId, delta] of stockDeltas) {
+                const updates = { stock: increment(delta.stock) };
+                Object.entries(delta.sizes).forEach(([size, amount]) => {
+                    updates[`sizeStocks.${size}`] = increment(amount);
+                });
+                batch.update(doc(db, "products", productId), updates);
+            }
+            await batch.commit();
+            setLastCreatedOrderId(orderId);
+            setLastCreatedOrderData({ id: orderRef.id, ...orderData });
 
             // A POS receipt is completed at creation; credit its phone-linked wallet once.
             // A temporary wallet issue must never prevent the sale or inventory update.
             if (savedOrderDocumentId) {
                 try { await syncWalletRewardForOrderStatus(savedOrderDocumentId, 'completed'); }
                 catch (rewardError) { console.error('POS wallet reward sync failed:', rewardError); }
-            }
-
-            // Deduct stock for new cartItems
-            for (const item of cartItems) {
-                const pRef = doc(db, "products", item.id);
-                const updates = { stock: increment(-item.quantity) };
-                if (item.selectedSize) {
-                    updates[`sizeStocks.${item.selectedSize}`] = increment(-item.quantity);
-                }
-                await updateDoc(pRef, updates);
             }
 
             // Auto-fix: cap negative stock at 0
@@ -568,7 +571,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             setEditingOrderId(null);
             setPaymentMethod('cash');
         } catch (err) {
-            console.error("Error completing POS checkout:", err);
+            console.error("Error completing POS checkout:", { stage: checkoutStage, code: err?.code, message: err?.message, error: err });
             alert(isRTL ? "حدث خطأ أثناء إتمام عملية البيع" : "An error occurred during transaction completion");
         } finally {
             setAuthLoading(false);
