@@ -40,6 +40,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
         currency: currency
     });
     const [editingExpenseId, setEditingExpenseId] = useState(null);
+    const [savingExpense, setSavingExpense] = useState(false);
 
     // State for Bonds
     const [bonds, setBonds] = useState([]);
@@ -62,6 +63,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
         entityType: ''
     });
     const [editingBondId, setEditingBondId] = useState(null);
+    const [savingBond, setSavingBond] = useState(false);
 
     const predefinedCategories = ['Utilities', 'Rent', 'Salaries', 'Maintenance'];
 
@@ -265,6 +267,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
 
     const handleSaveExpense = async (e) => {
         e.preventDefault();
+        if (savingExpense) return;
         if (!currentExpense.title || !currentExpense.amount) return;
 
         const categoryValue = currentExpense.category === 'custom' ? customCategoryText : currentExpense.category;
@@ -281,6 +284,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
         };
 
         try {
+            setSavingExpense(true);
             if (editingExpenseId) {
                 await updateDoc(doc(db, 'expenses', editingExpenseId), payload);
             } else {
@@ -292,6 +296,9 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
             setExpenseModalOpen(false);
         } catch (err) {
             console.error("Error saving expense:", err);
+            alert(isRTL ? 'تعذر حفظ المصروف، حاول مرة أخرى.' : 'Could not save the expense. Please try again.');
+        } finally {
+            setSavingExpense(false);
         }
     };
 
@@ -342,6 +349,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
 
     const handleSaveBond = async (e) => {
         e.preventDefault();
+        if (savingBond) return;
         if (!currentBond.entityName || !currentBond.amount) return;
 
         const entityTypeValue = currentBond.entityType;
@@ -361,6 +369,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
         };
 
         try {
+            setSavingBond(true);
             if (editingBondId) {
                 await updateDoc(doc(db, 'bonds', editingBondId), payload);
             } else {
@@ -372,6 +381,9 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
             setBondModalOpen(false);
         } catch (err) {
             console.error("Error saving bond:", err);
+            alert(isRTL ? 'تعذر حفظ السند، حاول مرة أخرى.' : 'Could not save the bond. Please try again.');
+        } finally {
+            setSavingBond(false);
         }
     };
 
@@ -1901,9 +1913,10 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-black shadow-sm"
+                                    disabled={savingExpense}
+                                    className="px-5 py-2.5 bg-red-500 hover:bg-red-600 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl text-sm font-black shadow-sm"
                                 >
-                                    {isRTL ? 'حفظ' : 'Save'}
+                                    {savingExpense ? (isRTL ? 'جارٍ الحفظ...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
                                 </button>
                             </div>
                         </form>
@@ -2065,9 +2078,10 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-black shadow-sm"
+                                    disabled={savingBond}
+                                    className="px-5 py-2.5 bg-green-500 hover:bg-green-600 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl text-sm font-black shadow-sm"
                                 >
-                                    {isRTL ? 'حفظ' : 'Save'}
+                                    {savingBond ? (isRTL ? 'جارٍ الحفظ...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
                                 </button>
                             </div>
                         </form>

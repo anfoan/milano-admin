@@ -12,6 +12,13 @@ service cloud.firestore {
          request.auth.token.email == 'grgr@getemails.uk');
     }
 
+    // POS workers use a Firebase anonymous session after the local worker login.
+    // Their access is limited to operational reads and stock/expense writes.
+    function isPOSWorker() {
+      return request.auth != null &&
+        request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
     // Storefront wallet operations are available only while the administrator enables them.
     function walletIsEnabled() {
       return !exists(/databases/$(database)/documents/settings/wallet) ||
@@ -21,7 +28,9 @@ service cloud.firestore {
     // Public store catalogue and storefront settings; write access stays admin-only.
     match /products/{productId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (isPOSWorker() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'sizeStocks']));
     }
     match /categories/{categoryId} {
       allow read: if true;
@@ -51,7 +60,7 @@ service cloud.firestore {
     // Customer orders can be created by the store, but remain private to administrators.
     match /orders/{orderId} {
       allow create: if true;
-      allow read, update, delete, list: if isAdmin();
+      allow read, update, delete, list: if isAdmin() || isPOSWorker();
     }
 
     // Wallet IDs are random device-bound IDs. Visitors can retrieve only a known wallet document,
@@ -142,10 +151,10 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
     match /expenses/{document=**} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdmin() || isPOSWorker();
     }
     match /bonds/{document=**} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdmin() || isPOSWorker();
     }
 
     // Customer support and reviews retain their existing storefront behavior.
