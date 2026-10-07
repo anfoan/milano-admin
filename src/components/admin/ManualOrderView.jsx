@@ -367,8 +367,8 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
     };
 
     const handleCreateOrder = async () => {
-        if (!formData.name.trim() || !formData.phone.trim() || !formData.region.trim() || !formData.address.trim() || cartItems.length === 0) {
-            alert(isRTL ? "يرجى تعبئة جميع بيانات العميل الإجبارية (الاسم، الهاتف، المنطقة، العنوان) وإضافة منتجات" : "Please fill in all mandatory customer details (Name, Phone, Region, Address) and add products");
+        if (!formData.name.trim() || !formData.phone.trim() || !formData.region.trim() || cartItems.length === 0) {
+            alert(isRTL ? "يرجى تعبئة جميع بيانات العميل الإجبارية (الاسم، الهاتف، المنطقة) وإضافة منتجات" : "Please fill in all mandatory customer details (Name, Phone, Region) and add products");
             return;
         }
 
@@ -677,19 +677,6 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-black text-gray-700 block">{txt.payment_method}</label>
-                                    <div className="relative">
-                                        <DollarSign className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400" size={18} />
-                                        <input
-                                            type="text"
-                                            value={formData.paymentMethod}
-                                            onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                                            className="w-full pr-10 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 transition-all font-bold"
-                                            placeholder={txt.payment_placeholder}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
                                     <label className="text-sm font-black text-gray-700 block">عملة الفاتورة والطلب</label>
                                     <select
                                         value={orderCurrency}
@@ -719,13 +706,13 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-black text-gray-700 block">{txt.address}</label>
+                                <label className="text-sm font-black text-gray-700 block">{txt.payment_method}</label>
                                 <textarea
                                     rows={2}
-                                    value={formData.address}
-                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                    value={formData.paymentMethod}
+                                    onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 transition-all font-bold resize-none"
-                                    placeholder="شارع خولان - بجانب عمارة..."
+                                    placeholder={txt.payment_placeholder}
                                 />
                             </div>
                         </motion.div>
