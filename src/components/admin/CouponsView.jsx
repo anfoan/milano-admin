@@ -406,9 +406,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
                                     {loading ? (
-                                        <tr><td colSpan="8" className="p-12 text-center text-gray-400 font-bold">{txt.loading}</td></tr>
+                                        <tr><td colSpan="7" className="p-12 text-center text-gray-400 font-bold">{txt.loading}</td></tr>
                                     ) : coupons.length === 0 ? (
-                                        <tr><td colSpan="8" className="p-12 text-center text-gray-400 font-bold">{txt.no_coupons}</td></tr>
+                                        <tr><td colSpan="7" className="p-12 text-center text-gray-400 font-bold">{txt.no_coupons}</td></tr>
                                     ) : (
                                         coupons.map((coupon) => (
                                             <tr key={coupon.id} className={`hover:bg-gray-50 transition-colors ${(!coupon.isUnlimited && Number(coupon.usedCount || 0) >= Number(coupon.maxUses || 0)) ? 'opacity-60 bg-gray-50' : ''}`}>
@@ -439,11 +439,6 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                                     ) : (
                                                         <span className="font-black text-gray-400 text-sm">{coupon.discountPercent || 0}%</span>
                                                     )}
-                                                </td>
-                                                <td className="p-6 text-center font-black text-gray-700">
-                                                    <span className={getDiscountAmount(coupon) === null ? 'text-xs text-amber-600 font-bold' : 'font-mono'}>
-                                                        {formatDiscountAmount(coupon)}
-                                                    </span>
                                                 </td>
                                                 <td className="p-6 text-center font-bold text-gray-600">
                                                     {coupon.isUnlimited ? (
