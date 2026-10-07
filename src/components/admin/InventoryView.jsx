@@ -8,6 +8,21 @@ import { db } from '../../lib/firebase';
 import { collection, query, getDocs, doc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 
+const getInventorySizeSlots = (product) => {
+    const values = product.variants?.find(v => v.type === 'size')?.values || [];
+    const knownOrder = { S: 0, M: 1, L: 2, XL: 3, XXL: 4, XXXL: 5 };
+    const ordered = [...values].sort((a, b) => {
+        const aKey = String(a).replace(/^مقاس\s*/i, '').toUpperCase();
+        const bKey = String(b).replace(/^مقاس\s*/i, '').toUpperCase();
+        const aKnown = knownOrder[aKey] !== undefined;
+        const bKnown = knownOrder[bKey] !== undefined;
+        if (aKnown && bKnown) return knownOrder[aKey] - knownOrder[bKey];
+        if (aKnown !== bKnown) return aKnown ? -1 : 1;
+        return 0;
+    });
+    return Array.from({ length: 6 }, (_, index) => ordered[index] || null);
+};
+
 const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQuery }) => {
     const t = {
         ar: {
@@ -23,7 +38,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             click_to_view: 'اضغط لعرض النتائج',
             th_hash: '#',
             th_code: 'رمز المنتج',
-            th_name: 'اسم المنتج',
+            th_name: 'اسم المنتج + المقاس',
             th_cost: 'سعر التكلفة',
             th_total_cost: 'إجمالي التكلفة',
             th_sell: 'سعر البيع',
@@ -545,7 +560,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                 <tr style={{ height: '44px' }}>
                                     <th className="px-3 text-center" style={{ width: '4%' }}>#</th>
                                     <th className="px-3" style={{ width: '10%' }}>{txt.th_code}</th>
-                                    <th className="px-3" style={{ width: '28%' }}>{txt.th_name}</th>
+                                    <th className="px-3 -translate-x-5" style={{ width: '28%' }}>{txt.th_name}</th>
                                     {/* Cost columns */}
                                     <th className="px-3" style={{ width: '10%' }}>
                                         <div className="flex flex-col gap-0.5">
@@ -581,7 +596,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                         <tr key={product.id} className="hover:bg-gray-50 transition-colors print:bg-white" style={{ height: '58px' }}>
                                             <td className="px-3 text-center text-xs font-black text-gray-400">{idx + 1}</td>
                                             <td className="px-3 text-xs font-mono text-blue-700 font-bold">{product.code || '---'}</td>
-                                            <td className="px-3 py-2">
+                                            <td className="px-3 py-2 translate-x-8">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-11 h-11 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 shadow-inner flex-shrink-0 no-print">
                                                         <img src={product.mainImage || "/nav-logo.png"} className="w-full h-full object-cover" alt={product.name} onError={(e) => e.target.src = "/nav-logo.png"} />
@@ -596,13 +611,16 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                         </div>
                                                         {/* Sizes: larger and clearer */}
                                                         {editingId !== product.id && product.variants?.find(v => v.type === 'size')?.values?.length > 0 && (
-                                                            <div className="flex flex-wrap gap-1.5 mt-1.5 no-print">
-                                                                {product.variants.find(v => v.type === 'size').values.map(size => {
-                                                                    const qty = product.sizeStocks?.[size] !== undefined ? Number(product.sizeStocks[size]) : 0;
+                                                            <div className="grid grid-flow-col grid-rows-2 grid-cols-3 gap-1.5 mt-1.5 no-print">
+                                                                {getInventorySizeSlots(product).map((size, slotIndex) => {
+                                                                    if (!size) return <span key={`empty-size-${slotIndex}`} aria-hidden="true" className="invisible h-6" />;
+                                                                    const displaySize = String(size).replace(/^مقاس\s*/i, '');
+                                                                    const storedQty = product.sizeStocks?.[size] ?? product.sizeStocks?.[displaySize];
+                                                                    const qty = storedQty !== undefined ? Number(storedQty) : 0;
                                                                     return (
-                                                                        <span key={size} className={`text-[12px] font-black border rounded-lg px-2.5 py-0.5 flex items-center gap-1 ${qty === 0 ? 'border-red-200 bg-red-50 text-red-600' : 'border-gray-200 bg-gray-50 text-gray-700'}`}>
-                                                                            <span className="text-gray-400">{size}:</span>
-                                                                            <span className={`font-black text-[13px] ${qty === 0 ? 'text-red-500' : 'text-blue-600'}`}>{qty}</span>
+                                                                        <span key={size} className={`relative z-10 min-w-0 max-w-full overflow-hidden whitespace-nowrap text-[12px] font-black border rounded-lg px-2.5 py-0.5 flex items-center justify-center gap-1 ${qty === 0 ? 'border-red-200 bg-red-50 text-red-600' : 'border-gray-200 bg-gray-50 text-gray-700'}`}>
+                                                                            <span className="shrink-0 text-gray-400">مقاس {displaySize}:</span>
+                                                                            <span className={`shrink-0 font-black text-[11px] ${qty === 0 ? 'text-red-500' : 'text-blue-600'}`}>{qty}</span>
                                                                         </span>
                                                                     );
                                                                 })}
@@ -647,16 +665,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                                     {txt.cancel}
                                                                 </button>
                                                             </div>
-                                                        ) : (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => { setEditingId(product.id); setTempStock(product.stock); setTempSizeStocks(product.sizeStocks || {}); }}
-                                                                className="mt-1 w-7 h-7 p-0 bg-blue-50 rounded-md text-blue-500 hover:bg-blue-100 transition-colors no-print flex items-center justify-center"
-                                                                title={txt.edit}
-                                                            >
-                                                                <Edit2 size={13} />
-                                                            </button>
-                                                        )}
+                                                        ) : null}
                                                     </div>
                                                 </div>
                                             </td>
@@ -718,6 +727,14 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                             </button>
                                                         </>
                                                     )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setEditingId(product.id); setTempStock(product.stock); setTempSizeStocks(product.sizeStocks || {}); }}
+                                                        className="w-7 h-7 p-0 bg-blue-50 rounded-md text-blue-500 hover:bg-blue-100 transition-colors flex items-center justify-center"
+                                                        title={txt.edit}
+                                                    >
+                                                        <Edit2 size={13} />
+                                                    </button>
                                                     <button onClick={() => deleteProduct(product.id)} className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all">
                                                         <Trash2 size={14} />
                                                     </button>

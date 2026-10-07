@@ -12,6 +12,15 @@ import { uploadToCloudinary } from '../../services/uploadService';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import VideoShowcaseManager from './VideoShowcaseManager';
 
+const readProductsCache = (key) => {
+    try {
+        const cached = localStorage.getItem(key);
+        return cached ? JSON.parse(cached) : [];
+    } catch {
+        return [];
+    }
+};
+
 const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSearchQuery }) => {
     const t = {
         ar: {
@@ -112,8 +121,8 @@ const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSe
     const currency = getLocalizedCurrency(generalSettings?.currency || 'YER', lang);
     const [view, setView] = useState('categories'); // 'categories' or 'product-list'
     const [selectedCategory, setSelectedCategory] = useState(null);
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [products, setProducts] = useState(() => readProductsCache('milano_admin_products_cache'));
+    const [loading, setLoading] = useState(() => readProductsCache('milano_admin_categories_cache').length === 0);
     // searchQuery state is now handled via props from AdminDashboard
     const [isAddingCategory, setIsAddingCategory] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
@@ -124,28 +133,30 @@ const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSe
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [productSearch, setProductSearch] = useState('');
 
-    const [categories, setCategories] = useState([]);
+    const [categories, setCategories] = useState(() => readProductsCache('milano_admin_categories_cache'));
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Fetch Products
                 const qProd = query(collection(db, "products"));
-                const prodSnapshot = await getDocs(qProd);
-                const items = prodSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                setProducts(items);
-
-                // Fetch Categories
                 const qCat = query(collection(db, "categories"));
-                const catSnapshot = await getDocs(qCat);
-                const fetchedCats = catSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name, image: doc.data().image, order: doc.data().order }));
-
-                // If distinct persistence is used, we use the fetched objects
-                setCategories(fetchedCats);
+                // Load both collections at the same time; render categories as soon
+                // as their request completes instead of waiting for products first.
+                const productsPromise = getDocs(qProd).then(prodSnapshot => {
+                    const items = prodSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setProducts(items);
+                    localStorage.setItem('milano_admin_products_cache', JSON.stringify(items));
+                });
+                const categoriesPromise = getDocs(qCat).then(catSnapshot => {
+                    const fetchedCats = catSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name, image: doc.data().image, order: doc.data().order }));
+                    setCategories(fetchedCats);
+                    localStorage.setItem('milano_admin_categories_cache', JSON.stringify(fetchedCats));
+                });
+                await Promise.all([productsPromise, categoriesPromise]);
             } catch (err) {
                 console.error("Error fetching data:", err);
             } finally {
@@ -414,6 +425,15 @@ const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSe
     };
 
     // Category List View (Matching Image 0)
+    if (loading && products.length === 0 && categories.length === 0) {
+        return (
+            <div className="min-h-[320px] rounded-[22px] border border-gray-100 bg-white dark:border-white/10 dark:bg-[#15171b] flex flex-col items-center justify-center gap-3 font-['Cairo']" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="h-9 w-9 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin" />
+                <span className="text-sm font-black text-gray-400">{lang === 'ar' ? 'جاري تحميل قائمة المنتجات...' : 'Loading product list...'}</span>
+            </div>
+        );
+    }
+
     if (view === 'videos') {
         return <VideoShowcaseManager lang={lang} onBack={() => setView('categories')} />;
     }
@@ -755,10 +775,8 @@ const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSe
                 {filteredProducts
                     .sort((a, b) => ((a.order || 9999) - (b.order || 9999))) // Apply Sort Order
                     .map((product) => (
-                        <motion.div
+                        <div
                             key={product.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
                             className={`bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden flex flex-col group relative ${product.hidden ? 'opacity-60 grayscale' : ''}`}
                         >
                             {/* Quick Actions (Always Visible) */}
@@ -809,7 +827,7 @@ const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSe
 
                                 <button onClick={() => onEdit(product)} className="w-full py-1.5 md:py-2.5 bg-blue-500 text-white font-black rounded-lg md:rounded-xl shadow-lg shadow-blue-200 mt-1 hover:bg-blue-600 transition-all text-[11px] md:text-sm">{txt.edit_product}</button>
                             </div>
-                        </motion.div>
+                        </div>
                     ))}
             </div>
 
