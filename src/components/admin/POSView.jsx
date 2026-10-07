@@ -122,7 +122,26 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     useEffect(() => {
         const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
             const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
-            
+
+            // Worker identity is local; never wait for the admin-email document
+            // (which is intentionally unreadable to anonymous workers).
+            if (isWorker) {
+                setIsAdminManager(false);
+                if (!user) {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (e) {
+                        console.error("Anonymous sign-in error:", e);
+                        setIsAuthenticated(false);
+                        setAuthLoading(false);
+                        return;
+                    }
+                }
+                setIsAuthenticated(true);
+                setAuthLoading(false);
+                return;
+            }
+
             if (user) {
                 // Admin check: Firestore list + fallback (case-insensitive)
                 const adminList = (await getAdminEmails()) || FALLBACK_ADMIN_EMAILS;
@@ -135,26 +154,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 }
             }
             
-            if (isWorker) {
-                setIsAdminManager(false);
-                // Worker credentials are local, so wait for the anonymous Firebase
-                // session before starting any products/orders listeners. Starting
-                // those listeners while auth is still null causes empty receipts
-                // and permission errors for workers only.
-                if (!user) {
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (e) {
-                        console.error("Anonymous sign-in error:", e);
-                        setIsAuthenticated(false);
-                        setAuthLoading(false);
-                        return;
-                    }
-                }
-                setIsAuthenticated(true);
-            } else {
-                setIsAuthenticated(false);
-            }
+            setIsAuthenticated(false);
             setAuthLoading(false);
         });
 
