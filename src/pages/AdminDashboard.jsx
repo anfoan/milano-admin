@@ -41,7 +41,7 @@ const AdminDashboard = () => {
     const workerPerms = isWorker ? JSON.parse(sessionStorage.getItem('posWorkerPermissions') || '{}') : {};
     const workerAllowedTabs = [];
     if (isWorker) {
-        if (workerPerms.allowViewHistory || workerPerms.allowOnlyPrint) workerAllowedTabs.push('pos');
+        if (workerPerms.allowViewHistory || workerPerms.allowOnlyPrint || workerPerms.allowDiscount || workerPerms.allowChangePayment) workerAllowedTabs.push('pos');
         if (workerPerms.allowExpenses || workerPerms.allowBonds) workerAllowedTabs.push('expenses');
         if (workerPerms.allowManualOrder) workerAllowedTabs.push('manual-order');
     }
