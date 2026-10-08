@@ -1540,12 +1540,13 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <div className="flex items-center gap-1 text-red-600 dark:text-red-300">
                                         <input
                                             type="number"
+                                            lang="en"
                                             dir="ltr"
                                             inputMode="numeric"
                                             value={customDiscount}
                                             disabled={!(isAdminManager || workerPermissions.allowDiscount)}
                                             onChange={(e) => setCustomDiscount(Math.max(0, Number(e.target.value)))}
-                                            className="w-24 bg-transparent border border-red-300 dark:border-red-400/30 rounded-lg px-2 py-1 text-center text-sm outline-none text-red-600 dark:text-red-300 font-sans font-black disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="w-24 bg-transparent border border-red-300 dark:border-red-400/30 rounded-lg px-2 py-1 text-center text-sm outline-none text-red-600 dark:text-red-300 font-['Arial'] font-black disabled:opacity-50 disabled:cursor-not-allowed" style={{ fontVariantNumeric: 'lining-nums' }}
                                         />
                                         <span className="font-black">{currency}</span>
                                     </div>
