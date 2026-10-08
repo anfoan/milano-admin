@@ -1,5 +1,4 @@
 import React from 'react';
-import { getLocalizedCurrency } from "../lib/currencyUtils";
 import { useCurrency } from "../context/CurrencyContext";
 
 const getInvoiceItemPrices = (item) => {
@@ -74,7 +73,9 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                         * { box-sizing: border-box; }
                         `}
                     </style>
-                    {orders.map((order) => (
+                    {orders.map((order) => {
+                        const invoiceCurrency = order.currency || currency || 'YER';
+                        return (
                         <div key={order.id} className="print-page invoice-preview-page flex flex-col bg-white shadow-xl mb-4 px-4 py-4 sm:px-8 sm:py-6 print:shadow-none print:mb-0 rounded-[24px] print:rounded-none" dir="rtl"
                             style={{ width: previewWidth, maxWidth: previewWidth, minHeight: 0, height: 'auto', margin: '0 auto', fontFamily: "'Cairo', sans-serif" }}>
 
@@ -224,7 +225,7 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                         <div className={`flex justify-between items-center text-gray-600 text-sm font-bold`}>
                                             <span>{lang === 'ar' ? 'المجموع الفرعي:' : 'Subtotal:'}</span>
                                             <span className="text-gray-800">
-                                                {formatPrice(order.subTotal || order.total, currency)}
+                                                {formatPrice(order.subTotal || order.total, invoiceCurrency)}
                                             </span>
                                         </div>
                                         <div className={`flex justify-between items-center text-red-500 text-sm font-bold`}>
@@ -234,21 +235,21 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                                     const productDiscount = Number(order.discount || 0);
                                                     const couponDiscount = Math.round(Number(order.subTotal || 0) * (Number(order.discountPercentage || 0) / 100));
                                                     const totalD = productDiscount + couponDiscount;
-                                                    return totalD > 0 ? `- ${formatPrice(totalD, currency)}` : '0';
+                                                    return totalD > 0 ? `- ${formatPrice(totalD, invoiceCurrency)}` : '0';
                                                 })()}
                                             </span>
                                         </div>
                                         <div className={`flex justify-between items-center text-gray-600 text-sm font-bold`}>
                                             <span>{lang === 'ar' ? 'رسوم التوصيل:' : 'Delivery:'}</span>
                                             <span className="text-gray-800">
-                                                {formatPrice(order.deliveryCost, currency)}
+                                                {formatPrice(order.deliveryCost, invoiceCurrency)}
                                             </span>
                                         </div>
                                         <div className="my-2 border-t-2 border-dashed border-gray-300"></div>
                                         <div className={`flex justify-between items-center`}>
                                             <span className="text-lg font-black text-[#111317]">{lang === 'ar' ? 'الإجمالي:' : 'Total:'}</span>
                                             <span className="text-xl font-black text-[#111317]">
-                                                {formatPrice(order.total || 0, currency)}
+                                                {formatPrice(order.total || 0, invoiceCurrency)}
                                             </span>
                                         </div>
                                     </div>
@@ -260,7 +261,8 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                 <p className="text-gray-900 font-mono text-[10px]">{window.location.hostname}</p>
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </div>
