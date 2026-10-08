@@ -157,6 +157,10 @@ service cloud.firestore {
       allow read, write: if isAdmin() || isPOSWorker();
     }
 
+    match /purchases/{purchaseId} {
+      allow read, write: if isAdmin() || isPOSWorker();
+    }
+
     // Customer support and reviews retain their existing storefront behavior.
     match /contact_messages/{messageId} {
       allow create: if true;
