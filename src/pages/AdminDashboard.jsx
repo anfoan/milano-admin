@@ -175,11 +175,15 @@ const AdminDashboard = () => {
         return () => unsubMsg();
     }, []);
 
-    // Listener for new orders count (for sidebar badge)
+    // Count unread storefront, POS, and external orders in the same Orders badge.
     useEffect(() => {
-        const ordersQ = query(collection(db, "orders"), where("status", "==", "new"));
+        const ordersQ = query(collection(db, "orders"));
         const unsubOrders = onSnapshot(ordersQ, (snapshot) => {
-            setNewOrdersCount(snapshot.size);
+            const unreadOrders = snapshot.docs.filter(orderDoc => {
+                const order = orderDoc.data();
+                return !order.adminViewed && (order.status === 'new' || order.isPOS === true || order.isExternal === true);
+            });
+            setNewOrdersCount(unreadOrders.length);
         });
         return () => unsubOrders();
     }, []);

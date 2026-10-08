@@ -393,6 +393,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             const orderData = {
                 orderId,
                 status: 'new',
+                adminViewed: false,
                 currency: orderCurrency,
                 paymentMethod: formData.paymentMethod || 'manual', // Set at top level for InvoiceTemplate compatibility
                 createdAt: serverTimestamp(),

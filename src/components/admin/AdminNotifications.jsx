@@ -164,7 +164,7 @@ const AdminNotifications = ({ lang: propLang }) => {
             ...orderNotifications.map(o => ({ ...o, type: 'order', sortDate: o.createdAt?.toDate ? o.createdAt.toDate() : new Date(o.date) })),
             ...messageNotifications.map(m => ({ ...m, type: 'message', sortDate: m.createdAt?.toDate ? m.createdAt.toDate() : new Date(m.date) }))
         ].sort((a, b) => b.sortDate - a.sortDate);
-        const unreadCount = notifications.filter(n => (n.type === 'order' && n.status === 'new' && !n.adminViewed) || (n.type === 'message' && n.status === 'new')).length;
+        const unreadCount = notifications.filter(n => ((n.type === 'order' && (n.status === 'new' || n.isPOS === true || n.isExternal === true) && !n.adminViewed) || (n.type === 'message' && n.status === 'new'))).length;
         return { notifications, unreadCount };
     }, [orderNotifications, messageNotifications]);
 
@@ -180,7 +180,7 @@ const AdminNotifications = ({ lang: propLang }) => {
         // But to be "Real", we should probably update a field `adminViewed`.
         // Let's check if we can update documents.
 
-        const unreadDocs = notifications.filter(n => n.status === 'new' && !n.adminViewed);
+        const unreadDocs = notifications.filter(n => n.type === 'order' && (n.status === 'new' || n.isPOS === true || n.isExternal === true) && !n.adminViewed);
 
         unreadDocs.forEach(async (order) => {
             try {
@@ -219,6 +219,8 @@ const AdminNotifications = ({ lang: propLang }) => {
         }
     };
     const txt = t[lang];
+    const getOrderImage = (order) => order?.cartItems?.[0]?.image || order?.items?.[0]?.image || order?.productImage || '';
+    const isUnreadOrder = (order) => order?.type === 'order' && (order.status === 'new' || order.isPOS === true || order.isExternal === true) && !order.adminViewed;
 
     // Helper to format time "2 days ago" etc
     const formatTimeAgo = (dateString) => {
@@ -266,8 +268,8 @@ const AdminNotifications = ({ lang: propLang }) => {
                             }}
                             className="bg-white dark:bg-[#1c1c1e] border-2 border-[#10b981] shadow-[0_20px_50px_rgba(16,185,129,0.2)] rounded-2xl p-4 flex items-center gap-4 cursor-pointer active:scale-95 transition-transform"
                         >
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${activeToast.type === 'order' ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-blue-100 text-blue-600'}`}>
-                                {activeToast.type === 'order' ? <ShoppingBag size={24} className="animate-bounce" /> : <MessageSquare size={24} className="animate-pulse" />}
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${activeToast.type === 'order' ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-blue-100 text-blue-600'}`}>
+                                {activeToast.type === 'order' && getOrderImage(activeToast) ? <img src={getOrderImage(activeToast)} alt="" className="h-full w-full object-cover" /> : activeToast.type === 'order' ? <ShoppingBag size={24} className="animate-bounce" /> : <MessageSquare size={24} className="animate-pulse" />}
                             </div>
                             <div className="flex-1 min-w-0 text-start">
                                 <h4 className="font-black text-gray-900 dark:text-white text-sm">
@@ -344,11 +346,11 @@ const AdminNotifications = ({ lang: propLang }) => {
                                                     window.dispatchEvent(new CustomEvent('admin-navigate', { detail: { view: 'admin-chat', chatId: item.id } }));
                                                 }
                                             }}
-                                            className={`p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer flex gap-3 ${isRTL ? 'text-right' : 'text-left'} ${item.status === 'new' && (item.type === 'message' || !item.adminViewed) ? 'bg-blue-50/30' : ''}`}
+                                            className={`p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer flex gap-3 ${isRTL ? 'text-right' : 'text-left'} ${((item.type === 'order' && isUnreadOrder(item)) || (item.type === 'message' && item.status === 'new')) ? 'bg-blue-50/30' : ''}`}
                                         >
                                             <div className="shrink-0">
-                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.status === 'new' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
-                                                    {item.type === 'order' ? <ShoppingBag size={18} /> : <MessageSquare size={18} />}
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${isUnreadOrder(item) || item.status === 'new' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                                                    {item.type === 'order' && getOrderImage(item) ? <img src={getOrderImage(item)} alt="" className="h-full w-full object-cover" /> : item.type === 'order' ? <ShoppingBag size={18} /> : <MessageSquare size={18} />}
                                                 </div>
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -371,7 +373,7 @@ const AdminNotifications = ({ lang: propLang }) => {
                                                     </span>
                                                 </div>
                                             </div>
-                                            {item.status === 'new' && (item.type === 'message' || !item.adminViewed) && (
+                                            {((item.type === 'order' && isUnreadOrder(item)) || (item.type === 'message' && item.status === 'new')) && (
                                                 <div className="shrink-0 self-center">
                                                     <div className="w-2 h-2 bg-blue-500 rounded-full ring-2 ring-white dark:ring-[#1c1c1e]"></div>
                                                 </div>
