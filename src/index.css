@@ -705,3 +705,12 @@ input[type=number] {
     animation-duration: 3.4s;
   }
 }
+
+.chat-dot-pattern {
+  background-image: radial-gradient(rgba(71, 85, 105, 0.24) 1px, transparent 1px) !important;
+  background-size: 20px 20px !important;
+}
+
+.dark .chat-dot-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px) !important;
+}

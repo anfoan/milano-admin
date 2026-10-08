@@ -207,7 +207,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide bg-[#f0f2f5] dark:bg-[#0a0a0b]" style={{ backgroundImage: 'radial-gradient(#444 0.5px, transparent 0.5px)', backgroundSize: '20px 20px', backgroundOpacity: 0.1 }}>
+            <div className="chat-dot-pattern flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide bg-[#f0f2f5] dark:bg-[#0a0a0b]">
                 {!chatId && (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
                         <p>{txt.loading_msgs}</p>
