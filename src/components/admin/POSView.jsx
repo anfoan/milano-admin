@@ -29,8 +29,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         return posCurrencyCode === 'SAR' ? Math.round((amount / exchangeRate) * 100) / 100 : amount;
     };
     const currency = getLocalizedCurrency(posCurrencyCode, lang);
-    const formatPosPrice = (value) => posCurrencyCode === 'SAR' ? convertPosPrice(value).toFixed(2) : String(Math.round(convertPosPrice(value)));
-    const formatDisplayedPrice = (value) => posCurrencyCode === 'SAR' ? Number(value || 0).toFixed(2) : String(Math.round(Number(value) || 0));
+    const formatPosPrice = (value) => String(Math.round(convertPosPrice(value)));
+    const formatDisplayedPrice = (value) => String(Math.round(Number(value) || 0));
 
     // Auth States
     const [isAuthenticated, setIsAuthenticated] = useState(false);
