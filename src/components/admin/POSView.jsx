@@ -29,6 +29,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         return posCurrencyCode === 'SAR' ? Math.round((amount / exchangeRate) * 100) / 100 : amount;
     };
     const currency = getLocalizedCurrency(posCurrencyCode, lang);
+    const formatPosPrice = (value) => posCurrencyCode === 'SAR' ? convertPosPrice(value).toFixed(2) : String(Math.round(convertPosPrice(value)));
+    const formatDisplayedPrice = (value) => posCurrencyCode === 'SAR' ? Number(value || 0).toFixed(2) : String(Math.round(Number(value) || 0));
 
     // Auth States
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -1230,8 +1232,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="flex flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-[8px] font-black leading-none" title={isRTL ? "العملة وسعر الصرف" : "Currency and exchange rate"}>
-                                <button type="button" onClick={() => setPosCurrencyCode('YER')} className={`px-2 py-1 transition-colors ${posCurrencyCode === 'YER' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'عملة وصرف: ريال يمني' : 'YER exchange'}</button>
-                                <button type="button" onClick={() => setPosCurrencyCode('SAR')} className={`px-2 py-1 transition-colors border-t border-gray-200 dark:border-white/10 ${posCurrencyCode === 'SAR' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'عملة وصرف: ريال سعودي' : 'SAR exchange'}</button>
+                                <button type="button" onClick={() => setPosCurrencyCode('YER')} className={`px-2 py-1 transition-colors ${posCurrencyCode === 'YER' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال يمني' : 'YER'}</button>
+                                <button type="button" onClick={() => setPosCurrencyCode('SAR')} className={`px-2 py-1 transition-colors border-t border-gray-200 dark:border-white/10 ${posCurrencyCode === 'SAR' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال سعودي' : 'SAR'}</button>
                             </div>
                             {(isAdminManager || workerPermissions.allowViewHistory) && (
                                 <button
@@ -1384,11 +1386,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 <div className="flex flex-col items-end">
                                                     {hasDiscount && (
                                                         <span className="text-[9px] text-gray-400 line-through">
-                                                            {convertPosPrice(product.price).toLocaleString()}
+                                                            {formatPosPrice(product.price)}
                                                         </span>
                                                     )}
                                                     <span className="text-xs font-black text-blue-600 dark:text-blue-400">
-                                                        {convertPosPrice(finalPrice).toLocaleString()} {currency}
+                                                        {formatPosPrice(finalPrice)} {currency}
                                                     </span>
                                                 </div>
                                             </div>
@@ -1441,7 +1443,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         {item.title}
                                                     </h4>
                                                     <div className="text-[10px] text-gray-400 mt-0.5">
-                                                        {item.price.toLocaleString()} {currency}
+                                                        {formatDisplayedPrice(item.price)} {currency}
                                                     </div>
                                                 </div>
                                             </div>
@@ -1532,7 +1534,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             <div className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-400">
                                 <div className="flex justify-between">
                                     <span>{isRTL ? "المجموع الفرعي" : "Subtotal"}</span>
-                                    <span className="text-gray-800 dark:text-white font-mono">{calculateSubtotal().toLocaleString()} {currency}</span>
+                                    <span className="text-gray-800 dark:text-white font-mono">{formatDisplayedPrice(calculateSubtotal())} {currency}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span>{isRTL ? "خصم إضافي بالفاتورة" : "Additional Invoice Discount"}</span>
@@ -1549,7 +1551,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 </div>
                                 <div className="flex justify-between text-base font-black text-gray-900 dark:text-white pt-2.5 border-t border-gray-200 dark:border-white/5">
                                     <span>{isRTL ? "الإجمالي النهائي" : "Final Total"}</span>
-                                    <span className="text-blue-600 dark:text-blue-400 font-mono">{calculateTotal().toLocaleString()} {currency}</span>
+                                    <span className="text-blue-600 dark:text-blue-400 font-mono">{formatDisplayedPrice(calculateTotal())} {currency}</span>
                                 </div>
                             </div>
 
