@@ -760,7 +760,10 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 {searchTerm && (
                                     <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden max-h-96 overflow-y-auto">
                                         {filteredProducts.length > 0 ? (
-                                            filteredProducts.map(p => (
+                                            filteredProducts.map(p => {
+                                                const stockCount = Number(p.stock || 0);
+                                                const stockColor = stockCount <= 0 ? 'text-red-600' : stockCount <= 3 ? 'text-orange-500' : 'text-green-600';
+                                                return (
                                                 <div
                                                     key={p.id}
                                                     className="p-3 md:p-4 hover:bg-gray-50 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b last:border-0 transition-colors"
@@ -768,7 +771,10 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                                     <div className="flex items-center gap-4">
                                                         <img src={p.mainImage || '/nav-logo.png'} className="w-12 h-12 rounded-lg object-cover" />
                                                         <div>
-                                                            <div className="font-black text-gray-800">{p.name}</div>
+                                                            <div className="font-black text-gray-800 flex items-center gap-2">
+                                                                <span>{p.name}</span>
+                                                                <span className={`${stockColor} font-black font-sans`} dir="ltr">{stockCount.toLocaleString('en-US')}</span>
+                                                            </div>
                                                             <div className="text-xs font-bold text-gray-400">{p.category}</div>
                                                         </div>
                                                     </div>
@@ -788,13 +794,15 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                                                 handleAddToCart(p);
                                                                 setSearchTerm('');
                                                             }}
-                                                            className="bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition"
+                                                            disabled={stockCount <= 0}
+                                                            className={`bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition ${stockCount <= 0 ? 'opacity-40 cursor-not-allowed hover:bg-blue-600' : ''}`}
                                                         >
                                                             <Plus size={20} />
                                                         </button>
                                                     </div>
                                                 </div>
-                                            ))
+                                                );
+                                            })
                                         ) : (
                                             <div className="p-8 text-center text-gray-400 font-bold">{txt.no_products}</div>
                                         )}
@@ -1020,17 +1028,18 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 )}
                             </div>
 
-                            <div className="flex justify-between items-center text-sm font-bold text-gray-500">
-                                <span>{txt.discount}</span>
+                            <div className="flex justify-between items-center text-sm font-black text-red-600">
+                                <span className="font-black text-red-600">{txt.discount}</span>
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="number"
+                                        inputMode="numeric"
                                         value={discount}
                                         onChange={(e) => {
                                             setDiscount(Math.max(0, Number(e.target.value)));
                                             setAppliedCoupon(null); // Clear applied coupon if manual edit
                                         }}
-                                        className="w-24 text-left font-mono font-bold bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-red-500"
+                                        className="w-24 text-left font-sans font-black bg-red-50 border border-red-400 rounded-lg px-2 py-1 text-red-600 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                                     />
                                 </div>
                             </div>
