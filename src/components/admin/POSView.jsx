@@ -22,7 +22,13 @@ import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 
 const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const isRTL = lang === 'ar';
-    const currency = getLocalizedCurrency(generalSettings?.currency || 'YER', lang);
+    const [posCurrencyCode, setPosCurrencyCode] = useState(generalSettings?.currency || 'YER');
+    const exchangeRate = 140;
+    const convertPosPrice = (value) => {
+        const amount = Number(value) || 0;
+        return posCurrencyCode === 'SAR' ? Math.round((amount / exchangeRate) * 100) / 100 : amount;
+    };
+    const currency = getLocalizedCurrency(posCurrencyCode, lang);
 
     // Auth States
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -399,8 +405,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             setCartItems([...cartItems, {
                 id: product.id,
                 title: product.name,
-                price: finalPrice,
-                originalPrice: product.price,
+                price: convertPosPrice(finalPrice),
+                originalPrice: convertPosPrice(product.price),
                 costPrice: product.costPrice || 0,
                 image: product.mainImage || '/nav-logo.png',
                 quantity: 1,
@@ -421,11 +427,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             const finalPrice = hasDiscount ? Number(p.priceAfterDiscount) : Number(p.price);
             return {
                 ...item,
-                price: finalPrice,
-                originalPrice: p.price
+                price: convertPosPrice(finalPrice),
+                originalPrice: convertPosPrice(p.price)
             };
         }));
-    }, [applyStoreOffers, products]);
+    }, [applyStoreOffers, products, posCurrencyCode]);
 
     const handleUpdateCartItem = (index, key, val) => {
         const updated = [...cartItems];
@@ -462,7 +468,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             const orderData = {
                 orderId,
                 status: 'completed',
-                currency: generalSettings?.currency || 'YER',
+                currency: posCurrencyCode,
                 paymentMethod: paymentMethod, // 'cash', 'card', 'transfer'
                 createdAt: serverTimestamp(),
                 date: new Date().toLocaleDateString(isRTL ? 'ar-EG' : 'en-GB'),
@@ -726,7 +732,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 .replace(/#[a-fA-F0-9]{3}/g, '')
                 .replace(/\s*·\s*$/, '')
                 .trim();
-            return `<tr><td class="item-cell"><strong>${escapeHtml(item.title || '---')}</strong>${details ? `<small>${escapeHtml(details)}</small>` : ''}</td><td class="qty-cell"><span class="plain-number">${toEnglishNumber(item.quantity || 1)}</span></td><td class="amount-cell"><span class="plain-number">${toEnglishNumber(Number(item.price || 0) * Number(item.quantity || 1))}</span><span class="plain-currency">${escapeHtml(currency)}</span></td></tr>`;
+            return `<tr><td class="item-cell"><strong>${escapeHtml(item.title || '---')}</strong>${details ? `<small>${escapeHtml(details)}</small>` : ''}</td><td class="qty-cell"><span class="plain-number">${toEnglishNumber(item.quantity || 1)}</span></td><td class="amount-cell"><span class="plain-number">${toEnglishNumber(Number(item.price || 0) * Number(item.quantity || 1))}</span></td></tr>`;
         }).join('') || `<tr><td colspan="3" class="empty">${isRTL ? 'لا توجد أصناف في الفاتورة' : 'No items in this invoice'}</td></tr>`;
         const htmlContent = `<!doctype html><html dir="${isRTL ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><base href="${window.location.origin}/"><title>${isRTL ? 'فاتورة نقطة البيع' : 'POS Invoice'}</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet"><style>
             @page{size:80mm auto;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#111;font-family:'Cairo',Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{width:80mm;margin:0 auto}.no-print{display:block}.print-actions{display:flex;justify-content:center;align-items:center;gap:3mm;margin:4mm auto 0;width:max-content}.action-btn{min-width:28mm;border:0;border-radius:7px;padding:2mm 4mm;font:800 11px 'Cairo',sans-serif;cursor:pointer}.print-btn{background:#2563eb;color:#fff}.cancel-btn{background:#e5e7eb;color:#374151}.receipt{width:100%;padding:3mm 4mm 4mm;background:#fff}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:4mm;padding-bottom:4mm;border-bottom:1px dashed #dedede}.store{min-width:0;flex:1;padding-top:3mm;text-align:right}.store-name{font-size:15px;line-height:1.2;font-weight:900;letter-spacing:-.25px}.store-address,.store-phone{margin-top:.6mm;color:#414141;font-size:10px;font-weight:700;line-height:1.45}.brand-logo{width:15mm;height:15mm;flex:0 0 15mm;object-fit:cover;border:1px solid #e5e7eb;border-radius:4mm;background:#fff;padding:0;box-shadow:0 2px 7px rgba(15,23,42,.12)}.meta{padding:2.5mm 0;border-bottom:1px dashed #dedede}.meta-row{display:grid;grid-template-columns:1fr 1fr;gap:3mm;min-height:4.5mm;align-items:baseline;font-size:9px}.meta-key{color:#444;font-weight:800;text-align:right}.meta-value{font-weight:900;text-align:left;overflow-wrap:anywhere}.meta-value.ltr{direction:ltr;font-family:Arial,sans-serif}.meta-value.status{color:${completed ? '#149a63' : '#dc2626'}}.items{width:100%;border-collapse:collapse;margin-top:3mm;table-layout:fixed}.items th{padding:0 0 2mm;border-bottom:1px dashed #999;color:#222;font-size:8px;font-weight:900}.items thead{border-bottom:1px dashed #999}.items th.item-head{text-align:right;width:57%}.items th.qty-head{text-align:center;width:15%}.items th.amount-head{text-align:left;width:28%;padding-right:0}.items td{padding:2.4mm 0;vertical-align:top;border-bottom:1px dashed #e2e2e2;font-size:10px}.item-cell{text-align:right;padding-left:2mm!important}.item-cell strong{display:block;font-size:10px;line-height:1.45}.item-cell small{display:block;margin-top:1px;color:#686868;font-size:8px;font-weight:700}.qty-cell{text-align:center!important;font-family:Arial,sans-serif;font-weight:900!important;font-variant-numeric:lining-nums;text-decoration:none!important;border-bottom:0!important}.amount-cell{display:flex;align-items:center;justify-content:flex-start;gap:1.5mm;flex-wrap:nowrap;white-space:nowrap;text-align:left!important;direction:rtl;font-family:Arial,sans-serif;font-size:12px;font-weight:900!important;font-variant-numeric:lining-nums;text-decoration:none!important;border-bottom:0!important}.plain-number{font-family:Arial,sans-serif;font-size:12px;font-weight:900;line-height:1.2;text-decoration:none!important;-webkit-text-decoration-line:none!important}.plain-currency{display:inline-block;margin-left:0;vertical-align:middle;transform:translateY(-0.5px);font-family:'Cairo',Arial,sans-serif;font-size:10px;font-weight:900;line-height:1.2;text-decoration:none!important}.amount-cell .plain-number{font-size:9px}.amount-cell .plain-currency{font-size:10px}.empty{text-align:center;color:#777;padding:6mm 0!important}.totals{margin-top:3mm;border-bottom:1px dashed #dedede;padding-bottom:3mm}.total-row{display:flex;justify-content:space-between;align-items:center;padding:1.1mm 0;font-size:10px;font-weight:700}.total-row .money{display:inline-flex;flex-direction:row-reverse;align-items:center;gap:1.3mm;direction:ltr;font-family:Arial,sans-serif;font-weight:900}.money-number{white-space:nowrap;font-family:Arial,sans-serif;font-size:12px;font-weight:900;font-variant-numeric:lining-nums;text-decoration:none!important}.money-currency{white-space:nowrap;font-family:'Cairo',Arial,sans-serif;font-size:11px;font-weight:900;text-decoration:none!important}.total-row.discount{color:#d33}.total-row.final{margin-top:1.2mm;padding-top:2mm;border-top:1px solid #d9d9d9;color:#111;font-size:14px;font-weight:900}.total-row.final{direction:rtl}.total-row.final > span:first-child{transform:none;text-align:right}.total-row.final .money{font-size:12px;transform:none}.total-row.final .money-number{font-size:11px}.footer{padding-top:4mm;padding-bottom:0;text-align:center}.footer b{display:block;font-size:11px;font-weight:900}.footer span{display:block;margin-top:1mm;color:#666;font-family:Arial,sans-serif;font-size:10px;font-weight:700}.barcode{width:42mm;height:11mm;margin:3mm auto 1mm;background:repeating-linear-gradient(90deg,#111 0 0.35mm,transparent 0.35mm 0.8mm,#111 0.8mm 1.15mm,transparent 1.15mm 1.7mm);}.barcode-number{font-family:Arial,sans-serif;font-size:7px;color:#666;text-align:center}.barcode-divider{border-top:1px dashed #dedede;margin:3mm 0}.barcode-thanks{text-align:center;font-size:10px;font-weight:900;color:#111}@media print{.no-print{display:none!important}.print-actions{display:none!important}.receipt{padding:4.5mm 4mm 4mm}body{width:80mm}.brand-logo{object-fit:contain!important;margin-top:1.3mm!important;padding:.7mm!important;background:#fff!important}}
@@ -1223,6 +1229,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
+                            <div className="flex flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-[8px] font-black leading-none" title={isRTL ? "العملة وسعر الصرف" : "Currency and exchange rate"}>
+                                <button type="button" onClick={() => setPosCurrencyCode('YER')} className={`px-2 py-1 transition-colors ${posCurrencyCode === 'YER' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'عملة وصرف: ريال يمني' : 'YER exchange'}</button>
+                                <button type="button" onClick={() => setPosCurrencyCode('SAR')} className={`px-2 py-1 transition-colors border-t border-gray-200 dark:border-white/10 ${posCurrencyCode === 'SAR' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'عملة وصرف: ريال سعودي' : 'SAR exchange'}</button>
+                            </div>
                             {(isAdminManager || workerPermissions.allowViewHistory) && (
                                 <button
                                     onClick={() => setPosSubView('receipts')}
@@ -1374,11 +1384,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 <div className="flex flex-col items-end">
                                                     {hasDiscount && (
                                                         <span className="text-[9px] text-gray-400 line-through">
-                                                            {Number(product.price).toLocaleString()}
+                                                            {convertPosPrice(product.price).toLocaleString()}
                                                         </span>
                                                     )}
                                                     <span className="text-xs font-black text-blue-600 dark:text-blue-400">
-                                                        {finalPrice.toLocaleString()} {currency}
+                                                        {convertPosPrice(finalPrice).toLocaleString()} {currency}
                                                     </span>
                                                 </div>
                                             </div>
@@ -2131,7 +2141,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     </div>
                                                     <div className="py-3 text-[10px] font-black">
                                                         <div className="grid grid-cols-[1fr_15%_28%] items-center gap-2 border-b border-dashed border-gray-500 dark:border-white/30 pb-2 text-[8px] text-gray-700 dark:text-gray-200"><span className="text-right">{isRTL ? 'اسم المنتج + المقاس' : 'Product name + size'}</span><span className="text-center">{isRTL ? 'الكمية' : 'Qty'}</span><span className="text-left">{isRTL ? 'الإجمالي' : 'Total'}</span></div>
-                                                        {items.map((item, itemIndex) => <div key={`${receipt.id}-${itemIndex}`} className="grid grid-cols-[1fr_15%_28%] items-start gap-2 border-b border-dashed border-gray-300 dark:border-white/15 py-2 last:border-0"><span className="min-w-0 text-right text-gray-900 dark:text-white">{item.title || '---'}{(item.selectedSize || item.size) ? <small className="block text-[9px] font-bold text-gray-500">{item.selectedSize || item.size}</small> : null}</span><span className="text-center font-mono text-gray-900 dark:text-white">{item.quantity || 1}</span><span dir="rtl" className="whitespace-nowrap text-left font-sans font-black text-[9px] text-gray-900 dark:text-white">{Number(item.price || 0).toLocaleString()} <span className="text-[11px] font-black">{currency}</span></span></div>)}
+                                                        {items.map((item, itemIndex) => <div key={`${receipt.id}-${itemIndex}`} className="grid grid-cols-[1fr_15%_28%] items-start gap-2 border-b border-dashed border-gray-300 dark:border-white/15 py-2 last:border-0"><span className="min-w-0 text-right text-gray-900 dark:text-white">{item.title || '---'}{(item.selectedSize || item.size) ? <small className="block text-[9px] font-bold text-gray-500">{item.selectedSize || item.size}</small> : null}</span><span className="text-center font-mono text-gray-900 dark:text-white">{item.quantity || 1}</span><span dir="rtl" className="whitespace-nowrap text-left font-sans font-black text-[9px] text-gray-900 dark:text-white">{Number(item.price || 0).toLocaleString()}</span></div>)}
                                                     </div>
                                                     <div className="flex items-center justify-between border-t border-gray-300 dark:border-white/10 pt-3 text-xs font-black text-gray-900 dark:text-white" dir="rtl"><span>{isRTL ? 'الإجمالي النهائي:' : 'Final total:'}</span><span className="font-sans font-black text-[11px]">{Number(receipt.total ?? subtotal).toLocaleString()} <span className="text-[11px] font-black">{currency}</span></span></div>
                                                     <div className="mt-3 border-t border-dashed border-gray-300 dark:border-white/10 pt-3 text-center"><div className="mx-auto h-9 w-40 barcode-stripes" aria-label={receipt.orderId || receipt.id}></div><div className="mt-1 font-mono text-[8px] text-gray-500">{receipt.orderId || receipt.id}</div><div className="my-3 border-t border-dashed border-gray-300 dark:border-white/10"></div><div className="text-[10px] font-black text-gray-800 dark:text-gray-100">{isRTL ? 'شكراً لتعاملكم مع متجر ميلانو.' : 'Thank you for doing business with Milano Store.'}</div></div>
@@ -2255,8 +2265,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 itemsToAdd.push({
                                                     id: sizeModalProduct.id,
                                                     title: sizeModalProduct.name,
-                                                    price: finalPrice,
-                                                    originalPrice: sizeModalProduct.price,
+                                                    price: convertPosPrice(finalPrice),
+                                                    originalPrice: convertPosPrice(sizeModalProduct.price),
                                                     costPrice: sizeModalProduct.costPrice || 0,
                                                     image: sizeModalProduct.mainImage || '/nav-logo.png',
                                                     quantity: qty,
