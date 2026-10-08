@@ -233,7 +233,7 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
             <div className="w-full max-w-5xl max-h-[96vh] overflow-y-auto bg-gray-100 dark:bg-[#202124] rounded-2xl shadow-2xl">
                 <div className="no-print sticky top-0 z-10 h-16 px-5 bg-white dark:bg-[#242528] border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
                     <div className="flex items-center gap-3"><Printer size={17} className="text-blue-500"/><span className="font-black text-sm text-gray-800 dark:text-white">{isRTL ? 'تقرير فواتير المشتريات الفاتورة' : 'Purchase Invoices Report'}</span></div>
-                    <div className="flex items-center gap-2"><button onClick={() => print()} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs font-black shadow-lg shadow-blue-500/20"><Printer size={15}/>{isRTL ? 'طباعة التقرير' : 'Print Report'}</button><button onClick={() => setReportOpen(false)} className="w-9 h-9 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center"><X size={18}/></button></div>
+                    <div className="flex items-center gap-2"><button onClick={() => setReportOpen(false)} className="w-9 h-9 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center"><X size={18}/></button></div>
                 </div>
                 <div className="p-4 md:p-7">
                     <div className="bg-white text-gray-900 rounded-2xl shadow-sm border border-gray-200 p-5 md:p-7" dir={isRTL ? 'rtl' : 'ltr'}>
