@@ -1312,7 +1312,7 @@ printWindow.onload = () => printWindow.print();
                                         </td>
                                         <td className="p-1.5 text-center">
                                             <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
-                                                <span className="text-[10px] font-bold text-gray-600 font-mono">
+                                                <span className="text-[10px] font-bold text-gray-600 font-sans">
                                                     {(() => {
                                                         const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
                                                         if (order.createdAt && typeof order.createdAt.toDate === 'function') {
@@ -1323,7 +1323,7 @@ printWindow.onload = () => printWindow.print();
                                                         return order.date;
                                                     })()}
                                                 </span>
-                                                <span className="text-[9px] text-gray-400 font-mono">
+                                                <span className="text-[9px] text-gray-400 font-sans">
                                                     {(() => {
                                                         const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
                                                         if (order.createdAt && typeof order.createdAt.toDate === 'function') {
