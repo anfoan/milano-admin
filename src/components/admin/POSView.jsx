@@ -95,6 +95,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const [generatedReport, setGeneratedReport] = useState(null);
     const [showBulkReceiptPreview, setShowBulkReceiptPreview] = useState(false);
     const [bulkReceiptPreviewItems, setBulkReceiptPreviewItems] = useState([]);
+    const [selectedBulkReceiptIds, setSelectedBulkReceiptIds] = useState([]);
 
     // Success Screen
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -961,7 +962,41 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
     const handlePrintVisibleReceipts = () => {
         setBulkReceiptPreviewItems(visibleReceipts);
+        setSelectedBulkReceiptIds(visibleReceipts.map(receipt => receipt.id));
         setShowBulkReceiptPreview(true);
+    };
+    const toggleBulkReceipt = (receiptId) => {
+        setSelectedBulkReceiptIds(current => current.includes(receiptId)
+            ? current.filter(id => id !== receiptId)
+            : [...current, receiptId]);
+    };
+    const toggleAllBulkReceipts = () => {
+        setSelectedBulkReceiptIds(current => current.length === bulkReceiptPreviewItems.length
+            ? []
+            : bulkReceiptPreviewItems.map(receipt => receipt.id));
+    };
+    const printSelectedSmallReceipts = () => {
+        const selected = bulkReceiptPreviewItems.filter(receipt => selectedBulkReceiptIds.includes(receipt.id));
+        if (selected.length === 0) return;
+        const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
+        const toEnglishNumber = (value) => Number(value || 0).toLocaleString('en-US');
+        const receiptCurrency = (receipt) => escapeHtml(getInvoiceCurrencyLabel(receipt));
+        const receiptHtml = selected.map((receipt) => {
+            const items = receipt.cartItems || [];
+            const subtotal = Number(receipt.subTotal ?? items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0));
+            const total = Number(receipt.total ?? subtotal);
+            const date = receipt.createdAt?.toDate?.() || new Date();
+            const dateText = date.toLocaleDateString('en-GB');
+            const timeText = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/am/i, 'ص').replace(/pm/i, 'م');
+            const rows = items.map(item => `<div class="item-row"><span>${escapeHtml(item.title || '---')}${(item.selectedSize || item.size) ? `<small>${escapeHtml(item.selectedSize || item.size)}</small>` : ''}</span><b>${toEnglishNumber(item.quantity || 1)}</b><strong>${toEnglishNumber(Number(item.price || 0) * Number(item.quantity || 1))}</strong></div>`).join('');
+            return `<article class="receipt"><header><div><h1>${escapeHtml(generalSettings?.storeName || 'متجر ميلانو')}</h1><p>${escapeHtml(generalSettings?.storeAddress || '')}</p></div><img src="${escapeHtml(generalSettings?.invoiceLogo || '/admin-logo.png')}"/></header><section class="meta"><div><span>رقم الإيصال:</span><b>${escapeHtml(receipt.orderId || receipt.id)}</b></div><div><span>التاريخ:</span><b>${dateText} ${timeText}</b></div><div><span>العميل:</span><b>${escapeHtml(receipt.formData?.name || 'زبون محلي')}</b></div><div><span>طريقة الدفع:</span><b>${receipt.paymentMethod === 'card' ? 'محفظة جيب' : receipt.paymentMethod === 'transfer' ? 'تحويل بنكي' : 'نقدي / كاش'}</b></div></section><div class="items-head"><span>اسم المنتج + المقاس</span><b>الكمية</b><strong>الإجمالي</strong></div>${rows}<div class="final"><b>الإجمالي النهائي:</b><strong>${toEnglishNumber(total)} ${receiptCurrency(receipt)}</strong></div><div class="barcode"></div><small class="barcode-id">${escapeHtml(receipt.orderId || receipt.id)}</small><div class="dash"></div><h2>شكراً لتعاملكم مع متجر ميلانو.</h2></article>`;
+        }).join('');
+        const printWindow = window.open('', '_blank', 'width=330,height=700');
+        if (!printWindow) { alert(isRTL ? 'يرجى السماح بالنوافذ المنبثقة للطبع' : 'Please allow popups for printing'); return; }
+        printWindow.document.write(`<!doctype html><html dir="rtl"><head><meta charset="utf-8"><title>طباعة الفواتير</title><style>@page{size:80mm auto;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,sans-serif}.receipt{width:80mm;min-height:100mm;padding:4mm;border-bottom:1px dashed #999;page-break-after:always}.receipt:last-child{page-break-after:auto}header{display:flex;justify-content:space-between;gap:3mm;border-bottom:1px dashed #aaa;padding-bottom:3mm}header h1{font-size:15px;margin:0;font-weight:900}header p{font-size:9px;margin:1mm 0}header img{width:15mm;height:15mm;object-fit:contain}.meta{border-bottom:1px dashed #aaa;padding:2mm 0;font-size:9px}.meta div{display:flex;justify-content:space-between;gap:2mm;padding:.6mm 0}.items-head,.item-row{display:grid;grid-template-columns:1fr 15% 28%;gap:2mm;align-items:center;font-size:9px;padding:2mm 0;border-bottom:1px dashed #ccc}.items-head{font-weight:900;border-bottom:1px solid #777}.items-head b,.item-row b{text-align:center}.items-head strong,.item-row strong{text-align:left;direction:ltr;white-space:nowrap}.item-row span{min-width:0;text-align:right;font-weight:700}.item-row small{display:block;font-size:8px;color:#666}.final{display:flex;justify-content:space-between;align-items:center;padding-top:3mm;margin-top:2mm;border-top:1px solid #111;font-size:12px;font-weight:900}.final strong{font-size:11px;direction:ltr;white-space:nowrap}.barcode{height:10mm;width:42mm;margin:4mm auto 1mm;background:repeating-linear-gradient(90deg,#111 0 .35mm,transparent .35mm .8mm,#111 .8mm 1.15mm,transparent 1.15mm 1.7mm)}.barcode-id{display:block;text-align:center;font-size:7px;color:#666;direction:ltr}.dash{border-top:1px dashed #aaa;margin:3mm 0}.receipt h2{text-align:center;font-size:10px;margin:0;font-weight:900}@media print{.receipt{page-break-after:always}.receipt:last-child{page-break-after:auto}}</style></head><body>${receiptHtml}</body></html>`);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.onload = () => printWindow.print();
     };
 
     if (authLoading) {
@@ -1540,7 +1575,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             <div className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-400">
                                 <div className="flex justify-between">
                                     <span>{isRTL ? "المجموع الفرعي" : "Subtotal"}</span>
-                                    <span className="text-gray-800 dark:text-white font-sans">{formatDisplayedPrice(calculateSubtotal())} {currency}</span>
+                                    <span className="text-gray-800 dark:text-white font-sans">{formatDisplayedPrice(calculateSubtotal())} <span className="inline-block leading-normal align-middle" style={currencyFontStyle}>{currency}</span></span>
                                 </div>
                                 <div className="flex justify-between items-center text-red-600 dark:text-red-300">
                                     <span className="font-black">{isRTL ? "خصم إضافي بالفاتورة" : "Additional Invoice Discount"}</span>
@@ -1782,7 +1817,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
                     {/* Search and Table */}
                     <div className="flex flex-1 flex-col min-h-0 overflow-visible lg:overflow-hidden">
-                        <div className="mb-4 flex items-center justify-between gap-3">
+                        <div dir="ltr" className="mb-4 flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2 shrink-0">
                                 <button
                                     onClick={handlePrintVisibleReceipts}
@@ -1795,7 +1830,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     {isRTL ? 'عدد الفواتير المعروضة:' : 'Displayed invoices:'} {visibleReceipts.length}
                                 </span>
                             </div>
-                            <div className="relative flex-1 max-w-md">
+                            <div className="relative flex-1 max-w-md" dir="rtl">
                                 <Search className="absolute top-2.5 right-3 text-gray-400" size={16} />
                                 <input
                                     type="text"
@@ -2118,12 +2153,18 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     <div className="fixed inset-0 z-[110] flex items-center justify-center p-3 sm:p-5">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm" onClick={() => setShowBulkReceiptPreview(false)} />
                         <motion.div initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 12 }} className="relative w-full max-w-4xl max-h-[94vh] overflow-hidden rounded-[26px] border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#15171b] shadow-2xl flex flex-col">
-                            <div className="shrink-0 flex items-center justify-between gap-3 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#1c1f24] px-4 py-3">
+                            <div className="shrink-0 flex flex-row-reverse items-center justify-between gap-3 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#1c1f24] px-4 py-3">
                                 <div className="min-w-0">
                                     <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white">{isRTL ? 'طباعة جميع الفواتير والإيصالات' : 'Print All POS Receipts'}</h3>
                                     <p className="mt-0.5 text-[10px] font-bold text-gray-400">{isRTL ? `${bulkReceiptPreviewItems.length} فاتورة ظاهرة في الصفحة الحالية` : `${bulkReceiptPreviewItems.length} invoices visible on this page`}</p>
                                 </div>
-                                <button onClick={() => setShowBulkReceiptPreview(false)} className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10"><X size={18} /></button>
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <label className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-white/10 px-2 py-1 text-[10px] font-black text-gray-700 dark:text-gray-200 cursor-pointer">
+                                        <input type="checkbox" checked={bulkReceiptPreviewItems.length > 0 && selectedBulkReceiptIds.length === bulkReceiptPreviewItems.length} onChange={toggleAllBulkReceipts} className="accent-red-600" />
+                                        {isRTL ? 'تحديد الكل' : 'Select all'}
+                                    </label>
+                                    <button onClick={() => setShowBulkReceiptPreview(false)} className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10"><X size={18} /></button>
+                                </div>
                             </div>
                             <div className="flex-1 overflow-y-auto p-1 sm:p-2">
                                 {bulkReceiptPreviewItems.length === 0 ? (
@@ -2137,7 +2178,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             return (
                                                 <article key={receipt.id} className="mx-auto w-full max-w-[365px] rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#202328] p-3 shadow-sm">
                                                     <div className="flex items-center justify-between border-b border-dashed border-gray-300 dark:border-white/10 pb-3">
-                                                        <span className="rounded-md bg-blue-50 dark:bg-blue-500/10 px-2 py-1 text-[9px] font-black text-blue-600 dark:text-blue-300">{isRTL ? `فاتورة كاشير رقم ${index + 1}` : `Cashier receipt ${index + 1}`}</span>
+                                                        <label className="inline-flex items-center gap-1 rounded-md bg-blue-50 dark:bg-blue-500/10 px-2 py-1 text-[9px] font-black text-blue-600 dark:text-blue-300 cursor-pointer"><input type="checkbox" checked={selectedBulkReceiptIds.includes(receipt.id)} onChange={() => toggleBulkReceipt(receipt.id)} className="accent-red-600" />{isRTL ? `فاتورة كاشير رقم ${index + 1}` : `Cashier receipt ${index + 1}`}</label>
                                                         <button onClick={() => triggerPrint(receipt)} className="inline-flex items-center gap-1 rounded-md border border-blue-200 dark:border-blue-500/30 px-2 py-1 text-[9px] font-black text-blue-600 dark:text-blue-300"><Printer size={11} />{isRTL ? 'طباعة هذه الفاتورة' : 'Print invoice'}</button>
                                                     </div>
                                                     <div className="flex items-start justify-between gap-3 border-b border-dashed border-gray-300 dark:border-white/10 py-3">
@@ -2164,7 +2205,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             </div>
                             <div className="shrink-0 flex flex-wrap items-center justify-end gap-2 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#1c1f24] px-4 py-3">
                                 <button onClick={() => setShowBulkReceiptPreview(false)} className="rounded-xl bg-gray-100 dark:bg-white/10 px-4 py-2 text-xs font-black text-gray-600 dark:text-gray-200">{isRTL ? 'إلغاء وإغلاق' : 'Close'}</button>
-                                <button onClick={() => bulkReceiptPreviewItems[0] && triggerPrint(bulkReceiptPreviewItems[0])} disabled={!bulkReceiptPreviewItems.length} className="rounded-xl bg-red-600 px-4 py-2 text-xs font-black text-white disabled:opacity-40">{isRTL ? 'طباعة الفاتورة المحددة' : 'Print selected invoice'}</button>
+                                <button onClick={printSelectedSmallReceipts} disabled={selectedBulkReceiptIds.length === 0} className="rounded-xl bg-red-600 px-4 py-2 text-xs font-black text-white disabled:opacity-40">{isRTL ? `طباعة الفواتير المحددة (${selectedBulkReceiptIds.length})` : `Print selected invoices (${selectedBulkReceiptIds.length})`}</button>
                             </div>
                         </motion.div>
                     </div>
