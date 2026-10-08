@@ -193,6 +193,20 @@ const AdminNotifications = ({ lang: propLang }) => {
         setIsOpen(false);
     };
 
+    const handleOpenNotification = async (item) => {
+        setIsOpen(false);
+        if (item.type === 'order') {
+            try {
+                await updateDoc(doc(db, 'orders', item.id), { adminViewed: true });
+            } catch (error) {
+                console.error('Error marking order notification as read', error);
+            }
+            window.dispatchEvent(new CustomEvent('admin-navigate', { detail: { view: 'order-details', data: item } }));
+        } else {
+            window.dispatchEvent(new CustomEvent('admin-navigate', { detail: { view: 'admin-chat', chatId: item.id } }));
+        }
+    };
+
     // Translation Object
     const t = {
         ar: {
@@ -259,17 +273,13 @@ const AdminNotifications = ({ lang: propLang }) => {
                     >
                         <div 
                             onClick={() => {
-                                if (activeToast.type === 'order') {
-                                    window.dispatchEvent(new CustomEvent('admin-navigate', { detail: { view: 'order-details', data: activeToast } }));
-                                } else {
-                                    window.dispatchEvent(new CustomEvent('admin-navigate', { detail: { view: 'admin-chat', chatId: activeToast.id } }));
-                                }
+                                void handleOpenNotification(activeToast);
                                 setActiveToast(null);
                             }}
                             className="bg-white dark:bg-[#1c1c1e] border-2 border-[#10b981] shadow-[0_20px_50px_rgba(16,185,129,0.2)] rounded-2xl p-4 flex items-center gap-4 cursor-pointer active:scale-95 transition-transform"
                         >
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${activeToast.type === 'order' ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-blue-100 text-blue-600'}`}>
-                                {activeToast.type === 'order' && getOrderImage(activeToast) ? <img src={getOrderImage(activeToast)} alt="" className="h-full w-full object-cover" /> : activeToast.type === 'order' ? <ShoppingBag size={24} className="animate-bounce" /> : <MessageSquare size={24} className="animate-pulse" />}
+                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${activeToast.type === 'order' ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-blue-100 text-blue-600'}`}>
+                                {activeToast.type === 'order' && getOrderImage(activeToast) ? <img src={getOrderImage(activeToast)} alt="" className="h-full w-full rounded-lg object-cover" /> : activeToast.type === 'order' ? <ShoppingBag size={24} className="animate-bounce" /> : <MessageSquare size={24} className="animate-pulse" />}
                             </div>
                             <div className="flex-1 min-w-0 text-start">
                                 <h4 className="font-black text-gray-900 dark:text-white text-sm">
@@ -338,19 +348,12 @@ const AdminNotifications = ({ lang: propLang }) => {
                                     {notifications.map((item) => (
                                         <div
                                             key={item.id}
-                                            onClick={() => {
-                                                setIsOpen(false);
-                                                if (item.type === 'order') {
-                                                    window.dispatchEvent(new CustomEvent('admin-navigate', { detail: { view: 'order-details', data: item } }));
-                                                } else {
-                                                    window.dispatchEvent(new CustomEvent('admin-navigate', { detail: { view: 'admin-chat', chatId: item.id } }));
-                                                }
-                                            }}
+                                            onClick={() => { void handleOpenNotification(item); }}
                                             className={`p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer flex gap-3 ${isRTL ? 'text-right' : 'text-left'} ${((item.type === 'order' && isUnreadOrder(item)) || (item.type === 'message' && item.status === 'new')) ? 'bg-blue-50/30' : ''}`}
                                         >
                                             <div className="shrink-0">
-                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${isUnreadOrder(item) || item.status === 'new' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
-                                                    {item.type === 'order' && getOrderImage(item) ? <img src={getOrderImage(item)} alt="" className="h-full w-full object-cover" /> : item.type === 'order' ? <ShoppingBag size={18} /> : <MessageSquare size={18} />}
+                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden ${isUnreadOrder(item) || item.status === 'new' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                                                    {item.type === 'order' && getOrderImage(item) ? <img src={getOrderImage(item)} alt="" className="h-full w-full rounded-lg object-cover" /> : item.type === 'order' ? <ShoppingBag size={18} /> : <MessageSquare size={18} />}
                                                 </div>
                                             </div>
                                             <div className="flex-1 min-w-0">
