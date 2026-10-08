@@ -28,6 +28,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         return posCurrencyCode === 'SAR' ? Math.round((amount / exchangeRate) * 100) / 100 : amount;
     };
     const currency = posCurrencyCode === 'SAR' ? (isRTL ? 'ريال سعودي' : 'SAR') : (isRTL ? 'ريال يمني' : 'YER');
+    const currencyFontStyle = { fontFamily: "'Al-Jazeera-Arabic', Arial, sans-serif", fontWeight: 700 };
     const formatPosPrice = (value) => String(Math.round(convertPosPrice(value)));
     const formatDisplayedPrice = (value) => String(Math.round(Number(value) || 0));
 
@@ -1379,7 +1380,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 {product.name}
                                             </h3>
                                             <div className="flex justify-between items-center mt-2.5 pt-1 border-t border-gray-100 dark:border-white/5">
-                                                <span className="text-[10px] text-gray-400 font-sans italic">
+                                                <span className="text-[10px] text-gray-400 font-sans italic" style={currencyFontStyle}>
                                                     {product.code || '---'}
                                                 </span>
                                                 <div className="flex flex-col items-end">
@@ -1389,7 +1390,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         </span>
                                                     )}
                                                     <span className="text-xs font-black text-blue-600 dark:text-blue-400">
-                                                        {formatPosPrice(finalPrice)} {currency}
+                                                        {formatPosPrice(finalPrice)} <span style={currencyFontStyle}>{currency}</span>
                                                     </span>
                                                 </div>
                                             </div>
@@ -1442,7 +1443,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         {item.title}
                                                     </h4>
                                                     <div className="text-[11px] text-gray-700 dark:text-gray-200 mt-0.5 font-black">
-                                                        {formatDisplayedPrice(item.price)} {currency}
+                                                        {formatDisplayedPrice(item.price)} <span style={currencyFontStyle}>{currency}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1546,7 +1547,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             value={customDiscount}
                                             disabled={!(isAdminManager || workerPermissions.allowDiscount)}
                                             onChange={(e) => setCustomDiscount(Math.max(0, Number(e.target.value)))}
-                                            className="w-24 bg-transparent border border-red-300 dark:border-red-400/30 rounded-lg px-2 py-1 text-center text-sm outline-none text-red-600 dark:text-red-300 font-['Arial'] font-black disabled:opacity-50 disabled:cursor-not-allowed" style={{ fontVariantNumeric: 'lining-nums' }}
+                                            className="w-24 bg-transparent border border-red-300 dark:border-red-400/30 rounded-lg px-2 py-1 text-center text-sm outline-none text-red-600 dark:text-red-300 font-['Arial'] font-black disabled:opacity-50 disabled:cursor-not-allowed" style={{ fontFamily: 'Arial, sans-serif', fontVariantNumeric: 'lining-nums' }}
                                         />
                                         <span className="font-black">{currency}</span>
                                     </div>
