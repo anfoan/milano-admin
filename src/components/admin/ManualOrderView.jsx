@@ -1034,12 +1034,15 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     <input
                                         type="number"
                                         inputMode="numeric"
-                                        value={discount}
+                                        min="0"
+                                        dir="ltr"
+                                        lang="en"
+                                        value={String(Number(discount) || 0)}
                                         onChange={(e) => {
                                             setDiscount(Math.max(0, Number(e.target.value)));
                                             setAppliedCoupon(null); // Clear applied coupon if manual edit
                                         }}
-                                        className="w-24 text-left font-sans font-black bg-red-50 border border-red-400 rounded-lg px-2 py-1 text-red-600 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                                        className="w-24 text-center font-sans font-black bg-red-50 border-2 border-red-600 rounded-lg px-2 py-1 text-red-600 focus:border-red-600 focus:ring-2 focus:ring-red-600/20 focus:outline-none"
                                     />
                                 </div>
                             </div>
