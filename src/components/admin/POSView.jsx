@@ -80,6 +80,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const [reportPeriod, setReportPeriod] = useState('custom');
     const [showReportModal, setShowReportModal] = useState(false);
     const [generatedReport, setGeneratedReport] = useState(null);
+    const [showBulkReceiptPreview, setShowBulkReceiptPreview] = useState(false);
+    const [bulkReceiptPreviewItems, setBulkReceiptPreviewItems] = useState([]);
 
     // Success Screen
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -944,24 +946,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     };
 
     const handlePrintVisibleReceipts = () => {
-        const activeReceipts = visibleReceipts.filter(receipt => receipt.status !== 'cancelled');
-        const paymentBreakdown = activeReceipts.reduce((out, receipt) => {
-            const method = receipt.paymentMethod === 'card' ? 'card' : receipt.paymentMethod === 'transfer' ? 'transfer' : 'cash';
-            out[method] += Number(receipt.total || 0);
-            return out;
-        }, { cash: 0, card: 0, transfer: 0 });
-        const totalSales = activeReceipts.reduce((sum, receipt) => sum + Number(receipt.total || 0), 0);
-        const totalCost = activeReceipts.reduce((sum, receipt) => sum + (receipt.cartItems || []).reduce((itemSum, item) => itemSum + Number(item.costPrice || 0) * Number(item.quantity || 1), 0), 0);
-        const totalDelivery = activeReceipts.reduce((sum, receipt) => sum + Number(receipt.deliveryCost || 0), 0);
-        handlePrintReport({
-            startDate: reportStartDate || '---',
-            endDate: reportEndDate || '---',
-            receiptsCount: activeReceipts.length,
-            totalSales,
-            netProfit: totalSales - totalDelivery - totalCost,
-            paymentBreakdown,
-            receipts: visibleReceipts
-        });
+        setBulkReceiptPreviewItems(visibleReceipts);
+        setShowBulkReceiptPreview(true);
     };
 
     if (authLoading) {
@@ -2099,6 +2085,63 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <Printer size={15} />
                                     {isRTL ? "طباعة التقرير" : "Print Report"}
                                 </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal: Bulk POS receipt preview — separate from the blue sales report */}
+            <AnimatePresence>
+                {showBulkReceiptPreview && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-3 sm:p-5">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm" onClick={() => setShowBulkReceiptPreview(false)} />
+                        <motion.div initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 12 }} className="relative w-full max-w-6xl max-h-[94vh] overflow-hidden rounded-[26px] border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#15171b] shadow-2xl flex flex-col">
+                            <div className="shrink-0 flex items-center justify-between gap-3 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#1c1f24] px-4 py-3">
+                                <div className="min-w-0">
+                                    <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white">{isRTL ? 'طباعة جميع الفواتير والإيصالات' : 'Print All POS Receipts'}</h3>
+                                    <p className="mt-0.5 text-[10px] font-bold text-gray-400">{isRTL ? `${bulkReceiptPreviewItems.length} فاتورة ظاهرة في الصفحة الحالية` : `${bulkReceiptPreviewItems.length} invoices visible on this page`}</p>
+                                </div>
+                                <button onClick={() => setShowBulkReceiptPreview(false)} className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10"><X size={18} /></button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-3 sm:p-5">
+                                {bulkReceiptPreviewItems.length === 0 ? (
+                                    <div className="py-20 text-center text-sm font-black text-gray-400">{isRTL ? 'لا توجد فواتير مطابقة للطباعة' : 'No matching receipts to print'}</div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                                        {bulkReceiptPreviewItems.map((receipt, index) => {
+                                            const items = receipt.cartItems || [];
+                                            const subtotal = Number(receipt.subTotal ?? items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0));
+                                            const paymentLabel = receipt.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') : receipt.paymentMethod === 'transfer' ? (isRTL ? 'تحويل بنكي' : 'Bank Transfer') : (isRTL ? 'نقدي / كاش' : 'Cash');
+                                            return (
+                                                <article key={receipt.id} className="mx-auto w-full max-w-[390px] rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#202328] p-4 shadow-sm">
+                                                    <div className="flex items-center justify-between border-b border-dashed border-gray-300 dark:border-white/10 pb-3">
+                                                        <span className="rounded-md bg-blue-50 dark:bg-blue-500/10 px-2 py-1 text-[9px] font-black text-blue-600 dark:text-blue-300">{isRTL ? `فاتورة كاشير رقم ${index + 1}` : `Cashier receipt ${index + 1}`}</span>
+                                                        <button onClick={() => triggerPrint(receipt)} className="inline-flex items-center gap-1 rounded-md border border-blue-200 dark:border-blue-500/30 px-2 py-1 text-[9px] font-black text-blue-600 dark:text-blue-300"><Printer size={11} />{isRTL ? 'طباعة هذه الفاتورة' : 'Print invoice'}</button>
+                                                    </div>
+                                                    <div className="flex items-start justify-between gap-3 border-b border-dashed border-gray-300 dark:border-white/10 py-3">
+                                                        <div className="text-right"><h4 className="text-sm font-black text-gray-900 dark:text-white">{generalSettings?.storeName || (isRTL ? 'متجر ميلانو للرياضة' : 'Milano Sports Store')}</h4><p className="mt-1 text-[9px] font-bold text-gray-400">{generalSettings?.storeAddress || ''}</p></div>
+                                                        <img src={generalSettings?.invoiceLogo || '/admin-logo.png'} alt="" className="h-10 w-10 rounded-xl object-cover" onError={(e) => { e.currentTarget.src = '/admin-logo.png'; }} />
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 border-b border-dashed border-gray-300 dark:border-white/10 py-3 text-[9px] font-bold">
+                                                        <span className="text-gray-400">{isRTL ? 'رقم الإيصال:' : 'Receipt:'}</span><span className="font-mono text-left text-gray-800 dark:text-white">{receipt.orderId || receipt.id}</span>
+                                                        <span className="text-gray-400">{isRTL ? 'العميل:' : 'Customer:'}</span><span className="text-left text-gray-800 dark:text-white">{receipt.formData?.name || (isRTL ? 'زبون محلي' : 'Walk-in')}</span>
+                                                        <span className="text-gray-400">{isRTL ? 'طريقة الدفع:' : 'Payment:'}</span><span className="text-left text-gray-800 dark:text-white">{paymentLabel}</span>
+                                                        <span className="text-gray-400">{isRTL ? 'الحالة:' : 'Status:'}</span><span className={receipt.status === 'cancelled' ? 'text-left text-red-500' : 'text-left text-emerald-500'}>{receipt.status === 'cancelled' ? (isRTL ? 'مسترجع' : 'Refunded') : (isRTL ? 'مكتمل' : 'Completed')}</span>
+                                                    </div>
+                                                    <div className="py-3 text-[9px] font-bold">
+                                                        {items.map((item, itemIndex) => <div key={`${receipt.id}-${itemIndex}`} className="flex items-start justify-between gap-2 border-b border-dashed border-gray-200 dark:border-white/10 py-2 last:border-0"><span className="min-w-0 flex-1 text-right text-gray-800 dark:text-white">{item.title || '---'}{(item.selectedSize || item.size) ? ` / ${item.selectedSize || item.size}` : ''}</span><span className="shrink-0 text-gray-500">{item.quantity || 1}</span><span className="shrink-0 font-mono text-gray-800 dark:text-white">{Number(item.price || 0).toLocaleString()} {currency}</span></div>)}
+                                                    </div>
+                                                    <div className="flex items-center justify-between border-t border-gray-300 dark:border-white/10 pt-3 text-xs font-black text-gray-900 dark:text-white"><span>{isRTL ? 'الإجمالي النهائي:' : 'Final total:'}</span><span className="font-mono">{Number(receipt.total ?? subtotal).toLocaleString()} {currency}</span></div>
+                                                </article>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="shrink-0 flex flex-wrap items-center justify-end gap-2 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#1c1f24] px-4 py-3">
+                                <button onClick={() => setShowBulkReceiptPreview(false)} className="rounded-xl bg-gray-100 dark:bg-white/10 px-4 py-2 text-xs font-black text-gray-600 dark:text-gray-200">{isRTL ? 'إلغاء وإغلاق' : 'Close'}</button>
+                                <button onClick={() => bulkReceiptPreviewItems[0] && triggerPrint(bulkReceiptPreviewItems[0])} disabled={!bulkReceiptPreviewItems.length} className="rounded-xl bg-red-600 px-4 py-2 text-xs font-black text-white disabled:opacity-40">{isRTL ? 'طباعة الفاتورة المحددة' : 'Print selected invoice'}</button>
                             </div>
                         </motion.div>
                     </div>
