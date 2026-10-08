@@ -24,7 +24,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const [posCurrencyCode, setPosCurrencyCode] = useState(generalSettings?.currency || 'YER');
     const exchangeRate = 140;
     const convertPosPrice = (value) => {
-        const amount = Number(value) || 0;
+        const amount = Number(String(value ?? 0).replace(/,/g, '')) || 0;
         return posCurrencyCode === 'SAR' ? Math.round((amount / exchangeRate) * 100) / 100 : amount;
     };
     const currency = posCurrencyCode === 'SAR' ? (isRTL ? 'ريال سعودي' : 'SAR') : (isRTL ? 'ريال يمني' : 'YER');
@@ -1173,7 +1173,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 <tbody>
                                     {receipts.slice(0, 5).map(receipt => (
                                         <tr key={receipt.id} className="border-b border-gray-50 dark:border-white/5 hover:bg-gray-50/30 dark:hover:bg-white/5 transition-colors">
-                                            <td className="p-3 font-mono font-black">{receipt.orderId}</td>
+                                            <td className="p-3 font-sans font-black">{receipt.orderId}</td>
                                             <td className="p-3 text-gray-500">
                                                 {receipt.formattedTime || receipt.formattedDate}
                                             </td>
@@ -1379,7 +1379,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 {product.name}
                                             </h3>
                                             <div className="flex justify-between items-center mt-2.5 pt-1 border-t border-gray-100 dark:border-white/5">
-                                                <span className="text-[10px] text-gray-400 font-mono italic">
+                                                <span className="text-[10px] text-gray-400 font-sans italic">
                                                     {product.code || '---'}
                                                 </span>
                                                 <div className="flex flex-col items-end">
@@ -1441,7 +1441,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     <h4 className="text-xs font-black text-gray-800 dark:text-white truncate" title={item.title}>
                                                         {item.title}
                                                     </h4>
-                                                    <div className="text-[10px] text-gray-400 mt-0.5">
+                                                    <div className="text-[11px] text-gray-700 dark:text-gray-200 mt-0.5 font-black">
                                                         {formatDisplayedPrice(item.price)} {currency}
                                                     </div>
                                                 </div>
@@ -1493,7 +1493,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 >
                                                     <Minus size={12} className="text-gray-600 dark:text-gray-300" />
                                                 </button>
-                                                <span className="text-xs font-black w-5 text-center text-gray-800 dark:text-white font-mono">
+                                                <span className="text-xs font-black w-5 text-center text-gray-800 dark:text-white font-sans">
                                                     {item.quantity}
                                                 </span>
                                                 <button 
@@ -1533,9 +1533,9 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             <div className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-400">
                                 <div className="flex justify-between">
                                     <span>{isRTL ? "المجموع الفرعي" : "Subtotal"}</span>
-                                    <span className="text-gray-800 dark:text-white font-mono">{formatDisplayedPrice(calculateSubtotal())} {currency}</span>
+                                    <span className="text-gray-800 dark:text-white font-sans">{formatDisplayedPrice(calculateSubtotal())} {currency}</span>
                                 </div>
-                                <div className="flex justify-between items-center rounded-lg bg-red-50/80 dark:bg-red-500/10 px-2 py-1 text-red-600 dark:text-red-300">
+                                <div className="flex justify-between items-center text-red-600 dark:text-red-300">
                                     <span className="font-black">{isRTL ? "خصم إضافي بالفاتورة" : "Additional Invoice Discount"}</span>
                                     <div className="flex items-center gap-1 text-red-600 dark:text-red-300">
                                         <input
@@ -1545,14 +1545,14 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             value={customDiscount}
                                             disabled={!(isAdminManager || workerPermissions.allowDiscount)}
                                             onChange={(e) => setCustomDiscount(Math.max(0, Number(e.target.value)))}
-                                            className="w-24 bg-red-100 dark:bg-red-500/15 border border-red-300 dark:border-red-400/30 rounded-lg px-2 py-1 text-center text-sm outline-none text-red-600 dark:text-red-300 font-mono font-black disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="w-24 bg-transparent border border-red-300 dark:border-red-400/30 rounded-lg px-2 py-1 text-center text-sm outline-none text-red-600 dark:text-red-300 font-sans font-black disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                         <span className="font-black">{currency}</span>
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-base font-black text-gray-900 dark:text-white pt-2.5 border-t border-gray-200 dark:border-white/5">
                                     <span>{isRTL ? "الإجمالي النهائي" : "Final Total"}</span>
-                                    <span className="text-blue-600 dark:text-blue-400 font-mono">{formatDisplayedPrice(calculateTotal())} {currency}</span>
+                                    <span className="text-blue-600 dark:text-blue-400 font-sans">{formatDisplayedPrice(calculateTotal())} {currency}</span>
                                 </div>
                             </div>
 
@@ -1675,7 +1675,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         ].map(method => (
                             <div key={method.id} className={`rounded-xl sm:rounded-2xl px-2 py-2 sm:px-4 sm:py-3 text-center font-black ${method.cls}`}>
                                 <div className="text-[9px] sm:text-xs">{method.label}</div>
-                                <div className="font-mono text-[11px] sm:text-lg mt-1 whitespace-nowrap">{paymentTotals[method.id].toLocaleString()} {currency}</div>
+                                <div className="font-sans text-[11px] sm:text-lg mt-1 whitespace-nowrap">{paymentTotals[method.id].toLocaleString()} {currency}</div>
                             </div>
                         ))}
                     </div>
@@ -1684,7 +1684,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         <div className="p-3 sm:p-4 bg-gray-50 dark:bg-white/5 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
                             <div>
                                 <span className="text-[10px] text-gray-400 font-bold block uppercase">{isRTL ? "إجمالي مبيعات الشهر" : "Month's Total Sales"}</span>
-                                <h3 className="text-sm sm:text-xl font-black text-gray-800 dark:text-white mt-1 font-mono whitespace-nowrap">{monthlySalesSum.toLocaleString()} {currency}</h3>
+                                <h3 className="text-sm sm:text-xl font-black text-gray-800 dark:text-white mt-1 font-sans whitespace-nowrap">{monthlySalesSum.toLocaleString()} {currency}</h3>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-green-50 dark:bg-green-500/10 text-green-500 flex items-center justify-center">
                                 <DollarSign size={20} />
@@ -1694,7 +1694,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         <div className="p-3 sm:p-4 bg-gray-50 dark:bg-white/5 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
                             <div>
                                 <span className="text-[10px] text-gray-400 font-bold block uppercase">{isRTL ? "عدد إيصالات الشهر" : "Month's Receipts Count"}</span>
-                                <h3 className="text-lg sm:text-xl font-black text-gray-800 dark:text-white mt-1 font-mono">{monthlySalesCount}</h3>
+                                <h3 className="text-lg sm:text-xl font-black text-gray-800 dark:text-white mt-1 font-sans">{monthlySalesCount}</h3>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center">
                                 <Printer size={20} />
@@ -1820,11 +1820,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     {visibleReceipts.map((receipt, idx) => (
                                             <tr key={receipt.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
                                                 <td className="p-3 text-center text-gray-400 w-8">{idx + 1}</td>
-                                                <td className="p-3 font-mono font-black">{receipt.orderId}</td>
+                                                <td className="p-3 font-sans font-black">{receipt.orderId}</td>
                                                 <td className="p-3">
                                                     <div className="space-y-0.5">{(receipt.cartItems || []).map((item, itemIdx) => <div key={itemIdx}>{item.title}{(item.selectedSize || item.size) ? ` / ${item.selectedSize || item.size}` : ''}</div>)}</div>
                                                 </td>
-                                                <td className="p-3 text-center font-mono">{(receipt.cartItems || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</td>
+                                                <td className="p-3 text-center font-sans">{(receipt.cartItems || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</td>
                                                 <td className="p-3">{receipt.formData?.name || '---'}</td>
                                                 <td className="p-3">
                                                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-black ${
@@ -1844,7 +1844,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         <span className="text-[10px] text-gray-400 font-normal mt-0.5">{receipt.formattedTime}</span>
                                                     </div>
                                                 </td>
-                                                <td className="p-3 font-mono font-black text-blue-600 dark:text-blue-400">
+                                                <td className="p-3 font-sans font-black text-blue-600 dark:text-blue-400">
                                                     {receipt.total?.toLocaleString()} {currency}
                                                 </td>
                                                 <td className="p-3">
@@ -1939,7 +1939,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             <h3 className="text-lg font-black text-gray-900 dark:text-white">
                                 {isRTL ? "تمت عملية البيع بنجاح!" : "Transaction Complete!"}
                             </h3>
-                            <p className="text-xs text-gray-500 font-mono mt-1 mb-6">
+                            <p className="text-xs text-gray-500 font-sans mt-1 mb-6">
                                 #{lastCreatedOrderId}
                             </p>
 
@@ -2023,15 +2023,15 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <div className="grid grid-cols-3 gap-2 text-xs font-bold text-center text-gray-500">
                                         <div>
                                             <span>{isRTL ? "نقدي (كاش):" : "Cash:"}</span>
-                                            <span className="block font-black text-gray-800 dark:text-white font-mono mt-1">{(generatedReport.paymentBreakdown.cash || 0).toLocaleString()} {currency}</span>
+                                            <span className="block font-black text-gray-800 dark:text-white font-sans mt-1">{(generatedReport.paymentBreakdown.cash || 0).toLocaleString()} {currency}</span>
                                         </div>
                                         <div>
                                             <span>{isRTL ? "محفظة جيب:" : "Card:"}</span>
-                                            <span className="block font-black text-gray-800 dark:text-white font-mono mt-1">{(generatedReport.paymentBreakdown.card || 0).toLocaleString()} {currency}</span>
+                                            <span className="block font-black text-gray-800 dark:text-white font-sans mt-1">{(generatedReport.paymentBreakdown.card || 0).toLocaleString()} {currency}</span>
                                         </div>
                                         <div>
                                             <span>{isRTL ? "تحويل بنكي:" : "Transfer:"}</span>
-                                            <span className="block font-black text-gray-800 dark:text-white font-mono mt-1">{(generatedReport.paymentBreakdown.transfer || 0).toLocaleString()} {currency}</span>
+                                            <span className="block font-black text-gray-800 dark:text-white font-sans mt-1">{(generatedReport.paymentBreakdown.transfer || 0).toLocaleString()} {currency}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -2054,7 +2054,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             {generatedReport.receipts.map((r, idx) => (
                                                 <tr key={r.id} className="border-b border-gray-100 dark:border-white/5">
                                                     <td className="p-2 text-gray-400 text-center">{idx + 1}</td>
-                                                    <td className="p-2 font-mono">{r.orderId}</td>
+                                                    <td className="p-2 font-sans">{r.orderId}</td>
                                                     <td className="p-2">{r.formData?.name || '---'}</td>
                                                     <td className="p-2">
                                                         {r.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') :
@@ -2063,7 +2063,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                          r.paymentMethod}
                                                     </td>
                                                     <td className="p-2">{r.formattedDate}</td>
-                                                    <td className="p-2 font-mono font-black">{r.total?.toLocaleString()} {currency}</td>
+                                                    <td className="p-2 font-sans font-black">{r.total?.toLocaleString()} {currency}</td>
                                                     <td className="p-2">
                                                         {r.status === 'cancelled' ? (
                                                             <span className="inline-flex items-center gap-1 text-[10px] text-red-500 font-black">
@@ -2137,17 +2137,17 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         <img src={generalSettings?.invoiceLogo || '/admin-logo.png'} alt="" className="h-10 w-10 rounded-xl object-cover" onError={(e) => { e.currentTarget.src = '/admin-logo.png'; }} />
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 border-b border-dashed border-gray-400 dark:border-white/20 py-3 text-[10px] font-black">
-                                                        <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'رقم الإيصال:' : 'Receipt:'}</span><span className="font-mono text-left text-gray-900 dark:text-white">{receipt.orderId || receipt.id}</span>
+                                                        <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'رقم الإيصال:' : 'Receipt:'}</span><span className="font-sans text-left text-gray-900 dark:text-white">{receipt.orderId || receipt.id}</span>
                                                         <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'العميل:' : 'Customer:'}</span><span className="text-left text-gray-900 dark:text-white">{receipt.formData?.name || (isRTL ? 'زبون محلي' : 'Walk-in')}</span>
                                                         <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'طريقة الدفع:' : 'Payment:'}</span><span className="text-left text-gray-900 dark:text-white">{paymentLabel}</span>
                                                         <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'الحالة:' : 'Status:'}</span><span className={receipt.status === 'cancelled' ? 'text-left text-red-600' : 'text-left text-emerald-600'}>{receipt.status === 'cancelled' ? (isRTL ? 'مسترجع' : 'Refunded') : (isRTL ? 'مكتمل' : 'Completed')}</span>
                                                     </div>
                                                     <div className="py-3 text-[10px] font-black">
                                                         <div className="grid grid-cols-[1fr_15%_28%] items-center gap-2 border-b border-dashed border-gray-500 dark:border-white/30 pb-2 text-[8px] text-gray-700 dark:text-gray-200"><span className="text-right">{isRTL ? 'اسم المنتج + المقاس' : 'Product name + size'}</span><span className="text-center">{isRTL ? 'الكمية' : 'Qty'}</span><span className="text-left">{isRTL ? 'الإجمالي' : 'Total'}</span></div>
-                                                        {items.map((item, itemIndex) => <div key={`${receipt.id}-${itemIndex}`} className="grid grid-cols-[1fr_15%_28%] items-start gap-2 border-b border-dashed border-gray-300 dark:border-white/15 py-2 last:border-0"><span className="min-w-0 text-right text-gray-900 dark:text-white">{item.title || '---'}{(item.selectedSize || item.size) ? <small className="block text-[9px] font-bold text-gray-500">{item.selectedSize || item.size}</small> : null}</span><span className="text-center font-mono text-gray-900 dark:text-white">{item.quantity || 1}</span><span dir="rtl" className="whitespace-nowrap text-left font-sans font-black text-[9px] text-gray-900 dark:text-white">{Number(item.price || 0).toLocaleString()}</span></div>)}
+                                                        {items.map((item, itemIndex) => <div key={`${receipt.id}-${itemIndex}`} className="grid grid-cols-[1fr_15%_28%] items-start gap-2 border-b border-dashed border-gray-300 dark:border-white/15 py-2 last:border-0"><span className="min-w-0 text-right text-gray-900 dark:text-white">{item.title || '---'}{(item.selectedSize || item.size) ? <small className="block text-[9px] font-bold text-gray-500">{item.selectedSize || item.size}</small> : null}</span><span className="text-center font-sans text-gray-900 dark:text-white">{item.quantity || 1}</span><span dir="rtl" className="whitespace-nowrap text-left font-sans font-black text-[9px] text-gray-900 dark:text-white">{Number(item.price || 0).toLocaleString()}</span></div>)}
                                                     </div>
                                                     <div className="flex items-center justify-between border-t border-gray-300 dark:border-white/10 pt-3 text-xs font-black text-gray-900 dark:text-white" dir="rtl"><span>{isRTL ? 'الإجمالي النهائي:' : 'Final total:'}</span><span className="font-sans font-black text-[11px]">{Number(receipt.total ?? subtotal).toLocaleString()} <span className="text-[11px] font-black">{currency}</span></span></div>
-                                                    <div className="mt-3 border-t border-dashed border-gray-300 dark:border-white/10 pt-3 text-center"><div className="mx-auto h-9 w-40 barcode-stripes" aria-label={receipt.orderId || receipt.id}></div><div className="mt-1 font-mono text-[8px] text-gray-500">{receipt.orderId || receipt.id}</div><div className="my-3 border-t border-dashed border-gray-300 dark:border-white/10"></div><div className="text-[10px] font-black text-gray-800 dark:text-gray-100">{isRTL ? 'شكراً لتعاملكم مع متجر ميلانو.' : 'Thank you for doing business with Milano Store.'}</div></div>
+                                                    <div className="mt-3 border-t border-dashed border-gray-300 dark:border-white/10 pt-3 text-center"><div className="mx-auto h-9 w-40 barcode-stripes" aria-label={receipt.orderId || receipt.id}></div><div className="mt-1 font-sans text-[8px] text-gray-500">{receipt.orderId || receipt.id}</div><div className="my-3 border-t border-dashed border-gray-300 dark:border-white/10"></div><div className="text-[10px] font-black text-gray-800 dark:text-gray-100">{isRTL ? 'شكراً لتعاملكم مع متجر ميلانو.' : 'Thank you for doing business with Milano Store.'}</div></div>
                                                 </article>
                                             );
                                         })}
@@ -2186,7 +2186,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-black text-base text-gray-800 truncate">{sizeModalProduct.name}</h3>
-                                        <p className="text-xs text-gray-400 font-bold font-mono mt-0.5">{sizeModalProduct.code || '---'}</p>
+                                        <p className="text-xs text-gray-400 font-bold font-sans mt-0.5">{sizeModalProduct.code || '---'}</p>
                                     </div>
                                     <button onClick={() => setShowSizeModal(false)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
                                         <X size={20} className="text-gray-400" />
