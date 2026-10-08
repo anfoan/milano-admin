@@ -1314,7 +1314,7 @@ printWindow.onload = () => printWindow.print();
                                             <div className="flex flex-col items-center justify-center gap-0.5 whitespace-nowrap">
                                                 <span className="text-[10px] font-bold text-gray-600 font-mono">
                                                     {(() => {
-                                                        const locale = lang === 'ar' ? 'ar-YE' : 'en-GB';
+                                                        const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
                                                         if (order.createdAt && typeof order.createdAt.toDate === 'function') {
                                                             return order.createdAt.toDate().toLocaleDateString(locale);
                                                         } else if (typeof order.createdAt === 'string') {
@@ -1325,7 +1325,7 @@ printWindow.onload = () => printWindow.print();
                                                 </span>
                                                 <span className="text-[9px] text-gray-400 font-mono">
                                                     {(() => {
-                                                        const locale = lang === 'ar' ? 'ar-YE' : 'en-GB';
+                                                        const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
                                                         if (order.createdAt && typeof order.createdAt.toDate === 'function') {
                                                             return order.createdAt.toDate().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
                                                         } else if (typeof order.createdAt === 'string') {
