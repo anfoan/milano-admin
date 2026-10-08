@@ -790,7 +790,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         setShowReportModal(true);
     };
 
-    const handlePrintReport = () => {
+    const handlePrintReport = (reportData = generatedReport) => {
+        if (!reportData) return;
         const htmlContent = `
           <!DOCTYPE html>
           <html dir="rtl">
@@ -859,21 +860,21 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                   </div>
 
                   <h1 class="report-title">${isRTL ? 'ملخص مبيعات نقطة البيع' : 'POS Sales Report'}</h1>
-                  <p class="report-date">${isRTL ? `من تاريخ ${generatedReport.startDate} إلى تاريخ ${generatedReport.endDate}` : `From ${generatedReport.startDate} to ${generatedReport.endDate}`}</p>
+                  <p class="report-date">${isRTL ? `من تاريخ ${reportData.startDate} إلى تاريخ ${reportData.endDate}` : `From ${reportData.startDate} to ${reportData.endDate}`}</p>
 
                   <h3 class="table-title">${isRTL ? 'تفصيل طرق الدفع' : 'Payment Method Details'}</h3>
                   <div class="payment-grid">
                       <div class="payment-card">
                           <span class="payment-label">${isRTL ? 'نقدي (كاش)' : 'Cash'}</span>
-                          <span class="payment-val">${(generatedReport.paymentBreakdown.cash || 0).toLocaleString()} ${currency}</span>
+                          <span class="payment-val">${(reportData.paymentBreakdown.cash || 0).toLocaleString()} ${currency}</span>
                       </div>
                       <div class="payment-card">
                           <span class="payment-label">${isRTL ? 'محفظة جيب' : 'Jib Wallet'}</span>
-                          <span class="payment-val">${(generatedReport.paymentBreakdown.card || 0).toLocaleString()} ${currency}</span>
+                          <span class="payment-val">${(reportData.paymentBreakdown.card || 0).toLocaleString()} ${currency}</span>
                       </div>
                       <div class="payment-card">
                           <span class="payment-label">${isRTL ? 'تحويل بنكي' : 'Transfer'}</span>
-                          <span class="payment-val">${(generatedReport.paymentBreakdown.transfer || 0).toLocaleString()} ${currency}</span>
+                          <span class="payment-val">${(reportData.paymentBreakdown.transfer || 0).toLocaleString()} ${currency}</span>
                       </div>
                   </div>
 
@@ -891,7 +892,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                           </tr>
                       </thead>
                       <tbody>
-                          ${generatedReport.receipts.map((r, idx) => {
+                          ${reportData.receipts.map((r, idx) => {
                               const paymentLabel = r.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') :
                                   r.paymentMethod === 'transfer' ? (isRTL ? 'تحويل بنكي' : 'Bank Transfer') :
                                   (isRTL ? 'نقدي / كاش' : 'Cash');
@@ -911,22 +912,22 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                               </tr>
                               `;
                           }).join('')}
-                          ${generatedReport.receipts.length === 0 ? '<tr><td colspan="7" style="text-align:center; color:#9ca3af; padding:15px;">' + (isRTL ? 'لا توجد فواتير في هذه الفترة' : 'No invoices found') + '</td></tr>' : ''}
+                          ${reportData.receipts.length === 0 ? '<tr><td colspan="7" style="text-align:center; color:#9ca3af; padding:15px;">' + (isRTL ? 'لا توجد فواتير في هذه الفترة' : 'No invoices found') + '</td></tr>' : ''}
                       </tbody>
                   </table>
                   
                   <div class="bottom-totals">
                       <div class="bottom-card-sales">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'الإجمالي النهائي' : 'Final Total'}</span>
-                          <span style="display: block; font-size: 14px; font-weight: 900; color: #2563eb; margin-top: 2px; font-family: monospace;">${generatedReport.totalSales.toLocaleString()} ${currency}</span>
+                          <span style="display: block; font-size: 14px; font-weight: 900; color: #2563eb; margin-top: 2px; font-family: monospace;">${reportData.totalSales.toLocaleString()} ${currency}</span>
                       </div>
                       <div class="bottom-card-profit">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'صافي الأرباح' : 'Net Profit'}</span>
-                          <span style="display: block; font-size: 14px; font-weight: 900; color: #10b981; margin-top: 2px; font-family: monospace;">${generatedReport.netProfit.toLocaleString()} ${currency}</span>
+                          <span style="display: block; font-size: 14px; font-weight: 900; color: #10b981; margin-top: 2px; font-family: monospace;">${reportData.netProfit.toLocaleString()} ${currency}</span>
                       </div>
                       <div class="bottom-card-count">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'عدد الفواتير' : 'Transactions'}</span>
-                          <span style="display: block; font-size: 14px; font-weight: 900; color: #8b5cf6; margin-top: 2px; font-family: monospace;">${generatedReport.receiptsCount}</span>
+                          <span style="display: block; font-size: 14px; font-weight: 900; color: #8b5cf6; margin-top: 2px; font-family: monospace;">${reportData.receiptsCount}</span>
                       </div>
                   </div>
               </div>
@@ -940,6 +941,27 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         }
         printWindow.document.write(htmlContent);
         printWindow.document.close();
+    };
+
+    const handlePrintVisibleReceipts = () => {
+        const activeReceipts = visibleReceipts.filter(receipt => receipt.status !== 'cancelled');
+        const paymentBreakdown = activeReceipts.reduce((out, receipt) => {
+            const method = receipt.paymentMethod === 'card' ? 'card' : receipt.paymentMethod === 'transfer' ? 'transfer' : 'cash';
+            out[method] += Number(receipt.total || 0);
+            return out;
+        }, { cash: 0, card: 0, transfer: 0 });
+        const totalSales = activeReceipts.reduce((sum, receipt) => sum + Number(receipt.total || 0), 0);
+        const totalCost = activeReceipts.reduce((sum, receipt) => sum + (receipt.cartItems || []).reduce((itemSum, item) => itemSum + Number(item.costPrice || 0) * Number(item.quantity || 1), 0), 0);
+        const totalDelivery = activeReceipts.reduce((sum, receipt) => sum + Number(receipt.deliveryCost || 0), 0);
+        handlePrintReport({
+            startDate: reportStartDate || '---',
+            endDate: reportEndDate || '---',
+            receiptsCount: activeReceipts.length,
+            totalSales,
+            netProfit: totalSales - totalDelivery - totalCost,
+            paymentBreakdown,
+            receipts: visibleReceipts
+        });
     };
 
     if (authLoading) {
@@ -1753,8 +1775,20 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
                     {/* Search and Table */}
                     <div className="flex flex-1 flex-col min-h-0 overflow-visible lg:overflow-hidden">
-                        <div className="mb-4">
-                            <div className="relative max-w-md">
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                    onClick={handlePrintVisibleReceipts}
+                                    className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3 py-2 text-[10px] font-black text-white shadow-md shadow-red-500/20 hover:bg-red-700 transition-colors"
+                                >
+                                    <Printer size={14} />
+                                    <span>{isRTL ? 'طباعة جميع الفواتير' : 'Print All Invoices'}</span>
+                                </button>
+                                <span className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/10 px-3 py-2 text-[10px] font-black text-gray-600 dark:text-gray-200 whitespace-nowrap">
+                                    {isRTL ? 'عدد الفواتير المعروضة:' : 'Displayed invoices:'} {visibleReceipts.length}
+                                </span>
+                            </div>
+                            <div className="relative flex-1 max-w-md">
                                 <Search className="absolute top-2.5 right-3 text-gray-400" size={16} />
                                 <input
                                     type="text"
