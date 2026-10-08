@@ -2079,7 +2079,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     {isRTL ? "إغلاق" : "Close"}
                                 </button>
                                 <button
-                                    onClick={handlePrintReport}
+                                    onClick={() => handlePrintReport()}
                                     className="flex-[2] py-3 bg-blue-600 text-white rounded-xl font-black text-xs hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/20"
                                 >
                                     <Printer size={15} />
