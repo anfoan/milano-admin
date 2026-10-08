@@ -747,7 +747,7 @@ printWindow.onload = () => printWindow.print();
                         box-shadow: 0 10px 30px rgba(15,23,42,.18) !important;
                         border: 1px solid #e5e7eb !important;
                         border-radius: 30px !important;
-                        overflow: hidden !important;
+                        overflow: visible !important;
                     }
                     .print\:hidden, [data-html2canvas-ignore="true"] { display: none !important; }
                     table, tr { page-break-inside: avoid !important; }
