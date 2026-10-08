@@ -181,7 +181,7 @@ const AdminDashboard = () => {
         const unsubOrders = onSnapshot(ordersQ, (snapshot) => {
             const unreadOrders = snapshot.docs.filter(orderDoc => {
                 const order = orderDoc.data();
-                return !order.adminViewed && (order.status === 'new' || order.isPOS === true || order.isExternal === true);
+                return (order.status === 'new' && !order.adminViewed) || ((order.isPOS === true || order.isExternal === true) && order.adminViewed === false);
             });
             setNewOrdersCount(unreadOrders.length);
         });

@@ -124,7 +124,7 @@ const AdminNotifications = ({ lang: propLang }) => {
         });
 
         // Separate listener for the full list (to keep logic clean)
-        const fullOrdersQ = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(10));
+        const fullOrdersQ = query(collection(db, "orders"), orderBy("createdAt", "desc"));
         const unsubscribeFullOrders = onSnapshot(fullOrdersQ, (snap) => {
              setOrderNotifications(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
@@ -164,7 +164,7 @@ const AdminNotifications = ({ lang: propLang }) => {
             ...orderNotifications.map(o => ({ ...o, type: 'order', sortDate: o.createdAt?.toDate ? o.createdAt.toDate() : new Date(o.date) })),
             ...messageNotifications.map(m => ({ ...m, type: 'message', sortDate: m.createdAt?.toDate ? m.createdAt.toDate() : new Date(m.date) }))
         ].sort((a, b) => b.sortDate - a.sortDate);
-        const unreadCount = notifications.filter(n => ((n.type === 'order' && (n.status === 'new' || n.isPOS === true || n.isExternal === true) && !n.adminViewed) || (n.type === 'message' && n.status === 'new'))).length;
+        const unreadCount = notifications.filter(n => ((n.type === 'order' && ((n.status === 'new' && !n.adminViewed) || ((n.isPOS === true || n.isExternal === true) && n.adminViewed === false))) || (n.type === 'message' && n.status === 'new'))).length;
         return { notifications, unreadCount };
     }, [orderNotifications, messageNotifications]);
 
@@ -180,7 +180,7 @@ const AdminNotifications = ({ lang: propLang }) => {
         // But to be "Real", we should probably update a field `adminViewed`.
         // Let's check if we can update documents.
 
-        const unreadDocs = notifications.filter(n => n.type === 'order' && (n.status === 'new' || n.isPOS === true || n.isExternal === true) && !n.adminViewed);
+        const unreadDocs = notifications.filter(n => n.type === 'order' && ((n.status === 'new' && !n.adminViewed) || ((n.isPOS === true || n.isExternal === true) && n.adminViewed === false)));
 
         unreadDocs.forEach(async (order) => {
             try {
@@ -220,7 +220,7 @@ const AdminNotifications = ({ lang: propLang }) => {
     };
     const txt = t[lang];
     const getOrderImage = (order) => order?.cartItems?.[0]?.image || order?.items?.[0]?.image || order?.productImage || '';
-    const isUnreadOrder = (order) => order?.type === 'order' && (order.status === 'new' || order.isPOS === true || order.isExternal === true) && !order.adminViewed;
+    const isUnreadOrder = (order) => order?.type === 'order' && ((order.status === 'new' && !order.adminViewed) || ((order.isPOS === true || order.isExternal === true) && order.adminViewed === false));
 
     // Helper to format time "2 days ago" etc
     const formatTimeAgo = (dateString) => {
