@@ -1256,11 +1256,11 @@ printWindow.onload = () => printWindow.print();
                                             <button onClick={() => onViewOrder && onViewOrder(order)} className="whitespace-nowrap rounded-lg border border-blue-100 bg-blue-50 px-2 py-1.5 font-mono text-[11px] font-bold text-blue-600 transition-all hover:scale-105 hover:bg-white hover:shadow-sm active:scale-95">{order.orderId}</button>
                                         </td>
                                         <td className="max-w-0 py-2 px-2 text-right">
-                                            <div title={getOrderProductsLabel(order)} className="truncate whitespace-nowrap font-bold text-gray-700">{getOrderProductsLabel(order)}</div>
+                                            <div title={getOrderProductsLabel(order)} className="truncate whitespace-nowrap font-bold text-gray-700 -translate-x-6">{getOrderProductsLabel(order)}</div>
                                         </td>
-                                        <td className="p-2 text-right font-bold text-gray-700 whitespace-nowrap"><span className="inline-block -translate-x-6">{order.formData?.name || 'زائر'}</span></td>
+                                        <td className="p-2 text-right font-bold text-gray-700 whitespace-nowrap"><span className="inline-block -translate-x-3">{order.formData?.name || 'زائر'}</span></td>
                                         <td className="p-1.5 text-center">
-                                            <div className="mx-auto flex w-fit -translate-x-2 items-center justify-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5">
+                                            <div className="mx-auto flex w-fit -translate-x-3 items-center justify-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5">
                                                 <span className="font-mono text-[11px] font-bold text-gray-600" dir="ltr">{order.formData?.phone}</span><Phone size={12} className="text-gray-400" />
                                             </div>
                                         </td>
