@@ -15,7 +15,6 @@ import {
 } from 'firebase/firestore';
 // eslint-disable-next-line no-unused-vars -- motion is used as <motion.div> in JSX (flat config lacks react/jsx-uses-vars)
 import { motion, AnimatePresence } from 'framer-motion';
-import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import InvoiceTemplate from '../InvoiceTemplate';
 import DraggableScrollContainer from '../DraggableScrollContainer';
 import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
@@ -28,7 +27,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         const amount = Number(value) || 0;
         return posCurrencyCode === 'SAR' ? Math.round((amount / exchangeRate) * 100) / 100 : amount;
     };
-    const currency = getLocalizedCurrency(posCurrencyCode, lang);
+    const currency = posCurrencyCode === 'SAR' ? (isRTL ? 'ريال سعودي' : 'SAR') : (isRTL ? 'ريال يمني' : 'YER');
     const formatPosPrice = (value) => String(Math.round(convertPosPrice(value)));
     const formatDisplayedPrice = (value) => String(Math.round(Number(value) || 0));
 
@@ -1536,17 +1535,19 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <span>{isRTL ? "المجموع الفرعي" : "Subtotal"}</span>
                                     <span className="text-gray-800 dark:text-white font-mono">{formatDisplayedPrice(calculateSubtotal())} {currency}</span>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span>{isRTL ? "خصم إضافي بالفاتورة" : "Additional Invoice Discount"}</span>
-                                    <div className="flex items-center gap-1">
+                                <div className="flex justify-between items-center rounded-lg bg-red-50/80 dark:bg-red-500/10 px-2 py-1 text-red-600 dark:text-red-300">
+                                    <span className="font-black">{isRTL ? "خصم إضافي بالفاتورة" : "Additional Invoice Discount"}</span>
+                                    <div className="flex items-center gap-1 text-red-600 dark:text-red-300">
                                         <input
                                             type="number"
+                                            dir="ltr"
+                                            inputMode="numeric"
                                             value={customDiscount}
                                             disabled={!(isAdminManager || workerPermissions.allowDiscount)}
                                             onChange={(e) => setCustomDiscount(Math.max(0, Number(e.target.value)))}
-                                            className="w-24 bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-lg px-2 py-1 text-center text-sm outline-none text-gray-800 dark:text-white font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="w-24 bg-red-100 dark:bg-red-500/15 border border-red-300 dark:border-red-400/30 rounded-lg px-2 py-1 text-center text-sm outline-none text-red-600 dark:text-red-300 font-mono font-black disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
-                                        <span>{currency}</span>
+                                        <span className="font-black">{currency}</span>
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-base font-black text-gray-900 dark:text-white pt-2.5 border-t border-gray-200 dark:border-white/5">
