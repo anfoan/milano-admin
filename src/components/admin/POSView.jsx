@@ -9,9 +9,9 @@ import { db, auth } from '../../lib/firebase';
 import { signInAnonymously, signOut } from 'firebase/auth';
 import { getAdminEmails, FALLBACK_ADMIN_EMAILS } from '../../lib/adminEmails';
 import { 
-    collection, doc, getDoc, getDocs, updateDoc, writeBatch, 
+    collection, doc, getDoc, getDocs, updateDoc,
     deleteDoc, query, orderBy, increment, serverTimestamp, 
-    onSnapshot 
+    onSnapshot, runTransaction
 } from 'firebase/firestore';
 // eslint-disable-next-line no-unused-vars -- motion is used as <motion.div> in JSX (flat config lacks react/jsx-uses-vars)
 import { motion, AnimatePresence } from 'framer-motion';
@@ -371,29 +371,22 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     }, { cash: 0, card: 0, transfer: 0 });
 
     const handleAddToCart = (product) => {
-        const totalStock = Number(product.stock || 0);
-        
-        // Check if product has stock
+        const sizeValues = product.variants?.find(v => v.type === 'size')?.values || [];
+        const colorValues = product.variants?.find(v => v.type === 'color')?.values || [];
+        const hasSizeInventory = product.sizeStocks && typeof product.sizeStocks === 'object' && Object.keys(product.sizeStocks).length > 0;
+        const availableSizes = hasSizeInventory
+            ? sizeValues.filter(size => Number(product.sizeStocks[size] || 0) > 0)
+            : sizeValues;
+        const totalStock = hasSizeInventory
+            ? availableSizes.reduce((sum, size) => sum + Number(product.sizeStocks[size] || 0), 0)
+            : Number(product.stock || 0);
         if (totalStock <= 0) {
             alert(isRTL ? 'هذا المنتج نفذ من المخزون' : 'This product is out of stock');
             return;
         }
-        
-        // Find if item already exists in cart with same size and color
-        const sizeValues = product.variants?.find(v => v.type === 'size')?.values || [];
-        const colorValues = product.variants?.find(v => v.type === 'color')?.values || [];
-        
-        const defaultSize = sizeValues[0] || '';
+        // Always select the first size that still has stock.
+        const defaultSize = availableSizes[0] || (!hasSizeInventory ? sizeValues[0] || '' : '');
         const defaultColor = colorValues[0] || '';
-
-        // Check size-specific stock if product has sizes
-        if (defaultSize && product.sizeStocks) {
-            const sizeStock = Number(product.sizeStocks[defaultSize] || 0);
-            if (sizeStock <= 0) {
-                alert(isRTL ? `مقاس ${defaultSize} نفذ من المخزون` : `Size ${defaultSize} is out of stock`);
-                return;
-            }
-        }
 
         const existingIdx = cartItems.findIndex(item => 
             item.id === product.id && 
@@ -507,45 +500,61 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             };
 
             let savedOrderDocumentId = editingOrderId || '';
-            const stockDeltas = new Map();
-            const addStockDelta = (item, delta) => {
-                if (!item?.id) return;
-                const entry = stockDeltas.get(item.id) || { stock: 0, sizes: {} };
-                entry.stock += delta * Number(item.quantity || 0);
-                if (item.selectedSize) {
-                    entry.sizes[item.selectedSize] = (entry.sizes[item.selectedSize] || 0) + delta * Number(item.quantity || 0);
-                }
-                stockDeltas.set(item.id, entry);
-            };
-
             const orderRef = editingOrderId
                 ? doc(db, "orders", editingOrderId)
                 : doc(collection(db, "orders"));
-            if (editingOrderId) {
-                checkoutStage = 'قراءة الفاتورة السابقة';
-                const origDoc = await getDoc(orderRef);
-                if (origDoc.exists()) {
-                    for (const item of (origDoc.data().cartItems || [])) addStockDelta(item, 1);
-                }
-            }
-            for (const item of cartItems) addStockDelta(item, -1);
+            const requestedDeltas = new Map();
+            const addRequestedDelta = (item, delta) => {
+                if (!item?.id) return;
+                const entry = requestedDeltas.get(item.id) || { stock: 0, sizes: {} };
+                entry.stock += delta * Number(item.quantity || 0);
+                if (item.selectedSize) entry.sizes[item.selectedSize] = (entry.sizes[item.selectedSize] || 0) + delta * Number(item.quantity || 0);
+                requestedDeltas.set(item.id, entry);
+            };
+            cartItems.forEach((item) => addRequestedDelta(item, -1));
 
-            checkoutStage = editingOrderId ? 'حفظ تعديل الفاتورة والمخزون' : 'حفظ الفاتورة والمخزون';
-            const batch = writeBatch(db);
-            if (editingOrderId) {
-                batch.update(orderRef, { ...orderData, updatedAt: serverTimestamp() });
-            } else {
-                batch.set(orderRef, orderData);
-                savedOrderDocumentId = orderRef.id;
-            }
-            for (const [productId, delta] of stockDeltas) {
-                const updates = { stock: increment(delta.stock) };
-                Object.entries(delta.sizes).forEach(([size, amount]) => {
-                    updates[`sizeStocks.${size}`] = increment(amount);
+            checkoutStage = editingOrderId ? 'التحقق من الفاتورة والمخزون' : 'التحقق من المخزون';
+            await runTransaction(db, async (transaction) => {
+                const originalSnap = editingOrderId ? await transaction.get(orderRef) : null;
+                const deltas = new Map([...requestedDeltas].map(([id, value]) => [id, { stock: value.stock, sizes: { ...value.sizes } }]));
+                if (editingOrderId && originalSnap?.exists()) {
+                    (originalSnap.data().cartItems || []).forEach((item) => {
+                        const entry = deltas.get(item.id) || { stock: 0, sizes: {} };
+                        const quantity = Number(item.quantity || 0);
+                        entry.stock += quantity;
+                        if (item.selectedSize) entry.sizes[item.selectedSize] = (entry.sizes[item.selectedSize] || 0) + quantity;
+                        deltas.set(item.id, entry);
+                    });
+                }
+                const productRefs = [...deltas.keys()].map((id) => doc(db, "products", id));
+                const productSnaps = await Promise.all(productRefs.map((ref) => transaction.get(ref)));
+                productSnaps.forEach((snap, index) => {
+                    if (!snap.exists()) throw new Error('PRODUCT_NOT_FOUND');
+                    const data = snap.data();
+                    const delta = deltas.get(productRefs[index].id);
+                    const hasSizes = data.sizeStocks && Object.keys(data.sizeStocks).length > 0;
+                    if (hasSizes) {
+                        const nextSizes = { ...data.sizeStocks };
+                        Object.entries(delta.sizes).forEach(([size, amount]) => {
+                            const nextQuantity = Number(nextSizes[size] || 0) + amount;
+                            if (nextQuantity < 0) throw new Error('INSUFFICIENT_SIZE_STOCK');
+                            nextSizes[size] = nextQuantity;
+                        });
+                        const nextStock = Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0);
+                        transaction.update(productRefs[index], { stock: nextStock, sizeStocks: nextSizes });
+                    } else {
+                        const nextStock = Number(data.stock || 0) + delta.stock;
+                        if (nextStock < 0) throw new Error('INSUFFICIENT_STOCK');
+                        transaction.update(productRefs[index], { stock: nextStock });
+                    }
                 });
-                batch.update(doc(db, "products", productId), updates);
-            }
-            await batch.commit();
+                if (editingOrderId) transaction.update(orderRef, { ...orderData, updatedAt: serverTimestamp() });
+                else {
+                    transaction.set(orderRef, orderData);
+                    savedOrderDocumentId = orderRef.id;
+                }
+            });
+
             setLastCreatedOrderId(orderId);
             setLastCreatedOrderData({ id: orderRef.id, ...orderData });
 

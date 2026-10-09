@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     User, Phone, MapPin, ShoppingBag, Plus, Trash2,
     Search, CheckCircle, ChevronRight, ChevronLeft,
@@ -7,11 +7,12 @@ import {
 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import {
-    collection, addDoc, doc, getDoc, getDocs,
-    query, where, serverTimestamp, increment, updateDoc,
+    collection, doc, getDoc,
+    serverTimestamp, increment, runTransaction,
     onSnapshot
 } from 'firebase/firestore';
-import { motion, AnimatePresence } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars -- motion is used as <motion.div> in JSX
+import { motion } from 'framer-motion';
 import { useCurrency } from '../../context/CurrencyContext';
 import InvoiceTemplate from '../InvoiceTemplate';
 
@@ -186,6 +187,14 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
 
     const txt = t[lang];
 
+    const getAvailableProductStock = (product) => {
+        const sizeStocks = product?.sizeStocks;
+        if (sizeStocks && typeof sizeStocks === 'object' && Object.keys(sizeStocks).length > 0) {
+            return Object.values(sizeStocks).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0);
+        }
+        return Math.max(0, Number(product?.stock) || 0);
+    };
+
     const filteredProducts = products.filter(p =>
         p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.category?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -195,7 +204,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
 
     const handleAddToCart = (product) => {
         // Check if product has stock
-        const totalStock = Number(product.stock || 0);
+        const totalStock = getAvailableProductStock(product);
         if (totalStock <= 0) {
             alert(isRTL ? 'هذا المنتج نفذ من المخزون' : 'This product is out of stock');
             return;
@@ -258,7 +267,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                 const newQty = Math.max(1, item.quantity + delta);
                 
                 // Check stock limit
-                let maxStock = Number(product.stock || 0);
+                let maxStock = getAvailableProductStock(product);
                 
                 // If product has sizes, check size-specific stock
                 if (item.selectedSize && product.sizeStocks) {
@@ -416,20 +425,51 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                 isExternal: true // Flag to distinguish
             };
 
-            const docRef = await addDoc(collection(db, "orders"), orderData);
-            if (appliedCoupon?.id && !appliedCoupon.isUnlimited) {
-                await updateDoc(doc(db, "coupons", appliedCoupon.id), { usedCount: increment(1) });
-            }
-
-            // Update stock
-            for (const item of cartItems) {
-                const pRef = doc(db, "products", item.id);
-                const updates = { stock: increment(-item.quantity) };
-                if (item.size) {
-                    updates[`sizeStocks.${item.size}`] = increment(-item.quantity);
+            const orderRef = doc(collection(db, "orders"));
+            const groupedItems = new Map();
+            cartItems.forEach((item) => {
+                const group = groupedItems.get(item.id) || { total: 0, bySize: {} };
+                const quantity = Number(item.quantity) || 0;
+                group.total += quantity;
+                if (item.size) group.bySize[item.size] = (group.bySize[item.size] || 0) + quantity;
+                groupedItems.set(item.id, group);
+            });
+            const productRefs = [...groupedItems.keys()].map((id) => doc(db, "products", id));
+            const couponRef = appliedCoupon?.id ? doc(db, "coupons", appliedCoupon.id) : null;
+            await runTransaction(db, async (transaction) => {
+                const productSnaps = await Promise.all(productRefs.map((ref) => transaction.get(ref)));
+                const couponSnap = couponRef ? await transaction.get(couponRef) : null;
+                productSnaps.forEach((snap, index) => {
+                    if (!snap.exists()) throw new Error('PRODUCT_NOT_FOUND');
+                    const productId = productRefs[index].id;
+                    const group = groupedItems.get(productId);
+                    const data = snap.data();
+                    const hasSizeStocks = data.sizeStocks && Object.keys(data.sizeStocks).length > 0;
+                    const currentStock = hasSizeStocks
+                        ? Object.values(data.sizeStocks).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0)
+                        : Math.max(0, Number(data.stock || 0));
+                    if (group.total > currentStock) throw new Error('INSUFFICIENT_STOCK');
+                    const updates = { stock: currentStock - group.total };
+                    if (hasSizeStocks) {
+                        const nextSizeStocks = { ...data.sizeStocks };
+                        Object.entries(group.bySize).forEach(([size, quantity]) => {
+                            const available = Math.max(0, Number(nextSizeStocks[size] || 0));
+                            if (quantity > available) throw new Error('INSUFFICIENT_SIZE_STOCK');
+                            nextSizeStocks[size] = available - quantity;
+                        });
+                        updates.sizeStocks = nextSizeStocks;
+                    }
+                    transaction.update(productRefs[index], updates);
+                });
+                if (couponRef && couponSnap?.exists() && !couponSnap.data().isUnlimited) {
+                    const used = Number(couponSnap.data().usedCount || 0);
+                    const max = Number(couponSnap.data().maxUses || 0);
+                    if (used >= max) throw new Error('COUPON_LIMIT_REACHED');
+                    transaction.update(couponRef, { usedCount: increment(1) });
                 }
-                await updateDoc(pRef, updates);
-            }
+                transaction.set(orderRef, orderData);
+            });
+            const docRef = orderRef;
 
             setCreatedOrderId(orderId);
             setCreatedOrderData({ id: docRef.id, ...orderData });
@@ -762,7 +802,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden max-h-96 overflow-y-auto">
                                         {filteredProducts.length > 0 ? (
                                             filteredProducts.map(p => {
-                                                const stockCount = Number(p.stock || 0);
+                                                const stockCount = getAvailableProductStock(p);
                                                 const stockColor = stockCount <= 0 ? 'text-red-600' : stockCount <= 3 ? 'text-orange-500' : 'text-green-600';
                                                 return (
                                                 <div
