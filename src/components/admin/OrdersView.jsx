@@ -1617,6 +1617,12 @@ printWindow.onload = () => printWindow.print();
                                         <span className="text-gray-500">{txt.delivery}</span>
                                         <span className="font-bold">{selectedOrder.deliveryCost?.toLocaleString()} {getLocalizedCurrency(generalSettings?.currency || 'YER', lang)}</span>
                                     </div>
+                                    {(Number(selectedOrder.discount || 0) + Math.round(Number(selectedOrder.subTotal || 0) * Number(selectedOrder.discountPercentage || 0) / 100)) > 0 && (
+                                        <div className="flex justify-between text-sm text-red-600">
+                                            <span>{lang === 'ar' ? 'الخصم:' : 'Discount:'}</span>
+                                            <span className="font-bold">- {(Number(selectedOrder.discount || 0) + Math.round(Number(selectedOrder.subTotal || 0) * Number(selectedOrder.discountPercentage || 0) / 100)).toLocaleString()} {getLocalizedCurrency(generalSettings?.currency || 'YER', lang)}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between text-lg text-blue-600 font-black pt-2">
                                         <span>{txt.total_final}</span>
                                         <span>{((Number(selectedOrder.subTotal || 0) + Number(selectedOrder.deliveryCost || 0)) - Number(selectedOrder.discount || 0)).toLocaleString()} {getLocalizedCurrency(generalSettings?.currency || 'YER', lang)}</span>
