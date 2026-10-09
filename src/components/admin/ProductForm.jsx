@@ -185,6 +185,8 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     const [descriptionView, setDescriptionView] = useState('editor'); // 'editor' or 'preview'
     const [croppingImage, setCroppingImage] = useState(null); // State for image to crop
 
+    const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x660));
+
     // Fetch categories on mount
     useEffect(() => {
         const fetchCategories = async () => {
@@ -221,9 +223,15 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                 order: editingProduct.order || ''
             });
             if (editingProduct.variants) {
-                setVariants(editingProduct.variants);
+                setVariants(editingProduct.variants.map(variant => variant.type === 'size'
+                    ? { ...variant, values: (variant.values || []).map(toEnglishDigits) }
+                    : variant));
             }
-            setSizeStocks(editingProduct.sizeStocks || {});
+            const normalizedStocks = Object.entries(editingProduct.sizeStocks || {}).reduce((stocks, [size, quantity]) => {
+                stocks[toEnglishDigits(size)] = toEnglishDigits(quantity);
+                return stocks;
+            }, {});
+            setSizeStocks(normalizedStocks);
         }
     }, [editingProduct]);
 
@@ -359,11 +367,27 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     };
 
     const handleSizeStockChange = (size, val) => {
-        const numVal = val === '' ? '' : Math.max(0, parseInt(val) || 0);
+        const normalizedValue = toEnglishDigits(val);
+        const numVal = normalizedValue === '' ? '' : Math.max(0, parseInt(normalizedValue, 10) || 0);
         setSizeStocks(prev => {
             const updatedStocks = { ...prev, [size]: numVal };
             const totalStock = Object.values(updatedStocks).reduce((sum, current) => sum + (Number(current) || 0), 0);
             setFormData(prevForm => ({ ...prevForm, stock: totalStock.toString() }));
+            return updatedStocks;
+        });
+    };
+
+    const renameVariantValue = (index, nextValue) => {
+        const normalizedValue = toEnglishDigits(nextValue).trim();
+        const previousValue = variants[0].values[index];
+        if (!normalizedValue || normalizedValue === previousValue) return;
+        if (variants[0].values.some((value, valueIndex) => valueIndex !== index && value === normalizedValue)) return;
+        const updated = [...variants];
+        updated[0] = { ...updated[0], values: updated[0].values.map((value, valueIndex) => valueIndex === index ? normalizedValue : value) };
+        setVariants(updated);
+        setSizeStocks(prev => {
+            const updatedStocks = { ...prev, [normalizedValue]: prev[previousValue] ?? 0 };
+            delete updatedStocks[previousValue];
             return updatedStocks;
         });
     };
@@ -874,12 +898,18 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                         >
                                             <X size={12} />
                                         </button>
-                                        <span className="font-black text-sm text-gray-800 dark:text-white mt-1">{v}</span>
+                                        <input
+                                            type="text"
+                                            value={toEnglishDigits(v)}
+                                            onChange={(e) => renameVariantValue(i, e.target.value)}
+                                            className="w-full text-center bg-transparent text-sm font-black text-gray-800 dark:text-white mt-1 outline-none border-b border-transparent focus:border-blue-500"
+                                            aria-label={`تعديل المقاس ${toEnglishDigits(v)}`}
+                                        />
                                         <div className="w-full">
                                             <input
-                                                type="number"
-                                                min="0"
-                                                value={sizeStocks[v] !== undefined ? sizeStocks[v] : 0}
+                                                type="text"
+                                                inputMode="numeric"
+                                                value={toEnglishDigits(sizeStocks[v] !== undefined ? sizeStocks[v] : 0)}
                                                 onChange={(e) => handleSizeStockChange(v, e.target.value)}
                                                 className="w-full text-center bg-white dark:bg-transparent border border-gray-200 dark:border-white/10 rounded-xl py-1.5 px-2 text-xs font-black outline-none focus:border-blue-500 text-gray-900 dark:text-white"
                                                 placeholder="الكمية"
