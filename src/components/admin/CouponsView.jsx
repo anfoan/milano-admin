@@ -15,7 +15,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
     // Form State
     const [code, setCode] = useState('');
-    const [discountAmount, setDiscountAmount] = useState('');
+    const [discountPercent, setDiscountPercent] = useState('');
     const [isUnlimited, setIsUnlimited] = useState(false);
     const [maxUses, setMaxUses] = useState(1);
     const [expiryDate, setExpiryDate] = useState('');
@@ -30,8 +30,8 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             random: "عشوائي",
             code_placeholder: "كوبون",
             discount_type: "الخصم",
-            discount_amount: "مبلغ الخصم الثابت",
-            discount_amount_placeholder: "0",
+            discount_amount: "نسبة الخصم",
+            discount_amount_placeholder: "10",
             unlimited_usage: "غير محدود الاستخدام",
             unlimited_desc: "تفعيل هذا الخيار يلغي الحد الأقصى",
             yes: "نعم",
@@ -58,8 +58,8 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             th_actions: "العمليات",
 
             // Alerts
-            alert_missing: "يرجى إدخال الكود ومبلغ الخصم الثابت",
-            alert_amount: "أدخل مبلغ خصم ثابتًا أكبر من صفر",
+            alert_missing: "يرجى إدخال الكود ونسبة الخصم",
+            alert_amount: "أدخل نسبة خصم بين 1% و100%",
             alert_success: "تم إضافة الكوبون بنجاح",
             alert_error: "حدث خطأ أثناء إضافة الكوبون",
             alert_confirm_delete: "هل أنت متأكد من حذف هذا الكوبون؟"
@@ -71,8 +71,8 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             random: "Random",
             code_placeholder: "CODE",
             discount_type: "Discount",
-            discount_amount: "Fixed discount amount",
-            discount_amount_placeholder: "0",
+            discount_amount: "Discount percentage",
+            discount_amount_placeholder: "10",
             unlimited_usage: "Unlimited Usage",
             unlimited_desc: "Enable to remove usage limit",
             yes: "Yes",
@@ -99,8 +99,8 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             th_actions: "Actions",
 
             // Alerts
-            alert_missing: "Please enter the code and fixed discount amount",
-            alert_amount: "Enter a fixed discount amount greater than zero",
+            alert_missing: "Please enter the code and discount percentage",
+            alert_amount: "Enter a discount percentage between 1% and 100%",
             alert_success: "Coupon added successfully",
             alert_error: "Error adding coupon",
             alert_confirm_delete: "Are you sure you want to delete this coupon?"
@@ -126,14 +126,6 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
         return amount === null
             ? (lang === 'ar' ? 'عيّن مبلغ خصم ثابتًا' : 'Set a fixed discount amount')
             : formatPrice(amount, couponCurrency);
-    };
-    const fixedDiscountBaseForSave = () => {
-        const displayedAmount = Math.max(0, Number(discountAmount || 0));
-        // Preserve the stored base amount when an unchanged SAR amount is rounded for display.
-        if (editingCoupon && displayedAmount === fromBaseCouponAmount(editingCoupon.discountAmount)) {
-            return Math.max(0, Number(editingCoupon.discountAmount || 0));
-        }
-        return toBaseCouponAmount(displayedAmount);
     };
     const minimumOrderBaseForSave = () => {
         const displayedMinimum = Math.max(0, Number(minOrderAmount || 0));
@@ -173,7 +165,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
         // Security & Validation Checks
         if (!code) return alert(txt.alert_missing);
-        if (Number(discountAmount) <= 0) return alert(txt.alert_amount);
+        if (Number(discountPercent) < 1 || Number(discountPercent) > 100) return alert(txt.alert_amount);
         if (!isUnlimited && Number(maxUses) < 1) return alert(lang === 'ar' ? 'أقصى عدد للاستخدام يجب أن يكون 1 على الأقل' : 'Max uses must be at least 1');
         if (minOrderAmount < 0) return alert(lang === 'ar' ? 'مبلغ الحد الأدنى لا يمكن أن يكون سالباً' : 'Min order cannot be negative');
 
@@ -193,9 +185,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
             const couponData = {
                 code: code.toUpperCase(),
-                discountType: 'fixed',
-                discountAmount: fixedDiscountBaseForSave(),
-                discountPercent: 0,
+                discountType: 'percent',
+                discountAmount: 0,
+                discountPercent: Math.min(100, Math.max(1, Number(discountPercent))),
                 maxUses: isUnlimited ? null : Math.max(1, Number(maxUses)),
                 expiryDate: expiryDate || null,
                 minOrderAmount: minimumOrderBaseForSave(),
@@ -217,7 +209,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
     const resetForm = () => {
         setCode('');
-        setDiscountAmount('');
+        setDiscountPercent('');
         setIsUnlimited(false);
         setMaxUses(100);
         setExpiryDate('');
@@ -228,7 +220,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const editCoupon = (coupon) => {
         setEditingCoupon(coupon);
         setCode(coupon.code || '');
-        setDiscountAmount(fromBaseCouponAmount(coupon.discountAmount) || '');
+        setDiscountPercent(coupon.discountPercent || '');
         setIsUnlimited(Boolean(coupon.isUnlimited));
         setMaxUses(coupon.maxUses || 1);
         setExpiryDate(coupon.expiryDate || '');
@@ -302,19 +294,22 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                 />
                             </div>
 
-                            {/* Fixed Discount Amount */}
+                            {/* Discount Percentage */}
                             <div>
-                                <label className="block text-sm font-bold text-gray-600 mb-2">{txt.discount_amount} ({currency})</label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    step="1"
-                                    placeholder={txt.discount_amount_placeholder}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-pink-500 outline-none font-black text-gray-900"
-                                    value={discountAmount}
-                                    onChange={e => setDiscountAmount(e.target.value)}
-                                />
-                                <p className="mt-2 text-xs font-bold text-gray-400">{lang === 'ar' ? 'هذا هو المبلغ الذي سيُخصم فعليًا عند استخدام الكوبون.' : 'This is the exact amount deducted when the coupon is used.'}</p>
+                                <label className="block text-sm font-bold text-gray-600 mb-2">{txt.discount_amount}</label>
+                                <div className="flex items-center gap-4">
+                                    <input
+                                        type="range"
+                                        min="1"
+                                        max="100"
+                                        step="1"
+                                        value={discountPercent || 1}
+                                        onChange={e => setDiscountPercent(e.target.value)}
+                                        className="flex-1 accent-pink-500"
+                                    />
+                                    <span className="min-w-[64px] rounded-xl bg-pink-50 px-3 py-2 text-center text-lg font-black text-pink-600" dir="ltr">{Number(discountPercent || 1)}%</span>
+                                </div>
+                                <p className="mt-2 text-xs font-bold text-gray-400">{lang === 'ar' ? 'حدد نسبة الخصم التي سيطبقها الكوبون عند الاستخدام.' : 'Choose the percentage discount applied when the coupon is used.'}</p>
                             </div>
 
                             {/* Unlimited Usage Toggle */}
@@ -398,7 +393,6 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                         <th className="p-6 font-bold">{txt.th_created}</th>
                                         <th className="p-6 font-bold">{txt.th_expiry}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_discount}</th>
-                                        <th className="p-6 font-bold text-center">{txt.discount_amount}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_max}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_uses}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_actions}</th>
