@@ -1227,7 +1227,7 @@ printWindow.onload = () => printWindow.print();
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-100 text-gray-400 font-bold text-xs">
                                 <th className="w-[120px] whitespace-nowrap p-2 text-center">{txt.th_order_id}</th>
-                                <th className="w-[190px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-3">{txt.th_product_size}</span></th>
+                                <th className="w-[210px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-3">{txt.th_product_size}</span></th>
                                 <th className="w-[125px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-10">{txt.th_name}</span></th>
                                 <th className="w-[135px] whitespace-nowrap p-2 text-center"><span className="inline-block -translate-x-2">{txt.th_phone}</span></th>
                                 <th className="w-[105px] whitespace-nowrap p-2 text-center">{txt.th_payment}</th>
