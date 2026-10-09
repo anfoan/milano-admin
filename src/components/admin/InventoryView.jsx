@@ -523,11 +523,11 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                             </td>
                                             <td className="px-3 py-3">
                                                 {sizeValues.length > 0 ? (
-                                                    <div className="flex flex-wrap gap-2">
+                                                    <div className="flex flex-wrap gap-2 overflow-visible">
                                                         {sizeValues.map(size => {
                                                             const qty = Number(product.sizeStocks?.[size] || 0);
                                                             return (
-                                                                <span key={size} className={`text-[11px] font-black border-2 rounded-xl pl-6 pr-4 py-1 flex shrink-0 whitespace-nowrap items-center gap-1.5 ${qty === 0 ? 'border-red-200 bg-red-50 text-red-600' : qty <= 3 ? 'border-orange-200 bg-orange-50 text-orange-600' : 'border-blue-100 bg-blue-50 text-blue-700'}`}>
+                                                                <span key={size} style={{ minWidth: '108px' }} className={`text-[11px] font-black border-2 rounded-xl pl-6 pr-4 py-1 flex shrink-0 whitespace-nowrap items-center justify-center gap-1.5 ${qty === 0 ? 'border-red-200 bg-red-50 text-red-600' : qty <= 3 ? 'border-orange-200 bg-orange-50 text-orange-600' : 'border-blue-100 bg-blue-50 text-blue-700'}`}>
                                                                     <span className="font-bold text-gray-500">{size}:</span>
                                                                     <span className="font-black text-base">{qty}</span>
                                                                 </span>
