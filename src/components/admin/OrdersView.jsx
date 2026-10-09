@@ -1228,7 +1228,7 @@ printWindow.onload = () => printWindow.print();
                             <tr className="bg-gray-50 border-b border-gray-100 text-gray-400 font-bold text-xs">
                                 <th className="w-[120px] whitespace-nowrap p-2 text-center">{txt.th_order_id}</th>
                                 <th className="w-[190px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-3">{txt.th_product_size}</span></th>
-                                <th className="w-[125px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-4">{txt.th_name}</span></th>
+                                <th className="w-[125px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-8">{txt.th_name}</span></th>
                                 <th className="w-[135px] whitespace-nowrap p-2 text-center"><span className="inline-block -translate-x-2">{txt.th_phone}</span></th>
                                 <th className="w-[105px] whitespace-nowrap p-2 text-center">{txt.th_payment}</th>
                                 <th className="w-[100px] whitespace-nowrap p-2 text-center">{txt.th_date}</th>
@@ -1258,7 +1258,7 @@ printWindow.onload = () => printWindow.print();
                                         <td className="max-w-0 py-2 px-2 text-right">
                                             <div title={getOrderProductsLabel(order)} className="truncate whitespace-nowrap font-bold text-gray-700">{getOrderProductsLabel(order)}</div>
                                         </td>
-                                        <td className="p-2 text-right font-bold text-gray-700 whitespace-nowrap"><span className="inline-block -translate-x-4">{order.formData?.name || 'زائر'}</span></td>
+                                        <td className="p-2 text-right font-bold text-gray-700 whitespace-nowrap"><span className="inline-block -translate-x-8">{order.formData?.name || 'زائر'}</span></td>
                                         <td className="p-1.5 text-center">
                                             <div className="mx-auto flex w-fit -translate-x-3 items-center justify-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5">
                                                 <span className="font-mono text-[11px] font-bold text-gray-600" dir="ltr">{order.formData?.phone}</span><Phone size={12} className="text-gray-400" />
