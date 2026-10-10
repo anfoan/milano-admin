@@ -78,6 +78,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
     // It is intentionally independent of Jib Wallet payments and customer balances.
     const [walletRewardAmount, setWalletRewardAmount] = useState(0);
     const [walletEnabled, setWalletEnabled] = useState(true);
+    const [expandedSections, setExpandedSections] = useState({});
     useEffect(() => {
         const unsubscribe = onSnapshot(doc(db, 'settings', 'wallet'), snapshot => {
             setWalletRewardAmount(Math.max(0, Number(snapshot.data()?.defaultReward || 0)));
@@ -164,6 +165,13 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
         if (item.id === 'orders-section' && activeTab.includes('manual-order')) return true;
         return false;
     };
+    const isSectionExpanded = item => item.subItems && expandedSections[item.id] !== undefined
+        ? expandedSections[item.id]
+        : isSectionActive(item);
+    const toggleSection = item => setExpandedSections(prev => ({
+        ...prev,
+        [item.id]: !isSectionExpanded(item)
+    }));
 
     return (
         <>
@@ -211,8 +219,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                             </button> : <button
                                 onClick={() => {
                                     if (item.subItems) {
-                                        // Toggle logic or just set first sub-item
-                                        setActiveTab(item.subItems[0].id);
+                                        toggleSection(item);
                                     } else {
                                         setActiveTab(item.id);
                                     }
@@ -239,17 +246,20 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                     )}
                                 </span>
                                 {item.subItems && (
-                                    <ChevronDown size={16} className={`transition-transform duration-300 ${isSectionActive(item) ? 'rotate-180' : ''}`} />
+                                    <ChevronDown size={16} className={`transition-transform duration-300 ${isSectionExpanded(item) ? 'rotate-180' : ''}`} />
                                 )}
                             </button>}
 
                             {/* Sub Items */}
-                            {item.subItems && isSectionActive(item) && (
+                            {item.subItems && isSectionExpanded(item) && (
                                 <div className={`space-y-1 mt-1 mb-2 ${isRTL ? 'mr-6 pr-4 border-r-2' : 'ml-6 pl-4 border-l-2'} border-gray-100 dark:border-white/5`}>
                                     {item.subItems.map((sub) => (
                                         <button
                                             key={sub.id}
-                                            onClick={() => setActiveTab(sub.id)}
+                                            onClick={() => {
+                                                setExpandedSections(prev => ({ ...prev, [item.id]: true }));
+                                                setActiveTab(sub.id);
+                                            }}
                                             className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm font-extrabold ${activeTab === sub.id
                                                 ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500'
                                                 : 'text-slate-800 dark:text-white hover:text-slate-950 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5'
