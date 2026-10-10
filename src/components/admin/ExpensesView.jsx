@@ -1828,6 +1828,8 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'التاريخ' : 'Date'}</label>
                                         <input
                                             type="date"
+                                            lang="en-US"
+                                            dir="ltr"
                                             required
                                             value={currentExpense.date}
                                             onChange={(e) => setCurrentExpense({ ...currentExpense, date: e.target.value })}
@@ -1979,6 +1981,8 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'التاريخ' : 'Date'}</label>
                                         <input
                                             type="date"
+                                            lang="en-US"
+                                            dir="ltr"
                                             required
                                             value={currentBond.date}
                                             onChange={(e) => setCurrentBond({ ...currentBond, date: e.target.value })}
@@ -1989,6 +1993,8 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'الوقت' : 'Time'}</label>
                                         <input
                                             type="time"
+                                            lang="en-US"
+                                            dir="ltr"
                                             required
                                             value={currentBond.time}
                                             onChange={(e) => setCurrentBond({ ...currentBond, time: e.target.value })}
