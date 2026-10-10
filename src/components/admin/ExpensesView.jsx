@@ -18,6 +18,24 @@ import {
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 
 const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, (digit) => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
+const formatDateField = (value) => toEnglishDigits(value).replace(/-/g, '/');
+const formatTimeField = (value) => {
+    const [rawHour, minute = '00'] = String(value || '00:00').split(':');
+    const hour = Number(rawHour);
+    if (!Number.isFinite(hour)) return toEnglishDigits(value);
+    const suffix = hour >= 12 ? 'م' : 'ص';
+    return `${hour % 12 || 12}:${String(minute).slice(0, 2).padStart(2, '0')} ${suffix}`;
+};
+const parseTimeField = (value) => {
+    const normalized = toEnglishDigits(value).trim();
+    const match = normalized.match(/^(\d{1,2})\s*:\s*(\d{1,2})\s*([صم])?$/);
+    if (!match) return normalized.replace(/[^0-9:]/g, '');
+    let hour = Number(match[1]);
+    const minute = String(match[2]).padStart(2, '0');
+    if (match[3] === 'م' && hour < 12) hour += 12;
+    if (match[3] === 'ص' && hour === 12) hour = 0;
+    return `${String(hour % 24).padStart(2, '0')}:${minute}`;
+};
 
 const ExpensesView = ({ lang = 'ar', generalSettings }) => {
     const currency = generalSettings?.currency || 'YER';
@@ -1827,12 +1845,12 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'التاريخ' : 'Date'}</label>
                                         <input
-                                            type="date"
-                                            lang="en-US"
+                                            type="text"
+                                            inputMode="numeric"
                                             dir="ltr"
                                             required
-                                            value={currentExpense.date}
-                                            onChange={(e) => setCurrentExpense({ ...currentExpense, date: e.target.value })}
+                                            value={formatDateField(currentExpense.date)}
+                                            onChange={(e) => setCurrentExpense({ ...currentExpense, date: toEnglishDigits(e.target.value).replace(/\//g, '-') })}
                                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-[#2c2c2e] dark:text-white font-bold"
                                         />
                                     </div>
@@ -1980,24 +1998,24 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'التاريخ' : 'Date'}</label>
                                         <input
-                                            type="date"
-                                            lang="en-US"
+                                            type="text"
+                                            inputMode="numeric"
                                             dir="ltr"
                                             required
-                                            value={currentBond.date}
-                                            onChange={(e) => setCurrentBond({ ...currentBond, date: e.target.value })}
+                                            value={formatDateField(currentBond.date)}
+                                            onChange={(e) => setCurrentBond({ ...currentBond, date: toEnglishDigits(e.target.value).replace(/\//g, '-') })}
                                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-[#2c2c2e] dark:text-white font-bold"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'الوقت' : 'Time'}</label>
                                         <input
-                                            type="time"
-                                            lang="en-US"
+                                            type="text"
+                                            inputMode="numeric"
                                             dir="ltr"
                                             required
-                                            value={currentBond.time}
-                                            onChange={(e) => setCurrentBond({ ...currentBond, time: e.target.value })}
+                                            value={formatTimeField(currentBond.time)}
+                                            onChange={(e) => setCurrentBond({ ...currentBond, time: parseTimeField(e.target.value) })}
                                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-[#2c2c2e] dark:text-white font-bold"
                                         />
                                     </div>
