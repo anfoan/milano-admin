@@ -444,7 +444,6 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                         : Math.max(0, Number(data.stock || 0));
                     if (group.total > currentStock) throw new Error('INSUFFICIENT_STOCK');
                     if (hasSizeStocks) {
-                        const nextSizeStocks = { ...data.sizeStocks };
                         Object.entries(group.bySize).forEach(([size, quantity]) => {
                             const available = getSizeStock(data, size);
                             if (quantity > available) throw new Error('INSUFFICIENT_SIZE_STOCK');

@@ -545,10 +545,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             if (nextQuantity < 0) throw new Error('INSUFFICIENT_SIZE_STOCK');
                             nextSizes[resolvedKey] = nextQuantity;
                         });
-                        const nextStock = Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0);
+                        const nextStock = Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, toStockNumber(quantity)), 0);
                         transaction.update(productRefs[index], { stock: nextStock, sizeStocks: nextSizes });
                     } else {
-                        const nextStock = Number(data.stock || 0) + delta.stock;
+                        const nextStock = toStockNumber(data.stock) + delta.stock;
                         if (nextStock < 0) throw new Error('INSUFFICIENT_STOCK');
                         transaction.update(productRefs[index], { stock: nextStock });
                     }
