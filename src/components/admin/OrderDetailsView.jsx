@@ -7,6 +7,7 @@ import {
 import { doc, updateDoc, collection, onSnapshot, query, limit } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
+import { syncOrderInventoryForStatus } from '../../lib/orderInventorySync';
 import { syncCustomerOrderHistoryById } from '../../lib/customerOrderHistory';
 import ImageWithFallback from '../ImageWithFallback';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
@@ -298,18 +299,12 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
 
         setUpdating(true);
         try {
-            const updates = {
-                status: newStatus,
-                updatedAt: new Date()
-            };
-
-            // If marking as completed, save the completion time
-            if (newStatus.toLowerCase().includes('complete') || newStatus.includes('مكتمل') || newStatus.includes('اكتمل')) {
-                updates.completedAt = new Date();
+            await syncOrderInventoryForStatus(order.id, newStatus);
+            try {
+                await syncWalletRewardForOrderStatus(order.id, newStatus);
+            } catch (rewardError) {
+                console.error('Wallet reward status sync failed after inventory update:', order.id, rewardError);
             }
-
-            await updateDoc(doc(db, "orders", order.id), updates);
-            await syncWalletRewardForOrderStatus(order.id, newStatus);
             await syncCustomerOrderHistoryById(order.id);
             setStatus(newStatus);
         } catch (error) {
