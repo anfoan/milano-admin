@@ -527,9 +527,9 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                         {sizeValues.map(size => {
                                                             const qty = Number(product.sizeStocks?.[size] || 0);
                                                             return (
-                                                                <span key={size} className={`w-fit min-w-fit max-w-none inline-flex flex-none overflow-visible text-[11px] font-black border-2 rounded-xl px-5 py-1 whitespace-nowrap items-center justify-center gap-1.5 ${qty === 0 ? 'border-red-200 bg-red-50 text-red-600' : qty <= 3 ? 'border-orange-200 bg-orange-50 text-orange-600' : 'border-blue-100 bg-blue-50 text-blue-700'}`}>
-                                                                    <span className="font-bold text-gray-500">{size}:</span>
-                                                                    <span className="font-black text-base">{qty}</span>
+                                                                <span key={size} className={`w-fit min-w-fit max-w-none inline-flex flex-none overflow-visible text-[11px] font-black border-2 rounded-xl px-5 py-1 whitespace-nowrap items-center justify-center gap-1.5 ${qty === 0 ? 'border-red-200 bg-red-50 text-red-600 dark:text-white' : qty <= 3 ? 'border-orange-200 bg-orange-50 text-orange-600 dark:text-white' : 'border-blue-100 bg-blue-50 text-blue-700 dark:text-white'}`}>
+                                                                    <span className="font-bold text-gray-500 dark:text-white">{size}:</span>
+                                                                    <span className="font-black text-base dark:text-white">{qty}</span>
                                                                 </span>
                                                             );
                                                         })}
