@@ -3,6 +3,17 @@ import { db } from './firebase';
 import { isCompletedOrderStatus } from './walletRewards';
 
 const itemSize = item => item?.selectedSize || item?.size || '';
+const normalizeSize = value => String(value ?? '')
+    .replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
+    .replace(/^\s*مقاس\s*/i, '')
+    .replace(/[：:]/g, '')
+    .replace(/\s+/g, '')
+    .toLowerCase();
+const resolveSizeKey = (sizeStocks, requestedSize) => {
+    if (Object.prototype.hasOwnProperty.call(sizeStocks, requestedSize)) return requestedSize;
+    const normalized = normalizeSize(requestedSize);
+    return Object.keys(sizeStocks).find(key => normalizeSize(key) === normalized) || null;
+};
 const groupedItems = items => {
     const groups = new Map();
     (items || []).forEach(item => {
@@ -54,10 +65,11 @@ export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
 
             if (hasSizes) {
                 Object.entries(group.bySize).forEach(([size, quantity]) => {
-                    if (!Object.prototype.hasOwnProperty.call(currentSizes, size)) throw new Error(`SIZE_NOT_FOUND:${productIds[index]}:${size}`);
-                    const next = Number(currentSizes[size] || 0) + direction * quantity;
-                    if (next < 0) throw new Error(`INSUFFICIENT_SIZE_STOCK:${productIds[index]}:${size}`);
-                    currentSizes[size] = next;
+                    const resolvedKey = resolveSizeKey(currentSizes, size);
+                    if (!resolvedKey) throw new Error(`SIZE_NOT_FOUND:${productIds[index]}:${size}`);
+                    const next = Number(currentSizes[resolvedKey] || 0) + direction * quantity;
+                    if (next < 0) throw new Error(`INSUFFICIENT_SIZE_STOCK:${productIds[index]}:${resolvedKey}`);
+                    currentSizes[resolvedKey] = next;
                 });
                 transaction.update(productRefs[index], {
                     sizeStocks: currentSizes,

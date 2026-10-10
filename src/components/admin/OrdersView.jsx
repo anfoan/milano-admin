@@ -881,7 +881,11 @@ printWindow.onload = () => printWindow.print();
         try {
             await Promise.all(ordersToUpdate.map(async order => {
                 await syncOrderInventoryForStatus(order.id, bulkStatus);
-                await syncWalletRewardForOrderStatus(order.id, bulkStatus);
+                try {
+                    await syncWalletRewardForOrderStatus(order.id, bulkStatus);
+                } catch (rewardError) {
+                    console.error('Wallet reward status sync failed after inventory update:', order.id, rewardError);
+                }
                 await syncCustomerOrderHistoryById(order.id);
             }));
             setSelectedOrdersIds([]);
@@ -943,7 +947,11 @@ printWindow.onload = () => printWindow.print();
     const updateStatus = async (orderId, newStatus) => {
         try {
             await syncOrderInventoryForStatus(orderId, newStatus);
-            await syncWalletRewardForOrderStatus(orderId, newStatus);
+            try {
+                await syncWalletRewardForOrderStatus(orderId, newStatus);
+            } catch (rewardError) {
+                console.error('Wallet reward status sync failed after inventory update:', orderId, rewardError);
+            }
             await syncCustomerOrderHistoryById(orderId);
         } catch (error) {
             console.error("Error updating status:", error);
