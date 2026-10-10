@@ -10,7 +10,7 @@ import { signInAnonymously, signOut } from 'firebase/auth';
 import { getAdminEmails, FALLBACK_ADMIN_EMAILS } from '../../lib/adminEmails';
 import { 
     collection, doc, getDoc, getDocs, updateDoc,
-    deleteDoc, query, orderBy, increment, serverTimestamp, 
+    deleteDoc, query, orderBy, serverTimestamp,
     onSnapshot, runTransaction
 } from 'firebase/firestore';
 // eslint-disable-next-line no-unused-vars -- motion is used as <motion.div> in JSX (flat config lacks react/jsx-uses-vars)
@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import InvoiceTemplate from '../InvoiceTemplate';
 import DraggableScrollContainer from '../DraggableScrollContainer';
 import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
+import { syncOrderInventoryForStatus } from '../../lib/orderInventorySync';
 
 const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const isRTL = lang === 'ar';
@@ -469,6 +470,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             const orderData = {
                 orderId,
                 status: 'completed',
+                inventoryCommitted: true,
                 adminViewed: false,
                 currency: posCurrencyCode,
                 paymentMethod: paymentMethod, // 'cash', 'card', 'transfer'
@@ -655,16 +657,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         if (!confirm(isRTL ? "هل أنت متأكد من حذف هذا الإيصال نهائياً؟ سيتم إعادة الكميات للمخزون." : "Are you sure you want to delete this receipt permanently? Stock will be restored.")) return;
 
         try {
-            // Restore stock (only if not already cancelled/refunded, to avoid double-incrementing stock)
             if (receipt.status !== 'cancelled') {
-            for (const item of (receipt.cartItems || [])) {
-                const pRef = doc(db, "products", item.id);
-                const updates = { stock: increment(item.quantity) };
-                if (item.selectedSize) {
-                    updates[`sizeStocks.${item.selectedSize}`] = increment(item.quantity);
-                }
-                await updateDoc(pRef, updates);
-            }
+                await syncOrderInventoryForStatus(receipt.id, 'cancelled');
             }
 
             await deleteDoc(doc(db, "orders", receipt.id));
@@ -689,21 +683,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
         try {
             setAuthLoading(true);
-            // Restore stock
-            for (const item of (receipt.cartItems || [])) {
-                const pRef = doc(db, "products", item.id);
-                const updates = { stock: increment(item.quantity) };
-                if (item.selectedSize) {
-                    updates[`sizeStocks.${item.selectedSize}`] = increment(item.quantity);
-                }
-                await updateDoc(pRef, updates);
-            }
-
-            // Update doc status to cancelled
-            await updateDoc(doc(db, "orders", receipt.id), {
-                status: 'cancelled',
-                updatedAt: serverTimestamp()
-            });
+            await syncOrderInventoryForStatus(receipt.id, 'cancelled');
             try { await syncWalletRewardForOrderStatus(receipt.id, 'cancelled'); }
             catch (rewardError) { console.error('POS wallet reward reversal failed:', rewardError); }
 

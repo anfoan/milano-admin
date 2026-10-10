@@ -3,6 +3,7 @@ import { Printer, Search, FileDown, Trash2, Clock, CheckCircle, XCircle, MapPin,
 import { db } from '../../lib/firebase';
 import { reverseWalletRewardForOrder, syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { reconcilePendingCustomerOrder } from '../../lib/pendingOrderSync';
+import { syncOrderInventoryForStatus } from '../../lib/orderInventorySync';
 import { deleteCustomerOrderHistory, isStorefrontCustomerOrder, syncCustomerOrderHistory, syncCustomerOrderHistoryById } from '../../lib/customerOrderHistory';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -879,8 +880,7 @@ printWindow.onload = () => printWindow.print();
 
         try {
             await Promise.all(ordersToUpdate.map(async order => {
-                const orderRef = doc(db, "orders", order.id);
-                await updateDoc(orderRef, { status: bulkStatus });
+                await syncOrderInventoryForStatus(order.id, bulkStatus);
                 await syncWalletRewardForOrderStatus(order.id, bulkStatus);
                 await syncCustomerOrderHistoryById(order.id);
             }));
@@ -942,8 +942,7 @@ printWindow.onload = () => printWindow.print();
 
     const updateStatus = async (orderId, newStatus) => {
         try {
-            const orderRef = doc(db, "orders", orderId);
-            await updateDoc(orderRef, { status: newStatus });
+            await syncOrderInventoryForStatus(orderId, newStatus);
             await syncWalletRewardForOrderStatus(orderId, newStatus);
             await syncCustomerOrderHistoryById(orderId);
         } catch (error) {

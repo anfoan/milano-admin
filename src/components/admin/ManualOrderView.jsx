@@ -402,6 +402,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             const orderData = {
                 orderId,
                 status: 'new',
+                inventoryCommitted: false,
                 adminViewed: false,
                 currency: orderCurrency,
                 paymentMethod: formData.paymentMethod || 'manual', // Set at top level for InvoiceTemplate compatibility
@@ -449,17 +450,13 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                         ? Object.values(data.sizeStocks).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0)
                         : Math.max(0, Number(data.stock || 0));
                     if (group.total > currentStock) throw new Error('INSUFFICIENT_STOCK');
-                    const updates = { stock: currentStock - group.total };
                     if (hasSizeStocks) {
                         const nextSizeStocks = { ...data.sizeStocks };
                         Object.entries(group.bySize).forEach(([size, quantity]) => {
                             const available = Math.max(0, Number(nextSizeStocks[size] || 0));
                             if (quantity > available) throw new Error('INSUFFICIENT_SIZE_STOCK');
-                            nextSizeStocks[size] = available - quantity;
                         });
-                        updates.sizeStocks = nextSizeStocks;
                     }
-                    transaction.update(productRefs[index], updates);
                 });
                 if (couponRef && couponSnap?.exists() && !couponSnap.data().isUnlimited) {
                     const used = Number(couponSnap.data().usedCount || 0);
