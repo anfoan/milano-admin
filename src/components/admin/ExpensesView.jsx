@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 
+const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, (digit) => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
+
 const ExpensesView = ({ lang = 'ar', generalSettings }) => {
     const currency = generalSettings?.currency || 'YER';
     const isRTL = lang === 'ar';
@@ -681,8 +683,8 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                       </div>
                       <div class="header-left">
                           <img src="${generalSettings?.invoiceLogo || '/admin-logo.png'}" alt="Logo" class="logo" onerror="this.src='/logo.jpg'; this.onerror=function(){this.src='/logo-rounded.png'; this.onerror=null;}" />
-                          <div class="date-time">التاريخ: ${bond.date || ''}</div>
-                          <div class="date-time">الوقت: ${timeStr}</div>
+                          <div class="date-time">التاريخ: ${toEnglishDigits(bond.date || '')}</div>
+                          <div class="date-time">الوقت: ${toEnglishDigits(timeStr)}</div>
                       </div>
                   </div>
                   
@@ -764,7 +766,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
               <button class="print-btn" onclick="window.print()">طباعة التقرير</button>
               <h2>تقرير السندات المالية المفلترة</h2>
               <div class="report-info">
-                  <div>تاريخ التقرير: ${new Date().toLocaleDateString('ar-YE')}</div>
+                  <div>تاريخ التقرير: ${toEnglishDigits(new Date().toLocaleDateString('ar-YE'))}</div>
                   <div>الفترة: ${bondsPeriod === 'all' ? 'الكل' : bondsPeriod === 'this_week' ? 'هذا الأسبوع' : bondsPeriod === 'this_month' ? 'هذا الشهر' : bondsPeriod === 'this_year' ? 'هذا السنة' : 'فترة مخصصة'} ${bondsStartDate ? `من ${bondsStartDate}` : ''} ${bondsEndDate ? `إلى ${bondsEndDate}` : ''}</div>
               </div>
 
@@ -790,7 +792,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                               <td class="${bond.type === 'receipt' ? 'receipt-val' : 'payment-val'}">
                                   ${bond.type === 'receipt' ? 'سند قبض' : 'سند صرف'}
                               </td>
-                              <td>${bond.date}</td>
+                              <td>${toEnglishDigits(bond.date)}</td>
                               <td>${getPaymentLabel(bond.paymentMethod)}</td>
                               <td>${getEntityLabel(bond.entityType)}</td>
                               <td class="${bond.type === 'receipt' ? 'receipt-val' : 'payment-val'}">${bond.amount.toLocaleString()} ${getCurrencyLabel(bond.currency || 'YER')}</td>
@@ -859,7 +861,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
               <button class="print-btn" onclick="window.print()">طباعة تقرير سندات القبض</button>
               <h2>تقرير سندات القبض</h2>
               <div class="report-info">
-                  <div>تاريخ التقرير: ${new Date().toLocaleDateString('ar-YE')}</div>
+                  <div>تاريخ التقرير: ${toEnglishDigits(new Date().toLocaleDateString('ar-YE'))}</div>
                   <div>الفترة: ${bondsPeriod === 'all' ? 'الكل' : bondsPeriod === 'this_week' ? 'هذا الأسبوع' : bondsPeriod === 'this_month' ? 'هذا الشهر' : bondsPeriod === 'this_year' ? 'هذا السنة' : 'فترة مخصصة'}</div>
               </div>
               <table>
@@ -872,7 +874,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                               <td>${idx + 1}</td>
                               <td style="font-weight: bold;">${bond.number}</td>
                               <td>${bond.entityName}</td>
-                              <td>${bond.date}</td>
+                              <td>${toEnglishDigits(bond.date)}</td>
                               <td>${getPaymentLabel(bond.paymentMethod)}</td>
                               <td>${getEntityLabel(bond.entityType)}</td>
                               <td style="color: #16a34a; font-weight: bold;">${bond.amount.toLocaleString()} ${getCurrencyLabel(bond.currency || 'YER')}</td>
@@ -922,7 +924,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
               <button class="print-btn" onclick="window.print()">طباعة تقرير سندات الصرف</button>
               <h2>تقرير سندات الصرف</h2>
               <div class="report-info">
-                  <div>تاريخ التقرير: ${new Date().toLocaleDateString('ar-YE')}</div>
+                  <div>تاريخ التقرير: ${toEnglishDigits(new Date().toLocaleDateString('ar-YE'))}</div>
                   <div>الفترة: ${bondsPeriod === 'all' ? 'الكل' : bondsPeriod === 'this_week' ? 'هذا الأسبوع' : bondsPeriod === 'this_month' ? 'هذا الشهر' : bondsPeriod === 'this_year' ? 'هذا السنة' : 'فترة مخصصة'}</div>
               </div>
               <table>
@@ -935,7 +937,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                               <td>${idx + 1}</td>
                               <td style="font-weight: bold;">${bond.number}</td>
                               <td>${bond.entityName}</td>
-                              <td>${bond.date}</td>
+                              <td>${toEnglishDigits(bond.date)}</td>
                               <td>${getPaymentLabel(bond.paymentMethod)}</td>
                               <td>${getEntityLabel(bond.entityType)}</td>
                               <td style="color: #dc2626; font-weight: bold;">${bond.amount.toLocaleString()} ${getCurrencyLabel(bond.currency || 'YER')}</td>
@@ -980,7 +982,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
               <button class="print-btn" onclick="window.print()" style="padding: 10px 20px; background: #111827; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 20px;">طباعة التقرير</button>
               <h2>تقرير المصروفات المفلترة</h2>
               <div class="report-info">
-                  <div>تاريخ التقرير: ${new Date().toLocaleDateString('ar-YE')}</div>
+                  <div>تاريخ التقرير: ${toEnglishDigits(new Date().toLocaleDateString('ar-YE'))}</div>
                   <div>الفترة المحددة: ${expensesPeriod === 'all' ? 'الكل' :
                 expensesPeriod === 'week' ? 'الأسبوع الحالي' :
                     expensesPeriod === 'month' ? 'الشهر الحالي' :
@@ -1006,7 +1008,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                               <td>${idx + 1}</td>
                               <td>${expense.title}</td>
                               <td class="nowrap-cell">${categoriesMap[expense.category] || expense.category}</td>
-                              <td class="nowrap-cell">${expense.date}</td>
+                              <td class="nowrap-cell">${toEnglishDigits(expense.date)}</td>
                               <td class="nowrap-cell">${getPaymentLabel(expense.paymentMethod)}</td>
                               <td>${expense.description || '-'}</td>
                               <td class="amount-val nowrap-cell">${expense.amount.toLocaleString()} ${getCurrencyLabel(expense.currency || currency)}</td>
@@ -1295,7 +1297,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                       </div>
                       <div class="header-left">
                           <img src="${generalSettings?.invoiceLogo || '/admin-logo.png'}" alt="Logo" class="logo" onerror="this.src='/logo.jpg'; this.onerror=function(){this.src='/logo-rounded.png'; this.onerror=null;}" />
-                          <div class="date-time">التاريخ: ${expense.date || ''}</div>
+                          <div class="date-time">التاريخ: ${toEnglishDigits(expense.date || '')}</div>
                       </div>
                   </div>
                   
@@ -1470,7 +1472,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                             {categoriesMap[expense.category] || expense.category}
                                         </span>
                                     </td>
-                                    <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">{expense.date}</td>
+                                    <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">{toEnglishDigits(expense.date)}</td>
                                     <td className="px-3 py-2.5 text-end font-extrabold text-red-500 dark:text-red-400 whitespace-nowrap">
                                         {expense.amount.toLocaleString()} {getCurrencyLabel(expense.currency || currency)}
                                     </td>
@@ -1697,7 +1699,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                             {isRTL ? (bond.type === 'receipt' ? 'قبض' : 'صرف') : bond.type}
                                         </span>
                                     </td>
-                                    <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">{bond.date}</td>
+                                    <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">{toEnglishDigits(bond.date)}</td>
                                     <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">
                                         {getEntityLabel(bond.entityType)}
                                     </td>
