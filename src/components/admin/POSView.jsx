@@ -19,6 +19,7 @@ import InvoiceTemplate from '../InvoiceTemplate';
 import DraggableScrollContainer from '../DraggableScrollContainer';
 import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { syncOrderInventoryForStatus } from '../../lib/orderInventorySync';
+import { getSizeStock, resolveSizeKey, toStockNumber } from '../../lib/stockUtils';
 
 const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const isRTL = lang === 'ar';
@@ -376,11 +377,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         const colorValues = product.variants?.find(v => v.type === 'color')?.values || [];
         const hasSizeInventory = product.sizeStocks && typeof product.sizeStocks === 'object' && Object.keys(product.sizeStocks).length > 0;
         const availableSizes = hasSizeInventory
-            ? sizeValues.filter(size => Number(product.sizeStocks[size] || 0) > 0)
+            ? sizeValues.filter(size => getSizeStock(product, size) > 0)
             : sizeValues;
         const totalStock = hasSizeInventory
-            ? availableSizes.reduce((sum, size) => sum + Number(product.sizeStocks[size] || 0), 0)
-            : Number(product.stock || 0);
+            ? availableSizes.reduce((sum, size) => sum + getSizeStock(product, size), 0)
+            : toStockNumber(product.stock);
         if (totalStock <= 0) {
             alert(isRTL ? 'هذا المنتج نفذ من المخزون' : 'This product is out of stock');
             return;
@@ -538,9 +539,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     if (hasSizes) {
                         const nextSizes = { ...data.sizeStocks };
                         Object.entries(delta.sizes).forEach(([size, amount]) => {
-                            const nextQuantity = Number(nextSizes[size] || 0) + amount;
+                            const resolvedKey = resolveSizeKey(nextSizes, size);
+                            if (!resolvedKey) throw new Error('SIZE_NOT_FOUND');
+                            const nextQuantity = toStockNumber(nextSizes[resolvedKey]) + amount;
                             if (nextQuantity < 0) throw new Error('INSUFFICIENT_SIZE_STOCK');
-                            nextSizes[size] = nextQuantity;
+                            nextSizes[resolvedKey] = nextQuantity;
                         });
                         const nextStock = Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0);
                         transaction.update(productRefs[index], { stock: nextStock, sizeStocks: nextSizes });
@@ -2238,7 +2241,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             {/* Size List */}
                             <div className="px-6 pb-4 space-y-3 max-h-[50vh] overflow-y-auto">
                                 {(sizeModalProduct.variants?.find(v => v.type === 'size')?.values || []).map(size => {
-                                    const sizeStock = Number(sizeModalProduct.sizeStocks?.[size] || 0);
+                                    const sizeStock = getSizeStock(sizeModalProduct, size);
                                     const qty = sizeModalQtys[size] || 0;
                                     return (
                                         <div key={size} className={`flex items-center justify-between p-3 rounded-2xl border-2 transition-all ${

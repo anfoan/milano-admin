@@ -15,6 +15,7 @@ import {
 import { motion } from 'framer-motion';
 import { useCurrency } from '../../context/CurrencyContext';
 import InvoiceTemplate from '../InvoiceTemplate';
+import { getAvailableProductStock, getSizeStock } from '../../lib/stockUtils';
 
 const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
     const isRTL = lang === 'ar';
@@ -187,14 +188,6 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
 
     const txt = t[lang];
 
-    const getAvailableProductStock = (product) => {
-        const sizeStocks = product?.sizeStocks;
-        if (sizeStocks && typeof sizeStocks === 'object' && Object.keys(sizeStocks).length > 0) {
-            return Object.values(sizeStocks).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0);
-        }
-        return Math.max(0, Number(product?.stock) || 0);
-    };
-
     const filteredProducts = products.filter(p =>
         p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.category?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -217,14 +210,14 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
         let defaultSize = '';
         if (sizeValues.length > 0) {
             if (product.sizeStocks && typeof product.sizeStocks === 'object') {
-                defaultSize = sizeValues.find(s => (product.sizeStocks[s] ?? 0) > 0) || '';
+                defaultSize = sizeValues.find(s => getSizeStock(product, s) > 0) || '';
             }
             // If no size with stock found or no sizeStocks object, use first size but check if any stock exists
             if (!defaultSize) {
                 defaultSize = sizeValues[0];
                 // Only block if sizeStocks exists and ALL are 0
                 if (product.sizeStocks && typeof product.sizeStocks === 'object') {
-                    const hasAnyStock = sizeValues.some(s => (product.sizeStocks[s] ?? 0) > 0);
+                    const hasAnyStock = sizeValues.some(s => getSizeStock(product, s) > 0);
                     if (!hasAnyStock) {
                         alert(isRTL ? 'جميع المقاسات نفذت من المخزون' : 'All sizes are out of stock');
                         return;
@@ -271,7 +264,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                 
                 // If product has sizes, check size-specific stock
                 if (item.selectedSize && product.sizeStocks) {
-                    const sizeStock = Number(product.sizeStocks[item.selectedSize] || 0);
+                    const sizeStock = getSizeStock(product, item.selectedSize);
                     // Calculate how much of this size is already in cart (excluding current item)
                     const otherSameSize = cartItems.reduce((acc, i, iIdx) => {
                         if (getCartKey(i, iIdx) !== cartKey && i.id === item.id && (i.selectedSize || i.size) === item.selectedSize) {
@@ -453,7 +446,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                     if (hasSizeStocks) {
                         const nextSizeStocks = { ...data.sizeStocks };
                         Object.entries(group.bySize).forEach(([size, quantity]) => {
-                            const available = Math.max(0, Number(nextSizeStocks[size] || 0));
+                            const available = getSizeStock(data, size);
                             if (quantity > available) throw new Error('INSUFFICIENT_SIZE_STOCK');
                         });
                     }
@@ -871,7 +864,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                                                         onChange={(e) => {
                                                                             const newSize = e.target.value;
                                                                             const p = products.find(prod => prod.id === item.id);
-                                                                            const sizeStock = Number(p?.sizeStocks?.[newSize] ?? 0);
+                                                                            const sizeStock = getSizeStock(p, newSize);
                                                                             setCartItems(cartItems.map((i, iIdx) => {
                                                                                 if (getCartKey(i, iIdx) === key) {
                                                                                     // Cap quantity to available stock for new size
@@ -888,7 +881,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                                                             const sizes = p?.variants?.find(v => v.type === 'size')?.values || [];
                                                                             // Filter to only sizes with stock > 0
                                                                             return sizes
-                                                                                .filter(s => (p?.sizeStocks?.[s] ?? 0) > 0)
+                                                                                .filter(s => getSizeStock(p, s) > 0)
                                                                                 .map(s => <option key={s} value={s}>{s}</option>);
                                                                         })()}
                                                                     </select>

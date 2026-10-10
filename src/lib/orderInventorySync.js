@@ -1,6 +1,7 @@
 import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { isCompletedOrderStatus } from './walletRewards';
+import { toStockNumber } from './stockUtils';
 
 const itemSize = item => item?.selectedSize || item?.size || '';
 const normalizeSize = value => String(value ?? '')
@@ -59,21 +60,21 @@ export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
             const hasSizes = product.sizeStocks && Object.keys(product.sizeStocks).length > 0;
             const currentSizes = hasSizes ? { ...product.sizeStocks } : null;
             const currentStock = hasSizes
-                ? Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0)
-                : Math.max(0, Number(product.stock) || 0);
+                ? Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0)
+                : Math.max(0, toStockNumber(product.stock));
             const direction = shouldCommit ? -1 : 1;
 
             if (hasSizes) {
                 Object.entries(group.bySize).forEach(([size, quantity]) => {
                     const resolvedKey = resolveSizeKey(currentSizes, size);
                     if (!resolvedKey) throw new Error(`SIZE_NOT_FOUND:${productIds[index]}:${size}`);
-                    const next = Number(currentSizes[resolvedKey] || 0) + direction * quantity;
+                    const next = toStockNumber(currentSizes[resolvedKey]) + direction * quantity;
                     if (next < 0) throw new Error(`INSUFFICIENT_SIZE_STOCK:${productIds[index]}:${resolvedKey}`);
                     currentSizes[resolvedKey] = next;
                 });
                 transaction.update(productRefs[index], {
                     sizeStocks: currentSizes,
-                    stock: Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0)
+                    stock: Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0)
                 });
             } else {
                 const nextStock = currentStock + direction * group.total;
