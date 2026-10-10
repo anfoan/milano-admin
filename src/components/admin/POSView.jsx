@@ -469,8 +469,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
             const orderData = {
                 orderId,
-                status: 'new',
-                inventoryCommitted: false,
+                status: 'completed',
+                inventoryCommitted: true,
                 adminViewed: false,
                 currency: posCurrencyCode,
                 paymentMethod: paymentMethod, // 'cash', 'card', 'transfer'
@@ -543,9 +543,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             nextSizes[size] = nextQuantity;
                         });
                         const nextStock = Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0);
+                        transaction.update(productRefs[index], { stock: nextStock, sizeStocks: nextSizes });
                     } else {
                         const nextStock = Number(data.stock || 0) + delta.stock;
                         if (nextStock < 0) throw new Error('INSUFFICIENT_STOCK');
+                        transaction.update(productRefs[index], { stock: nextStock });
                     }
                 });
                 if (editingOrderId) transaction.update(orderRef, { ...orderData, updatedAt: serverTimestamp() });
