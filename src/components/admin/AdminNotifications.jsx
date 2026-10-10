@@ -3,8 +3,10 @@ import { Bell, Check, ShoppingBag, Clock, MessageSquare, X } from 'lucide-react'
 import { db, auth } from '../../lib/firebase';
 import { signInAnonymously } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, limit, updateDoc, doc } from 'firebase/firestore';
+// eslint-disable-next-line no-unused-vars -- motion is used as <motion.div> in JSX
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCurrency } from '../../context/CurrencyContext';
+import { reconcilePendingCustomerOrder } from '../../lib/pendingOrderSync';
 
 const AdminNotifications = ({ lang: propLang }) => {
     const { formatPrice } = useCurrency();
@@ -25,6 +27,7 @@ const AdminNotifications = ({ lang: propLang }) => {
     const [messageNotifications, setMessageNotifications] = useState([]);
     const [authReady, setAuthReady] = useState(false);
     const notificationAudioRef = useRef(null);
+    const pendingSyncIdsRef = useRef(new Set());
 
     // Workers use a local login, so prepare their Firebase anonymous session
     // before starting the notification listeners.
@@ -126,7 +129,15 @@ const AdminNotifications = ({ lang: propLang }) => {
         // Separate listener for the full list (to keep logic clean)
         const fullOrdersQ = query(collection(db, "orders"), orderBy("createdAt", "desc"));
         const unsubscribeFullOrders = onSnapshot(fullOrdersQ, (snap) => {
-             setOrderNotifications(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+             const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+             setOrderNotifications(orders);
+             orders.filter(order => order.inventorySyncPending).forEach(order => {
+                 if (pendingSyncIdsRef.current.has(order.id)) return;
+                 pendingSyncIdsRef.current.add(order.id);
+                 reconcilePendingCustomerOrder(order.id)
+                     .catch(error => console.error('Pending customer order reconciliation failed:', order.id, error))
+                     .finally(() => pendingSyncIdsRef.current.delete(order.id));
+             });
         });
 
         const unsubscribeMessages = onSnapshot(messageQ, (snapshot) => {
