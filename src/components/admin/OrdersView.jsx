@@ -881,12 +881,13 @@ printWindow.onload = () => printWindow.print();
         try {
             await Promise.all(ordersToUpdate.map(async order => {
                 await syncOrderInventoryForStatus(order.id, bulkStatus);
-                try {
-                    await syncWalletRewardForOrderStatus(order.id, bulkStatus);
-                } catch (rewardError) {
-                    console.error('Wallet reward status sync failed after inventory update:', order.id, rewardError);
-                }
-                await syncCustomerOrderHistoryById(order.id);
+                setOrders(previous => previous.map(item => item.id === order.id
+                    ? { ...item, status: bulkStatus, inventoryCommitted: bulkStatus === 'completed' }
+                    : item));
+                void syncWalletRewardForOrderStatus(order.id, bulkStatus)
+                    .catch(rewardError => console.error('Wallet reward status sync failed after inventory update:', order.id, rewardError));
+                void syncCustomerOrderHistoryById(order.id)
+                    .catch(historyError => console.error('Customer history status sync failed:', order.id, historyError));
             }));
             setSelectedOrdersIds([]);
             setBulkStatus('');
@@ -947,12 +948,13 @@ printWindow.onload = () => printWindow.print();
     const updateStatus = async (orderId, newStatus) => {
         try {
             await syncOrderInventoryForStatus(orderId, newStatus);
-            try {
-                await syncWalletRewardForOrderStatus(orderId, newStatus);
-            } catch (rewardError) {
-                console.error('Wallet reward status sync failed after inventory update:', orderId, rewardError);
-            }
-            await syncCustomerOrderHistoryById(orderId);
+            setOrders(previous => previous.map(item => item.id === orderId
+                ? { ...item, status: newStatus, inventoryCommitted: newStatus === 'completed' }
+                : item));
+            void syncWalletRewardForOrderStatus(orderId, newStatus)
+                .catch(rewardError => console.error('Wallet reward status sync failed after inventory update:', orderId, rewardError));
+            void syncCustomerOrderHistoryById(orderId)
+                .catch(historyError => console.error('Customer history status sync failed:', orderId, historyError));
         } catch (error) {
             console.error("Error updating status:", error);
             alert(txt.alert_status_update_error);

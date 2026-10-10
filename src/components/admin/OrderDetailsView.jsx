@@ -297,16 +297,14 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
     const handleStatusUpdate = async (newStatus) => {
         if (!window.confirm(txt.alert_status_confirm.replace("{status}", getStatusLabel(newStatus)))) return;
 
-        setUpdating(true);
+            setUpdating(true);
         try {
             await syncOrderInventoryForStatus(order.id, newStatus);
-            try {
-                await syncWalletRewardForOrderStatus(order.id, newStatus);
-            } catch (rewardError) {
-                console.error('Wallet reward status sync failed after inventory update:', order.id, rewardError);
-            }
-            await syncCustomerOrderHistoryById(order.id);
             setStatus(newStatus);
+            void syncWalletRewardForOrderStatus(order.id, newStatus)
+                .catch(rewardError => console.error('Wallet reward status sync failed after inventory update:', order.id, rewardError));
+            void syncCustomerOrderHistoryById(order.id)
+                .catch(historyError => console.error('Customer history status sync failed:', order.id, historyError));
         } catch (error) {
             console.error("Error updating status:", error);
             alert(txt.alert_error + error.message);
