@@ -1214,7 +1214,7 @@ printWindow.onload = () => printWindow.print();
                     { label: txt.stat_all, value: orders.length, color: 'border-blue-500 text-blue-600', filter: 'all' },
                     { label: txt.stat_new, value: orders.filter(o => o.status === 'new').length, color: 'border-yellow-500 text-yellow-600', filter: 'new' },
                     { label: txt.stat_processing, value: orders.filter(o => o.status === 'processing').length, color: 'border-purple-500 text-purple-600', filter: 'processing' },
-                    { label: txt.stat_shipping, value: orders.filter(o => o.status === 'shipping').length, color: 'border-indigo-500 text-indigo-600', filter: 'shipping' },
+                    { label: txt.stat_shipping, value: orders.filter(o => o.status === 'shipping').length, color: 'border-cyan-500 text-cyan-600', filter: 'shipping' },
                     { label: txt.stat_completed, value: orders.filter(o => o.status === 'completed').length, color: 'border-green-500 text-green-600', filter: 'completed' },
                     { label: txt.stat_cancelled, value: orders.filter(o => o.status === 'cancelled').length, color: 'border-red-500 text-red-600', filter: 'cancelled' },
                 ].map((stat, idx) => (
