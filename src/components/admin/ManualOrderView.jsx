@@ -566,6 +566,14 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
         doc.close();
     };
 
+    const goNext = () => {
+        if (step === 1 && (!formData.name.trim() || !formData.phone.trim() || !formData.region.trim() || !orderCurrency || !formData.paymentMethod)) {
+            return alert(txt.fill_required);
+        }
+        if (step === 2 && cartItems.length === 0) return alert(txt.empty_cart);
+        setStep(step + 1);
+    };
+
     const resetForm = () => {
         setStep(1);
         setFormData({
@@ -669,7 +677,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                         >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-black text-gray-700 block">{txt.name}</label>
+                                    <label className="text-sm font-black text-gray-700 flex items-center gap-1"><span>{txt.name}</span><span className="text-red-600">*</span></label>
                                     <div className="relative">
                                         <User className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400" size={18} />
                                         <input
@@ -682,7 +690,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-black text-gray-700 block">{txt.phone}</label>
+                                    <label className="text-sm font-black text-gray-700 flex items-center gap-1"><span>{txt.phone}</span><span className="text-red-600">*</span></label>
                                     <div className="relative">
                                         <Phone className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400" size={18} />
                                         <input
@@ -696,7 +704,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-black text-gray-700 block">{txt.region}</label>
+                                    <label className="text-sm font-black text-gray-700 flex items-center gap-1"><span>{txt.region}</span><span className="text-red-600">*</span></label>
                                     <select
                                         value={formData.region}
                                         onChange={(e) => setFormData({ ...formData, region: e.target.value })}
@@ -707,7 +715,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-black text-gray-700 block">عملة الفاتورة والطلب</label>
+                                    <label className="text-sm font-black text-gray-700 flex items-center gap-1"><span>عملة الفاتورة والطلب</span><span className="text-red-600">*</span></label>
                                     <select
                                         value={orderCurrency}
                                         onChange={(e) => setOrderCurrency(e.target.value)}
@@ -736,7 +744,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-black text-gray-700 block">{txt.payment_method}</label>
+                                <label className="text-sm font-black text-gray-700 flex items-center gap-1"><span>{txt.payment_method}</span><span className="text-red-600">*</span></label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <button
                                         type="button"
@@ -978,7 +986,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                     )}
 
                     {/* Navigation Buttons */}
-                    <div className="flex justify-between items-center bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+                    {step > 1 && (<div className="flex justify-between items-center bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
                         {step > 1 ? (
                             <button
                                 onClick={() => setStep(step - 1)}
@@ -991,11 +999,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
 
                         {step < 3 ? (
                             <button
-                                onClick={() => {
-                                    if (step === 1 && (!formData.name || !formData.phone)) return alert(txt.fill_required);
-                                    if (step === 2 && cartItems.length === 0) return alert(txt.empty_cart);
-                                    setStep(step + 1);
-                                }}
+                                onClick={goNext}
                                 className="flex items-center gap-1.5 md:gap-2 px-6 md:px-8 py-2.5 md:py-3 rounded-xl md:rounded-2xl bg-blue-600 text-white font-bold md:font-black hover:bg-blue-700 transition shadow-lg shadow-blue-500/20 text-sm md:text-base"
                             >
                                 <span>{txt.next}</span>
@@ -1011,7 +1015,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 <span>{loading ? txt.creating : txt.create_order}</span>
                             </button>
                         )}
-                    </div>
+                    </div>)}
                 </div>
 
                 {/* Sidebar / Summary */}
@@ -1093,6 +1097,14 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                             </div>
                         )}
                     </div>
+                    {step === 1 && (
+                        <div className="flex justify-start">
+                            <button onClick={goNext} className="mr-auto flex items-center gap-2 rounded-2xl bg-blue-600 px-8 py-3 text-base font-black text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700">
+                                <span>{txt.next}</span>
+                                <ChevronLeft size={18} className={isRTL ? '' : 'rotate-180'} />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
