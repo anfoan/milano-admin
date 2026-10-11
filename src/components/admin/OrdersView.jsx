@@ -1244,7 +1244,7 @@ printWindow.onload = () => printWindow.print();
                                 <th className="w-[135px] whitespace-nowrap p-2 text-center"><span className="inline-block -translate-x-2">{txt.th_phone}</span></th>
                                 <th className="w-[105px] whitespace-nowrap p-2 text-center">{txt.th_payment}</th>
                                 <th className="w-[100px] whitespace-nowrap p-2 text-center">{txt.th_date}</th>
-                                <th className="w-[105px] whitespace-nowrap p-2 text-center"><span className="inline-block -translate-x-2">{txt.th_status}</span></th>
+                                <th className="w-[105px] whitespace-nowrap p-2 text-center">{txt.th_status}</th>
                                 <th className="w-[125px] whitespace-nowrap p-2 text-center">{isRTL ? 'إجمالي الطلب' : 'Order Total'}</th>
                                 <th className="w-[150px] whitespace-nowrap p-2 text-center">{txt.th_details}</th>
                             </tr>
@@ -1270,8 +1270,8 @@ printWindow.onload = () => printWindow.print();
                                         </td>
                                         <td className="p-2 text-right font-bold text-gray-700 whitespace-nowrap"><span className="inline-block -translate-x-10">{order.formData?.name || 'زائر'}</span></td>
                                         <td className="p-1.5 text-center">
-                                            <div className="mx-auto flex w-fit -translate-x-2 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5">
-                                                <span className="whitespace-nowrap font-mono text-[11px] font-bold text-gray-600" dir="ltr">{order.formData?.phone}</span><Phone size={12} className="text-gray-400" />
+                                            <div className="mx-auto flex w-fit -translate-x-3 items-center justify-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5">
+                                                <span className="font-mono text-[11px] font-bold text-gray-600" dir="ltr">{order.formData?.phone}</span><Phone size={12} className="text-gray-400" />
                                             </div>
                                         </td>
                                         <td className="p-1.5 text-center"><div className="flex justify-center"><div title={order.formData?.paymentMethod === 'whatsapp' ? 'WhatsApp' : 'الدفع عند الاستلام'}><img src="/cash-on-delivery.png" alt="توصيل الطلبات" className="w-10 object-contain" /></div></div></td>
@@ -1281,7 +1281,7 @@ printWindow.onload = () => printWindow.print();
                                                 <span className="text-[9px] text-gray-400 font-sans">{(() => { const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB'; if (order.createdAt && typeof order.createdAt.toDate === 'function') return order.createdAt.toDate().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }); if (typeof order.createdAt === 'string') return new Date(order.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }); return ''; })()}</span>
                                             </div>
                                         </td>
-                                        <td className="p-1.5 text-center"><span className={`inline-flex -translate-x-2 items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold border rounded-full ${getStatusColor(order.status)}`}><span className={`w-1.5 h-1.5 rounded-full ${getStatusColor(order.status).replace('bg-', 'bg-current-').replace('text-', 'bg-').split(' ')[1]}`}></span>{getStatusLabel(order.status)}</span></td>
+                                        <td className="p-1.5 text-center"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold border rounded-full ${getStatusColor(order.status)}`}><span className={`w-1.5 h-1.5 rounded-full ${getStatusColor(order.status).replace('bg-', 'bg-current-').replace('text-', 'bg-').split(' ')[1]}`}></span>{getStatusLabel(order.status)}</span></td>
                                         <td className="p-2 text-center"><div className="flex flex-col items-center gap-0.5 whitespace-nowrap font-black text-gray-800"><span className="text-xs md:text-sm">{formatPrice(order.subTotal ? (order.subTotal - (order.discount || 0) + (order.deliveryCost || 0)) : order.total, generalSettings?.currency || 'YER')}</span>{order.deliveryCost > 0 && <span className="text-[9px] text-gray-400 font-normal">{lang === 'ar' ? 'شامل التوصيل' : 'Inc. Delivery'}</span>}</div></td>
                                         <td className="p-1 text-center"><div className="flex items-center justify-center gap-1"><button onClick={() => handlePrintSingleInvoice(order)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-600 shadow-sm transition-all hover:bg-gray-200 active:scale-95" title={lang === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice'}><Printer size={17} /></button><button onClick={() => onViewOrder && onViewOrder(order, true)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95" title={lang === 'ar' ? 'تعديل الطلب' : 'Edit Order'}><Pencil size={18} /></button><button onClick={() => deleteOrder(order.id)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500 text-white shadow-md shadow-red-500/20 transition-all hover:bg-red-600 active:scale-95" title={lang === 'ar' ? 'حذف الطلب' : 'Delete Order'}><Trash2 size={18} /></button></div></td>
                                     </tr>
