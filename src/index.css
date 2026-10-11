@@ -798,5 +798,5 @@ input[type=number] {
 /* Restore soft elevation around rounded data cards in light mode only. */
 html:not(.dark) .admin-dashboard-root .shadow-sm[class*="rounded-"],
 html:not(.dark) .admin-dashboard-root .shadow[class*="rounded-"] {
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.09), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
 }
