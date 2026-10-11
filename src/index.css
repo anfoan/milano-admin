@@ -669,6 +669,15 @@ input[type=number] {
   text-rendering: optimizeLegibility;
 }
 
+/* One dashboard typeface: Cairo Black (900). Keep existing font sizes and
+   layout classes intact while preventing individual sections from falling
+   back to Arial, monospace, or a lighter Arabic face. */
+.admin-dashboard-root,
+.admin-dashboard-root * {
+  font-family: 'Cairo', system-ui, sans-serif !important;
+  font-weight: 900 !important;
+}
+
 .admin-dashboard-root main,
 .admin-dashboard-root main > * {
   max-width: 100%;
