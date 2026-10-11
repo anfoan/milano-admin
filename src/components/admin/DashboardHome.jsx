@@ -925,12 +925,12 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                 <div className="lg:col-span-3 bg-white p-5 md:p-7 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden">
                     <div className="flex justify-between items-center mb-6 md:mb-8">
                         <h3 className="font-black text-gray-800 text-sm">{txt.daily_sales}</h3>
-                        <div className="flex bg-gray-50 p-1 rounded-xl">
+                        <div className="flex flex-wrap items-center gap-1.5">
                             {chartTabs.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveChartTab(tab.id)}
-                                    className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${activeChartTab === tab.id ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
+                                    className={`h-8 rounded-lg px-3.5 text-[10px] font-black transition-all ${activeChartTab === tab.id ? 'bg-[#2563eb] text-white shadow-sm shadow-blue-500/30' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200'}`}
                                 >
                                     {tab.label}
                                 </button>
