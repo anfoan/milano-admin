@@ -1157,8 +1157,8 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                             <tr>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap"><span className="inline-block -translate-x-2">{txt.order_no}</span></th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap"><span className="inline-block -translate-x-3">{txt.product_size}</span></th>
-                                <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.name}</th>
-                                <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.phone}</th>
+                                <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap"><span className="inline-block translate-x-2">{txt.name}</span></th>
+                                <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap"><span className="inline-block translate-x-3">{txt.phone}</span></th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.date}</th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap"><span className="inline-block -translate-x-2">{txt.price}</span></th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start"><span className="inline-block -translate-x-2">{txt.status}</span></th>
