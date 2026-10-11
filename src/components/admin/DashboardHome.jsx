@@ -798,12 +798,14 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
         const s = status?.toLowerCase() || '';
         if (lang === 'ar') {
             if (s === 'new' || s.includes('جديد')) return "طلب جديد";
+            if (s === 'processing' || s.includes('تجهيز')) return "قيد التجهيز";
             if (s === 'shipping' || s.includes('توصيل')) return "قيد التوصيل";
             if (s === 'completed' || s.includes('اكتمل') || s === 'مكتمل') return "مكتمل";
             if (s === 'cancelled' || s.includes('إلغاء') || s === 'ملغي') return "ملغي";
             return status || 'غير معروف';
         } else {
             if (s === 'new' || s.includes('جديد')) return "New Order";
+            if (s === 'processing' || s.includes('تجهيز')) return "Processing";
             if (s === 'shipping' || s.includes('توصيل')) return "Out for Delivery";
             if (s === 'completed' || s.includes('اكتمل') || s === 'مكتمل') return "Completed";
             if (s === 'cancelled' || s.includes('إلغاء') || s === 'ملغي') return "Cancelled";
