@@ -1144,13 +1144,12 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.product_size}</th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start">{txt.name}</th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start">{txt.price}</th>
-                                <th className="px-6 py-3 md:px-8 md:py-4 text-start">{txt.phone}</th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start"><span className="inline-block -translate-x-2">{txt.status}</span></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
-                                <tr><td colSpan="6" className="p-10 text-center text-gray-500 font-bold text-lg">{txt.loading}</td></tr>
+                                <tr><td colSpan="5" className="p-10 text-center text-gray-500 font-bold text-lg">{txt.loading}</td></tr>
                             ) : realOrders.length > 0 ? (
                                 realOrders.slice(0, 20).map((order, idx) => (
                                     <tr key={order.id} onClick={() => onViewOrder(order)} className="hover:bg-gray-50 transition-colors cursor-pointer group">
@@ -1158,7 +1157,6 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-700 text-sm font-bold whitespace-nowrap">{getOrderProductSize(order)}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-base font-black">{order.customer?.name || order.name || txt.anonymous}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-sm font-black uppercase">{(order.total || order.price || 0).toLocaleString()} {currency}</td>
-                                        <td className="px-6 py-3 md:px-8 md:py-3.5 whitespace-nowrap text-gray-800 text-sm font-sans no-underline" dir="ltr">{order.phone || order.customer?.phone || '---'}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 -translate-x-2">
                                             <span className={`px-4 py-1.5 rounded-full text-xs font-black ${getStatusColor(order.status)}`}>
                                                 {formatStatus(order.status)}
@@ -1167,7 +1165,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                                     </tr>
                                 ))
                             ) : (
-                                <tr><td colSpan="6" className="p-10 text-center text-gray-500 font-bold italic text-lg">{txt.no_orders}</td></tr>
+                                <tr><td colSpan="5" className="p-10 text-center text-gray-500 font-bold italic text-lg">{txt.no_orders}</td></tr>
                             )}
                         </tbody>
                     </table>
