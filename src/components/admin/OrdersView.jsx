@@ -1235,10 +1235,10 @@ printWindow.onload = () => printWindow.print();
                     <table className="w-full min-w-[1200px] table-fixed border-collapse text-[13px]">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-100 text-gray-400 font-bold text-xs">
-                                <th className="w-[120px] whitespace-nowrap p-2 text-center">{txt.th_order_id}</th>
                                 <th className="w-11 p-2 text-center">
                                     <input type="checkbox" className="w-5 h-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked={currentOrders.length > 0 && currentOrders.every(o => selectedOrdersIds.includes(o.id))} onChange={toggleSelectAll} />
                                 </th>
+                                <th className="w-[120px] whitespace-nowrap p-2 text-center">{txt.th_order_id}</th>
                                 <th className="w-[210px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-3">{txt.th_product_size}</span></th>
                                 <th className="w-[125px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-10">{txt.th_name}</span></th>
                                 <th className="w-[135px] whitespace-nowrap p-2 text-center"><span className="inline-block -translate-x-2">{txt.th_phone}</span></th>
@@ -1261,10 +1261,10 @@ printWindow.onload = () => printWindow.print();
                             ) : (
                                 currentOrders.map((order) => (
                                     <tr key={order.id} className={`hover:bg-blue-50/50 transition-colors group ${selectedOrdersIds.includes(order.id) ? 'bg-blue-50/30' : ''}`}>
+                                        <td className="p-2 text-center"><input type="checkbox" className="w-5 h-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked={selectedOrdersIds.includes(order.id)} onChange={() => toggleSelectOrder(order.id)} /></td>
                                         <td className="p-1 text-center">
                                             <button onClick={() => onViewOrder && onViewOrder(order)} className="whitespace-nowrap rounded-lg border border-blue-100 bg-blue-50 px-2 py-1.5 font-mono text-[11px] font-bold text-blue-600 transition-all hover:scale-105 hover:bg-white hover:shadow-sm active:scale-95">{order.orderId}</button>
                                         </td>
-                                        <td className="p-2 text-center"><input type="checkbox" className="w-5 h-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked={selectedOrdersIds.includes(order.id)} onChange={() => toggleSelectOrder(order.id)} /></td>
                                         <td className="max-w-0 py-2 px-2 text-right">
                                             <div title={getOrderProductsLabel(order)} className="truncate whitespace-nowrap font-bold text-gray-700">{getOrderProductsLabel(order)}</div>
                                         </td>
