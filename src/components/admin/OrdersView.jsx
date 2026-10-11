@@ -1236,6 +1236,9 @@ printWindow.onload = () => printWindow.print();
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-100 text-gray-400 font-bold text-xs">
                                 <th className="w-[120px] whitespace-nowrap p-2 text-center">{txt.th_order_id}</th>
+                                <th className="w-11 p-2 text-center">
+                                    <input type="checkbox" className="w-5 h-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked={currentOrders.length > 0 && currentOrders.every(o => selectedOrdersIds.includes(o.id))} onChange={toggleSelectAll} />
+                                </th>
                                 <th className="w-[210px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-3">{txt.th_product_size}</span></th>
                                 <th className="w-[125px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-10">{txt.th_name}</span></th>
                                 <th className="w-[135px] whitespace-nowrap p-2 text-center"><span className="inline-block -translate-x-2">{txt.th_phone}</span></th>
@@ -1244,9 +1247,6 @@ printWindow.onload = () => printWindow.print();
                                 <th className="w-[105px] whitespace-nowrap p-2 text-center">{txt.th_status}</th>
                                 <th className="w-[125px] whitespace-nowrap p-2 text-center">{isRTL ? 'إجمالي الطلب' : 'Order Total'}</th>
                                 <th className="w-[150px] whitespace-nowrap p-2 text-center">{txt.th_details}</th>
-                                <th className="w-11 p-2 text-center">
-                                    <input type="checkbox" className="w-5 h-5 translate-x-3 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked={currentOrders.length > 0 && currentOrders.every(o => selectedOrdersIds.includes(o.id))} onChange={toggleSelectAll} />
-                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -1264,6 +1264,7 @@ printWindow.onload = () => printWindow.print();
                                         <td className="p-1 text-center">
                                             <button onClick={() => onViewOrder && onViewOrder(order)} className="whitespace-nowrap rounded-lg border border-blue-100 bg-blue-50 px-2 py-1.5 font-mono text-[11px] font-bold text-blue-600 transition-all hover:scale-105 hover:bg-white hover:shadow-sm active:scale-95">{order.orderId}</button>
                                         </td>
+                                        <td className="p-2 text-center"><input type="checkbox" className="w-5 h-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked={selectedOrdersIds.includes(order.id)} onChange={() => toggleSelectOrder(order.id)} /></td>
                                         <td className="max-w-0 py-2 px-2 text-right">
                                             <div title={getOrderProductsLabel(order)} className="truncate whitespace-nowrap font-bold text-gray-700">{getOrderProductsLabel(order)}</div>
                                         </td>
@@ -1283,7 +1284,6 @@ printWindow.onload = () => printWindow.print();
                                         <td className="p-1.5 text-center"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-bold border rounded-full ${getStatusColor(order.status)}`}><span className={`w-1.5 h-1.5 rounded-full ${getStatusColor(order.status).replace('bg-', 'bg-current-').replace('text-', 'bg-').split(' ')[1]}`}></span>{getStatusLabel(order.status)}</span></td>
                                         <td className="p-2 text-center"><div className="flex flex-col items-center gap-0.5 whitespace-nowrap font-black text-gray-800"><span className="text-xs md:text-sm">{formatPrice(order.subTotal ? (order.subTotal - (order.discount || 0) + (order.deliveryCost || 0)) : order.total, generalSettings?.currency || 'YER')}</span>{order.deliveryCost > 0 && <span className="text-[9px] text-gray-400 font-normal">{lang === 'ar' ? 'شامل التوصيل' : 'Inc. Delivery'}</span>}</div></td>
                                         <td className="p-1 text-center"><div className="flex items-center justify-center gap-1"><button onClick={() => handlePrintSingleInvoice(order)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-600 shadow-sm transition-all hover:bg-gray-200 active:scale-95" title={lang === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice'}><Printer size={17} /></button><button onClick={() => onViewOrder && onViewOrder(order, true)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95" title={lang === 'ar' ? 'تعديل الطلب' : 'Edit Order'}><Pencil size={18} /></button><button onClick={() => deleteOrder(order.id)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500 text-white shadow-md shadow-red-500/20 transition-all hover:bg-red-600 active:scale-95" title={lang === 'ar' ? 'حذف الطلب' : 'Delete Order'}><Trash2 size={18} /></button></div></td>
-                                        <td className="p-2 text-center"><input type="checkbox" className="w-5 h-5 translate-x-3 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked={selectedOrdersIds.includes(order.id)} onChange={() => toggleSelectOrder(order.id)} /></td>
                                     </tr>
                                 ))
                             )}
