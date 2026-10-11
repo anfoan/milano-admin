@@ -1176,7 +1176,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                                         <td className="translate-x-2 px-6 py-3 text-center md:px-8 md:py-3.5 whitespace-nowrap text-gray-800 text-sm font-sans no-underline" dir="ltr">{String(order.phone || order.customer?.phone || '---').replace(/^\+967[\s-]*/, '')}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 whitespace-nowrap text-gray-700 text-sm font-sans"><div className="flex flex-col leading-5"><span>{formatOrderDateTime(order).date}</span><span className="text-xs text-gray-400">{formatOrderDateTime(order).time}</span></div></td>
                                         <td className="-translate-x-2 px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-sm font-black uppercase whitespace-nowrap">{(order.total || order.price || 0).toLocaleString()} {currency}</td>
-                                        <td className="px-6 py-3 md:px-8 md:py-3.5 -translate-x-2 whitespace-nowrap">
+                                        <td className="px-6 py-3 md:px-8 md:py-3.5 translate-x-1 whitespace-nowrap">
                                             <span className={`inline-flex whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-black ${getStatusColor(order.status)}`}>
                                                 {formatStatus(order.status)}
                                             </span>
