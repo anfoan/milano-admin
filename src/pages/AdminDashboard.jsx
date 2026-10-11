@@ -331,7 +331,7 @@ const AdminDashboard = () => {
             case 'purchases':
                 return <PurchasesView lang={lang} generalSettings={generalSettings} />;
             case 'financial-reports':
-                return <FinancialReportsView lang={lang} generalSettings={generalSettings} />;
+                return <FinancialReportsView lang={lang} generalSettings={generalSettings} onNavigate={handleTabChange} onViewOrder={handleViewOrder} />;
             case 'wallet':
                 return <WalletView lang={lang} generalSettings={generalSettings} />;
             case 'product-list':
