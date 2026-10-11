@@ -331,8 +331,8 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {}, onNavigate, o
     ];
     const categoryFilters = [['all', t.all], ['sales', t.salesType], ['purchase', t.purchaseType], ['expense', t.expenseType], ['receipt', t.receiptType], ['payment', t.paymentType]];
     const previewTone = {
-        stock: 'border-blue-200 bg-blue-50/40', purchases: 'border-amber-200 bg-amber-50/40', expenses: 'border-rose-200 bg-rose-50/40',
-        sales: 'border-emerald-200 bg-emerald-50/40', revenue: 'border-violet-200 bg-violet-50/40', profit: 'border-cyan-200 bg-cyan-50/40'
+        stock: 'border-blue-300 bg-blue-100/70', purchases: 'border-amber-300 bg-amber-100/70', expenses: 'border-rose-300 bg-rose-100/70',
+        sales: 'border-emerald-300 bg-emerald-100/70', revenue: 'border-violet-300 bg-violet-100/70', profit: 'border-cyan-300 bg-cyan-100/70'
     };
 
     const refreshPage = () => {
