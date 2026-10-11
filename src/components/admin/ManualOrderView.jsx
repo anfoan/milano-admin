@@ -582,6 +582,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             region: '',
             address: '',
             deliveryType: 'home',
+            paymentMethod: 'cash',
             notes: ''
         });
         setCartItems([]);
