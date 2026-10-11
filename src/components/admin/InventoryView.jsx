@@ -338,10 +338,10 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
     ];
 
     const colorMap = {
-        blue: { active: 'border-blue-500 bg-blue-500 text-white', inactive: 'border-gray-100 bg-white text-gray-500 hover:border-blue-200', count: 'bg-blue-600' },
-        green: { active: 'border-green-500 bg-green-500 text-white', inactive: 'border-gray-100 bg-white text-gray-500 hover:border-green-200', count: 'bg-green-600' },
-        yellow: { active: 'border-yellow-500 bg-yellow-500 text-white', inactive: 'border-gray-100 bg-white text-gray-500 hover:border-yellow-200', count: 'bg-yellow-500' },
-        red: { active: 'border-red-500 bg-red-500 text-white', inactive: 'border-gray-100 bg-white text-gray-500 hover:border-red-200', count: 'bg-red-500' },
+        blue: { active: 'border-blue-500 bg-blue-500 text-white', inactive: 'border-blue-200 bg-white text-gray-500 hover:border-blue-300', count: 'bg-blue-600' },
+        green: { active: 'border-green-500 bg-green-500 text-white', inactive: 'border-green-200 bg-white text-gray-500 hover:border-green-300', count: 'bg-green-600' },
+        yellow: { active: 'border-yellow-500 bg-yellow-500 text-white', inactive: 'border-yellow-200 bg-white text-gray-500 hover:border-yellow-300', count: 'bg-yellow-500' },
+        red: { active: 'border-red-500 bg-red-500 text-white', inactive: 'border-red-200 bg-white text-gray-500 hover:border-red-300', count: 'bg-red-500' },
     };
 
     return (
@@ -465,8 +465,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     <span className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} text-[11px] font-black px-2 py-0.5 rounded-full text-white ${isActive ? 'bg-white/30' : c.count}`}>
                                         {tab.count}
                                     </span>
-                                    <span className="text-sm font-black">{tab.label}</span>
-                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'opacity-70' : 'opacity-40'}`}>{txt.click_to_view}</span>
+                                    <span className="text-base font-black">{tab.label}</span>
+                                    <span className={`text-xs font-bold uppercase tracking-widest ${isActive ? 'opacity-80' : 'opacity-60'}`}>{txt.click_to_view}</span>
                                 </button>
                             );
                         })}
