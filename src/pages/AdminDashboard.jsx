@@ -521,7 +521,7 @@ const AdminDashboard = () => {
                                         <span>{txt.settings}</span>
                                     </button>
                                     <button onClick={toggleLang} className="px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors">
-                                        <img src={lang === 'ar' ? "https://flagcdn.com/w40/gb.png" : "https://flagcdn.com/w40/sa.png"} alt="Lang" className="w-5 h-auto rounded-sm shadow-sm" />
+                                        <img src={lang === 'ar' ? "https://flagcdn.com/w40/gb.png" : "https://flagcdn.com/w40/ye.png"} alt="Lang" className="w-5 h-auto rounded-sm shadow-sm" />
                                         <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
                                     </button>
                                     <div className="h-px bg-gray-100 dark:bg-white/5 my-1"></div>
