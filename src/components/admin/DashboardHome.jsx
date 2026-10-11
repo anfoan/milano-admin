@@ -788,6 +788,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
     const getStatusColor = (status) => {
         const s = status?.toLowerCase() || '';
         if (s === 'new' || s.includes('جديد')) return "text-orange-500 bg-orange-50 ring-1 ring-orange-100";
+        if (s === 'processing' || s.includes('تجهيز')) return "text-purple-500 bg-purple-50 ring-1 ring-purple-100";
         if (s === 'shipping' || s.includes('توصيل')) return "text-blue-500 bg-blue-50 ring-1 ring-blue-100";
         if (s === 'completed' || s.includes('اكتمل') || s === 'مكتمل') return "text-green-500 bg-green-50 ring-1 ring-green-100";
         if (s === 'cancelled' || s.includes('إلغاء') || s === 'ملغي') return "text-red-500 bg-red-50 ring-1 ring-red-100";
