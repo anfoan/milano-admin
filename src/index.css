@@ -657,6 +657,48 @@ input[type=number] {
 .admin-dashboard-root > *,
 .admin-dashboard-root main {
   min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Keep the desktop dashboard stable when browser zoom, viewport width, or
+   font rendering differs between computers. */
+.admin-dashboard-root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+}
+
+.admin-dashboard-root main,
+.admin-dashboard-root main > * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-dashboard-root button,
+.admin-dashboard-root input,
+.admin-dashboard-root select,
+.admin-dashboard-root textarea {
+  line-height: 1.35;
+}
+
+.admin-dashboard-root th,
+.admin-dashboard-root td {
+  vertical-align: middle;
+}
+
+@media (min-width: 1024px) {
+  .admin-dashboard-root header,
+  .admin-dashboard-root header > *,
+  .admin-dashboard-root header button,
+  .admin-dashboard-root .admin-sidebar-section-scroll button {
+    min-width: 0;
+  }
+
+  .admin-dashboard-root header button,
+  .admin-dashboard-root .admin-sidebar-section-scroll button {
+    white-space: nowrap;
+  }
 }
 
 .admin-dashboard-root .overflow-x-auto {
