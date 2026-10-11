@@ -1155,8 +1155,8 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                     <table className="w-full min-w-[1100px] table-fixed text-start font-bold"><colgroup><col style={{ width: '110px' }}/><col style={{ width: '300px' }}/><col style={{ width: '125px' }}/><col style={{ width: '110px' }}/><col style={{ width: '125px' }}/><col style={{ width: '165px' }}/><col style={{ width: '125px' }}/></colgroup>
                         <thead className="bg-gray-50 text-gray-800 text-sm font-black uppercase italic">
                             <tr>
-                                <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.order_no}</th>
-                                <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.product_size}</th>
+                                <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap"><span className="inline-block -translate-x-2">{txt.order_no}</span></th>
+                                <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap"><span className="inline-block -translate-x-3">{txt.product_size}</span></th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.name}</th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.phone}</th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.date}</th>
@@ -1170,8 +1170,8 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                             ) : realOrders.length > 0 ? (
                                 realOrders.slice(0, 20).map((order, idx) => (
                                     <tr key={order.id} onClick={() => onViewOrder(order)} className="hover:bg-gray-50 transition-colors cursor-pointer group">
-                                        <td className="px-6 py-3 md:px-8 md:py-3.5 text-base font-black text-gray-800 font-mono italic">#{order.id.slice(-8)}</td>
-                                        <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-700 text-sm font-bold whitespace-nowrap">{getOrderProductSize(order)}</td>
+                                        <td className="-translate-x-2 px-6 py-3 text-base font-black text-gray-800 font-mono italic whitespace-nowrap md:px-8 md:py-3.5" dir="ltr"><span className="whitespace-nowrap">#{order.id.slice(-8)}</span></td>
+                                        <td className="-translate-x-3 px-6 py-3 md:px-8 md:py-3.5 text-gray-700 text-sm font-bold whitespace-nowrap">{getOrderProductSize(order)}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 whitespace-nowrap text-gray-900 text-base font-black">{order.customer?.name || order.name || txt.anonymous}</td>
                                         <td className="translate-x-2 px-6 py-3 text-center md:px-8 md:py-3.5 whitespace-nowrap text-gray-800 text-sm font-sans no-underline" dir="ltr">{String(order.phone || order.customer?.phone || '---').replace(/^\+967[\s-]*/, '')}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 whitespace-nowrap text-gray-700 text-sm font-sans"><div className="flex flex-col leading-5"><span>{formatOrderDateTime(order).date}</span><span className="text-xs text-gray-400">{formatOrderDateTime(order).time}</span></div></td>
