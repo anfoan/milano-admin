@@ -736,18 +736,18 @@ printWindow.onload = () => printWindow.print();
                     .print-button:hover { background: #1d4ed8; }
                     .print-container { width: 100% !important; padding: 28px 0 40px; }
                     .print-page {
-                        width: 210mm !important;
-                        min-height: 240mm !important;
+                        width: 170mm !important;
+                        min-height: 0 !important;
                         height: auto !important;
                         margin: 0 auto !important;
-                        padding: 20px 40px !important;
+                        padding: 20px 24px !important;
                         page-break-after: avoid !important;
                         break-after: avoid-page !important;
                         page-break-inside: avoid !important;
                         background: #fff !important;
                         box-shadow: 0 10px 30px rgba(15,23,42,.18) !important;
                         border: 1px solid #e5e7eb !important;
-                        border-radius: 30px !important;
+                        border-radius: 24px !important;
                         overflow: visible !important;
                     }
                     .print\:hidden, [data-html2canvas-ignore="true"] { display: none !important; }
@@ -759,7 +759,7 @@ printWindow.onload = () => printWindow.print();
                         .print-container { padding: 0 !important; }
                         .print-page {
                             box-shadow: none !important; border: 0 !important; border-radius: 0 !important;
-                            margin: 0 !important; width: 210mm !important; min-height: 240mm !important;
+                            margin: 0 auto !important; width: 170mm !important; min-height: 0 !important;
                         }
                     }
                 </style></head><body>
