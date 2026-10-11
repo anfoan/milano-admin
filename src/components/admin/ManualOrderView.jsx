@@ -741,7 +741,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, paymentMethod: 'cash' })}
-                                        className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'cash' ? 'border-green-500/60 bg-green-500/15 text-green-700 font-black' : 'border-green-200 bg-green-50 text-green-600 hover:bg-green-100'}`}
+                                        className={`payment-method-option py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'cash' ? 'payment-method-selected bg-green-500/15 text-green-700 font-black' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
                                     >
                                         <DollarSign size={16} />
                                         <span className="text-[10px]">{isRTL ? 'نقدي / كاش' : 'Cash'}</span>
@@ -749,7 +749,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, paymentMethod: 'card' })}
-                                        className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'card' ? 'border-purple-500/60 bg-purple-500/15 text-purple-700 font-black' : 'border-purple-200 bg-purple-50 text-purple-600 hover:bg-purple-100'}`}
+                                        className={`payment-method-option py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'card' ? 'payment-method-selected bg-purple-500/15 text-purple-700 font-black' : 'bg-purple-50 text-purple-600 hover:bg-purple-100'}`}
                                     >
                                         <CreditCard size={16} />
                                         <span className="text-[10px]">{isRTL ? 'محفظة جيب' : 'Jib Wallet'}</span>
@@ -757,7 +757,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, paymentMethod: 'transfer' })}
-                                        className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'transfer' ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-700 font-black' : 'border-cyan-200 bg-cyan-50 text-cyan-600 hover:bg-cyan-100'}`}
+                                        className={`payment-method-option py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'transfer' ? 'payment-method-selected bg-cyan-500/15 text-cyan-700 font-black' : 'bg-cyan-50 text-cyan-600 hover:bg-cyan-100'}`}
                                     >
                                         <ArrowLeftRight size={16} />
                                         <span className="text-[10px]">{isRTL ? 'تحويل بنكي' : 'Bank Transfer'}</span>
