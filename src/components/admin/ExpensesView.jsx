@@ -1574,11 +1574,14 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                             <span>{isRTL ? 'تقرير' : 'Report'}</span>
                         </button>
                         <button
-                            onClick={() => handleAddBondClick()}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-lg transition-all duration-200 shadow-sm text-xs font-black"
+                            onClick={() => handleAddBondClick(bondsTab)}
+                            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 text-white rounded-lg transition-all duration-200 shadow-sm text-xs font-black ${bondsTab === 'receipt'
+                                    ? 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700'
+                                    : 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700'
+                                }`}
                         >
                             <Plus size={14} />
-                            <span>{isRTL ? 'سند جديد' : 'New Bond'}</span>
+                            <span>{isRTL ? (bondsTab === 'receipt' ? 'سند قبض' : 'سند صرف') : (bondsTab === 'receipt' ? 'Receipt Bond' : 'Payment Bond')}</span>
                         </button>
                     </div>
                 </div>
