@@ -37,7 +37,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
         region: '',
         address: '',
         deliveryType: 'home', // 'home' or 'office'
-        paymentMethod: '', // Empty by default as requested
+        paymentMethod: 'cash', // Cash is selected by default and remains changeable
         notes: ''
     });
 
@@ -744,7 +744,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                         className={`payment-method-option py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'cash' ? 'payment-method-selected bg-green-500/15 text-green-700 font-black' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
                                     >
                                         <DollarSign size={16} />
-                                        <span className="text-[10px]">{isRTL ? 'نقدي / كاش' : 'Cash'}</span>
+                                        <span className="text-xs">{isRTL ? 'نقدي / كاش' : 'Cash'}</span>
                                     </button>
                                     <button
                                         type="button"
@@ -752,7 +752,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                         className={`payment-method-option py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'card' ? 'payment-method-selected bg-purple-500/15 text-purple-700 font-black' : 'bg-purple-50 text-purple-600 hover:bg-purple-100'}`}
                                     >
                                         <CreditCard size={16} />
-                                        <span className="text-[10px]">{isRTL ? 'محفظة جيب' : 'Jib Wallet'}</span>
+                                        <span className="text-xs">{isRTL ? 'محفظة جيب' : 'Jib Wallet'}</span>
                                     </button>
                                     <button
                                         type="button"
@@ -760,7 +760,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                         className={`payment-method-option py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${formData.paymentMethod === 'transfer' ? 'payment-method-selected bg-cyan-500/15 text-cyan-700 font-black' : 'bg-cyan-50 text-cyan-600 hover:bg-cyan-100'}`}
                                     >
                                         <ArrowLeftRight size={16} />
-                                        <span className="text-[10px]">{isRTL ? 'تحويل بنكي' : 'Bank Transfer'}</span>
+                                        <span className="text-xs">{isRTL ? 'تحويل بنكي' : 'Bank Transfer'}</span>
                                     </button>
                                 </div>
                             </div>
