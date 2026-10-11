@@ -1157,7 +1157,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 text-base font-black text-gray-800 font-mono italic">#{order.id.slice(-8)}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-700 text-sm font-bold whitespace-nowrap">{getOrderProductSize(order)}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-base font-black">{order.customer?.name || order.name || txt.anonymous}</td>
-                                        <td className="px-6 py-3 md:px-8 md:py-3.5 whitespace-nowrap text-gray-800 text-sm font-sans no-underline" dir="ltr">{order.phone || order.customer?.phone || '---'}</td>
+                                        <td className="translate-x-2 px-6 py-3 text-center md:px-8 md:py-3.5 whitespace-nowrap text-gray-800 text-sm font-sans no-underline" dir="ltr">{String(order.phone || order.customer?.phone || '---').replace(/^\+967[\s-]*/, '')}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-sm font-black uppercase">{(order.total || order.price || 0).toLocaleString()} {currency}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 -translate-x-2">
                                             <span className={`px-4 py-1.5 rounded-full text-xs font-black ${getStatusColor(order.status)}`}>
