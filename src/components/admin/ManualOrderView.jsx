@@ -1040,7 +1040,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                         value={couponCode}
                                         onChange={(e) => setCouponCode(e.target.value)}
                                         className="flex-1 min-w-0 text-sm font-black bg-gray-50 border border-gray-200 rounded-2xl px-4 outline-none focus:border-blue-500 uppercase font-mono transition-all focus:bg-white placeholder:text-gray-300 text-center shadow-sm"
-                                        placeholder="SALE20"
+                                        placeholder=""
                                     />
                                     <button
                                         onClick={handleApplyCoupon}
@@ -1062,14 +1062,15 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 <span className="font-black text-red-600">{txt.discount}</span>
                                 <div className="flex items-center gap-2">
                                     <input
-                                        type="number"
+                                        type="text"
                                         inputMode="numeric"
                                         min="0"
                                         dir="ltr"
                                         lang="en"
                                         value={String(Number(discount) || 0)}
                                         onChange={(e) => {
-                                            setDiscount(Math.max(0, Number(e.target.value)));
+                                            const digits = e.target.value.replace(/[^0-9]/g, '');
+                                            setDiscount(Math.max(0, Number(digits || 0)));
                                             setAppliedCoupon(null); // Clear applied coupon if manual edit
                                         }}
                                         className="w-24 text-center font-sans font-black bg-red-50 border-2 border-red-600 rounded-lg px-2 py-1 text-red-600 focus:border-red-600 focus:ring-2 focus:ring-red-600/20 focus:outline-none"
