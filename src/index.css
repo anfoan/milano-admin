@@ -794,3 +794,9 @@ input[type=number] {
 
 .barcode-stripes { background: repeating-linear-gradient(90deg, #111 0 2px, transparent 2px 4px, #111 4px 5px, transparent 5px 8px); border-radius: 1px; }
 .dark .barcode-stripes { background: repeating-linear-gradient(90deg, #fff 0 2px, transparent 2px 4px, #fff 4px 5px, transparent 5px 8px); }
+
+/* Restore soft elevation around rounded data cards in light mode only. */
+html:not(.dark) .admin-dashboard-root .shadow-sm[class*="rounded-"],
+html:not(.dark) .admin-dashboard-root .shadow[class*="rounded-"] {
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+}
