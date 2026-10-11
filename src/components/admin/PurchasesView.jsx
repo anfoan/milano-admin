@@ -274,6 +274,7 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
             .dark .purchase-invoice-modal .purchase-items-table { background: #1c1c1e !important; border-color: rgba(255,255,255,.1) !important; }
             .dark .purchase-invoice-modal .purchase-items-table thead { background: #111827 !important; color: #f9fafb !important; }
             .dark .purchase-invoice-modal .purchase-totals > div { background: #242528 !important; border-color: rgba(255,255,255,.12) !important; }
+            .dark .purchase-invoice-modal .purchase-totals > div:nth-child(2) { background: rgba(244,63,94,.12) !important; border-color: rgba(244,63,94,.45) !important; }
             .dark .purchase-invoice-modal .purchase-paid-input { background: transparent !important; background-color: transparent !important; box-shadow: none !important; }
             .dark .purchase-invoice-modal .purchase-product-picker { background: #1c1c1e !important; border-color: rgba(255,255,255,.12) !important; color: #f9fafb !important; }
             .dark .purchase-invoice-modal .purchase-product-picker .text-gray-800 { color: #f9fafb !important; }
