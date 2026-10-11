@@ -476,7 +476,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                     <div>
                         <button
                             onClick={() => setFilter('audit')}
-                            className={`w-full px-6 py-3 rounded-[18px] border-2 transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md ${filter === 'audit' ? 'border-purple-500 bg-purple-500 text-white' : 'border-gray-100 bg-white text-gray-500 hover:border-purple-200'}`}
+                            className={`w-full px-6 py-3 rounded-[18px] border-2 transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md ${filter === 'audit' ? 'border-purple-500 bg-purple-500 text-white' : 'border-purple-200 bg-white text-gray-500 hover:border-purple-300'}`}
                         >
                             <ClipboardList size={18} />
                             <span className="text-sm font-black">{txt.filter_audit}</span>
