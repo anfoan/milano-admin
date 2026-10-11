@@ -146,7 +146,7 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {}, onNavigate, o
     const number = (value) => Number(value || 0).toLocaleString('en-US');
     const formatDate = (value) => {
         const date = typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? dayAtNoon(value) : toDate(value);
-        return date ? new Intl.DateTimeFormat(isRTL ? 'ar-YE-u-nu-latn' : 'en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date) : '---';
+        return date ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date) : '---';
     };
     const isInRange = (value) => {
         const key = isoDay(value);
