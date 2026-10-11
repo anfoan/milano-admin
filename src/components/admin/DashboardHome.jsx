@@ -63,6 +63,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             product_size: "اسم المنتج + المقاس",
             name: "اسم العميل",
             price: "إجمالي الطلب",
+            date: "التاريخ",
             phone: "رقم الهاتف",
             city: "المدينة",
             status: "الحالة",
@@ -118,6 +119,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             product_size: "Product + Size",
             name: "Customer Name",
             price: "Order Total",
+            date: "Date",
             phone: "Phone",
             city: "City",
             status: "Status",
@@ -140,6 +142,19 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             const size = item.selectedSize || item.size || '';
             return size ? `${product} + ${size}` : product;
         }).join('، ');
+    };
+
+    const formatOrderDateTime = (order) => {
+        let date = null;
+        if (order.createdAt && typeof order.createdAt.toDate === 'function') date = order.createdAt.toDate();
+        else if (typeof order.createdAt === 'string') date = new Date(order.createdAt);
+        else if (order.date) date = new Date(order.date);
+        if (!date || Number.isNaN(date.getTime())) return { date: '---', time: '---' };
+        const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
+        return {
+            date: date.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            time: date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: true })
+        };
     };
 
     const [storeOpen, setStoreOpen] = useState(true);
@@ -1144,13 +1159,14 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.product_size}</th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start">{txt.name}</th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.phone}</th>
-                                <th className="px-6 py-3 md:px-8 md:py-4 text-start">{txt.price}</th>
+                                <th className="px-6 py-3 md:px-8 md:py-4 text-start whitespace-nowrap">{txt.date}</th>
+                                <th className="px-6 py-3 md:px-8 md:py-4 text-start"><span className="inline-block -translate-x-2">{txt.price}</span></th>
                                 <th className="px-6 py-3 md:px-8 md:py-4 text-start"><span className="inline-block -translate-x-2">{txt.status}</span></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
-                                <tr><td colSpan="6" className="p-10 text-center text-gray-500 font-bold text-lg">{txt.loading}</td></tr>
+                                <tr><td colSpan="7" className="p-10 text-center text-gray-500 font-bold text-lg">{txt.loading}</td></tr>
                             ) : realOrders.length > 0 ? (
                                 realOrders.slice(0, 20).map((order, idx) => (
                                     <tr key={order.id} onClick={() => onViewOrder(order)} className="hover:bg-gray-50 transition-colors cursor-pointer group">
@@ -1158,7 +1174,8 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-700 text-sm font-bold whitespace-nowrap">{getOrderProductSize(order)}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-base font-black">{order.customer?.name || order.name || txt.anonymous}</td>
                                         <td className="translate-x-2 px-6 py-3 text-center md:px-8 md:py-3.5 whitespace-nowrap text-gray-800 text-sm font-sans no-underline" dir="ltr">{String(order.phone || order.customer?.phone || '---').replace(/^\+967[\s-]*/, '')}</td>
-                                        <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-sm font-black uppercase">{(order.total || order.price || 0).toLocaleString()} {currency}</td>
+                                        <td className="px-6 py-3 md:px-8 md:py-3.5 text-gray-700 text-sm font-sans whitespace-nowrap"><div className="flex flex-col leading-5"><span>{formatOrderDateTime(order).date}</span><span className="text-xs text-gray-400">{formatOrderDateTime(order).time}</span></div></td>
+                                        <td className="-translate-x-2 px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-sm font-black uppercase whitespace-nowrap">{(order.total || order.price || 0).toLocaleString()} {currency}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 -translate-x-2">
                                             <span className={`px-4 py-1.5 rounded-full text-xs font-black ${getStatusColor(order.status)}`}>
                                                 {formatStatus(order.status)}
@@ -1167,7 +1184,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                                     </tr>
                                 ))
                             ) : (
-                                <tr><td colSpan="6" className="p-10 text-center text-gray-500 font-bold italic text-lg">{txt.no_orders}</td></tr>
+                                <tr><td colSpan="7" className="p-10 text-center text-gray-500 font-bold italic text-lg">{txt.no_orders}</td></tr>
                             )}
                         </tbody>
                     </table>
