@@ -909,9 +909,9 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                                     </div>
                                                     <div className="flex items-center gap-4 md:gap-6 justify-between md:justify-end w-full md:w-auto">
                                                         <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-2 py-1 border border-gray-200">
-                                                            <button onClick={() => updateQuantity(key, -1)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors font-black text-2xl">-</button>
+                                                            <button onClick={() => updateQuantity(key, 1)} className="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 transition-colors font-black text-2xl">+</button>
                                                             <span className="w-8 text-center font-black text-gray-800">{item.quantity}</span>
-                                                            <button onClick={() => updateQuantity(key, 1)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors font-black text-2xl">+</button>
+                                                            <button onClick={() => updateQuantity(key, -1)} className="w-8 h-8 flex items-center justify-center text-red-600 hover:text-red-700 transition-colors font-black text-2xl">-</button>
                                                         </div>
 
                                                         <div className="flex items-center gap-4">
@@ -1085,7 +1085,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                             <div className="pt-4 border-t-2 border-dashed border-gray-100 flex justify-between items-center whitespace-nowrap">
                                 <span className="text-sm md:text-lg font-black text-gray-800 shrink-0">{txt.final_total}</span>
                                 <div className="text-base md:text-2xl font-black text-blue-600 flex items-center gap-1">
-                                    <span>{formatPrice(Math.max(0, (calculateSubtotal() + getDeliveryCost()) - discount), orderCurrency)}</span>
+                                    <span className="text-sm md:text-xl whitespace-nowrap" style={{ wordSpacing: '0.25em' }}>{formatPrice(Math.max(0, (calculateSubtotal() + getDeliveryCost()) - discount), orderCurrency)}</span>
                                 </div>
                             </div>
                         </div>
