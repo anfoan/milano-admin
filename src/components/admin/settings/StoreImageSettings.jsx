@@ -71,7 +71,7 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
                 // Merge separate fields if they exist, or fallback to the old 'logoImage' if new ones aren't set yet (migration)
                 const data = docSnap.data();
                 setImages({
-                    profileImage: data.profileImage || data.logoImage || '',
+                    profileImage: data.profileImage && data.profileImage !== data.navLogo ? data.profileImage : '',
                     coverImage: data.coverImage || '',
                     invoiceLogo: data.invoiceLogo || '',
                     logoImage: data.logoImage || '',
