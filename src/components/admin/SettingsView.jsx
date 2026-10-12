@@ -51,11 +51,10 @@ const SettingsView = ({ activeSection, setActiveSection, lang = 'ar' }) => {
         { id: 'interface', title: txt.interface.title, description: txt.interface.description, icon: Store, component: StoreInterfaceSettings },
         { id: 'images', title: txt.images.title, description: txt.images.description, icon: Image, component: StoreImageSettings },
         { id: 'language', title: txt.language.title, description: txt.language.description, icon: Languages, component: StoreLanguageSettings },
-        { id: 'orders', title: txt.orders.title, description: txt.orders.description, icon: ShoppingBag, component: OrderPageSettings },
+        { id: 'pos-settings', title: isRTL ? 'المستخدمين والصلاحيات' : 'Users & Permissions', description: isRTL ? 'إدارة صلاحيات دخول العامل' : 'Manage worker credentials', icon: CreditCard, component: POSSettings },
         { id: 'page-settings', title: txt.page.title, description: txt.page.description, icon: Settings, component: OrderPageSettings },
         { id: 'cart', title: txt.cart.title, description: txt.cart.description, icon: ShoppingCart, component: StoreCartSettings },
         { id: 'domain', title: txt.domain.title, description: txt.domain.description, icon: Globe, component: StoreDomainSettings },
-        { id: 'pos-settings', title: isRTL ? 'المستخدمين والصلاحيات' : 'Users & Permissions', description: isRTL ? 'إدارة صلاحيات دخول العامل' : 'Manage worker credentials', icon: CreditCard, component: POSSettings },
     ];
 
     if (activeSection) {
