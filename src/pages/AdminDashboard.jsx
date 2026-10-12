@@ -106,7 +106,10 @@ const AdminDashboard = () => {
         const unsubscribeImages = onSnapshot(doc(db, "settings", "images"), (docSnap) => {
             if (docSnap.exists()) setGeneralSettings(prev => ({ ...prev, invoiceLogo: docSnap.data().invoiceLogo || '' }));
         });
-        return () => { unsubscribe(); unsubscribeImages(); };
+        const unsubscribeBranding = onSnapshot(doc(db, "settings", "branding"), (docSnap) => {
+            if (docSnap.exists()) setGeneralSettings(prev => ({ ...prev, ...docSnap.data() }));
+        });
+        return () => { unsubscribe(); unsubscribeImages(); unsubscribeBranding(); };
     }, []);
 
     // Search Indexer (Fetch basic data for instant search)
@@ -501,11 +504,11 @@ const AdminDashboard = () => {
                                 className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 p-2 rounded-xl transition-colors"
                             >
                                 <div className="hidden lg:flex flex-col items-end">
-                                    <span className="text-sm font-black text-gray-800 dark:text-white">{txt.admin_name}</span>
+                                    <span className="text-sm font-black text-gray-800 dark:text-white">{generalSettings?.adminTitle || txt.admin_name}</span>
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{txt.admin_role}</span>
                                 </div>
                                 <div className="w-10 h-10 rounded-[14px] overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm relative bg-white flex items-center justify-center p-0.5">
-                                    <img src="/admin-new-icon.png" alt="Admin" className="w-full h-full object-cover rounded-[12px]" onError={(e) => e.target.src = '/nav-logo.png'} />
+                                    <img src={generalSettings?.adminImage || '/admin-new-icon.png'} alt="Admin" className="w-full h-full object-cover rounded-[12px]" onError={(e) => e.target.src = '/admin-new-icon.png'} />
                                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
                                 </div>
                             </button>

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Save, ArrowRight, Loader2, Mail, Users } from 'lucide-react';
+import { Save, ArrowRight, Loader2, Mail, Users, Upload } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import { uploadSettingsImage } from '../../../services/uploadService';
 
 const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [branding, setBranding] = useState({ adminTitle: 'إعدادات لوحة التحكم', adminImage: '/admin-new-icon.png', storeTitle: 'متجر ميلانو', storeImage: '/logo-rounded.png' });
+    const [uploading, setUploading] = useState({ admin: false, store: false });
 
     const [settings, setSettings] = useState({
         emailStatus: 'hide', // 'show' or 'hide'
@@ -54,6 +57,8 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
                 if (docSnap.exists()) {
                     setSettings(prev => ({ ...prev, ...docSnap.data() }));
                 }
+                const brandingSnap = await getDoc(doc(db, 'settings', 'branding'));
+                if (brandingSnap.exists()) setBranding(prev => ({ ...prev, ...brandingSnap.data() }));
             } catch (error) {
                 console.error("Error fetching order settings:", error);
             } finally {
@@ -71,6 +76,24 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
         }));
     };
 
+    const handleBrandingChange = (key, value) => setBranding(prev => ({ ...prev, [key]: value }));
+
+    const handleBrandingImage = async (event, key) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        setUploading(prev => ({ ...prev, [key]: true }));
+        try {
+            const url = await uploadSettingsImage(file, `${key}-brand`);
+            setBranding(prev => ({ ...prev, [`${key}Image`]: url }));
+        } catch (error) {
+            console.error('Brand image upload failed:', error);
+            alert(isRTL ? 'تعذر رفع الصورة' : 'Unable to upload image');
+        } finally {
+            setUploading(prev => ({ ...prev, [key]: false }));
+            event.target.value = '';
+        }
+    };
+
     const handleSave = async () => {
         // Validation: Ensure maxDailyOrders is at least 1
         if (settings.maxDailyOrders < 1) {
@@ -81,6 +104,9 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
         setSaving(true);
         try {
             await setDoc(doc(db, "settings", "order"), settings);
+            await setDoc(doc(db, 'settings', 'branding'), branding, { merge: true });
+            await setDoc(doc(db, 'settings', 'general'), { storeName: branding.storeTitle }, { merge: true });
+            await setDoc(doc(db, 'settings', 'images'), { navLogo: branding.storeImage }, { merge: true });
             alert(txt.success);
         } catch (error) {
             console.error("Error saving order settings:", error);
@@ -101,6 +127,17 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
             {/* Header managed by SettingsView */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[['admin', 'adminTitle', 'adminImage', isRTL ? 'إعدادات ميلانو' : 'Milano Settings', isRTL ? 'عنوان لوحة التحكم' : 'Dashboard title'], ['store', 'storeTitle', 'storeImage', isRTL ? 'متجر ميلانو' : 'Milano Store', isRTL ? 'عنوان المتجر' : 'Store title']].map(([key, titleKey, imageKey, heading, label]) => (
+                        <div key={key} className="rounded-[24px] border border-gray-100 bg-white p-6 shadow-sm">
+                            <div className="mb-5 flex items-center gap-3"><img src={branding[imageKey]} onError={event => { event.currentTarget.src = key === 'admin' ? '/admin-new-icon.png' : '/logo-rounded.png'; }} className="h-10 w-10 rounded-xl object-cover" alt=""/><h3 className="font-black text-gray-800">{heading}</h3></div>
+                            <label className="mb-2 block text-sm font-bold text-gray-500">{label}</label>
+                            <input value={branding[titleKey]} onChange={event => handleBrandingChange(titleKey, event.target.value)} className="mb-4 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 font-bold text-gray-900 outline-none focus:border-blue-500" />
+                            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-blue-300 bg-blue-50 px-4 py-3 font-bold text-blue-700"><Upload size={17}/>{uploading[key] ? (isRTL ? 'جاري الرفع...' : 'Uploading...') : (isRTL ? 'تغيير الصورة' : 'Change image')}<input type="file" accept="image/*" className="hidden" onChange={event => handleBrandingImage(event, key)} /></label>
+                        </div>
+                    ))}
+                </div>
 
                 {/* Email Status */}
                 <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm p-6 relative overflow-hidden group hover:shadow-md transition-shadow">
