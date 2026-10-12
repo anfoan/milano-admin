@@ -72,8 +72,14 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
                 const data = docSnap.data();
                 setImages({
                     ...data,
+                    profileImage: data.profileImage || data.logoImage || '',
                     invoiceLogo: data.invoiceLogo || '',
-                    brands: { ...(data.brands || {}) }
+                    brands: {
+                        nike: data.brands?.nike || '',
+                        adidas: data.brands?.adidas || '',
+                        puma: data.brands?.puma || '',
+                        lacoste: data.brands?.lacoste || ''
+                    }
                 });
             }
         } catch (error) {
