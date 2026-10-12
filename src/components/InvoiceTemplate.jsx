@@ -86,7 +86,7 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                     <p className="text-xl font-bold text-gray-500 mb-2">{generalSettings?.storeName || (lang === 'ar' ? 'متجر ميلانو' : 'Milano Store')}</p>
                                     <div className="mb-4 space-y-0.5 text-xs font-bold text-gray-500">
                                         {generalSettings?.storeAddress && <p>{generalSettings.storeAddress}</p>}
-                                        {generalSettings?.phoneNumber && <p dir="ltr" className="text-right">{generalSettings.phoneNumber}</p>}
+                                        {generalSettings?.phoneNumber && <p dir="ltr" className="text-right" style={{ direction: 'ltr', textAlign: 'right' }}>{generalSettings.phoneNumber}</p>}
                                     </div>
                                     <div className="space-y-1.5 text-sm font-bold text-gray-800">
                                         <div className="flex items-center gap-3">
