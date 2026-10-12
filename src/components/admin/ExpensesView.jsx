@@ -1494,14 +1494,14 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 <tr key={expense.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.01] transition-all">
                                     <td className="px-3 py-2.5 text-start text-gray-400">{idx + 1}</td>
                                     <td className="px-3 py-2.5 text-start text-gray-900 dark:text-white whitespace-nowrap">{expense.title}</td>
-                                    <td className="px-3 py-2.5 text-start">
+                                    <td className="px-3 py-2.5 text-start relative left-2">
                                         <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-[#2c2c2e] text-gray-700 dark:text-gray-300 whitespace-nowrap">
                                             {categoriesMap[expense.category] || expense.category}
                                         </span>
                                     </td>
                                     <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap relative left-2">{toEnglishDigits(expense.date)}</td>
-                                    <td className="px-3 py-2.5 text-start whitespace-nowrap"><span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-black ${getPaymentClass(expense.paymentMethod)}`}>{getPaymentLabel(expense.paymentMethod)}</span></td>
-                                    <td className="px-3 py-2.5 text-end font-extrabold text-red-500 dark:text-red-400 whitespace-nowrap">
+                                    <td className="px-3 py-2.5 text-start whitespace-nowrap relative left-3"><span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-black ${getPaymentClass(expense.paymentMethod)}`}>{getPaymentLabel(expense.paymentMethod)}</span></td>
+                                    <td className="px-3 py-2.5 text-end font-extrabold text-red-500 dark:text-red-400 whitespace-nowrap relative right-3">
                                         {expense.amount.toLocaleString()} {getCurrencyLabel(expense.currency || currency)}
                                     </td>
                                     <td className="px-3 py-2.5 text-center">
