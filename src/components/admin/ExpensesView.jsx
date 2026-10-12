@@ -50,6 +50,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
     const [expensesStartDate, setExpensesStartDate] = useState('');
     const [expensesEndDate, setExpensesEndDate] = useState('');
     const [expenseModalOpen, setExpenseModalOpen] = useState(false);
+    const [expensePaymentOpen, setExpensePaymentOpen] = useState(false);
     const [currentExpense, setCurrentExpense] = useState({
         title: '',
         amount: '',
@@ -1481,9 +1482,9 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                             <tr>
                                 <th className="px-3 py-2.5 text-start">#</th>
                                 <th className="px-3 py-2.5 text-start">{isRTL ? 'بند المصروفات' : 'Expense item'}</th>
-                                <th className="px-3 py-2.5 text-start">{isRTL ? 'التصنيف' : 'Category'}</th>
+                                <th className="px-3 py-2.5 text-start relative left-2">{isRTL ? 'التصنيف' : 'Category'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap relative left-2">{isRTL ? 'التاريخ' : 'Date'}</th>
-                                <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'طريقة الدفع' : 'Payment method'}</th>
+                                <th className="px-3 py-2.5 text-start whitespace-nowrap relative left-3">{isRTL ? 'طريقة الدفع' : 'Payment method'}</th>
                                 <th className="px-3 py-2.5 text-end whitespace-nowrap relative right-3">{isRTL ? 'مبلغ المصروف' : 'Expense amount'}</th>
                                 <th className="px-3 py-2.5 text-center">{isRTL ? 'إجراءات' : 'Actions'}</th>
                             </tr>
@@ -1916,11 +1917,23 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     </div>
                                     <div className="relative left-2">
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'طريقة الدفع' : 'Payment Method'}</label>
-                                        <select value={currentExpense.paymentMethod || 'cash'} onChange={(e) => setCurrentExpense({ ...currentExpense, paymentMethod: e.target.value })} className={`w-full appearance-auto rounded-xl border-0 px-4 py-2.5 text-center text-xs font-black outline-none ${getPaymentClass(currentExpense.paymentMethod || 'cash')}`}>
-                                            <option value="cash">{isRTL ? 'نقدي / كاش' : 'Cash'}</option>
-                                            <option value="jib_wallet">{isRTL ? 'محفظة جيب' : 'Jib Wallet'}</option>
-                                            <option value="bank">{isRTL ? 'تحويل بنكي / صرافة' : 'Bank transfer / exchange'}</option>
-                                        </select>
+                                        <div className="relative">
+                                            <button type="button" onClick={() => setExpensePaymentOpen(value => !value)} className={`flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-xs font-black ${getPaymentClass(currentExpense.paymentMethod || 'cash')}`}>
+                                                <span>{getPaymentLabel(currentExpense.paymentMethod || 'cash')}</span>
+                                                <ChevronDown size={15} className={`transition-transform ${expensePaymentOpen ? 'rotate-180' : ''}`} />
+                                            </button>
+                                            {expensePaymentOpen && (
+                                                <div className="absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-xl dark:border-white/10 dark:bg-[#2c2c2e]">
+                                                    {[
+                                                        ['cash', isRTL ? 'نقدي / كاش' : 'Cash'],
+                                                        ['jib_wallet', isRTL ? 'محفظة جيب' : 'Jib Wallet'],
+                                                        ['bank', isRTL ? 'تحويل بنكي / صرافة' : 'Bank transfer / exchange']
+                                                    ].map(([value, label]) => (
+                                                        <button key={value} type="button" onClick={() => { setCurrentExpense({ ...currentExpense, paymentMethod: value }); setExpensePaymentOpen(false); }} className={`mb-1 flex w-full items-center justify-center rounded-lg px-2 py-2 text-xs font-black last:mb-0 ${getPaymentClass(value)} ${currentExpense.paymentMethod === value ? 'ring-2 ring-blue-400' : ''}`}>{label}</button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
