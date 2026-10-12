@@ -36,7 +36,7 @@ const PageMetadataHandler = () => {
             }
             pageDesc = "تسوق أفضل المستلزمات الرياضية لكرة القدم (بواتي، فنايل نسخة اللاعبين، ترنكات صوف) بخامة فيتنامية في متجر ميلانو. جودة عالمية وتوصيل لكل اليمن.";
         } else if (path.startsWith('/milano-secure-gate-99') || path.startsWith('/milano-dashboard-vault-77')) {
-            pageTitle = "إعدادات ميلانو";
+            pageTitle = generalSettings?.adminTitle || "إعدادات ميلانو";
             pageDesc = "لوحة تحكم مدير متجر ميلانو.";
         } else {
             pageTitle = generalSettings?.storeName || "متجر ميلانو";
