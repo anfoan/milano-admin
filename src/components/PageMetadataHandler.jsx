@@ -144,14 +144,15 @@ const PageMetadataHandler = () => {
                 : '/favicon.ico.png';
 
             // Update Favicon Link
-            let link = document.querySelector("link[rel*='icon']");
-            if (!link) {
-                link = document.createElement('link');
+            const iconLinks = document.querySelectorAll("link[rel*='icon']");
+            const link = iconLinks[0] || document.createElement('link');
+            if (!iconLinks.length) {
                 link.rel = 'icon';
-                document.getElementsByTagName('head')[0].appendChild(link);
+                document.head.appendChild(link);
             }
             link.type = iconHref.endsWith('.png') ? 'image/png' : 'image/jpeg';
             link.href = iconHref;
+            iconLinks.forEach(existing => { existing.href = iconHref; });
         };
 
         // Initial Call
