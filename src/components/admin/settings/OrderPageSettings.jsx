@@ -78,12 +78,32 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
 
     const handleBrandingChange = (key, value) => setBranding(prev => ({ ...prev, [key]: value }));
 
+    const cropToSquare = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const image = new Image();
+            image.onload = () => {
+                const size = Math.min(image.naturalWidth, image.naturalHeight);
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const context = canvas.getContext('2d');
+                context.drawImage(image, (image.naturalWidth - size) / 2, (image.naturalHeight - size) / 2, size, size, 0, 0, 512, 512);
+                canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Image crop failed')), 'image/jpeg', 0.92);
+            };
+            image.onerror = reject;
+            image.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+
     const handleBrandingImage = async (event, key) => {
         const file = event.target.files?.[0];
         if (!file) return;
         setUploading(prev => ({ ...prev, [key]: true }));
         try {
-            const url = await uploadSettingsImage(file, `${key}-brand`);
+            const url = await uploadSettingsImage(await cropToSquare(file), `${key}-brand`);
             setBranding(prev => ({ ...prev, [`${key}Image`]: url }));
         } catch (error) {
             console.error('Brand image upload failed:', error);
@@ -105,8 +125,8 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
         try {
             await setDoc(doc(db, "settings", "order"), settings);
             await setDoc(doc(db, 'settings', 'branding'), branding, { merge: true });
-            await setDoc(doc(db, 'settings', 'general'), { storeName: branding.storeTitle }, { merge: true });
-            await setDoc(doc(db, 'settings', 'images'), { navLogo: branding.storeImage }, { merge: true });
+            await setDoc(doc(db, 'settings', 'general'), { storeName: branding.storeTitle, adminTitle: branding.adminTitle }, { merge: true });
+            await setDoc(doc(db, 'settings', 'images'), { navLogo: branding.storeImage, adminImage: branding.adminImage }, { merge: true });
             alert(txt.success);
         } catch (error) {
             console.error("Error saving order settings:", error);
