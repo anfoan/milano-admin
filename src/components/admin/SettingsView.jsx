@@ -14,27 +14,29 @@ const SettingsView = ({ activeSection, setActiveSection, lang = 'ar' }) => {
 
     const t = {
         ar: {
-            title: "إعدادات المتجر",
+            title: "إعدادات النظام",
             home: "الرئيسية",
-            settings: "إعدادات المتجر",
+            settings: "إعدادات النظام",
             general: { title: 'الإعدادات العامة', description: 'إدارة إعدادات المتجر الأساسية' },
             interface: { title: 'واجهة المتجر', description: 'إعدادات واجهة المتجر' },
             images: { title: 'الصور', description: 'رفع وتنظيم صور متجرك' },
             language: { title: 'لغة المتجر', description: 'تغيير لغة واجهة المتجر' },
             orders: { title: 'إعدادات صفحة الطلب', description: 'تخصيص إعدادات الطلب' },
+            page: { title: 'إعدادات الصفحة', description: 'تخصيص إعدادات الصفحة' },
             cart: { title: 'إعدادات السلة', description: 'تخصيص إعدادات السلة' },
             domain: { title: 'إعدادات النطاق', description: 'ربط وإدارة نطاق المتجر' },
             soon: "قريباً"
         },
         en: {
-            title: "Store Settings",
+            title: "System Settings",
             home: "Home",
-            settings: "Store Settings",
+            settings: "System Settings",
             general: { title: 'General Settings', description: 'Manage basic store settings' },
             interface: { title: 'Store Interface', description: 'Store interface settings' },
             images: { title: 'Images', description: 'Upload and organize store images' },
             language: { title: 'Store Language', description: 'Change store interface language' },
             orders: { title: 'Order Page', description: 'Customize order settings' },
+            page: { title: 'Page Settings', description: 'Customize page settings' },
             cart: { title: 'Cart Settings', description: 'Customize cart settings' },
             domain: { title: 'Domain Settings', description: 'Connect and manage store domain' },
             soon: "Coming Soon"
@@ -50,6 +52,7 @@ const SettingsView = ({ activeSection, setActiveSection, lang = 'ar' }) => {
         { id: 'images', title: txt.images.title, description: txt.images.description, icon: Image, component: StoreImageSettings },
         { id: 'language', title: txt.language.title, description: txt.language.description, icon: Languages, component: StoreLanguageSettings },
         { id: 'orders', title: txt.orders.title, description: txt.orders.description, icon: ShoppingBag, component: OrderPageSettings },
+        { id: 'page-settings', title: txt.page.title, description: txt.page.description, icon: Settings, component: OrderPageSettings },
         { id: 'cart', title: txt.cart.title, description: txt.cart.description, icon: ShoppingCart, component: StoreCartSettings },
         { id: 'domain', title: txt.domain.title, description: txt.domain.description, icon: Globe, component: StoreDomainSettings },
         { id: 'pos-settings', title: isRTL ? 'المستخدمين والصلاحيات' : 'Users & Permissions', description: isRTL ? 'إدارة صلاحيات دخول العامل' : 'Manage worker credentials', icon: CreditCard, component: POSSettings },
