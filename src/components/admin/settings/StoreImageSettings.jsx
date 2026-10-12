@@ -71,9 +71,10 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
                 // Merge separate fields if they exist, or fallback to the old 'logoImage' if new ones aren't set yet (migration)
                 const data = docSnap.data();
                 setImages({
-                    ...data,
                     profileImage: data.profileImage || data.logoImage || '',
+                    coverImage: data.coverImage || '',
                     invoiceLogo: data.invoiceLogo || '',
+                    logoImage: data.logoImage || '',
                     brands: {
                         nike: data.brands?.nike || '',
                         adidas: data.brands?.adidas || '',
@@ -153,7 +154,13 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
                 : { ...images, [type]: imageUrl };
 
             // Persist first: a preview is never shown as changed unless Firestore saved it.
-            await setDoc(doc(db, 'settings', 'images'), newImages, { merge: true });
+            await setDoc(doc(db, 'settings', 'images'), {
+                profileImage: newImages.profileImage || '',
+                coverImage: newImages.coverImage || '',
+                logoImage: newImages.logoImage || '',
+                invoiceLogo: newImages.invoiceLogo || '',
+                brands: newImages.brands || {}
+            }, { merge: true });
             setImages(newImages);
         } catch (error) {
             console.error(`Error uploading ${type}:`, error);
@@ -167,7 +174,13 @@ const StoreImageSettings = ({ onBack, lang = 'ar' }) => {
     const handleSave = async () => {
         setSaving(true);
         try {
-            await setDoc(doc(db, "settings", "images"), images, { merge: true });
+            await setDoc(doc(db, "settings", "images"), {
+                profileImage: images.profileImage || '',
+                coverImage: images.coverImage || '',
+                logoImage: images.logoImage || '',
+                invoiceLogo: images.invoiceLogo || '',
+                brands: images.brands || {}
+            }, { merge: true });
             alert(txt.save_success);
         } catch (error) {
             console.error("Error saving images:", error);
