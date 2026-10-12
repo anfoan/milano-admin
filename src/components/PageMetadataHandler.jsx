@@ -143,6 +143,34 @@ const PageMetadataHandler = () => {
                 ? (imageSettings?.adminImage || '/admin-icon-192.png')
                 : '/favicon.ico.png';
 
+            const applyIcon = href => {
+                const iconLinks = document.querySelectorAll("link[rel*='icon']");
+                const link = iconLinks[0] || document.createElement('link');
+                if (!iconLinks.length) {
+                    link.rel = 'icon';
+                    document.head.appendChild(link);
+                }
+                link.type = 'image/png';
+                link.href = href;
+                iconLinks.forEach(existing => { existing.href = href; });
+            };
+
+            if (isAdminRoute && imageSettings?.adminImage) {
+                const image = new Image();
+                image.crossOrigin = 'anonymous';
+                image.onload = () => {
+                    const sourceSize = Math.min(image.naturalWidth, image.naturalHeight) * 0.68;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 128;
+                    canvas.height = 128;
+                    canvas.getContext('2d').drawImage(image, (image.naturalWidth - sourceSize) / 2, (image.naturalHeight - sourceSize) / 2, sourceSize, sourceSize, 0, 0, 128, 128);
+                    applyIcon(canvas.toDataURL('image/png'));
+                };
+                image.onerror = () => applyIcon(iconHref);
+                image.src = iconHref;
+                return;
+            }
+
             // Update Favicon Link
             const iconLinks = document.querySelectorAll("link[rel*='icon']");
             const link = iconLinks[0] || document.createElement('link');
