@@ -130,6 +130,12 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
         return 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300';
     };
 
+    const getPaymentPrintStyle = (val) => {
+        if (val === 'cash') return 'background:#dcfce7;color:#15803d;border-color:#86efac;';
+        if (val === 'jib_wallet' || val === 'wallet' || val === 'card') return 'background:#f3e8ff;color:#7e22ce;border-color:#d8b4fe;';
+        return 'background:#cffafe;color:#0e7490;border-color:#67e8f9;';
+    };
+
     // Fetch Expenses from Firestore
     useEffect(() => {
         const expensesRef = collection(db, 'expenses');
@@ -993,7 +999,8 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                   @page { size: A4 portrait; margin: 8mm 10mm; }
                   body { font-family: 'Cairo', sans-serif; padding: 15px; background: #fff; }
                   h2 { text-align: center; margin-bottom: 25px; font-weight: 900; }
-                  .report-info { margin-bottom: 20px; font-weight: 600; font-size: 14px; }
+                  .business-details { text-align: right; direction: rtl; font-weight: 700; font-size: 13px; line-height: 1.8; margin-bottom: 8px; }
+                  .report-info { margin-bottom: 20px; font-weight: 600; font-size: 14px; text-align: left; direction: rtl; }
                   table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 12px; margin-top: 15px; }
                   th { background: #f3f4f6; padding: 8px 6px; text-align: right; border: 1px solid #e5e7eb; border-bottom: 2px solid #ccc; font-weight: 700; white-space: nowrap; }
                   td { padding: 8px 6px; border: 1px solid #e5e7eb; }
@@ -1006,6 +1013,11 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
           </head>
           <body>
               <button class="print-btn" onclick="window.print()" style="padding: 10px 20px; background: #111827; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 20px;">طباعة التقرير</button>
+              <div class="business-details">
+                  <div>${generalSettings?.businessName || generalSettings?.storeName || ''}</div>
+                  <div>${generalSettings?.storeAddress || generalSettings?.address || ''}</div>
+                  <div>${generalSettings?.phoneNumber || generalSettings?.phone || ''}</div>
+              </div>
               <h2>تقرير المصروفات المفلترة</h2>
               <div class="report-info">
                   <div>تاريخ التقرير: ${toEnglishDigits(new Date().toLocaleDateString('ar-YE'))}</div>
@@ -1035,7 +1047,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                               <td>${expense.title}</td>
                               <td class="nowrap-cell">${categoriesMap[expense.category] || expense.category}</td>
                               <td class="nowrap-cell">${toEnglishDigits(expense.date)}</td>
-                              <td class="nowrap-cell">${getPaymentLabel(expense.paymentMethod)}</td>
+                              <td class="nowrap-cell" style="${getPaymentPrintStyle(expense.paymentMethod)} font-weight:700; text-align:center;">${getPaymentLabel(expense.paymentMethod)}</td>
                               <td>${expense.description || '-'}</td>
                               <td class="amount-val nowrap-cell">${expense.amount.toLocaleString()} ${getCurrencyLabel(expense.currency || currency)}</td>
                           </tr>
