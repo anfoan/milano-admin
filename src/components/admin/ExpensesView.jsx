@@ -120,8 +120,13 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
         if (val === 'cash') return isRTL ? 'نقدي / كاش' : 'Cash';
         if (val === 'jib_wallet' || val === 'wallet' || val === 'card') return isRTL ? 'محفظة جيب' : 'Jib Wallet';
         if (val === 'bank' || val === 'transfer') return isRTL ? 'تحويل بنكي / صرافة' : 'Bank transfer / exchange';
-        if (val === 'whatsapp') return isRTL ? 'تحويل واتساب' : 'WhatsApp transfer';
         return val || '';
+    };
+
+    const getPaymentClass = (val) => {
+        if (val === 'cash') return 'bg-green-500/15 text-green-700 dark:text-green-300';
+        if (val === 'jib_wallet' || val === 'wallet' || val === 'card') return 'bg-purple-500/15 text-purple-700 dark:text-purple-300';
+        return 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300';
     };
 
     // Fetch Expenses from Firestore
@@ -1494,7 +1499,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                         </span>
                                     </td>
                                     <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap relative left-2">{toEnglishDigits(expense.date)}</td>
-                                    <td className="px-3 py-2.5 text-start whitespace-nowrap">{getPaymentLabel(expense.paymentMethod)}</td>
+                                    <td className="px-3 py-2.5 text-start whitespace-nowrap"><span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-black ${getPaymentClass(expense.paymentMethod)}`}>{getPaymentLabel(expense.paymentMethod)}</span></td>
                                     <td className="px-3 py-2.5 text-end font-extrabold text-red-500 dark:text-red-400 whitespace-nowrap">
                                         {expense.amount.toLocaleString()} {getCurrencyLabel(expense.currency || currency)}
                                     </td>
@@ -1911,16 +1916,11 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     </div>
                                     <div className="relative left-2">
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'طريقة الدفع' : 'Payment Method'}</label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {[
-                                                ['cash', isRTL ? 'نقدي / كاش' : 'Cash', 'bg-green-500/15 text-green-700 dark:text-green-300'],
-                                                ['jib_wallet', isRTL ? 'محفظة جيب' : 'Jib Wallet', 'bg-purple-500/15 text-purple-700 dark:text-purple-300'],
-                                                ['bank', isRTL ? 'تحويل بنكي / صرافة' : 'Bank transfer / exchange', 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300'],
-                                                ['whatsapp', isRTL ? 'تحويل واتساب' : 'WhatsApp transfer', 'bg-slate-500/15 text-slate-700 dark:text-slate-300']
-                                            ].map(([value, label, color]) => (
-                                                <button key={value} type="button" onClick={() => setCurrentExpense({ ...currentExpense, paymentMethod: value })} className={`rounded-xl border px-2 py-2 text-xs font-black transition-all ${color} ${currentExpense.paymentMethod === value ? 'ring-2 ring-blue-400' : 'border-transparent'}`}>{label}</button>
-                                            ))}
-                                        </div>
+                                        <select value={currentExpense.paymentMethod || 'cash'} onChange={(e) => setCurrentExpense({ ...currentExpense, paymentMethod: e.target.value })} className={`w-full appearance-auto rounded-xl border-0 px-4 py-2.5 text-center text-xs font-black outline-none ${getPaymentClass(currentExpense.paymentMethod || 'cash')}`}>
+                                            <option value="cash">{isRTL ? 'نقدي / كاش' : 'Cash'}</option>
+                                            <option value="jib_wallet">{isRTL ? 'محفظة جيب' : 'Jib Wallet'}</option>
+                                            <option value="bank">{isRTL ? 'تحويل بنكي / صرافة' : 'Bank transfer / exchange'}</option>
+                                        </select>
                                     </div>
                                 </div>
 
