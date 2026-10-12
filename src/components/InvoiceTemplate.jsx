@@ -83,7 +83,11 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                             <div className="flex justify-between items-start mb-10 pb-4 border-b-2 border-slate-800">
                                 <div className={`${lang === 'ar' ? 'text-right' : 'text-left'}`}>
                                     <h1 className="text-4xl font-black text-[#111317] mb-4">{lang === 'ar' ? 'فاتورة' : 'INVOICE'}</h1>
-                                    <p className="text-xl font-bold text-gray-500 mb-4">{lang === 'ar' ? 'متجر ميلانو' : 'Milano Store'}</p>
+                                    <p className="text-xl font-bold text-gray-500 mb-2">{generalSettings?.storeName || (lang === 'ar' ? 'متجر ميلانو' : 'Milano Store')}</p>
+                                    <div className="mb-4 space-y-0.5 text-xs font-bold text-gray-500">
+                                        {generalSettings?.storeAddress && <p>{generalSettings.storeAddress}</p>}
+                                        {generalSettings?.phoneNumber && <p dir="ltr" className="text-right">{generalSettings.phoneNumber}</p>}
+                                    </div>
                                     <div className="space-y-1.5 text-sm font-bold text-gray-800">
                                         <div className="flex items-center gap-3">
                                             <span className="text-gray-800 font-bold">{lang === 'ar' ? 'تاريخ الطلب:' : 'Order Date:'}</span>
