@@ -85,7 +85,7 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
             image.onload = () => {
                 // Zoom the centered square crop slightly so browser/tab icons
                 // use the available square area instead of appearing too small.
-                const size = Math.min(image.naturalWidth, image.naturalHeight) * 0.82;
+                const size = Math.min(image.naturalWidth, image.naturalHeight) * 0.68;
                 const canvas = document.createElement('canvas');
                 canvas.width = 512;
                 canvas.height = 512;
@@ -151,7 +151,7 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[['admin', 'adminTitle', 'adminImage', isRTL ? 'إعدادات ميلانو' : 'Milano Settings', isRTL ? 'عنوان لوحة التحكم' : 'Dashboard title'], ['store', 'storeTitle', 'storeImage', isRTL ? 'متجر ميلانو' : 'Milano Store', isRTL ? 'عنوان المتجر' : 'Store title']].map(([key, titleKey, imageKey, heading, label]) => (
+                    {[['admin', 'adminTitle', 'adminImage', isRTL ? 'إعدادات ميلانو' : 'Milano Settings', isRTL ? 'بيانات متصفح لوحة التحكم' : 'Dashboard browser data'], ['store', 'storeTitle', 'storeImage', isRTL ? 'متجر ميلانو' : 'Milano Store', isRTL ? 'بيانات متصفح المتجر' : 'Store browser data']].map(([key, titleKey, imageKey, heading, label]) => (
                         <div key={key} className="rounded-[24px] border border-gray-100 bg-white p-6 shadow-sm">
                             <div className="mb-5 flex items-center gap-3"><img src={branding[imageKey]} onError={event => { event.currentTarget.src = key === 'admin' ? '/admin-new-icon.png' : '/logo-rounded.png'; }} className="h-10 w-10 rounded-xl object-cover" alt=""/><h3 className="font-black text-gray-800">{branding[titleKey] || heading}</h3></div>
                             <label className="mb-2 block text-sm font-bold text-gray-500">{label}</label>
