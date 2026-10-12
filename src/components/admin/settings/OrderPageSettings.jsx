@@ -83,7 +83,9 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
         reader.onload = () => {
             const image = new Image();
             image.onload = () => {
-                const size = Math.min(image.naturalWidth, image.naturalHeight);
+                // Zoom the centered square crop slightly so browser/tab icons
+                // use the available square area instead of appearing too small.
+                const size = Math.min(image.naturalWidth, image.naturalHeight) * 0.82;
                 const canvas = document.createElement('canvas');
                 canvas.width = 512;
                 canvas.height = 512;
