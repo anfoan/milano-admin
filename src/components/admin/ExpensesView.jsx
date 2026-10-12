@@ -56,7 +56,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
         category: 'Utilities',
         date: new Date().toISOString().split('T')[0],
         description: '',
-        paymentMethod: '',
+        paymentMethod: 'cash',
         currency: currency
     });
     const [editingExpenseId, setEditingExpenseId] = useState(null);
@@ -117,8 +117,10 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
 
     // Helper: map old internal payment method values to display text, or show as-is for free text
     const getPaymentLabel = (val) => {
-        if (val === 'cash') return isRTL ? 'نقدي' : 'Cash';
-        if (val === 'bank') return isRTL ? 'بنك' : 'Bank';
+        if (val === 'cash') return isRTL ? 'نقدي / كاش' : 'Cash';
+        if (val === 'jib_wallet' || val === 'wallet' || val === 'card') return isRTL ? 'محفظة جيب' : 'Jib Wallet';
+        if (val === 'bank' || val === 'transfer') return isRTL ? 'تحويل بنكي / صرافة' : 'Bank transfer / exchange';
+        if (val === 'whatsapp') return isRTL ? 'تحويل واتساب' : 'WhatsApp transfer';
         return val || '';
     };
 
@@ -253,7 +255,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
             category: 'Utilities',
             date: new Date().toISOString().split('T')[0],
             description: '',
-            paymentMethod: '',
+            paymentMethod: 'cash',
             currency: currency
         });
         setIsCustomCategory(false);
@@ -1012,12 +1014,12 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                   <thead>
                       <tr>
                           <th style="width: 4%;">#</th>
-                          <th style="width: 20%;">البند</th>
+                          <th style="width: 20%;">بند المصروفات</th>
                           <th style="width: 16%;">التصنيف</th>
                           <th style="width: 12%;">التاريخ</th>
                           <th style="width: 12%;">طريقة الدفع</th>
                           <th style="width: 22%;">التفاصيل/البيان</th>
-                          <th style="width: 14%;">المبلغ</th>
+                          <th style="width: 14%;">مبلغ المصروف</th>
                       </tr>
                   </thead>
                   <tbody>
@@ -1473,10 +1475,11 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                         <thead className="text-xs text-gray-400 uppercase bg-gray-50 dark:bg-white/[0.02] border-b border-gray-100 dark:border-white/5 font-black">
                             <tr>
                                 <th className="px-3 py-2.5 text-start">#</th>
-                                <th className="px-3 py-2.5 text-start">{isRTL ? 'البند' : 'Title'}</th>
+                                <th className="px-3 py-2.5 text-start">{isRTL ? 'بند المصروفات' : 'Expense item'}</th>
                                 <th className="px-3 py-2.5 text-start">{isRTL ? 'التصنيف' : 'Category'}</th>
-                                <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'التاريخ' : 'Date'}</th>
-                                <th className="px-3 py-2.5 text-end whitespace-nowrap">{isRTL ? 'المبلغ' : 'Amount'}</th>
+                                <th className="px-3 py-2.5 text-start whitespace-nowrap relative left-2">{isRTL ? 'التاريخ' : 'Date'}</th>
+                                <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'طريقة الدفع' : 'Payment method'}</th>
+                                <th className="px-3 py-2.5 text-end whitespace-nowrap relative right-3">{isRTL ? 'مبلغ المصروف' : 'Expense amount'}</th>
                                 <th className="px-3 py-2.5 text-center">{isRTL ? 'إجراءات' : 'Actions'}</th>
                             </tr>
                         </thead>
@@ -1490,7 +1493,8 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                             {categoriesMap[expense.category] || expense.category}
                                         </span>
                                     </td>
-                                    <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">{toEnglishDigits(expense.date)}</td>
+                                    <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap relative left-2">{toEnglishDigits(expense.date)}</td>
+                                    <td className="px-3 py-2.5 text-start whitespace-nowrap">{getPaymentLabel(expense.paymentMethod)}</td>
                                     <td className="px-3 py-2.5 text-end font-extrabold text-red-500 dark:text-red-400 whitespace-nowrap">
                                         {expense.amount.toLocaleString()} {getCurrencyLabel(expense.currency || currency)}
                                     </td>
@@ -1527,7 +1531,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                             ))}
                             {filteredExpenses.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-3 py-8 text-center text-gray-400 font-bold text-sm">
+                                    <td colSpan={7} className="px-3 py-8 text-center text-gray-400 font-bold text-sm">
                                         {isRTL ? 'لا توجد مصروفات مسجلة' : 'No expenses found'}
                                     </td>
                                 </tr>
@@ -1535,7 +1539,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                         </tbody>
                         <tfoot className="bg-gray-50/50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5 font-extrabold text-sm">
                             <tr>
-                                <td colSpan={4} className="px-3 py-2.5 text-start text-gray-900 dark:text-white whitespace-nowrap">
+                                <td colSpan={5} className="px-3 py-2.5 text-start text-gray-900 dark:text-white whitespace-nowrap">
                                     {isRTL ? 'الإجمالي' : 'Total'}
                                 </td>
                                 <td className="px-3 py-2.5 text-end text-red-500 dark:text-red-400 whitespace-nowrap">
@@ -1835,7 +1839,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'المبلغ' : 'Amount'}</label>
+                                        <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'مبلغ المصروف' : 'Expense amount'}</label>
                                         <input
                                             type="number"
                                             required
@@ -1905,15 +1909,18 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/5 dark:text-white font-bold cursor-not-allowed"
                                         />
                                     </div>
-                                    <div>
+                                    <div className="relative left-2">
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'طريقة الدفع' : 'Payment Method'}</label>
-                                        <input
-                                            type="text"
-                                            value={currentExpense.paymentMethod || ''}
-                                            onChange={(e) => setCurrentExpense({ ...currentExpense, paymentMethod: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-[#2c2c2e] dark:text-white font-bold"
-                                            placeholder={isRTL ? 'اكتب طريقة الدفع...' : 'Enter payment method...'}
-                                        />
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[
+                                                ['cash', isRTL ? 'نقدي / كاش' : 'Cash', 'bg-green-500/15 text-green-700 dark:text-green-300'],
+                                                ['jib_wallet', isRTL ? 'محفظة جيب' : 'Jib Wallet', 'bg-purple-500/15 text-purple-700 dark:text-purple-300'],
+                                                ['bank', isRTL ? 'تحويل بنكي / صرافة' : 'Bank transfer / exchange', 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300'],
+                                                ['whatsapp', isRTL ? 'تحويل واتساب' : 'WhatsApp transfer', 'bg-slate-500/15 text-slate-700 dark:text-slate-300']
+                                            ].map(([value, label, color]) => (
+                                                <button key={value} type="button" onClick={() => setCurrentExpense({ ...currentExpense, paymentMethod: value })} className={`rounded-xl border px-2 py-2 text-xs font-black transition-all ${color} ${currentExpense.paymentMethod === value ? 'ring-2 ring-blue-400' : 'border-transparent'}`}>{label}</button>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
 
