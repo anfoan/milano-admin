@@ -146,6 +146,27 @@ const PageMetadataHandler = () => {
                 ? sourceHref.replace('/image/upload/', '/image/upload/c_fill,g_auto,w_128,h_128/')
                 : sourceHref;
 
+            const setIcon = href => {
+                const iconLinks = document.querySelectorAll("link[rel*='icon']");
+                const link = iconLinks[0] || document.createElement('link');
+                if (!iconLinks.length) { link.rel = 'icon'; document.head.appendChild(link); }
+                link.type = 'image/png';
+                link.href = href;
+                iconLinks.forEach(existing => { existing.href = href; });
+            };
+            const image = new Image();
+            image.crossOrigin = 'anonymous';
+            image.onload = () => {
+                const side = Math.min(image.naturalWidth, image.naturalHeight) * 0.82;
+                const canvas = document.createElement('canvas');
+                canvas.width = 128; canvas.height = 128;
+                canvas.getContext('2d').drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 128, 128);
+                setIcon(canvas.toDataURL('image/png'));
+            };
+            image.onerror = () => setIcon(iconHref);
+            image.src = iconHref;
+            return;
+
             // Update Favicon Link
             const iconLinks = document.querySelectorAll("link[rel*='icon']");
             const link = iconLinks[0] || document.createElement('link');
