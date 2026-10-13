@@ -2103,7 +2103,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'طريقة الدفع' : 'Payment Method'}</label>
                                         <div className="relative">
-                                            <button type="button" onClick={() => setBondPaymentOpen(value => !value)} className={`flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-xs font-black ${getPaymentClass(currentBond.paymentMethod || 'cash')}`}>
+                                            <button type="button" onClick={() => setBondPaymentOpen(value => !value)} className={`flex w-full items-center justify-between rounded-xl pl-1 pr-4 py-2.5 text-xs font-black ${getPaymentClass(currentBond.paymentMethod || 'cash')}`}>
                                                 <span>{getPaymentLabel(currentBond.paymentMethod || 'cash')}</span>
                                                 <ChevronDown size={15} className={`transition-transform ${bondPaymentOpen ? 'rotate-180' : ''}`} />
                                             </button>
