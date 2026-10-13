@@ -1641,7 +1641,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
 
                         <div className="flex items-center gap-2 shrink-0">
                             <div className="flex flex-col">
-                                <label className="text-[10px] text-gray-400 font-bold mb-0.5">{isRTL ? 'من تاريخ' : 'From'}</label>
+                                <label className="text-[10px] text-gray-400 font-bold mb-0.5 transform -translate-x-3">{isRTL ? 'من تاريخ' : 'From'}</label>
                                 <input
                                     type="date"
                                     value={bondsStartDate}
@@ -1653,7 +1653,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <label className="text-[10px] text-gray-400 font-bold mb-0.5">{isRTL ? 'إلى تاريخ' : 'To'}</label>
+                                <label className="text-[10px] text-gray-400 font-bold mb-0.5 transform -translate-x-3">{isRTL ? 'إلى تاريخ' : 'To'}</label>
                                 <input
                                     type="date"
                                     value={bondsEndDate}
