@@ -71,6 +71,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
     const [bondsEndDate, setBondsEndDate] = useState('');
     const [bondsTab, setBondsTab] = useState('receipt'); // 'receipt' | 'payment'
     const [bondModalOpen, setBondModalOpen] = useState(false);
+    const [bondPaymentOpen, setBondPaymentOpen] = useState(false);
     const [currentBond, setCurrentBond] = useState({
         number: '',
         type: 'receipt',
@@ -356,11 +357,12 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
             entityName: '',
             amount: '',
             currency: currency,
-            paymentMethod: '',
+            paymentMethod: 'cash',
             notes: '',
             entityType: ''
         });
         setEditingBondId(null);
+        setBondPaymentOpen(false);
         setBondModalOpen(true);
     };
 
@@ -2103,13 +2105,23 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 <div className="grid grid-cols-1 gap-4">
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'طريقة الدفع' : 'Payment Method'}</label>
-                                        <input
-                                            type="text"
-                                            value={currentBond.paymentMethod}
-                                            onChange={(e) => setCurrentBond({ ...currentBond, paymentMethod: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-[#2c2c2e] dark:text-white font-bold"
-                                            placeholder={isRTL ? 'اكتب طريقة الدفع...' : 'Enter payment method...'}
-                                        />
+                                        <div className="relative">
+                                            <button type="button" onClick={() => setBondPaymentOpen(value => !value)} className={`flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-xs font-black ${getPaymentClass(currentBond.paymentMethod || 'cash')}`}>
+                                                <span>{getPaymentLabel(currentBond.paymentMethod || 'cash')}</span>
+                                                <ChevronDown size={15} className={`transition-transform ${bondPaymentOpen ? 'rotate-180' : ''}`} />
+                                            </button>
+                                            {bondPaymentOpen && (
+                                                <div className="absolute inset-x-0 top-full z-30 mt-1 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-xl dark:border-white/10 dark:bg-[#2c2c2e]">
+                                                    {[
+                                                        ['cash', isRTL ? 'نقدي / كاش' : 'Cash'],
+                                                        ['jib_wallet', isRTL ? 'محفظة جيب' : 'Jib Wallet'],
+                                                        ['bank', isRTL ? 'تحويل بنكي / صرافة' : 'Bank transfer / exchange']
+                                                    ].map(([value, label]) => (
+                                                        <button key={value} type="button" onClick={() => { setCurrentBond({ ...currentBond, paymentMethod: value }); setBondPaymentOpen(false); }} className={`mb-1 flex w-full items-center justify-center rounded-lg px-2 py-2 text-xs font-black last:mb-0 ${getPaymentClass(value)} ${currentBond.paymentMethod === value ? 'ring-2 ring-blue-400' : ''}`}>{label}</button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
