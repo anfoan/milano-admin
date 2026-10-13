@@ -1794,19 +1794,19 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                 </div>
 
                 {/* Totals Section for Bonds */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 border-t border-gray-100 dark:border-white/5 pt-3 font-extrabold text-sm text-gray-700 dark:text-gray-300">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 px-2 mt-3 border-t border-gray-100 dark:border-white/5 pt-3 font-extrabold text-sm text-gray-700 dark:text-gray-300">
                     <div className="bg-green-100/80 dark:bg-green-500/15 p-2.5 rounded-lg text-center">
-                        <span className="text-gray-400 block text-xs">{isRTL ? 'إجمالي سندات القبض' : 'Total Receipt Bonds'}</span>
+                        <span className="text-gray-500 dark:text-gray-300 block text-[13px] font-bold">{isRTL ? 'إجمالي سندات القبض' : 'Total Receipt Bonds'}</span>
                         <span className="text-green-500 text-base font-black">{totalReceipts.toLocaleString()} {getCurrencyLabel(currency)}</span>
                     </div>
 
                     <div className="bg-red-100/80 dark:bg-red-500/15 p-2.5 rounded-lg text-center">
-                        <span className="text-gray-400 block text-xs">{isRTL ? 'إجمالي سندات الصرف' : 'Total Payment Bonds'}</span>
+                        <span className="text-gray-500 dark:text-gray-300 block text-[13px] font-bold">{isRTL ? 'إجمالي سندات الصرف' : 'Total Payment Bonds'}</span>
                         <span className="text-red-500 text-base font-black">{totalPayments.toLocaleString()} {getCurrencyLabel(currency)}</span>
                     </div>
 
                     <div className="bg-blue-100/80 dark:bg-blue-500/15 p-2.5 rounded-lg text-center">
-                        <span className="text-gray-400 block text-xs">{isRTL ? 'صافي الرصيد' : 'Net Balance'}</span>
+                        <span className="text-gray-500 dark:text-gray-300 block text-[13px] font-bold">{isRTL ? 'صافي الرصيد' : 'Net Balance'}</span>
                         <span className={`text-base font-black ${netBalance >= 0 ? 'text-blue-500 dark:text-blue-400' : 'text-orange-500'}`}>
                             {netBalance >= 0 ? '+' : ''}{netBalance.toLocaleString()} {getCurrencyLabel(currency)}
                         </span>
