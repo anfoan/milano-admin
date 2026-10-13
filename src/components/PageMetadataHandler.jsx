@@ -157,12 +157,12 @@ const PageMetadataHandler = () => {
             const image = new Image();
             image.crossOrigin = 'anonymous';
             image.onload = () => {
-                const side = Math.min(image.naturalWidth, image.naturalHeight);
+                const side = Math.min(image.naturalWidth, image.naturalHeight) * 0.92;
                 const canvas = document.createElement('canvas');
                 canvas.width = 128; canvas.height = 128;
                 const context = canvas.getContext('2d');
                 context.beginPath();
-                context.roundRect(2, 2, 124, 124, 22);
+                context.roundRect(1, 1, 126, 126, 24);
                 context.clip();
                 context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 128, 128);
                 setIcon(canvas.toDataURL('image/png'));
