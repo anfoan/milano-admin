@@ -791,18 +791,32 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                   .totals-table td { padding: 10px; font-weight: bold; }
                   .net-total { background: #eff6ff; border-top: 2px solid #3b82f6; }
                   .net-total td { color: #2563eb; font-size: 14px; }
-                  .print-btn { background: #111827; color: #fff; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo', sans-serif; font-size: 14px; margin-bottom: 15px; }
-                  .print-btn:hover { background: #1f2937; }
+                  .report-header { display: flex; direction: ltr; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 12px; }
+                  .report-meta { direction: rtl; text-align: left; font-weight: 600; font-size: 13px; min-width: 180px; }
+                  .report-meta > div { margin-bottom: 4px; }
+                  .store-image { display: block; width: 86px; height: 86px; margin-top: 10px; object-fit: cover; border-radius: 14px; }
+                  .business-details { direction: rtl; text-align: right; font-weight: 700; font-size: 13px; line-height: 1.8; min-width: 210px; }
+                  .business-details div { white-space: nowrap; }
+                  .print-btn { background: #2563eb; color: #fff; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo', sans-serif; font-size: 14px; margin-bottom: 15px; }
+                  .print-btn:hover { background: #1d4ed8; }
                   @media print { .print-btn { display: none; } body { padding: 0; } }
               </style>
           </head>
           <body>
               <button class="print-btn" onclick="window.print()">طباعة التقرير</button>
-              <h2>تقرير السندات المالية المفلترة</h2>
-              <div class="report-info">
-                  <div>تاريخ التقرير: ${toEnglishDigits(new Date().toLocaleDateString('ar-YE'))}</div>
-                  <div>الفترة: ${bondsPeriod === 'all' ? 'الكل' : bondsPeriod === 'this_week' ? 'هذا الأسبوع' : bondsPeriod === 'this_month' ? 'هذا الشهر' : bondsPeriod === 'this_year' ? 'هذا السنة' : 'فترة مخصصة'} ${bondsStartDate ? `من ${bondsStartDate}` : ''} ${bondsEndDate ? `إلى ${bondsEndDate}` : ''}</div>
+              <div class="report-header">
+                  <div class="report-meta">
+                      <div>تاريخ التقرير: ${toEnglishDigits(new Date().toLocaleDateString('ar-YE'))}</div>
+                      <div>الفترة: ${bondsPeriod === 'all' ? 'الكل' : bondsPeriod === 'this_week' ? 'هذا الأسبوع' : bondsPeriod === 'this_month' ? 'هذا الشهر' : bondsPeriod === 'this_year' ? 'هذا السنة' : 'فترة مخصصة'} ${bondsStartDate ? `من ${bondsStartDate}` : ''} ${bondsEndDate ? `إلى ${bondsEndDate}` : ''}</div>
+                      <img class="store-image" src="${generalSettings?.profileImage || generalSettings?.storeLogo || generalSettings?.invoiceLogo || '/logo-rounded.png'}" alt="صورة المتجر" />
+                  </div>
+                  <div class="business-details">
+                      <div>${generalSettings?.storeName || generalSettings?.businessName || ''}</div>
+                      <div>${generalSettings?.storeAddress || generalSettings?.address || ''}</div>
+                      <div>${generalSettings?.phoneNumber || generalSettings?.phone || ''}</div>
+                  </div>
               </div>
+              <h2>تقرير السندات المالية المفلترة</h2>
 
               <table>
                   <thead>
