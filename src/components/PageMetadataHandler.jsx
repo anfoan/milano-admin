@@ -167,7 +167,15 @@ const PageMetadataHandler = () => {
                 context.roundRect(1, 1, 126, 126, 24);
                 context.clip();
                 context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 128, 128);
-                setIcon(canvas.toDataURL('image/png'));
+                const iconData = canvas.toDataURL('image/png');
+                window.__milanoInstallIcon = iconData;
+                setIcon(iconData);
+                const manifestLink = document.querySelector("link[rel='manifest']") || document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'manifest' }));
+                const manifest = { name: generalSettings?.adminTitle || 'إعدادات ميلانو', short_name: generalSettings?.adminTitle || 'إعدادات ميلانو', id: window.location.pathname, start_url: window.location.pathname, scope: '/', display: 'standalone', background_color: '#ffffff', theme_color: '#ffffff', icons: [{ src: iconData, sizes: '128x128', type: 'image/png', purpose: 'any' }] };
+                if (manifestLink.dataset.blobUrl) URL.revokeObjectURL(manifestLink.dataset.blobUrl);
+                const blobUrl = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+                manifestLink.dataset.blobUrl = blobUrl;
+                manifestLink.href = blobUrl;
             };
             image.onerror = () => {};
             image.src = iconHref;
@@ -206,14 +214,15 @@ const PageMetadataHandler = () => {
             const installIcon = iconSource?.includes('/image/upload/')
                 ? iconSource.replace('/image/upload/', '/image/upload/f_png,c_fill,g_auto,w_192,h_192,r_24/')
                 : (iconSource || transparentInstallIcon);
+            const currentInstallIcon = window.__milanoInstallIcon || installIcon;
             const manifest = {
                 name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
                 short_name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
                 start_url: window.location.pathname,
                 scope: '/', display: 'standalone', background_color: '#ffffff', theme_color: '#ffffff',
                 icons: [
-                    { src: installIcon, sizes: '192x192', type: 'image/png', purpose: 'any' },
-                    { src: installIcon, sizes: '512x512', type: 'image/png', purpose: 'any' }
+                    { src: currentInstallIcon, sizes: '192x192', type: 'image/png', purpose: 'any' },
+                    { src: currentInstallIcon, sizes: '512x512', type: 'image/png', purpose: 'any' }
                 ]
             };
             if (manifestLink.dataset.blobUrl) URL.revokeObjectURL(manifestLink.dataset.blobUrl);
@@ -222,7 +231,7 @@ const PageMetadataHandler = () => {
             manifestLink.href = blobUrl;
             let appleIcon = document.querySelector("link[rel='apple-touch-icon']");
             if (!appleIcon) { appleIcon = document.createElement('link'); appleIcon.rel = 'apple-touch-icon'; document.head.appendChild(appleIcon); }
-            appleIcon.href = installIcon;
+            appleIcon.href = currentInstallIcon;
         };
         updateManifest();
 
