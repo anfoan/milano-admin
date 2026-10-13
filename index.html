@@ -36,13 +36,6 @@
         path.startsWith('/milano-secure-gate-99') ||
         path.startsWith('/milano-dashboard-vault-77');
 
-      // Use a transparent placeholder until the saved branding icon is loaded.
-      const iconLink = document.createElement('link');
-      iconLink.rel = 'icon';
-      iconLink.type = 'image/png';
-      iconLink.href = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
-      document.head.appendChild(iconLink);
-
       // Title
       document.title = isAdmin ? 'إعدادات ميلانو' : 'متجر ميلانو';
     };

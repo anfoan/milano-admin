@@ -155,6 +155,7 @@ const PageMetadataHandler = () => {
                 link.href = href;
                 iconLinks.forEach(existing => { existing.href = href; });
             };
+            if (!sourceHref) return;
             const image = new Image();
             image.crossOrigin = 'anonymous';
             image.onload = () => {
@@ -168,7 +169,7 @@ const PageMetadataHandler = () => {
                 context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 128, 128);
                 setIcon(canvas.toDataURL('image/png'));
             };
-            image.onerror = () => setIcon(transparentIcon);
+            image.onerror = () => {};
             image.src = iconHref;
             return;
 
