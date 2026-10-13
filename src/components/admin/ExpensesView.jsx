@@ -1797,12 +1797,12 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                 {/* Totals Section for Bonds */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 border-t border-gray-100 dark:border-white/5 pt-3 font-extrabold text-sm text-gray-700 dark:text-gray-300">
                     <div className="bg-green-50/50 dark:bg-green-500/[0.02] p-2.5 rounded-lg text-center">
-                        <span className="text-gray-400 block text-xs">{isRTL ? 'إجمالي المقبوضات' : 'Total Receipts'}</span>
+                        <span className="text-gray-400 block text-xs">{isRTL ? 'إجمالي سندات القبض' : 'Total Receipt Bonds'}</span>
                         <span className="text-green-500 text-base font-black">{totalReceipts.toLocaleString()} {getCurrencyLabel(currency)}</span>
                     </div>
 
                     <div className="bg-red-50/50 dark:bg-red-500/[0.02] p-2.5 rounded-lg text-center">
-                        <span className="text-gray-400 block text-xs">{isRTL ? 'إجمالي المدفوعات' : 'Total Payments'}</span>
+                        <span className="text-gray-400 block text-xs">{isRTL ? 'إجمالي سندات الصرف' : 'Total Payment Bonds'}</span>
                         <span className="text-red-500 text-base font-black">{totalPayments.toLocaleString()} {getCurrencyLabel(currency)}</span>
                     </div>
 
