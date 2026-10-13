@@ -1555,13 +1555,12 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                         </tbody>
                         <tfoot className="bg-gray-50/50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5 font-extrabold text-sm">
                             <tr>
-                                <td colSpan={5} className="px-3 py-2.5 text-start text-gray-900 dark:text-white whitespace-nowrap">
-                                    {isRTL ? 'الإجمالي' : 'Total'}
+                                <td colSpan={7} className="px-3 py-2.5 text-center bg-red-50/70 dark:bg-red-500/10 text-red-600 dark:text-red-300 whitespace-nowrap">
+                                    <span className="inline-flex items-center justify-center gap-2 font-black">
+                                        <span>{isRTL ? 'الإجمالي' : 'Total'}</span>
+                                        <span>{totalExpenses.toLocaleString()} {getCurrencyLabel(currency)}</span>
+                                    </span>
                                 </td>
-                                <td className="px-3 py-2.5 text-end text-red-500 dark:text-red-400 whitespace-nowrap">
-                                    {totalExpenses.toLocaleString()} {getCurrencyLabel(currency)}
-                                </td>
-                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
