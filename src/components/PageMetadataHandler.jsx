@@ -156,6 +156,7 @@ const PageMetadataHandler = () => {
                 iconLinks.forEach(existing => { existing.href = href; });
             };
             if (!sourceHref) return;
+            setIcon(iconHref);
             const image = new Image();
             image.crossOrigin = 'anonymous';
             image.onload = () => {

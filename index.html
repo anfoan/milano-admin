@@ -36,6 +36,15 @@
         path.startsWith('/milano-secure-gate-99') ||
         path.startsWith('/milano-dashboard-vault-77');
 
+      let cachedImages = {};
+      try { cachedImages = JSON.parse(localStorage.getItem('settings_images') || '{}'); } catch (_) {}
+      const cachedIcon = isAdmin ? cachedImages.adminImage : cachedImages.navLogo;
+      if (cachedIcon) {
+        const iconLink = document.createElement('link');
+        iconLink.rel = 'icon'; iconLink.type = 'image/png'; iconLink.href = cachedIcon;
+        document.head.appendChild(iconLink);
+      }
+
       // Title
       document.title = isAdmin ? 'إعدادات ميلانو' : 'متجر ميلانو';
     };
