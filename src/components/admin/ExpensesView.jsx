@@ -1494,10 +1494,10 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                             <tr>
                                 <th className="px-3 py-2.5 text-start">#</th>
                                 <th className="px-3 py-2.5 text-start">{isRTL ? 'بند المصروفات' : 'Expense item'}</th>
-                                <th className="px-3 py-2.5 text-start relative -left-6">{isRTL ? 'التصنيف' : 'Category'}</th>
+                                <th className="px-3 py-2.5 text-start relative -left-8">{isRTL ? 'التصنيف' : 'Category'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap relative -left-4">{isRTL ? 'التاريخ' : 'Date'}</th>
-                                <th className="px-3 py-2.5 text-start whitespace-nowrap relative -left-6">{isRTL ? 'طريقة الدفع' : 'Payment method'}</th>
-                                <th className="px-3 py-2.5 text-end whitespace-nowrap relative -right-4">{isRTL ? 'مبلغ المصروف' : 'Expense amount'}</th>
+                                <th className="px-3 py-2.5 text-start whitespace-nowrap relative -left-8">{isRTL ? 'طريقة الدفع' : 'Payment method'}</th>
+                                <th className="px-3 py-2.5 text-end whitespace-nowrap relative -right-2">{isRTL ? 'مبلغ المصروف' : 'Expense amount'}</th>
                                 <th className="px-3 py-2.5 text-center">{isRTL ? 'إجراءات' : 'Actions'}</th>
                             </tr>
                         </thead>
