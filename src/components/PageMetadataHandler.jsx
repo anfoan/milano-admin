@@ -157,26 +157,14 @@ const PageMetadataHandler = () => {
             const image = new Image();
             image.crossOrigin = 'anonymous';
             image.onload = () => {
-                const source = document.createElement('canvas');
-                source.width = image.naturalWidth; source.height = image.naturalHeight;
-                const sourceContext = source.getContext('2d');
-                sourceContext.drawImage(image, 0, 0);
-                const pixels = sourceContext.getImageData(0, 0, source.width, source.height).data;
-                let left = source.width, top = source.height, right = 0, bottom = 0;
-                for (let y = 0; y < source.height; y += 1) for (let x = 0; x < source.width; x += 1) {
-                    const i = (y * source.width + x) * 4;
-                    if (pixels[i + 3] > 20 && pixels[i] + pixels[i + 1] + pixels[i + 2] < 735) {
-                        left = Math.min(left, x); top = Math.min(top, y); right = Math.max(right, x); bottom = Math.max(bottom, y);
-                    }
-                }
-                if (right === 0) { left = 0; top = 0; right = source.width - 1; bottom = source.height - 1; }
-                const contentWidth = right - left + 1, contentHeight = bottom - top + 1;
-                const side = Math.max(contentWidth, contentHeight) * 1.08;
-                const cropX = Math.max(0, Math.min(source.width - side, (left + right + 1 - side) / 2));
-                const cropY = Math.max(0, Math.min(source.height - side, (top + bottom + 1 - side) / 2));
+                const side = Math.min(image.naturalWidth, image.naturalHeight);
                 const canvas = document.createElement('canvas');
                 canvas.width = 128; canvas.height = 128;
-                canvas.getContext('2d').drawImage(source, cropX, cropY, side, side, 0, 0, 128, 128);
+                const context = canvas.getContext('2d');
+                context.beginPath();
+                context.roundRect(2, 2, 124, 124, 22);
+                context.clip();
+                context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 128, 128);
                 setIcon(canvas.toDataURL('image/png'));
             };
             image.onerror = () => setIcon(iconHref);
