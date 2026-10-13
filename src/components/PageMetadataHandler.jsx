@@ -139,9 +139,12 @@ const PageMetadataHandler = () => {
 
         // Handle Icon Selection (Reverted to stable logo.jpg as requested)
         const updateFavicon = () => {
-            const iconHref = isAdminRoute
+            const sourceHref = isAdminRoute
                 ? (imageSettings?.adminImage || '/admin-icon-192.png')
                 : '/favicon.ico.png';
+            const iconHref = sourceHref.includes('/image/upload/')
+                ? sourceHref.replace('/image/upload/', '/image/upload/c_fill,g_auto,w_128,h_128/')
+                : sourceHref;
 
             // Update Favicon Link
             const iconLinks = document.querySelectorAll("link[rel*='icon']");
