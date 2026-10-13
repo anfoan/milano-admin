@@ -785,7 +785,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                   td { padding: 8px; border-bottom: 1px solid #eee; }
                   .receipt-val { color: #10b981; font-weight: bold; }
                   .payment-val { color: #ef4444; font-weight: bold; }
-                  .totals-table { width: 50%; margin-left: auto; margin-top: 20px; border: 2px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+                  .totals-table { width: 50%; margin-left: auto; margin-top: 20px; border: 2px solid #e5e7eb; border-collapse: separate; border-spacing: 0; border-radius: 10px; overflow: hidden; }
                   .totals-table td { padding: 10px; font-weight: bold; }
                   .net-total { background: #eff6ff; border-top: 2px solid #3b82f6; }
                   .net-total td { color: #2563eb; font-size: 14px; }
@@ -842,10 +842,6 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                   <tr>
                       <td>إجمالي سندات الصرف (-)</td>
                       <td class="payment-val">${totalPayments.toLocaleString()} ${getCurrencyLabel(currency)}</td>
-                  </tr>
-                  <tr>
-                      <td>صافي الرصيد الكلي</td>
-                      <td style="color: ${netBalance >= 0 ? '#10b981' : '#ef4444'}">${netBalance.toLocaleString()} ${getCurrencyLabel(currency)}</td>
                   </tr>
                   <tr class="net-total">
                       <td>المتبقي من القبض والصرف</td>
