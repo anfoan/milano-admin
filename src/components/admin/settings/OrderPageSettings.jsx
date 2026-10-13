@@ -90,8 +90,11 @@ const OrderPageSettings = ({ onBack, lang = 'ar' }) => {
                 canvas.width = 512;
                 canvas.height = 512;
                 const context = canvas.getContext('2d');
+                context.beginPath();
+                context.roundRect(4, 4, 504, 504, 72);
+                context.clip();
                 context.drawImage(image, (image.naturalWidth - size) / 2, (image.naturalHeight - size) / 2, size, size, 0, 0, 512, 512);
-                canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Image crop failed')), 'image/jpeg', 0.92);
+                canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Image crop failed')), 'image/png');
             };
             image.onerror = reject;
             image.src = reader.result;

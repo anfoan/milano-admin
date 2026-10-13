@@ -63,7 +63,8 @@ const SETTINGS_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_SETTINGS_UPLOAD_P
 
 const appendImageFile = (formData, file, fileName) => {
     if (file instanceof Blob && !(file instanceof File)) {
-        formData.append('file', file, `${fileName}.jpg`);
+        const extension = file.type === 'image/png' ? 'png' : 'jpg';
+        formData.append('file', file, `${fileName}.${extension}`);
     } else {
         formData.append('file', file);
     }
