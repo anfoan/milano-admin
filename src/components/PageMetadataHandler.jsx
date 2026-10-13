@@ -197,7 +197,23 @@ const PageMetadataHandler = () => {
                 manifestLink.rel = 'manifest';
                 document.head.appendChild(manifestLink);
             }
-            manifestLink.href = isAdmin ? '/admin-manifest.json' : '/manifest.json';
+            const iconSource = isAdmin
+                ? (imageSettings?.adminImage || '/admin-icon-192.png')
+                : '/favicon.ico.png';
+            const manifest = {
+                name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
+                short_name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
+                start_url: window.location.pathname,
+                scope: '/', display: 'standalone', background_color: '#ffffff', theme_color: '#ffffff',
+                icons: [
+                    { src: iconSource, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+                    { src: iconSource, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+                ]
+            };
+            if (manifestLink.dataset.blobUrl) URL.revokeObjectURL(manifestLink.dataset.blobUrl);
+            const blobUrl = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+            manifestLink.dataset.blobUrl = blobUrl;
+            manifestLink.href = blobUrl;
         };
         updateManifest();
 
