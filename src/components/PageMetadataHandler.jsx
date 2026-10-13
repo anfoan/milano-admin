@@ -201,7 +201,7 @@ const PageMetadataHandler = () => {
                 ? (imageSettings?.adminImage || '/admin-icon-192.png')
                 : '/favicon.ico.png';
             const installIcon = iconSource.includes('/image/upload/')
-                ? iconSource.replace('/image/upload/', '/image/upload/c_fill,g_auto,w_192,h_192,r_max/')
+                ? iconSource.replace('/image/upload/', '/image/upload/c_fill,g_auto,w_192,h_192,r_24/')
                 : iconSource;
             const manifest = {
                 name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
@@ -209,14 +209,17 @@ const PageMetadataHandler = () => {
                 start_url: window.location.pathname,
                 scope: '/', display: 'standalone', background_color: '#ffffff', theme_color: '#ffffff',
                 icons: [
-                    { src: installIcon, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-                    { src: installIcon, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+                    { src: installIcon, sizes: '192x192', type: 'image/png', purpose: 'any' },
+                    { src: installIcon, sizes: '512x512', type: 'image/png', purpose: 'any' }
                 ]
             };
             if (manifestLink.dataset.blobUrl) URL.revokeObjectURL(manifestLink.dataset.blobUrl);
             const blobUrl = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
             manifestLink.dataset.blobUrl = blobUrl;
             manifestLink.href = blobUrl;
+            let appleIcon = document.querySelector("link[rel='apple-touch-icon']");
+            if (!appleIcon) { appleIcon = document.createElement('link'); appleIcon.rel = 'apple-touch-icon'; document.head.appendChild(appleIcon); }
+            appleIcon.href = installIcon;
         };
         updateManifest();
 
