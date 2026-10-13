@@ -1745,7 +1745,9 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     </td>
                                     <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">{toEnglishDigits(bond.date)}</td>
                                     <td className="px-3 py-2.5 text-start whitespace-nowrap">
-                                        {getPaymentLabel(bond.paymentMethod)}
+                                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-black ${getPaymentClass(bond.paymentMethod)}`}>
+                                            {getPaymentLabel(bond.paymentMethod)}
+                                        </span>
                                     </td>
                                     <td className={`px-3 py-2.5 text-end font-extrabold whitespace-nowrap transform translate-x-3 ${bond.type === 'receipt' ? 'text-green-500' : 'text-red-500'}`}>
                                         {bond.amount.toLocaleString()} {getCurrencyLabel(bond.currency || currency)}
@@ -2099,7 +2101,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 gap-4">
+                                <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 mb-1">{isRTL ? 'طريقة الدفع' : 'Payment Method'}</label>
                                         <div className="relative">
