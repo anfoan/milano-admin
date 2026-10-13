@@ -39,7 +39,7 @@
       // Manifest
       const manifestLink = document.createElement('link');
       manifestLink.rel = 'manifest';
-      manifestLink.href = isAdmin ? '/admin-manifest.json' : '/manifest.json';
+      manifestLink.href = `${isAdmin ? '/admin-manifest.json' : '/manifest.json'}?v=branding-current`;
       document.head.appendChild(manifestLink);
 
       // Use a transparent placeholder until the saved branding icon is loaded.

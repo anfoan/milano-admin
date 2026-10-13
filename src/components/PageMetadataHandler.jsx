@@ -201,7 +201,7 @@ const PageMetadataHandler = () => {
                 ? (imageSettings?.adminImage || '/admin-icon-192.png')
                 : '/favicon.ico.png';
             const installIcon = iconSource.includes('/image/upload/')
-                ? iconSource.replace('/image/upload/', '/image/upload/c_fill,g_auto,w_192,h_192,r_24/')
+                ? iconSource.replace('/image/upload/', '/image/upload/f_png,c_fill,g_auto,w_192,h_192,r_24/')
                 : iconSource;
             const manifest = {
                 name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
