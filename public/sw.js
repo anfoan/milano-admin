@@ -1,5 +1,5 @@
 // Service Worker - Milano Store v3 (Force Update for New Database)
-const CACHE_NAME = 'milano-cache-v4'; // INCREMENT VERSION TO FORCE REFRESH
+const CACHE_NAME = 'milano-cache-v5'; // Keep manifests and branding icons fresh
 
 // On install: Skip waiting to activate immediately
 self.addEventListener('install', (event) => {
@@ -41,6 +41,14 @@ self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET' || 
         (!event.request.url.startsWith('http://') && !event.request.url.startsWith('https://'))) {
         event.respondWith(fetch(event.request).catch(() => new Response('', { status: 503, statusText: 'Offline' })));
+        return;
+    }
+
+    const requestUrl = new URL(event.request.url);
+    const isBrandingResource = event.request.destination === 'manifest'
+        || /manifest\.json|icon-\d+|favicon|admin-icon/i.test(requestUrl.pathname);
+    if (isBrandingResource) {
+        event.respondWith(fetch(event.request, { cache: 'no-store' }));
         return;
     }
 

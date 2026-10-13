@@ -36,12 +36,6 @@
         path.startsWith('/milano-secure-gate-99') ||
         path.startsWith('/milano-dashboard-vault-77');
 
-      // Manifest
-      const manifestLink = document.createElement('link');
-      manifestLink.rel = 'manifest';
-      manifestLink.href = `${isAdmin ? '/admin-manifest.json' : '/manifest.json'}?v=branding-current`;
-      document.head.appendChild(manifestLink);
-
       // Use a transparent placeholder until the saved branding icon is loaded.
       const iconLink = document.createElement('link');
       iconLink.rel = 'icon';
