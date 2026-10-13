@@ -1724,7 +1724,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'النوع' : 'Type'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'التاريخ' : 'Date'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'طريقة الدفع' : 'Payment method'}</th>
-                                <th className="px-3 py-2.5 text-end whitespace-nowrap">{isRTL ? 'مبلغ السند' : 'Bond amount'}</th>
+                                <th className="px-3 py-2.5 text-end whitespace-nowrap relative -right-3">{isRTL ? 'مبلغ السند' : 'Bond amount'}</th>
                                 <th className="px-3 py-2.5 text-center">{isRTL ? 'إجراءات' : 'Actions'}</th>
                             </tr>
                         </thead>
@@ -1749,7 +1749,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     <td className="px-3 py-2.5 text-start whitespace-nowrap">
                                         {getPaymentLabel(bond.paymentMethod)}
                                     </td>
-                                    <td className={"px-3 py-2.5 text-end font-extrabold whitespace-nowrap ${bond.type === 'receipt' ? 'text-green-500' : 'text-red-500'}"}>
+                                    <td className={"px-3 py-2.5 text-end font-extrabold whitespace-nowrap relative -right-3 ${bond.type === 'receipt' ? 'text-green-500' : 'text-red-500'}"}>
                                         {bond.amount.toLocaleString()} {getCurrencyLabel(bond.currency || currency)}
                                     </td>
                                     <td className="px-3 py-2.5 text-center">
