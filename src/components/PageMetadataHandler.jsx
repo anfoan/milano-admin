@@ -200,14 +200,17 @@ const PageMetadataHandler = () => {
             const iconSource = isAdmin
                 ? (imageSettings?.adminImage || '/admin-icon-192.png')
                 : '/favicon.ico.png';
+            const installIcon = iconSource.includes('/image/upload/')
+                ? iconSource.replace('/image/upload/', '/image/upload/c_fill,g_auto,w_192,h_192,r_max/')
+                : iconSource;
             const manifest = {
                 name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
                 short_name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
                 start_url: window.location.pathname,
                 scope: '/', display: 'standalone', background_color: '#ffffff', theme_color: '#ffffff',
                 icons: [
-                    { src: iconSource, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-                    { src: iconSource, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+                    { src: installIcon, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+                    { src: installIcon, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
                 ]
             };
             if (manifestLink.dataset.blobUrl) URL.revokeObjectURL(manifestLink.dataset.blobUrl);
