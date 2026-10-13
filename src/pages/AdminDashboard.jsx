@@ -505,7 +505,7 @@ const AdminDashboard = () => {
                                 className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 p-2 rounded-xl transition-colors"
                             >
                                 <div className="hidden lg:flex flex-col items-end">
-                                    <span className="text-sm font-black text-gray-800 dark:text-white">{generalSettings?.adminTitle || txt.admin_name}</span>
+                                    <span className="text-sm font-black text-gray-800 dark:text-white">{generalSettings?.storeName || txt.admin_name}</span>
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{txt.admin_role}</span>
                                 </div>
                                 <div className="w-10 h-10 rounded-[14px] overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm relative bg-white flex items-center justify-center p-0.5">
