@@ -1720,11 +1720,11 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 <th className="px-3 py-2.5 text-start">#</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'رقم السند' : 'Bond #'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'اسم السيد' : 'Name'}</th>
+                                <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'الجهة' : 'Entity'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'النوع' : 'Type'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'التاريخ' : 'Date'}</th>
-                                <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'الجهة' : 'Entity'}</th>
-                                <th className="px-3 py-2.5 text-end whitespace-nowrap">{isRTL ? 'المبلغ' : 'Amount'}</th>
-                                <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'الدفع' : 'Pay Method'}</th>
+                                <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'طريقة الدفع' : 'Payment method'}</th>
+                                <th className="px-3 py-2.5 text-end whitespace-nowrap">{isRTL ? 'مبلغ السند' : 'Bond amount'}</th>
                                 <th className="px-3 py-2.5 text-center">{isRTL ? 'إجراءات' : 'Actions'}</th>
                             </tr>
                         </thead>
@@ -1734,6 +1734,9 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     <td className="px-3 py-2.5 text-start text-gray-400">{idx + 1}</td>
                                     <td className="px-3 py-2.5 text-start text-gray-900 dark:text-white font-mono whitespace-nowrap">{bond.number}</td>
                                     <td className="px-3 py-2.5 text-start text-gray-900 dark:text-white whitespace-nowrap max-w-[150px] truncate" title={bond.entityName}>{bond.entityName}</td>
+                                    <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">
+                                        {getEntityLabel(bond.entityType)}
+                                    </td>
                                     <td className="px-3 py-2.5 text-start whitespace-nowrap">
                                         <span className={`px-2 py-0.5 text-xs rounded-full ${bond.type === 'receipt'
                                                 ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400'
@@ -1743,14 +1746,11 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                         </span>
                                     </td>
                                     <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">{toEnglishDigits(bond.date)}</td>
-                                    <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">
-                                        {getEntityLabel(bond.entityType)}
+                                    <td className="px-3 py-2.5 text-start whitespace-nowrap">
+                                        {getPaymentLabel(bond.paymentMethod)}
                                     </td>
                                     <td className={"px-3 py-2.5 text-end font-extrabold whitespace-nowrap ${bond.type === 'receipt' ? 'text-green-500' : 'text-red-500'}"}>
                                         {bond.amount.toLocaleString()} {getCurrencyLabel(bond.currency || currency)}
-                                    </td>
-                                    <td className="px-3 py-2.5 text-start whitespace-nowrap">
-                                        {getPaymentLabel(bond.paymentMethod)}
                                     </td>
                                     <td className="px-3 py-2.5 text-center">
                                         <div className="flex items-center justify-center gap-1">
