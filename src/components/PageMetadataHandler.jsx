@@ -139,12 +139,13 @@ const PageMetadataHandler = () => {
 
         // Handle Icon Selection (Reverted to stable logo.jpg as requested)
         const updateFavicon = () => {
+            const transparentIcon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
             const sourceHref = isAdminRoute
-                ? (imageSettings?.adminImage || '/admin-icon-192.png')
+                ? imageSettings?.adminImage
                 : '/favicon.ico.png';
-            const iconHref = sourceHref.includes('/image/upload/')
-                ? sourceHref.replace('/image/upload/', '/image/upload/c_fill,g_auto,w_128,h_128/')
-                : sourceHref;
+            const iconHref = sourceHref?.includes('/image/upload/')
+                ? sourceHref.replace('/image/upload/', '/image/upload/f_png,c_fill,g_auto,w_128,h_128,r_24/')
+                : (sourceHref || transparentIcon);
 
             const setIcon = href => {
                 const iconLinks = document.querySelectorAll("link[rel*='icon']");
@@ -167,7 +168,7 @@ const PageMetadataHandler = () => {
                 context.drawImage(image, (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side, 0, 0, 128, 128);
                 setIcon(canvas.toDataURL('image/png'));
             };
-            image.onerror = () => setIcon(iconHref);
+            image.onerror = () => setIcon(transparentIcon);
             image.src = iconHref;
             return;
 
@@ -198,11 +199,12 @@ const PageMetadataHandler = () => {
                 document.head.appendChild(manifestLink);
             }
             const iconSource = isAdmin
-                ? (imageSettings?.adminImage || '/admin-icon-192.png')
-                : '/favicon.ico.png';
-            const installIcon = iconSource.includes('/image/upload/')
+                ? imageSettings?.adminImage
+                : null;
+            const transparentInstallIcon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+            const installIcon = iconSource?.includes('/image/upload/')
                 ? iconSource.replace('/image/upload/', '/image/upload/f_png,c_fill,g_auto,w_192,h_192,r_24/')
-                : iconSource;
+                : (iconSource || transparentInstallIcon);
             const manifest = {
                 name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
                 short_name: isAdmin ? (generalSettings?.adminTitle || 'إعدادات ميلانو') : (generalSettings?.storeName || 'متجر ميلانو'),
