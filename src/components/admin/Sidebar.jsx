@@ -8,7 +8,7 @@ import {
     PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt, BarChart3, Wallet
 } from 'lucide-react';
 
-const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, toggleLang, unreadCount = 0, newOrdersCount = 0, restrictedTabs = null }) => {
+const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, toggleLang, unreadCount = 0, newOrdersCount = 0, restrictedTabs = null, businessName = '' }) => {
 
 
     const t = {
@@ -194,7 +194,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                             <img src="/admin-new-icon.png" className="w-full h-full object-cover rounded-[12px] mix-blend-multiply dark:mix-blend-lighten" alt="Admin" />
                         </div>
                         <div className="flex flex-col justify-center">
-                            <span className="text-[20px] font-black text-slate-950 dark:text-white leading-tight translate-y-0.5">{txt.milano}</span>
+                            <span className="text-[20px] font-black text-slate-950 dark:text-white leading-tight translate-y-0.5">{businessName || txt.milano}</span>
                         </div>
                     </div>
                     {/* Close button for mobile */}

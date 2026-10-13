@@ -416,6 +416,7 @@ const AdminDashboard = () => {
                     unreadCount={unreadCount}
                     newOrdersCount={newOrdersCount}
                     restrictedTabs={isWorker ? workerAllowedTabs : null}
+                    businessName={generalSettings?.storeName}
                 />
             </div>
 
