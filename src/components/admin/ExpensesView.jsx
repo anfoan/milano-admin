@@ -794,16 +794,15 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                   .report-header { display: flex; direction: ltr; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 12px; }
                   .report-meta { direction: rtl; text-align: left; font-weight: 600; font-size: 13px; min-width: 180px; }
                   .report-meta > div { margin-bottom: 4px; }
-                  .store-image { display: block; width: 86px; height: 86px; margin-top: 10px; object-fit: cover; border-radius: 14px; }
-                  .business-details { direction: rtl; text-align: right; font-weight: 700; font-size: 13px; line-height: 1.8; min-width: 210px; }
+                  .store-image { display: block; width: 86px; height: 86px; margin-top: 18px; object-fit: cover; border-radius: 14px; }
+                  .business-details { direction: rtl; text-align: right; font-weight: 700; font-size: 13px; line-height: 1.8; min-width: 210px; padding-top: 42px; }
                   .business-details div { white-space: nowrap; }
-                  .print-btn { background: #2563eb; color: #fff; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo', sans-serif; font-size: 14px; margin-bottom: 15px; }
+                  .print-btn { background: #2563eb; color: #fff; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo', sans-serif; font-size: 14px; margin-top: 24px; }
                   .print-btn:hover { background: #1d4ed8; }
                   @media print { .print-btn { display: none; } body { padding: 0; } }
               </style>
           </head>
           <body>
-              <button class="print-btn" onclick="window.print()">طباعة التقرير</button>
               <div class="report-header">
                   <div class="report-meta">
                       <div>تاريخ التقرير: ${toEnglishDigits(new Date().toLocaleDateString('ar-YE'))}</div>
@@ -864,6 +863,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                       <td>${netBalance.toLocaleString()} ${getCurrencyLabel(currency)}</td>
                   </tr>
               </table>
+              <button class="print-btn" onclick="window.print()">طباعة التقرير</button>
           </body>
           </html>
         `;
