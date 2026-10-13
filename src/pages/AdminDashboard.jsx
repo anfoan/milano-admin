@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -46,6 +46,7 @@ const AdminDashboard = () => {
         if (workerPerms.allowManualOrder) workerAllowedTabs.push('manual-order');
     }
     const [activeTab, setActiveTab] = useState(() => isWorker ? (workerAllowedTabs[0] || '') : 'overview');
+    const [, startNavigationTransition] = useTransition();
     const [showRightPanel, setShowRightPanel] = useState(false); // Right Panel State
     const [showProfileMenu, setShowProfileMenu] = useState(false); // Profile Menu State
     const [settingsSection, setSettingsSection] = useState(null); // Settings Section State
@@ -284,7 +285,7 @@ const AdminDashboard = () => {
             return;
         }
         if (tab === 'settings') setSettingsSection(null);
-        setActiveTab(tab);
+        startNavigationTransition(() => setActiveTab(tab));
         // A drawer should never remain layered over the newly selected view on phone/tablet.
         if (window.innerWidth < 1280) setIsSidebarOpen(false);
     };
