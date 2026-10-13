@@ -42,11 +42,11 @@
       manifestLink.href = isAdmin ? '/admin-manifest.json' : '/manifest.json';
       document.head.appendChild(manifestLink);
 
-      // Favicon - set BEFORE browser renders
+      // Use a transparent placeholder until the saved branding icon is loaded.
       const iconLink = document.createElement('link');
       iconLink.rel = 'icon';
       iconLink.type = 'image/png';
-      iconLink.href = isAdmin ? '/admin-icon-192.png' : '/favicon.ico.png';
+      iconLink.href = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
       document.head.appendChild(iconLink);
 
       // Title
