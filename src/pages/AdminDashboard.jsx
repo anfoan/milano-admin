@@ -105,10 +105,16 @@ const AdminDashboard = () => {
             if (docSnap.exists()) setGeneralSettings(docSnap.data());
         });
         const unsubscribeImages = onSnapshot(doc(db, "settings", "images"), (docSnap) => {
-            if (docSnap.exists()) setGeneralSettings(prev => ({ ...prev, ...docSnap.data(), invoiceLogo: docSnap.data().invoiceLogo || prev.invoiceLogo || '' }));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setGeneralSettings(prev => ({ ...prev, invoiceLogo: data.invoiceLogo || prev.invoiceLogo || '', adminImage: data.adminImage || prev.adminImage || '', navLogo: data.navLogo || prev.navLogo || '' }));
+            }
         });
         const unsubscribeBranding = onSnapshot(doc(db, "settings", "branding"), (docSnap) => {
-            if (docSnap.exists()) setGeneralSettings(prev => ({ ...prev, ...docSnap.data() }));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setGeneralSettings(prev => ({ ...prev, adminTitle: data.adminTitle || prev.adminTitle || '', adminImage: data.adminImage || prev.adminImage || '' }));
+            }
         });
         return () => { unsubscribe(); unsubscribeImages(); unsubscribeBranding(); };
     }, []);
