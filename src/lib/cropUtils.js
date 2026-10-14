@@ -17,13 +17,14 @@ export const getCroppedImg = (imageSrc, pixelCrop, outputSize = 1600) => {
             return null;
         }
 
-        // Keep the output square but cap its size so very large camera images do
-        // not exceed the browser canvas limit or fail silently.
+        // Preserve the crop's original aspect ratio while capping only the
+        // longest side. This prevents huge camera images from exhausting the
+        // browser canvas without forcing the result into a 1:1 square.
         const sourceWidth = Math.max(1, Number(pixelCrop.width) || 1);
         const sourceHeight = Math.max(1, Number(pixelCrop.height) || 1);
-        const targetSize = Math.min(outputSize, sourceWidth, sourceHeight);
-        canvas.width = Math.max(1, Math.round(targetSize));
-        canvas.height = Math.max(1, Math.round(targetSize));
+        const scale = Math.min(1, outputSize / Math.max(sourceWidth, sourceHeight));
+        canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+        canvas.height = Math.max(1, Math.round(sourceHeight * scale));
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 

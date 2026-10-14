@@ -1,25 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
+import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css'; // Import the CSS for the new library
 import { X, Check } from 'lucide-react';
 import { getCroppedImg } from '../../lib/cropUtils';
-
-// Helper to center the crop initially
-function centerAspectCrop(mediaWidth, mediaHeight, aspect) {
-    return centerCrop(
-        makeAspectCrop(
-            {
-                unit: '%',
-                width: 90,
-            },
-            aspect,
-            mediaWidth,
-            mediaHeight,
-        ),
-        mediaWidth,
-        mediaHeight,
-    )
-}
 
 const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
     const [crop, setCrop] = useState();
@@ -30,8 +13,9 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
     // Initial load: Set a default crop covering most of the image
     const onImageLoad = (e) => {
         const { width, height } = e.currentTarget;
-        // Start with a 1:1 square aspect ratio crop centered
-        const newCrop = centerAspectCrop(width, height, 1);
+        // Start with a free-ratio crop covering almost the complete image.
+        // The original aspect ratio is intentionally preserved.
+        const newCrop = { unit: '%', x: 5, y: 5, width: 90, height: 90 };
         setCrop(newCrop);
         setCompletedCrop(newCrop);
     }
@@ -67,7 +51,7 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
             <div className="bg-white rounded-3xl overflow-hidden w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white z-10 shrink-0">
-                    <h3 className="font-black text-lg text-gray-800">قص الصورة (مقاس مربع 1:1)</h3>
+                    <h3 className="font-black text-lg text-gray-800">قص الصورة (الحجم الأصلي)</h3>
                     <button onClick={onCancel} className="p-2 hover:bg-gray-100 rounded-full transition">
                         <X size={20} className="text-gray-500" />
                     </button>
@@ -79,7 +63,6 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
                         crop={crop}
                         onChange={(_, percentCrop) => setCrop(percentCrop)}
                         onComplete={(c) => setCompletedCrop(c)}
-                        aspect={1}
                         className="max-h-full"
                     >
                         <img
@@ -95,7 +78,7 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
                 {/* Controls */}
                 <div className="px-6 py-4 bg-white border-t border-gray-100 shrink-0">
                     <p className="text-center text-xs text-gray-400 font-bold mb-4">
-                        الآن يمكنك سحب أركان المربع الأزرق لتحديد الجزء المطلوب
+                        الآن يمكنك تحديد الجزء المطلوب مع الحفاظ على أبعاد الصورة الأصلية
                     </p>
                     <div className="flex gap-3">
                         <button
