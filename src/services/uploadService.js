@@ -87,10 +87,11 @@ export const uploadSettingsImage = async (file, fileName = 'store-image') => {
     return payload.secure_url;
 };
 
-// Existing product upload API: intentionally retains its environment-only behavior.
+// Product uploads use the same safe Cloudinary fallback as the other image
+// settings, including in preview builds where Vite variables may be absent.
 export const uploadToCloudinary = async (file, fileName = 'image') => {
-    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || SETTINGS_UPLOAD_PRESET;
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || SETTINGS_CLOUD_NAME;
 
     if (!uploadPreset || !cloudName) {
         console.error('Cloudinary configuration missing in environment variables.');
@@ -111,10 +112,12 @@ export const uploadToCloudinary = async (file, fileName = 'image') => {
             method: 'POST',
             body: formData,
         });
-        const payload = await response.json();
-        if (payload.secure_url) return payload.secure_url;
-        console.error('Cloudinary upload error:', payload);
-        return null;
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload.secure_url) {
+            console.error('Cloudinary upload error:', payload);
+            throw new Error(payload?.error?.message || 'PRODUCT_IMAGE_UPLOAD_FAILED');
+        }
+        return payload.secure_url;
     } catch (error) {
         console.error('Error in uploadToCloudinary service:', error);
         return null;

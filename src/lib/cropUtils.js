@@ -1,4 +1,4 @@
-export const getCroppedImg = (imageSrc, pixelCrop) => {
+export const getCroppedImg = (imageSrc, pixelCrop, outputSize = 1600) => {
     const createImage = (url) =>
         new Promise((resolve, reject) => {
             const image = new Image();
@@ -17,9 +17,15 @@ export const getCroppedImg = (imageSrc, pixelCrop) => {
             return null;
         }
 
-        // set width/height to double - this is too heavy for large images, so we use actual pixelCrop
-        canvas.width = pixelCrop.width;
-        canvas.height = pixelCrop.height;
+        // Keep the output square but cap its size so very large camera images do
+        // not exceed the browser canvas limit or fail silently.
+        const sourceWidth = Math.max(1, Number(pixelCrop.width) || 1);
+        const sourceHeight = Math.max(1, Number(pixelCrop.height) || 1);
+        const targetSize = Math.min(outputSize, sourceWidth, sourceHeight);
+        canvas.width = Math.max(1, Math.round(targetSize));
+        canvas.height = Math.max(1, Math.round(targetSize));
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
         // draw the cropped image
         ctx.drawImage(
@@ -30,8 +36,8 @@ export const getCroppedImg = (imageSrc, pixelCrop) => {
             pixelCrop.height,
             0,
             0,
-            pixelCrop.width,
-            pixelCrop.height
+            canvas.width,
+            canvas.height
         );
 
         // As Blob
@@ -41,7 +47,7 @@ export const getCroppedImg = (imageSrc, pixelCrop) => {
                 console.error('Canvas is empty');
                 return;
             }
-            blob.name = 'cropped.jpeg';
+            blob.name = 'cropped-product.jpg';
             resolve(blob);
         }, 'image/jpeg', 0.95);
     });

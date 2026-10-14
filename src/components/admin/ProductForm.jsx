@@ -331,14 +331,20 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     const handleCropComplete = async (croppedBlob) => {
         setCroppingImage(null); // Close cropper
         setLoading(true);
-
-        // Upload cropped blob with a specific name
-        const imageUrl = await uploadToCloudinary(croppedBlob, 'cropped_product');
-        if (imageUrl) {
-            setFormData({ ...formData, mainImage: imageUrl });
+        try {
+            // The crop utility normalizes every source dimension to a sharp,
+            // safe square before uploading it to Cloudinary.
+            const imageUrl = await uploadToCloudinary(croppedBlob, 'cropped_product');
+            if (!imageUrl) throw new Error('PRODUCT_IMAGE_UPLOAD_FAILED');
+            setFormData(prev => ({ ...prev, mainImage: imageUrl }));
+            setErrors(prev => ({ ...prev, mainImage: false }));
             alert(txt.alert_success_main_img);
+        } catch (error) {
+            console.error('Product image upload failed:', error);
+            alert(isRTL ? 'تعذر رفع الصورة. يرجى المحاولة مرة أخرى.' : 'The image could not be uploaded. Please try again.');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleGalleryChange = async (e) => {
