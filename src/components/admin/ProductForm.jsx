@@ -505,7 +505,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
             if (editingProduct && editingProduct.discount > 0) {
                 const priceNum = Number(formData.price);
                 const discountPercent = Number(editingProduct.discount);
-                finalData.priceAfterDiscount = priceNum - (priceNum * (discountPercent / 100));
+                finalData.priceAfterDiscount = Math.round(priceNum - (priceNum * (discountPercent / 100)));
             }
 
             if (editingProduct) {

@@ -159,7 +159,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
             const newDiscount = Number(editValue);
             const price = Number(originalPrice);
             const discountAmount = (price * newDiscount) / 100;
-            const newPriceAfter = price - discountAmount;
+            const newPriceAfter = Math.round(price - discountAmount);
 
             await updateDoc(doc(db, "products", productId), {
                 discount: newDiscount,
@@ -260,7 +260,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                 const price = parsePrice(p.price);
                 const discount = Number(discountPercent);
                 // Ensure price doesn't go negative (though checks above prevent it via discount range)
-                const priceAfterDiscount = Math.max(0, price - (price * (discount / 100)));
+                const priceAfterDiscount = Math.round(Math.max(0, price - (price * (discount / 100))));
 
                 return updateDoc(doc(db, "products", p.id), {
                     discount: discount,
@@ -287,7 +287,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                 if (isTarget) {
                     const price = parsePrice(p.price);
                     const discount = Number(discountPercent);
-                    const priceAfterDiscount = Math.max(0, price - (price * (discount / 100)));
+                    const priceAfterDiscount = Math.round(Math.max(0, price - (price * (discount / 100))));
                     return {
                         ...p,
                         discount,
@@ -686,7 +686,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                                             <h3 className="font-bold text-gray-700 text-base select-none line-clamp-1">{offer.name}</h3>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-xs font-bold text-gray-400 line-through">{Number(offer.price).toLocaleString()}</span>
-                                                <span className="text-sm font-black text-rose-500">{Number(offer.priceAfterDiscount).toLocaleString()} {currency}</span>
+                                                <span className="text-sm font-black text-rose-500">{Math.round(Number(offer.priceAfterDiscount) || 0).toLocaleString('en-US')} {currency}</span>
                                             </div>
                                         </div>
                                     </div>
