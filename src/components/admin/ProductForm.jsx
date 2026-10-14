@@ -184,6 +184,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     const [newCategoryName, setNewCategoryName] = useState('');
     const [descriptionView, setDescriptionView] = useState('editor'); // 'editor' or 'preview'
     const [croppingImage, setCroppingImage] = useState(null); // State for image to crop
+    const [draggedGalleryIndex, setDraggedGalleryIndex] = useState(null);
 
     const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x660));
 
@@ -370,6 +371,17 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     const removeGalleryImage = (index) => {
         const newGallery = formData.gallery.filter((_, i) => i !== index);
         setFormData({ ...formData, gallery: newGallery });
+    };
+
+    const moveGalleryImage = (fromIndex, toIndex) => {
+        if (fromIndex === null || fromIndex === toIndex) return;
+        setFormData(prev => {
+            const gallery = [...prev.gallery];
+            const [movedImage] = gallery.splice(fromIndex, 1);
+            gallery.splice(toIndex, 0, movedImage);
+            return { ...prev, gallery };
+        });
+        setDraggedGalleryIndex(null);
     };
 
     const handleSizeStockChange = (size, val) => {
@@ -862,7 +874,15 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                         {formData.gallery.length > 0 && (
                             <div className="mt-6 flex justify-center gap-4">
                                 {formData.gallery.map((img, idx) => (
-                                    <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-gray-100">
+                                    <div
+                                        key={idx}
+                                        draggable
+                                        onDragStart={() => setDraggedGalleryIndex(idx)}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        onDrop={() => moveGalleryImage(draggedGalleryIndex, idx)}
+                                        onDragEnd={() => setDraggedGalleryIndex(null)}
+                                        className={`relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-gray-100 cursor-grab active:cursor-grabbing transition-opacity ${draggedGalleryIndex === idx ? 'opacity-50' : ''}`}
+                                    >
                                         <img src={img} className="w-full h-full object-cover" />
                                         <button type="button" onClick={(e) => { e.stopPropagation(); removeGalleryImage(idx); }} className="absolute top-1 left-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"><X size={12} /></button>
                                     </div>
