@@ -141,6 +141,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                 { type: 'color', name: txt.colors, values: [] }
             ]);
             setSizeStocks({});
+            sizeStockLimitRef.current = null;
             generateCode();
         }
     }, [editingProduct]);
@@ -176,6 +177,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     ]);
 
     const [sizeStocks, setSizeStocks] = useState({});
+    const sizeStockLimitRef = useRef(null);
 
     const [newSize, setNewSize] = useState('');
     const [newColor, setNewColor] = useState('#000000'); // Default black for picker
@@ -233,6 +235,9 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                 return stocks;
             }, {});
             setSizeStocks(normalizedStocks);
+            sizeStockLimitRef.current = editingProduct.stock === '' || editingProduct.stock === undefined
+                ? null
+                : Math.max(0, Number(toEnglishDigits(editingProduct.stock)) || 0);
         }
     }, [editingProduct]);
 
@@ -386,8 +391,17 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
 
     const handleSizeStockChange = (size, val) => {
         const normalizedValue = toEnglishDigits(val);
-        const numVal = normalizedValue === '' ? '' : Math.max(0, parseInt(normalizedValue, 10) || 0);
+        const requestedValue = normalizedValue === '' ? '' : Math.max(0, parseInt(normalizedValue, 10) || 0);
         setSizeStocks(prev => {
+            const otherSizesTotal = Object.entries(prev)
+                .filter(([currentSize]) => currentSize !== size)
+                .reduce((sum, [, current]) => sum + (Number(current) || 0), 0);
+            const remainingAllowed = sizeStockLimitRef.current === null
+                ? null
+                : Math.max(0, sizeStockLimitRef.current - otherSizesTotal);
+            const numVal = requestedValue === '' || remainingAllowed === null
+                ? requestedValue
+                : Math.min(requestedValue, remainingAllowed);
             const updatedStocks = { ...prev, [size]: numVal };
             const totalStock = Object.values(updatedStocks).reduce((sum, current) => sum + (Number(current) || 0), 0);
             setFormData(prevForm => ({ ...prevForm, stock: totalStock.toString() }));
@@ -414,6 +428,10 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
         if (type === 'size' && newSize.trim()) {
             const sizeVal = newSize.trim();
             if (variants[0].values.includes(sizeVal)) return;
+
+            if (variants[0].values.length === 0 && sizeStockLimitRef.current === null && formData.stock !== '') {
+                sizeStockLimitRef.current = Math.max(0, Number(toEnglishDigits(formData.stock)) || 0);
+            }
 
             const updated = [...variants];
             updated[0].values.push(sizeVal);
@@ -669,6 +687,12 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                     value={formData.stock}
                                     onChange={(e) => {
                                         setFormData({ ...formData, stock: e.target.value });
+                                        if (variants[0].values.length === 0) {
+                                            const normalizedStock = toEnglishDigits(e.target.value);
+                                            sizeStockLimitRef.current = normalizedStock === ''
+                                                ? null
+                                                : Math.max(0, Number(normalizedStock) || 0);
+                                        }
                                         if (errors.stock) setErrors({ ...errors, stock: false });
                                     }}
                                     type="number"
