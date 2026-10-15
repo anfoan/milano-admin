@@ -214,16 +214,16 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
         if (editingProduct) {
             setFormData({
                 name: editingProduct.name || '',
-                price: editingProduct.price || '',
-                costPrice: editingProduct.costPrice || '',
-                stock: editingProduct.stock || '',
+                price: toEnglishDigits(editingProduct.price || ''),
+                costPrice: toEnglishDigits(editingProduct.costPrice || ''),
+                stock: toEnglishDigits(editingProduct.stock || ''),
                 code: editingProduct.code || '',
                 category: editingProduct.category || '',
                 description: editingProduct.description || '',
                 mainImage: editingProduct.mainImage || null,
                 gallery: editingProduct.gallery || [],
                 hidden: editingProduct.hidden || false,
-                order: editingProduct.order || ''
+                order: toEnglishDigits(editingProduct.order || '')
             });
             if (editingProduct.variants) {
                 setVariants(editingProduct.variants.map(variant => variant.type === 'size'
@@ -426,7 +426,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
 
     const addVariantValue = (type) => {
         if (type === 'size' && newSize.trim()) {
-            const sizeVal = newSize.trim();
+            const sizeVal = toEnglishDigits(newSize.trim());
             if (variants[0].values.includes(sizeVal)) return;
 
             if (variants[0].values.length === 0 && sizeStockLimitRef.current === null && formData.stock !== '') {
@@ -604,7 +604,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                     onCancel={() => setCroppingImage(null)}
                 />
             )}
-            <form onSubmit={handleSave} className="space-y-6 pb-20 font-['Cairo']" dir={isRTL ? 'rtl' : 'ltr'}>
+            <form onSubmit={handleSave} className="space-y-6 pb-20 font-['Cairo'] text-sm" dir={isRTL ? 'rtl' : 'ltr'}>
                 {editingProduct && (
                     <button type="button" onClick={() => { setEditingProduct(null); setActiveTab('product-list'); }} className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-600 hover:text-blue-600 hover:border-blue-300 transition-colors" title={isRTL ? 'العودة إلى قائمة المنتجات' : 'Back to products'}>
                         <ArrowRight size={20} className={isRTL ? '' : 'rotate-180'} />
@@ -667,10 +667,12 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                 <input
                                     value={formData.price}
                                     onChange={(e) => {
-                                        setFormData({ ...formData, price: e.target.value });
+                                    setFormData({ ...formData, price: toEnglishDigits(e.target.value) });
                                         if (errors.price) setErrors({ ...errors, price: false });
                                     }}
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
+                                    dir="ltr"
                                     className={`w-full bg-white border ${errors.price ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 transition-all`}
                                     placeholder={txt.price}
                                 />
@@ -686,16 +688,18 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                 <input
                                     value={formData.stock}
                                     onChange={(e) => {
-                                        setFormData({ ...formData, stock: e.target.value });
+                                        const normalizedStock = toEnglishDigits(e.target.value);
+                                        setFormData({ ...formData, stock: normalizedStock });
                                         if (variants[0].values.length === 0) {
-                                            const normalizedStock = toEnglishDigits(e.target.value);
                                             sizeStockLimitRef.current = normalizedStock === ''
                                                 ? null
                                                 : Math.max(0, Number(normalizedStock) || 0);
                                         }
                                         if (errors.stock) setErrors({ ...errors, stock: false });
                                     }}
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
+                                    dir="ltr"
                                     disabled={variants[0].values.length > 0}
                                     className={`w-full bg-white border ${errors.stock ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 transition-all ${variants[0].values.length > 0 ? 'opacity-60 bg-gray-50 cursor-not-allowed' : ''}`}
                                     placeholder={txt.stock}
@@ -711,10 +715,12 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                 <input
                                     value={formData.costPrice}
                                     onChange={(e) => {
-                                        setFormData({ ...formData, costPrice: e.target.value });
+                                        setFormData({ ...formData, costPrice: toEnglishDigits(e.target.value) });
                                         if (errors.costPrice) setErrors({ ...errors, costPrice: false });
                                     }}
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
+                                    dir="ltr"
                                     className={`w-full bg-white border ${errors.costPrice ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 transition-all`}
                                     placeholder={txt.cost_price}
                                 />
@@ -730,10 +736,12 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                 <input
                                     value={formData.order}
                                     onChange={(e) => {
-                                        setFormData({ ...formData, order: e.target.value });
+                                        setFormData({ ...formData, order: toEnglishDigits(e.target.value) });
                                         if (errors.order) setErrors({ ...errors, order: false });
                                     }}
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
+                                    dir="ltr"
                                     className={`w-full bg-white border ${errors.order ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 transition-all`}
                                     placeholder={txt.order_placeholder}
                                 />
