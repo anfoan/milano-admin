@@ -1603,7 +1603,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     disabled={!(isAdminManager || workerPermissions.allowChangePayment)}
                                     className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
                                         paymentMethod === 'cash' 
-                                            ? 'border-green-500/60 bg-green-500/15 dark:bg-green-400/10 text-green-700 dark:text-green-300 font-black'
+                                            ? 'payment-method-selected border-green-500/60 bg-green-500/15 dark:bg-green-400/10 text-green-700 dark:text-green-300 font-black'
                                             : 'border-gray-200 dark:border-white/5 text-gray-400'
                                     } ${!(isAdminManager || workerPermissions.allowChangePayment) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >
@@ -1615,7 +1615,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     disabled={!(isAdminManager || workerPermissions.allowChangePayment)}
                                     className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
                                         paymentMethod === 'card' 
-                                            ? 'border-purple-500/60 bg-purple-500/15 dark:bg-purple-400/10 text-purple-700 dark:text-purple-300 font-black'
+                                            ? 'payment-method-selected border-purple-500/60 bg-purple-500/15 dark:bg-purple-400/10 text-purple-700 dark:text-purple-300 font-black'
                                             : 'border-gray-200 dark:border-white/5 text-gray-400'
                                     } ${!(isAdminManager || workerPermissions.allowChangePayment) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >
@@ -1627,7 +1627,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     disabled={!(isAdminManager || workerPermissions.allowChangePayment)}
                                     className={`py-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
                                         paymentMethod === 'transfer' 
-                                            ? 'border-cyan-500/60 bg-cyan-500/15 dark:bg-cyan-400/10 text-cyan-700 dark:text-cyan-300 font-black'
+                                            ? 'payment-method-selected border-cyan-500/60 bg-cyan-500/15 dark:bg-cyan-400/10 text-cyan-700 dark:text-cyan-300 font-black'
                                             : 'border-gray-200 dark:border-white/5 text-gray-400'
                                     } ${!(isAdminManager || workerPermissions.allowChangePayment) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                 >
