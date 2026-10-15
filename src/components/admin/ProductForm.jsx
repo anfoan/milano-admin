@@ -673,7 +673,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                     type="text"
                                     inputMode="numeric"
                                     dir="ltr"
-                                    className={`w-full bg-white border ${errors.price ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 transition-all`}
+                                    className={`w-full bg-white border ${errors.price ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 text-right transition-all`}
                                     placeholder={txt.price}
                                 />
                                 {formData.price && (
@@ -701,7 +701,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                     inputMode="numeric"
                                     dir="ltr"
                                     disabled={variants[0].values.length > 0}
-                                    className={`w-full bg-white border ${errors.stock ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 transition-all ${variants[0].values.length > 0 ? 'opacity-60 bg-gray-50 cursor-not-allowed' : ''}`}
+                                    className={`w-full bg-white border ${errors.stock ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 text-right transition-all ${variants[0].values.length > 0 ? 'opacity-60 bg-gray-50 cursor-not-allowed' : ''}`}
                                     placeholder={txt.stock}
                                 />
                                 {variants[0].values.length > 0 ? (
@@ -721,7 +721,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                     type="text"
                                     inputMode="numeric"
                                     dir="ltr"
-                                    className={`w-full bg-white border ${errors.costPrice ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 transition-all`}
+                                    className={`w-full bg-white border ${errors.costPrice ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 text-right transition-all`}
                                     placeholder={txt.cost_price}
                                 />
                                 {formData.costPrice && (
@@ -742,7 +742,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                     type="text"
                                     inputMode="numeric"
                                     dir="ltr"
-                                    className={`w-full bg-white border ${errors.order ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 transition-all`}
+                                    className={`w-full bg-white border ${errors.order ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 outline-none focus:border-blue-500 font-bold text-gray-900 placeholder-gray-400 text-right transition-all`}
                                     placeholder={txt.order_placeholder}
                                 />
                                 {errors.order && <p className="text-[10px] font-bold text-red-500 px-2 animate-in fade-in slide-in-from-top-1">حقل الترتيب مطلوب</p>}
