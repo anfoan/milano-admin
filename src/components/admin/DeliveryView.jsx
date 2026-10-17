@@ -349,7 +349,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                                 type="text"
                                                 value={region.deliveryDurationLabel ?? 'يوم'}
                                                 onChange={(e) => updateRegionText(region.id, 'deliveryDurationLabel', e.target.value)}
-                                                className="min-w-0 flex-1 bg-transparent border-none p-0 text-left text-white font-bold outline-none focus:ring-0"
+                                                className="min-w-0 flex-1 bg-transparent border-none p-0 text-center text-white font-bold outline-none focus:ring-0"
                                                 placeholder={lang === 'ar' ? 'كلمة' : 'Label'}
                                                 aria-label={lang === 'ar' ? 'كلمة مدة التوصيل' : 'Duration label'}
                                             />
