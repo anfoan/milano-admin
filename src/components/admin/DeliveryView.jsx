@@ -16,15 +16,15 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
         dynamicPricing: false,
         dynamicThreshold: 20,
         regions: [
-            { id: 1, name: 'صنعاء', cost: 1500 },
-            { id: 2, name: 'إب', cost: 1500 },
-            { id: 3, name: 'عدن', cost: 2000 },
-            { id: 4, name: 'تعز', cost: 2000 },
-            { id: 5, name: 'حضرموت', cost: 3000 },
-            { id: 6, name: 'شبوة', cost: 3000 },
-            { id: 7, name: 'ذمار', cost: 1500 },
-            { id: 8, name: 'عمران', cost: 1500 },
-            { id: 9, name: 'البيضاء', cost: 2500 }
+            { id: 1, name: 'صنعاء', cost: 1500, deliveryDuration: 1, deliveryDurationLabel: 'يوم' },
+            { id: 2, name: 'إب', cost: 1500, deliveryDuration: 1, deliveryDurationLabel: 'يوم' },
+            { id: 3, name: 'عدن', cost: 2000, deliveryDuration: 1, deliveryDurationLabel: 'يوم' },
+            { id: 4, name: 'تعز', cost: 2000, deliveryDuration: 1, deliveryDurationLabel: 'يوم' },
+            { id: 5, name: 'حضرموت', cost: 3000, deliveryDuration: 1, deliveryDurationLabel: 'يوم' },
+            { id: 6, name: 'شبوة', cost: 3000, deliveryDuration: 1, deliveryDurationLabel: 'يوم' },
+            { id: 7, name: 'ذمار', cost: 1500, deliveryDuration: 1, deliveryDurationLabel: 'يوم' },
+            { id: 8, name: 'عمران', cost: 1500, deliveryDuration: 1, deliveryDurationLabel: 'يوم' },
+            { id: 9, name: 'البيضاء', cost: 2500, deliveryDuration: 1, deliveryDurationLabel: 'يوم' }
         ]
     });
     const [loading, setLoading] = useState(false);
@@ -49,7 +49,8 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
             threshold_hint: "شريحتان: أقل من الحد والحد فأعلى",
             regions_title: "المناطق والمدن",
             add_region: "إضافة منطقة",
-            region_col: "المناطق",
+            region_col: "المنطقة",
+            duration_col: "مدة التوصيل التقريبية",
             price_less_than: "سعر أقل من",
             price_more_than: "سعر أكبر من",
             office_fee: `رسوم المكتب (${getLocalizedCurrency(generalSettings?.currency || 'YER', 'ar')})`,
@@ -83,7 +84,8 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
             threshold_hint: "Two tiers: Below threshold and Above threshold",
             regions_title: "Regions & Cities",
             add_region: "Add Region",
-            region_col: "Regions",
+            region_col: "Region",
+            duration_col: "Approximate Delivery Duration",
             price_less_than: "Price < ",
             price_more_than: "Price >= ",
             office_fee: `Office Fee (${getLocalizedCurrency(generalSettings?.currency || 'YER', 'en')})`,
@@ -151,6 +153,13 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
         setSettings({ ...settings, regions: updatedRegions });
     };
 
+    const updateRegionText = (id, field, value) => {
+        const updatedRegions = settings.regions.map(r =>
+            r.id === id ? { ...r, [field]: value } : r
+        );
+        setSettings({ ...settings, regions: updatedRegions });
+    };
+
     const removeRegion = (id) => {
         if (!window.confirm(txt.delete_confirm)) return;
         setSettings({ ...settings, regions: settings.regions.filter(r => r.id !== id) });
@@ -166,7 +175,9 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
             cost: 1500,
             officeCost: 1500,
             costLessThan: 1500,
-            costGreaterThan: 1500
+            costGreaterThan: 1500,
+            deliveryDuration: 1,
+            deliveryDurationLabel: 'يوم'
         };
         setSettings({ ...settings, regions: [...settings.regions, newRegion] });
         setNewRegionName('');
@@ -291,6 +302,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                         <thead>
                             <tr className="border-b border-gray-50 text-gray-400 text-xs font-black uppercase">
                                 <th className={`px-8 py-5 ${isRTL ? 'text-right' : 'text-left'} w-1/4`}>{txt.region_col}</th>
+                                <th className="px-6 py-5 text-center whitespace-nowrap">{txt.duration_col}</th>
                                 {settings.dynamicPricing ? (
                                     <>
                                         <th className="px-8 py-5 text-center">{txt.price_less_than} {settings.dynamicThreshold || '-'}</th>
@@ -319,6 +331,27 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                             className="w-[65%] h-6 ml-auto mr-0 block bg-transparent border-none p-0 font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
                                             placeholder={txt.region_name_placeholder}
                                         />
+                                    </td>
+
+                                    <td className="px-6 py-4 text-center">
+                                        <div className="w-full max-w-[190px] mx-auto h-8 bg-black rounded-md px-2 flex items-center gap-2" dir="rtl">
+                                            <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                value={toEnglishDigits(region.deliveryDuration ?? 1)}
+                                                onChange={(e) => updateRegionCost(region.id, 'deliveryDuration', toEnglishDigits(e.target.value))}
+                                                className="w-12 bg-transparent border-none p-0 text-center text-white font-bold font-mono outline-none focus:ring-0"
+                                                aria-label={txt.duration_col}
+                                            />
+                                            <input
+                                                type="text"
+                                                value={region.deliveryDurationLabel ?? 'يوم'}
+                                                onChange={(e) => updateRegionText(region.id, 'deliveryDurationLabel', e.target.value)}
+                                                className="min-w-0 flex-1 bg-transparent border-none p-0 text-left text-white font-bold outline-none focus:ring-0"
+                                                placeholder={lang === 'ar' ? 'كلمة' : 'Label'}
+                                                aria-label={lang === 'ar' ? 'كلمة مدة التوصيل' : 'Duration label'}
+                                            />
+                                        </div>
                                     </td>
 
                                     {settings.freeDeliveryAll ? (
