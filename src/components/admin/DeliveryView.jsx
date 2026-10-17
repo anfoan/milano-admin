@@ -7,6 +7,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 
 const DeliveryView = ({ lang = 'ar', generalSettings }) => {
+    const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
     const [settings, setSettings] = useState({
         freeDeliveryAll: false,
         splitFees: false,
@@ -315,7 +316,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                             maxLength={50}
                                             value={region.name}
                                             onChange={(e) => updateRegionName(region.id, e.target.value)}
-                                            className="w-full bg-transparent border-none p-0 font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
+                                            className="w-[96%] h-7 bg-transparent border-none p-0 font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
                                             placeholder={txt.region_name_placeholder}
                                         />
                                     </td>
@@ -334,7 +335,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                                         <input
                                                             type="number"
                                                             min="0"
-                                                            value={region.costLessThan}
+                                                            value={toEnglishDigits(region.costLessThan)}
                                                             onChange={(e) => updateRegionCost(region.id, 'costLessThan', e.target.value)}
                                                             className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                             placeholder={txt.price_less_than}
@@ -344,7 +345,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                                         <input
                                                             type="number"
                                                             min="0"
-                                                            value={region.costGreaterThan}
+                                                            value={toEnglishDigits(region.costGreaterThan)}
                                                             onChange={(e) => updateRegionCost(region.id, 'costGreaterThan', e.target.value)}
                                                             className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                             placeholder={txt.price_more_than}
@@ -357,7 +358,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                                         <input
                                                             type="number"
                                                             min="0"
-                                                            value={region.officeCost}
+                                                            value={toEnglishDigits(region.officeCost)}
                                                             onChange={(e) => updateRegionCost(region.id, 'officeCost', e.target.value)}
                                                             className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                             placeholder={txt.office_placeholder}
@@ -367,7 +368,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                                         <input
                                                             type="number"
                                                             min="0"
-                                                            value={region.cost}
+                                                            value={toEnglishDigits(region.cost)}
                                                             onChange={(e) => updateRegionCost(region.id, 'cost', e.target.value)}
                                                             className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                             placeholder={txt.home_placeholder}
@@ -379,7 +380,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                                     <input
                                                         type="number"
                                                         min="0"
-                                                        value={region.cost}
+                                                        value={toEnglishDigits(region.cost)}
                                                         onChange={(e) => updateRegionCost(region.id, 'cost', e.target.value)}
                                                         className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                         placeholder="0"
