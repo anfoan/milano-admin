@@ -336,7 +336,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                     </td>
 
                                     <td className="px-6 py-4 text-center">
-                                        <div className="w-full max-w-[190px] mx-auto h-8 bg-black rounded-md px-2 flex items-center gap-2" dir="rtl">
+                                        <div className="w-full max-w-[160px] mx-auto h-8 bg-black rounded-md px-2 flex items-center gap-2" dir="rtl">
                                             <input
                                                 type="text"
                                                 inputMode="numeric"
