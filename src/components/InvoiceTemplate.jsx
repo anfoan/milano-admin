@@ -46,7 +46,7 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
             <div className="flex justify-center pb-20 print:p-0 print:block">
                 <div ref={ref} className="print-container">
                     <style type="text/css" media="screen">
-                        {`.invoice-preview-page { width: min(170mm, calc(100vw - 2rem)) !important; max-width: min(170mm, calc(100vw - 2rem)) !important; min-height: 0 !important; height: auto !important; box-sizing: border-box; overflow: visible !important; } .invoice-preview-page table { width: 100%; table-layout: fixed; } .invoice-preview-page table th { white-space: nowrap !important; font-size: 11px !important; } .invoice-preview-page table td { font-size: 11px !important; line-height: 1.25 !important; } .invoice-preview-page table col:nth-child(1) { width: 43% !important; } .invoice-preview-page table col:nth-child(2) { width: 10% !important; } .invoice-preview-page table col:nth-child(3) { width: 20% !important; } .invoice-preview-page table col:nth-child(4) { width: 9% !important; } .invoice-preview-page table col:nth-child(5) { width: 18% !important; } @media (max-width: 639px) { .invoice-preview-page { width: calc(100vw - 2rem) !important; max-width: calc(100vw - 2rem) !important; } .invoice-preview-page table th, .invoice-preview-page table td { font-size: 9px !important; } }`}
+                        {`.invoice-preview-page { width: min(170mm, calc(100vw - 2rem)) !important; max-width: min(170mm, calc(100vw - 2rem)) !important; min-height: 0 !important; height: auto !important; box-sizing: border-box; overflow: visible !important; } .invoice-preview-page .invoice-items-table { width: 100%; table-layout: fixed; } .invoice-preview-page .invoice-items-table th { white-space: nowrap !important; font-size: 11px !important; } .invoice-preview-page .invoice-items-table td { font-size: 11px !important; line-height: 1.25 !important; } .invoice-preview-page .invoice-items-table col:nth-child(1) { width: 40% !important; } .invoice-preview-page .invoice-items-table col:nth-child(2) { width: 10% !important; } .invoice-preview-page .invoice-items-table col:nth-child(3) { width: 18% !important; } .invoice-preview-page .invoice-items-table col:nth-child(4) { width: 8% !important; } .invoice-preview-page .invoice-items-table col:nth-child(5) { width: 24% !important; } @media (max-width: 639px) { .invoice-preview-page { width: calc(100vw - 2rem) !important; max-width: calc(100vw - 2rem) !important; } .invoice-preview-page .invoice-items-table th, .invoice-preview-page .invoice-items-table td { font-size: 9px !important; } }`}
                     </style>
                     <style type="text/css" media="print">
                         {`
@@ -158,13 +158,13 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                             {/* 3. Products Table */}
                             <div className="mb-5">
                                 <h3 className={`font-black text-lg sm:text-xl mb-3 text-gray-800 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? 'تفاصيل الفاتورة' : 'Invoice Details'}</h3>
-                                <table className={`w-full table-fixed ${lang === 'ar' ? 'text-right' : 'text-left'} border-collapse border border-gray-400`} style={{ tableLayout: 'fixed' }}>
+                                <table className={`invoice-items-table w-full table-fixed ${lang === 'ar' ? 'text-right' : 'text-left'} border-collapse border border-gray-400`} style={{ tableLayout: 'fixed' }}>
                                     <colgroup>
-                                        <col style={{ width: '43%' }} /><col style={{ width: '10%' }} /><col style={{ width: '20%' }} /><col style={{ width: '9%' }} /><col style={{ width: '18%' }} />
+                                        <col style={{ width: '40%' }} /><col style={{ width: '10%' }} /><col style={{ width: '18%' }} /><col style={{ width: '8%' }} /><col style={{ width: '24%' }} />
                                     </colgroup>
                                     <thead style={{ backgroundColor: '#111317', color: '#ffffff' }} className="bg-[#111317] text-white print:bg-[#111317] print:text-white">
                                         <tr>
-                                            <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className={`text-sm font-bold border-l border-gray-500 w-[48%] ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? 'اسم المنتج' : 'Item'}</th>
+                                            <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className={`text-sm font-bold border-l border-gray-500 ${lang === 'ar' ? 'text-right' : 'text-left'}`}><span className="inline-block -translate-x-2">{lang === 'ar' ? 'اسم المنتج' : 'Item'}</span></th>
                                             <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-xs sm:text-sm font-bold text-center border-l border-gray-500 w-[10%] whitespace-nowrap">{lang === 'ar' ? 'المقاس' : 'Size'}</th>
                                             <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-xs sm:text-sm font-bold text-center border-l border-gray-500 w-[20%] whitespace-nowrap">{lang === 'ar' ? 'سعر الحبه' : 'Unit Price'}</th>
                                             <th style={{ padding: '10px 8px', verticalAlign: 'middle', color: '#ffffff', backgroundColor: '#111317' }} className="text-xs sm:text-sm font-bold text-center border-l border-gray-500 w-[9%] whitespace-nowrap">{lang === 'ar' ? 'الكمية' : 'Qty'}</th>
@@ -212,8 +212,10 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                                 <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-bold text-gray-600 border-l border-gray-400">
                                                     <span>{item.quantity || 1}</span>
                                                 </td>
-                                                <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-black text-[#111317] whitespace-nowrap">
-                                                    <span>{formatPrice(itemPrices.discounted * (item.quantity || 1), itemCurrency)}</span>
+                                                <td style={{ padding: '8px 6px', verticalAlign: 'middle' }} className="text-center text-xs font-black text-[#111317] whitespace-nowrap">
+                                                    <div className="flex min-h-[55px] w-full items-center justify-center">
+                                                        <span>{formatPrice(itemPrices.discounted * (item.quantity || 1), itemCurrency)}</span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             );

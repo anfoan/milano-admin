@@ -760,6 +760,7 @@ printWindow.onload = () => printWindow.print();
                         .print-page {
                             box-shadow: none !important; border: 0 !important; border-radius: 0 !important;
                             margin: 0 auto !important; width: 170mm !important; min-height: 0 !important;
+                            padding: 24px 32px !important;
                         }
                     }
                 </style></head><body>
