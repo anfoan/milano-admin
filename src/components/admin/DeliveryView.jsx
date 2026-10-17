@@ -301,7 +301,9 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                     <table className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
                         <thead>
                             <tr className="border-b border-gray-50 text-gray-400 text-xs font-black uppercase">
-                                <th className="px-8 py-5 text-center w-1/4">{txt.region_col}</th>
+                                <th className="px-8 py-5 w-1/4">
+                                    <div className="w-[55%] ml-auto mr-0 text-center">{txt.region_col}</div>
+                                </th>
                                 <th className="px-6 py-5 text-center whitespace-nowrap">{txt.duration_col}</th>
                                 {settings.dynamicPricing ? (
                                     <>
