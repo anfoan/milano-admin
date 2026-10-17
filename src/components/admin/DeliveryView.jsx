@@ -301,7 +301,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                     <table className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
                         <thead>
                             <tr className="border-b border-gray-50 text-gray-400 text-xs font-black uppercase">
-                                <th className={`px-8 py-5 ${isRTL ? 'text-right' : 'text-left'} w-1/4`}>{txt.region_col}</th>
+                                <th className="px-8 py-5 text-center w-1/4">{txt.region_col}</th>
                                 <th className="px-6 py-5 text-center whitespace-nowrap">{txt.duration_col}</th>
                                 {settings.dynamicPricing ? (
                                     <>
@@ -328,7 +328,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                             maxLength={50}
                                             value={region.name}
                                             onChange={(e) => updateRegionName(region.id, e.target.value)}
-                                            className="w-[65%] h-6 ml-auto mr-0 block bg-transparent border-none p-0 font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
+                                            className="w-[55%] h-5 ml-auto mr-0 block bg-transparent border-none p-0 text-center font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
                                             placeholder={txt.region_name_placeholder}
                                         />
                                     </td>
