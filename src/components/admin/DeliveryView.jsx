@@ -316,7 +316,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                             maxLength={50}
                                             value={region.name}
                                             onChange={(e) => updateRegionName(region.id, e.target.value)}
-                                            className="w-[90%] h-6 bg-transparent border-none p-0 font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
+                                            className="w-[80%] h-6 bg-transparent border-none p-0 font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
                                             placeholder={txt.region_name_placeholder}
                                         />
                                     </td>
