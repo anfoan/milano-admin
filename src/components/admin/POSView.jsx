@@ -868,7 +868,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                           ${generalSettings?.storeAddress ? `<div class="store-info">${isRTL ? 'العنوان : ' : 'Address: '}${generalSettings.storeAddress}</div>` : ''}
                           ${generalSettings?.phoneNumber ? `<div class="store-info">${isRTL ? 'الهاتف : ' : 'Phone: '}${generalSettings.phoneNumber}</div>` : ''}
                       </div>
-                      <img class="store-logo" src="${generalSettings?.storeLogo || '/logo-icon.jpg'}" alt="شعار المحل" onerror="this.style.display='none'" />
+                      <img class="store-logo" src="${generalSettings?.profileImage || generalSettings?.storeLogo || '/logo-icon.jpg'}" alt="شعار المحل" onerror="this.style.display='none'" />
                   </div>
 
                   <h1 class="report-title">${isRTL ? 'ملخص مبيعات نقطة البيع' : 'POS Sales Report'}</h1>

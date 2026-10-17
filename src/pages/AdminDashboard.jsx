@@ -107,7 +107,7 @@ const AdminDashboard = () => {
         const unsubscribeImages = onSnapshot(doc(db, "settings", "images"), (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                setGeneralSettings(prev => ({ ...prev, invoiceLogo: data.invoiceLogo || prev.invoiceLogo || '', adminImage: data.adminImage || prev.adminImage || '', navLogo: data.navLogo || prev.navLogo || '' }));
+                setGeneralSettings(prev => ({ ...prev, profileImage: data.profileImage || prev.profileImage || '', invoiceLogo: data.invoiceLogo || prev.invoiceLogo || '', adminImage: data.adminImage || prev.adminImage || '', navLogo: data.navLogo || prev.navLogo || '' }));
             }
         });
         const unsubscribeBranding = onSnapshot(doc(db, "settings", "branding"), (docSnap) => {
