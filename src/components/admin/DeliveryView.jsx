@@ -316,7 +316,7 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                             maxLength={50}
                                             value={region.name}
                                             onChange={(e) => updateRegionName(region.id, e.target.value)}
-                                            className="w-[96%] h-7 bg-transparent border-none p-0 font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
+                                            className="w-[90%] h-6 bg-transparent border-none p-0 font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
                                             placeholder={txt.region_name_placeholder}
                                         />
                                     </td>
@@ -333,20 +333,22 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                                 <>
                                                     <td className="px-8 py-4 text-center">
                                                         <input
-                                                            type="number"
+                                                            type="text"
+                                                            inputMode="numeric"
                                                             min="0"
                                                             value={toEnglishDigits(region.costLessThan)}
-                                                            onChange={(e) => updateRegionCost(region.id, 'costLessThan', e.target.value)}
+                                                            onChange={(e) => updateRegionCost(region.id, 'costLessThan', toEnglishDigits(e.target.value))}
                                                             className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                             placeholder={txt.price_less_than}
                                                         />
                                                     </td>
                                                     <td className="px-8 py-4 text-center">
                                                         <input
-                                                            type="number"
+                                                            type="text"
+                                                            inputMode="numeric"
                                                             min="0"
                                                             value={toEnglishDigits(region.costGreaterThan)}
-                                                            onChange={(e) => updateRegionCost(region.id, 'costGreaterThan', e.target.value)}
+                                                            onChange={(e) => updateRegionCost(region.id, 'costGreaterThan', toEnglishDigits(e.target.value))}
                                                             className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                             placeholder={txt.price_more_than}
                                                         />
@@ -356,20 +358,22 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                                 <>
                                                     <td className="px-8 py-4 text-center">
                                                         <input
-                                                            type="number"
+                                                            type="text"
+                                                            inputMode="numeric"
                                                             min="0"
                                                             value={toEnglishDigits(region.officeCost)}
-                                                            onChange={(e) => updateRegionCost(region.id, 'officeCost', e.target.value)}
+                                                            onChange={(e) => updateRegionCost(region.id, 'officeCost', toEnglishDigits(e.target.value))}
                                                             className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                             placeholder={txt.office_placeholder}
                                                         />
                                                     </td>
                                                     <td className="px-8 py-4 text-center">
                                                         <input
-                                                            type="number"
+                                                            type="text"
+                                                            inputMode="numeric"
                                                             min="0"
                                                             value={toEnglishDigits(region.cost)}
-                                                            onChange={(e) => updateRegionCost(region.id, 'cost', e.target.value)}
+                                                            onChange={(e) => updateRegionCost(region.id, 'cost', toEnglishDigits(e.target.value))}
                                                             className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                             placeholder={txt.home_placeholder}
                                                         />
@@ -378,10 +382,11 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                             ) : (
                                                 <td className="px-8 py-4 text-center">
                                                     <input
-                                                        type="number"
+                                                        type="text"
+                                                        inputMode="numeric"
                                                         min="0"
                                                         value={toEnglishDigits(region.cost)}
-                                                        onChange={(e) => updateRegionCost(region.id, 'cost', e.target.value)}
+                                                        onChange={(e) => updateRegionCost(region.id, 'cost', toEnglishDigits(e.target.value))}
                                                         className="w-full max-w-[150px] px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono mx-auto"
                                                         placeholder="0"
                                                     />
