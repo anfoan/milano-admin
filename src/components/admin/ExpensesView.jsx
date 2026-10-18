@@ -1508,7 +1508,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 <th className="px-3 py-2.5 text-start">{isRTL ? 'بند المصروفات' : 'Expense item'}</th>
                                 <th className="px-3 py-2.5 text-start"><span className="relative -left-8">{isRTL ? 'التصنيف' : 'Category'}</span></th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap"><span className="relative -left-4">{isRTL ? 'التاريخ' : 'Date'}</span></th>
-                                <th className="px-3 py-2.5 text-start whitespace-nowrap"><span className="relative -left-8">{isRTL ? 'طريقة الدفع' : 'Payment method'}</span></th>
+                                <th className="w-[140px] px-3 py-2.5 text-start whitespace-nowrap"><span className="relative -left-8">{isRTL ? 'طريقة الدفع' : 'Payment method'}</span></th>
                                 <th className="px-3 py-2.5 text-end whitespace-nowrap"><span className="relative -right-5">{isRTL ? 'مبلغ المصروف' : 'Expense amount'}</span></th>
                                 <th className="px-3 py-2.5 text-center">{isRTL ? 'إجراءات' : 'Actions'}</th>
                             </tr>
@@ -1524,7 +1524,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                         </span>
                                     </td>
                                     <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap"><span className="relative -left-2">{toEnglishDigits(expense.date)}</span></td>
-                                    <td className="px-3 py-2.5 text-start whitespace-nowrap"><span className={`relative -left-3 inline-flex rounded-full px-2 py-0.5 text-xs font-black ${getPaymentClass(expense.paymentMethod)}`}>{getPaymentLabel(expense.paymentMethod)}</span></td>
+                                    <td className="w-[140px] px-3 py-2.5 text-start whitespace-nowrap"><span className={`relative -left-3 inline-flex min-w-[116px] justify-center rounded-full px-2 py-0.5 text-xs font-black ${getPaymentClass(expense.paymentMethod)}`}>{getPaymentLabel(expense.paymentMethod)}</span></td>
                                     <td className="px-3 py-2.5 text-end font-extrabold text-red-500 dark:text-red-400 whitespace-nowrap"><span className="relative -right-2">
                                         {expense.amount.toLocaleString()} {getCurrencyLabel(expense.currency || currency)}
                                     </span>
