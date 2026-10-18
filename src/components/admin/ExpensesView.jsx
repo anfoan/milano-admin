@@ -1736,7 +1736,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap transform -translate-x-2">{isRTL ? 'النوع' : 'Type'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap transform -translate-x-3">{isRTL ? 'التاريخ' : 'Date'}</th>
                                 <th className="w-[140px] px-3 py-2.5 text-start whitespace-nowrap"><span className="inline-block transform -translate-x-4">{isRTL ? 'طريقة الدفع' : 'Payment method'}</span></th>
-                                <th className="w-[150px] px-3 py-2.5 text-end whitespace-nowrap"><span className="inline-block transform translate-x-8">{isRTL ? 'مبلغ السند' : 'Bond amount'}</span></th>
+                                <th className="w-[150px] px-3 py-2.5 text-end whitespace-nowrap"><span className="inline-block transform translate-x-10">{isRTL ? 'مبلغ السند' : 'Bond amount'}</span></th>
                                 <th className="px-3 py-2.5 text-center">{isRTL ? 'إجراءات' : 'Actions'}</th>
                             </tr>
                         </thead>
