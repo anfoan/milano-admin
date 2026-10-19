@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Paperclip, ArrowRight, ArrowLeft, Settings, X, Search, Image as ImageIcon } from 'lucide-react';
+import { Send, Paperclip, ArrowRight, ArrowLeft, PhoneOff, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, getDoc, orderBy, limit } from 'firebase/firestore';
 import { uploadChatMedia } from '../../services/uploadService';
@@ -10,7 +10,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
     const [chatDetails, setChatDetails] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [showSettings, setShowSettings] = useState(false);
+    const [showCloseConfirm, setShowCloseConfirm] = useState(false);
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
 
@@ -20,6 +20,9 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
             online: "متصل الآن",
             settings_title: "الإعدادات",
             close_chat: "إغلاق المحادثة",
+            confirm_close: "هل تريد إغلاق المحادثة؟",
+            yes: "نعم",
+            no: "لا",
             loading_msgs: "جاري تحميل المحادثة...",
             uploading: "جاري رفع الملف...",
             closed_msg: "تم إغلاق هذه المحادثة ولا يمكن إرسال رسائل جديدة",
@@ -31,6 +34,9 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
             online: "Online",
             settings_title: "Settings",
             close_chat: "Close Chat",
+            confirm_close: "Do you want to close this chat?",
+            yes: "Yes",
+            no: "No",
             loading_msgs: "Loading chat...",
             uploading: "Uploading file...",
             closed_msg: "This chat is closed and cannot receive new messages",
@@ -152,7 +158,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
         try {
             await updateDoc(doc(db, "contact_messages", chatId), { status: 'closed' });
             setChatDetails(previous => previous ? { ...previous, status: 'closed' } : previous);
-            setShowSettings(false);
+            setShowCloseConfirm(false);
         } catch (error) {
             console.error("Error closing chat:", error);
         }
@@ -185,27 +191,43 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                 <div className="flex items-center gap-2 relative">
 
                     <button
-                        onClick={() => setShowSettings(!showSettings)}
-                        className={`p - 2.5 transition - colors rounded - xl ${showSettings ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-blue-500'} `}
-                        title={txt.settings_title}
+                        onClick={() => setShowCloseConfirm(true)}
+                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-md shadow-red-500/20 transition-all active:scale-95"
+                        title={txt.close_chat}
+                        aria-label={txt.close_chat}
                     >
-                        <Settings size={20} />
+                        <PhoneOff size={20} />
                     </button>
-
-                    {/* Settings Dropdown */}
-                    {showSettings && (
-                        <div className={`absolute top - full ${isRTL ? 'left-0' : 'right-0'} mt - 2 w - 48 bg - white dark: bg - zinc - 800 rounded - 2xl shadow - xl border border - gray - 100 dark: border - white / 5 overflow - hidden z - 50`}>
-                            <button
-                                onClick={handleCloseChat}
-                                className={`w - full ${isRTL ? 'text-right' : 'text-left'} px - 4 py - 3 text - red - 500 hover: bg - red - 50 dark: hover: bg - red - 500 / 10 transition - colors text - sm font - bold flex items - center gap - 2`}
-                            >
-                                <X size={16} />
-                                {txt.close_chat}
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
+
+            {showCloseConfirm && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
+                    <div className="w-full max-w-xs rounded-2xl bg-white dark:bg-zinc-900 p-5 text-center shadow-2xl border border-gray-100 dark:border-white/10">
+                        <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-500 dark:bg-red-500/10">
+                            <PhoneOff size={21} />
+                        </div>
+                        <h3 className="text-base font-black text-gray-900 dark:text-white">{txt.close_chat}</h3>
+                        <p className="mt-1 text-xs font-bold text-gray-500 dark:text-gray-400">{txt.confirm_close}</p>
+                        <div className="mt-5 flex items-center justify-center gap-3" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <button
+                                type="button"
+                                onClick={handleCloseChat}
+                                className="rounded-xl bg-red-500 px-5 py-2 text-sm font-black text-white transition-colors hover:bg-red-600"
+                            >
+                                {txt.yes}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowCloseConfirm(false)}
+                                className="rounded-xl bg-gray-100 px-5 py-2 text-sm font-black text-gray-700 transition-colors hover:bg-gray-200 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/15"
+                            >
+                                {txt.no}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Messages Area */}
             <div className="chat-dot-pattern flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide bg-[#f0f2f5] dark:bg-[#0a0a0b]">
