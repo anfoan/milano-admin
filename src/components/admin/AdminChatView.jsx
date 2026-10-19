@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Paperclip, ArrowRight, ArrowLeft, PhoneOff, X } from 'lucide-react';
+import { Send, Paperclip, ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, getDoc, orderBy, limit } from 'firebase/firestore';
 import { uploadChatMedia } from '../../services/uploadService';
@@ -196,7 +196,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                         title={txt.close_chat}
                         aria-label={txt.close_chat}
                     >
-                        <PhoneOff size={20} />
+                        <img src="/chat-close-icon.jfif" alt="" className="h-6 w-6 rounded-md object-cover" />
                     </button>
                 </div>
             </div>
@@ -205,7 +205,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
                     <div className="w-full max-w-xs rounded-2xl bg-white dark:bg-zinc-900 p-5 text-center shadow-2xl border border-gray-100 dark:border-white/10">
                         <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-500 dark:bg-red-500/10">
-                            <PhoneOff size={21} />
+                            <img src="/chat-close-icon.jfif" alt="" className="h-7 w-7 rounded-lg object-cover" />
                         </div>
                         <h3 className="text-base font-black text-gray-900 dark:text-white">{txt.close_chat}</h3>
                         <p className="mt-1 text-xs font-bold text-gray-500 dark:text-gray-400">{txt.confirm_close}</p>
