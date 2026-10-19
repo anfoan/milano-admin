@@ -165,7 +165,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
     };
 
     return (
-        <div className="h-[calc(100vh-140px)] flex flex-col bg-gray-50 dark:bg-zinc-950 font-['Cairo'] overflow-hidden rounded-[32px] border border-gray-100 dark:border-white/5 shadow-sm relative" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="h-[calc(100vh-100px)] flex flex-col bg-gray-50 dark:bg-zinc-950 font-['Cairo'] overflow-hidden rounded-[32px] border border-gray-100 dark:border-white/5 shadow-sm relative" dir={isRTL ? "rtl" : "ltr"}>
 
             {/* Header */}
             <div className="bg-white dark:bg-zinc-900 px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between shadow-sm z-10">
