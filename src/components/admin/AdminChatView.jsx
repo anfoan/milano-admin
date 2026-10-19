@@ -151,6 +151,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
         if (!chatId) return;
         try {
             await updateDoc(doc(db, "contact_messages", chatId), { status: 'closed' });
+            setChatDetails(previous => previous ? { ...previous, status: 'closed' } : previous);
             setShowSettings(false);
         } catch (error) {
             console.error("Error closing chat:", error);
