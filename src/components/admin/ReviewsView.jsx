@@ -30,6 +30,8 @@ const ReviewsView = ({ lang = 'ar' }) => {
             cancel: "إلغاء",
             delete_confirm: "هل أنت متأكد من حذف هذا التقييم؟",
             delete_success: "تم الحذف بنجاح",
+            reply_delete_confirm: "هل أنت متأكد من حذف رد المدير فقط؟",
+            reply_delete_success: "تم حذف رد المدير بنجاح",
             reply_success: "تم حفظ الرد بنجاح",
             error: "حدث خطأ",
             missing_reply: "يرجى كتابة نص الرد",
@@ -51,6 +53,8 @@ const ReviewsView = ({ lang = 'ar' }) => {
             cancel: "Cancel",
             delete_confirm: "Are you sure you want to delete this review?",
             delete_success: "Deleted successfully",
+            reply_delete_confirm: "Are you sure you want to delete the store reply only?",
+            reply_delete_success: "Store reply deleted successfully",
             reply_success: "Reply saved successfully",
             error: "An error occurred",
             missing_reply: "Please enter a reply message",
@@ -119,6 +123,17 @@ const ReviewsView = ({ lang = 'ar' }) => {
         }
     };
 
+    const deleteReply = async (id) => {
+        if (!window.confirm(txt.reply_delete_confirm)) return;
+        try {
+            await updateDoc(doc(db, "reviews", id), { replyText: '' });
+            alert(txt.reply_delete_success);
+        } catch (error) {
+            console.error("Error deleting store reply:", error);
+            alert(txt.error);
+        }
+    };
+
     return (
         <div className="space-y-6 font-['Cairo']" dir={isRTL ? "rtl" : "ltr"}>
             <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
@@ -164,8 +179,17 @@ const ReviewsView = ({ lang = 'ar' }) => {
                                         <td className="p-4">
                                             <p className="text-gray-600 text-sm leading-relaxed max-w-lg">{review.message}</p>
                                             {review.replyText && (
-                                                <div className="mt-2 text-xs bg-blue-50 text-blue-800 p-2 rounded-lg border border-blue-100">
-                                                    <span className="font-bold">{txt.reply_label} </span> {review.replyText}
+                                                <div className="relative mt-2 flex items-start justify-between gap-2 text-xs bg-blue-50 text-blue-800 p-2 rounded-lg border border-blue-100">
+                                                    <span><span className="font-bold">{txt.reply_label} </span>{review.replyText}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => deleteReply(review.id)}
+                                                        className="shrink-0 inline-flex h-6 w-6 items-center justify-center rounded-md bg-red-600 text-white shadow-sm transition-colors hover:bg-red-700 active:scale-95"
+                                                        title={isRTL ? 'حذف رد المدير' : 'Delete store reply'}
+                                                        aria-label={isRTL ? 'حذف رد المدير' : 'Delete store reply'}
+                                                    >
+                                                        <Trash2 size={13} strokeWidth={2.5} />
+                                                    </button>
                                                 </div>
                                             )}
                                         </td>
