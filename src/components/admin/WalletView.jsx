@@ -134,7 +134,7 @@ const WalletView = ({ generalSettings }) => {
 
     useEffect(() => {
         if (!notice.startsWith('لن يتم إيداع مكافأة العميل')) return undefined;
-        const timeout = window.setTimeout(() => setNotice(''), 10000);
+        const timeout = window.setTimeout(() => setNotice(''), 15000);
         return () => window.clearTimeout(timeout);
     }, [notice]);
 
