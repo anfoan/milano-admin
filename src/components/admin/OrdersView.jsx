@@ -758,10 +758,11 @@ printWindow.onload = () => printWindow.print();
                         .print-toolbar { display: none !important; }
                         .print-container { padding: 0 !important; }
                         .print-page {
-                            box-shadow: 0 10px 30px rgba(15,23,42,.18) !important;
-                            border: 1px solid #e5e7eb !important; border-radius: 24px !important;
-                            margin: 0 !important; width: 210mm !important; min-height: 0 !important;
-                            padding: 24px 32px !important; height: auto !important;
+                            box-shadow: none !important;
+                            border: 0 !important; border-radius: 0 !important;
+                            margin: 0 !important; width: 210mm !important; min-height: 297mm !important;
+                            padding: 24px 32px !important; height: 297mm !important;
+                            justify-content: space-between !important;
                         }
                     }
                 </style></head><body>

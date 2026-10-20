@@ -56,8 +56,8 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                         .print-container { width: 100%; }
                         .print-page {
                             width: 210mm;
-                            min-height: 0;
-                            height: auto;
+                            min-height: 297mm;
+                            height: 297mm;
                             padding: 24px 32px !important;
                             margin: 0 auto;
                             page-break-after: always;
@@ -66,10 +66,10 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                             font-family: 'Cairo', sans-serif;
                             position: relative;
                             direction: rtl;
-                            border: 1px solid #e5e7eb;
-                            border-radius: 24px;
-                            box-shadow: 0 10px 30px rgba(15,23,42,.18);
+                            border: 0;
+                            border-radius: 0;
                             box-shadow: none;
+                            justify-content: space-between;
                             overflow: hidden;
                         }
                         .print-page:last-child { page-break-after: auto; }
