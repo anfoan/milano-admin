@@ -133,6 +133,12 @@ const WalletView = ({ generalSettings }) => {
     };
 
     useEffect(() => {
+        if (!notice.startsWith('لن يتم إيداع مكافأة العميل')) return undefined;
+        const timeout = window.setTimeout(() => setNotice(''), 5000);
+        return () => window.clearTimeout(timeout);
+    }, [notice]);
+
+    useEffect(() => {
         // Preserve a complete customer-facing archive for every existing storefront
         // invoice. The signature prevents unchanged snapshot data from rewriting it.
         orders.filter(isStorefrontInvoice).forEach(order => {
