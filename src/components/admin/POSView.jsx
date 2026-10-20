@@ -1399,13 +1399,13 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     <img 
                                                         src={product.mainImage} 
                                                         alt={product.name} 
-                                                        className="w-full h-full object-cover scale-[1.18] group-hover:scale-110 transition-transform duration-300"
+                                                        className="w-full h-full object-cover scale-[1.25] group-hover:scale-110 transition-transform duration-300"
                                                     />
                                                 ) : (
                                                     <ShoppingCart size={32} className="text-gray-300" />
                                                 )}
                                                 {hasDiscount && (
-                                                    <span className="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md shadow-sm">
+                                                    <span className="absolute top-2 right-1 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md shadow-sm">
                                                         {isRTL ? `خصم ${product.discount}%` : `Discount ${product.discount}%`}
                                                     </span>
                                                 )}
