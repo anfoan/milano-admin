@@ -1399,7 +1399,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     <img 
                                                         src={product.mainImage} 
                                                         alt={product.name} 
-                                                        className="w-full h-full object-cover scale-[1.12] group-hover:scale-110 transition-transform duration-300"
+                                                        className="w-full h-full object-cover scale-[1.18] group-hover:scale-110 transition-transform duration-300"
                                                     />
                                                 ) : (
                                                     <ShoppingCart size={32} className="text-gray-300" />
@@ -1429,7 +1429,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         {formatPosPrice(finalPrice)} <span style={currencyFontStyle}>{currency}</span>
                                                     </span>
                                                     {hasDiscount && (
-                                                        <span className="translate-x-1 text-[13px] font-black text-gray-400 line-through decoration-2">
+                                                        <span className="translate-x-3 text-[13px] font-black text-gray-400 line-through decoration-2">
                                                             {formatPosPrice(product.price)}
                                                         </span>
                                                     )}
