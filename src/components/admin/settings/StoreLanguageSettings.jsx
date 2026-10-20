@@ -55,9 +55,10 @@ const StoreLanguageSettings = ({ onBack, lang = 'ar' }) => {
     const handleSave = async () => {
         setSaving(true);
         try {
+            const nextLanguage = currentLanguage === 'en' ? 'en' : 'ar';
             await setDoc(doc(db, "settings", "language"), {
-                currentLanguage
-            });
+                currentLanguage: nextLanguage
+            }, { merge: true });
             alert(txt.success);
             // Force reload to apply direction changes cleanly if needed, though Context handles it dynamically
         } catch (error) {
