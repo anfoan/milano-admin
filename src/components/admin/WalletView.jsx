@@ -157,7 +157,8 @@ const WalletView = ({ generalSettings }) => {
     useEffect(() => {
         if (!walletSettingsLoaded || settings.enabled === false) return;
         orders.forEach(order => {
-            if (!order.id || !getOrderRewardWalletId(order)) return;
+            const rewardWalletId = getOrderRewardWalletId(order);
+            if (!order.id || !rewardWalletId || !walletMap.has(rewardWalletId)) return;
             const completed = isCompletedOrderStatus(order.status);
             const eligible = isOrderEligibleForWalletReward(order);
             const needsCredit = completed && eligible && (!order.walletRewardGranted || order.walletRewardReversed);
@@ -166,7 +167,7 @@ const WalletView = ({ generalSettings }) => {
             syncRewardOnce(order.id, order.status)
                 .catch(error => console.error('Wallet reward reconciliation:', error));
         });
-    }, [orders, settings.defaultReward, settings.enabled, walletSettingsLoaded]);
+    }, [orders, settings.defaultReward, settings.enabled, walletMap, walletSettingsLoaded]);
 
     const toggleWalletEnabled = async enabled => {
         if (enabled === walletEnabled || togglingWallet) return;
@@ -227,7 +228,7 @@ const WalletView = ({ generalSettings }) => {
                 ? `تم تحديث الحالة واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.`
                 : walletResult.reason === 'below-minimum-order-total'
                     ? `تم تحديث الحالة. لا تُضاف مكافأة لأن إجمالي الفاتورة أقل من ${walletRewardMinimumText(order)}.`
-                    : walletResult.reason === 'no-customer-phone'
+                    : ['no-customer-phone', 'no-customer-wallet'].includes(walletResult.reason)
                         ? 'لن يتم إيداع مكافأة العميل إلا بعد أن يقوم بفتح محفظة مرتبطة بهذا الرقم.❌'
                     : 'تم تحديث حالة الفاتورة.');
         } catch (error) { console.error(error); setNotice('تعذّر تعديل حالة الفاتورة.'); }

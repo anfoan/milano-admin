@@ -67,11 +67,13 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
             };
         }
         const resolvedWalletId = getOrderRewardWalletId(order);
-        if (!resolvedWalletId) return { granted: false, reason: 'no-customer-phone' };
+        if (!resolvedWalletId) return { granted: false, reason: 'no-customer-wallet' };
+        const walletRef = doc(db, 'customer_wallets', resolvedWalletId);
 
-        const [settingsSnapshot, rewardSnapshot] = await Promise.all([
+        const [settingsSnapshot, rewardSnapshot, walletSnapshot] = await Promise.all([
             transaction.get(walletSettingsRef),
             transaction.get(rewardRef),
+            transaction.get(walletRef),
         ]);
         const settings = settingsSnapshot.exists() ? settingsSnapshot.data() : {};
         const rewardRecord = rewardSnapshot.exists() ? rewardSnapshot.data() : null;
@@ -94,11 +96,10 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
             }
             return { granted: false, reason: 'already-granted', amount: amountOf(rewardRecord?.amount || order.walletRewardAmount) };
         }
+        if (!walletSnapshot.exists()) return { granted: false, reason: 'no-customer-wallet' };
 
-        const walletRef = doc(db, 'customer_wallets', resolvedWalletId);
         const customerRewardRef = doc(walletRef, 'transactions', rewardRef.id);
-        const walletSnapshot = await transaction.get(walletRef);
-        const existingWallet = walletSnapshot.exists() ? walletSnapshot.data() : {};
+        const existingWallet = walletSnapshot.data();
         const previousBalance = amountOf(existingWallet.balance);
         const cycle = Number(order.walletRewardCycle || 0) + 1;
         const { customerName, phone } = customerDetails(order, existingWallet);
