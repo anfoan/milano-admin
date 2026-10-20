@@ -188,7 +188,7 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                                                 e.target.src = '/nav-logo.png';
                                                             }}
                                                         />
-                                                        <span style={{ fontWeight: 'bold', color: '#1f2937', fontSize: '12px', lineHeight: '1.4', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{item.title}</span>
+                                                        <span style={{ fontWeight: 'bold', color: '#1f2937', fontSize: '13px', lineHeight: '1.4', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{item.title}</span>
                                                     </div>
                                                 </td>
                                                 <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-bold text-gray-800 border-l border-gray-400">
