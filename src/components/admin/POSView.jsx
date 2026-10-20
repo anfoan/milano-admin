@@ -1425,14 +1425,14 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     {product.code || '---'}
                                                 </span>
                                                 <div className="flex flex-col items-end">
+                                                    <span className="text-sm font-black text-blue-600 dark:text-blue-400">
+                                                        {formatPosPrice(finalPrice)} <span style={currencyFontStyle}>{currency}</span>
+                                                    </span>
                                                     {hasDiscount && (
-                                                        <span className="text-[11px] font-black text-gray-400 line-through decoration-2">
+                                                        <span className="text-xs font-black text-gray-400 line-through decoration-2">
                                                             {formatPosPrice(product.price)}
                                                         </span>
                                                     )}
-                                                    <span className="text-xs font-black text-blue-600 dark:text-blue-400">
-                                                        {formatPosPrice(finalPrice)} <span style={currencyFontStyle}>{currency}</span>
-                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
