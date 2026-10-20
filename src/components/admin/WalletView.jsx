@@ -164,7 +164,8 @@ const WalletView = ({ generalSettings }) => {
         if (!walletSettingsLoaded || settings.enabled === false) return;
         orders.forEach(order => {
             const rewardWalletId = getOrderRewardWalletId(order);
-            if (!order.id || !rewardWalletId || !walletMap.has(rewardWalletId)) return;
+            const rewardWallet = rewardWalletId ? walletMap.get(rewardWalletId) : null;
+            if (!order.id || !rewardWalletId || rewardWallet?.pinConfigured !== true) return;
             const completed = isCompletedOrderStatus(order.status);
             const eligible = isOrderEligibleForWalletReward(order);
             const needsCredit = completed && eligible && (!order.walletRewardGranted || order.walletRewardReversed);

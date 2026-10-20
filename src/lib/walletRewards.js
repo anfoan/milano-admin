@@ -96,7 +96,9 @@ export const grantWalletRewardForCompletedOrder = async (orderId) => {
             }
             return { granted: false, reason: 'already-granted', amount: amountOf(rewardRecord?.amount || order.walletRewardAmount) };
         }
-        if (!walletSnapshot.exists()) return { granted: false, reason: 'no-customer-wallet' };
+        if (!walletSnapshot.exists() || walletSnapshot.data()?.pinConfigured !== true) {
+            return { granted: false, reason: 'no-customer-wallet' };
+        }
 
         const customerRewardRef = doc(walletRef, 'transactions', rewardRef.id);
         const existingWallet = walletSnapshot.data();
