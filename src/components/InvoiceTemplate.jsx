@@ -55,7 +55,8 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                         body { margin: 0; padding: 0; background: white; -webkit-print-color-adjust: exact; }
                         .print-container { width: 100%; }
                         .print-page {
-                            width: 210mm;
+                            width: 210mm !important;
+                            max-width: 210mm !important;
                             min-height: 297mm;
                             height: 297mm;
                             padding: 24px 32px !important;
