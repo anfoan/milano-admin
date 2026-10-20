@@ -226,10 +226,14 @@ const WalletView = ({ generalSettings }) => {
         finally { setRewarding(''); }
     };
     const saveStatus = async (order, status) => {
+        const previousStatus = order.status;
+        setOrders(currentOrders => currentOrders.map(currentOrder => currentOrder.id === order.id ? { ...currentOrder, status } : currentOrder));
         try {
             await updateDoc(doc(db, 'orders', order.id), { status, updatedAt: serverTimestamp() });
-            const walletResult = await syncRewardOnce(order.id, status);
-            await syncCustomerOrderHistoryById(order.id);
+            const [walletResult] = await Promise.all([
+                syncRewardOnce(order.id, status),
+                syncCustomerOrderHistoryById(order.id),
+            ]);
             setNotice(walletResult.reversed
                 ? `تم تحديث الحالة واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.`
                 : walletResult.reason === 'below-minimum-order-total'
@@ -237,7 +241,11 @@ const WalletView = ({ generalSettings }) => {
                     : ['no-customer-phone', 'no-customer-wallet'].includes(walletResult.reason)
                         ? 'لن يتم إيداع مكافأة العميل إلا بعد أن يقوم بفتح محفظة مرتبطة بهذا الرقم.❌'
                     : 'تم تحديث حالة الفاتورة.');
-        } catch (error) { console.error(error); setNotice('تعذّر تعديل حالة الفاتورة.'); }
+        } catch (error) {
+            console.error(error);
+            setOrders(currentOrders => currentOrders.map(currentOrder => currentOrder.id === order.id ? { ...currentOrder, status: previousStatus } : currentOrder));
+            setNotice('تعذّر تعديل حالة الفاتورة.');
+        }
     };
     const saveInvoice = async (draft) => {
         try {
