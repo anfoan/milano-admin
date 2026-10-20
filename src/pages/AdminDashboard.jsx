@@ -2,7 +2,7 @@ import React, { useState, useEffect, useTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
-import { doc, getDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import Sidebar from '../components/admin/Sidebar';
 import SettingsView from '../components/admin/SettingsView';
 import AccountSettingsView from '../components/admin/AccountSettingsView'; // Account Settings
@@ -114,9 +114,14 @@ const AdminDashboard = () => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 setGeneralSettings(prev => ({ ...prev, adminTitle: data.adminTitle || prev.adminTitle || '', adminImage: data.adminImage || prev.adminImage || '' }));
-            }
+                }
+            });
+        const unsubscribeLanguage = onSnapshot(doc(db, "settings", "language"), (docSnap) => {
+            const selectedLanguage = docSnap.data()?.currentLanguage === 'en' ? 'en' : 'ar';
+            setLang(selectedLanguage);
+            localStorage.setItem('adminLang', selectedLanguage);
         });
-        return () => { unsubscribe(); unsubscribeImages(); unsubscribeBranding(); };
+        return () => { unsubscribe(); unsubscribeImages(); unsubscribeBranding(); unsubscribeLanguage(); };
     }, []);
 
     // Search Indexer (Fetch basic data for instant search)
@@ -202,6 +207,9 @@ const AdminDashboard = () => {
         const newLang = lang === 'ar' ? 'en' : 'ar';
         setLang(newLang);
         localStorage.setItem('adminLang', newLang);
+        setDoc(doc(db, "settings", "language"), { currentLanguage: newLang }, { merge: true }).catch(error => {
+            console.error('Error saving dashboard language:', error);
+        });
         // Optional: Dispatch event if other components listed need it, though props flow is better
         window.dispatchEvent(new Event('adminLangChange'));
     };
