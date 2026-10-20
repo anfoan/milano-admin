@@ -1399,7 +1399,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     <img 
                                                         src={product.mainImage} 
                                                         alt={product.name} 
-                                                        className="w-full h-full object-cover scale-[1.06] group-hover:scale-110 transition-transform duration-300"
+                                                        className="w-full h-full object-cover scale-[1.12] group-hover:scale-110 transition-transform duration-300"
                                                     />
                                                 ) : (
                                                     <ShoppingCart size={32} className="text-gray-300" />
@@ -1425,11 +1425,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     {product.code || '---'}
                                                 </span>
                                                 <div className="flex flex-col items-end">
-                                                    <span className="text-sm font-black text-blue-600 dark:text-blue-400">
+                                                    <span className="text-[13px] font-black text-blue-600 dark:text-blue-400">
                                                         {formatPosPrice(finalPrice)} <span style={currencyFontStyle}>{currency}</span>
                                                     </span>
                                                     {hasDiscount && (
-                                                        <span className="text-xs font-black text-gray-400 line-through decoration-2">
+                                                        <span className="translate-x-1 text-[13px] font-black text-gray-400 line-through decoration-2">
                                                             {formatPosPrice(product.price)}
                                                         </span>
                                                     )}
