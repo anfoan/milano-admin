@@ -494,7 +494,7 @@ const AdminDashboard = () => {
                             <AdminNotifications lang={lang} />
 
                             <a
-                                href="https://milano2.netlify.app/"
+                                href={generalSettings?.storeUrl || 'https://milano2.netlify.app/'}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title={txt.your_store}
