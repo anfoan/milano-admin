@@ -1731,8 +1731,8 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                             <tr>
                                 <th className="px-3 py-2.5 text-start">#</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'رقم السند' : 'Bond #'}</th>
-                                <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'اسم السيد' : 'Name'}</th>
-                                <th className="px-3 py-2.5 text-start whitespace-nowrap">{isRTL ? 'الجهة' : 'Entity'}</th>
+                                <th className="w-[150px] px-3 py-2.5 text-center align-middle whitespace-nowrap">{isRTL ? 'اسم السيد' : 'Name'}</th>
+                                <th className="w-[150px] px-3 py-2.5 text-center align-middle whitespace-nowrap">{isRTL ? 'الجهة' : 'Entity'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap transform -translate-x-2">{isRTL ? 'النوع' : 'Type'}</th>
                                 <th className="px-3 py-2.5 text-start whitespace-nowrap transform -translate-x-3">{isRTL ? 'التاريخ' : 'Date'}</th>
                                 <th className="w-[140px] px-3 py-2.5 text-start whitespace-nowrap"><span className="inline-block transform -translate-x-4">{isRTL ? 'طريقة الدفع' : 'Payment method'}</span></th>
@@ -1745,8 +1745,8 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 <tr key={bond.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.01] transition-all">
                                     <td className="px-3 py-2.5 text-start text-gray-400">{idx + 1}</td>
                                     <td className="px-3 py-2.5 text-start text-gray-900 dark:text-white font-mono whitespace-nowrap">{bond.number}</td>
-                                    <td className="px-3 py-2.5 text-start text-gray-900 dark:text-white whitespace-nowrap max-w-[150px] truncate" title={bond.entityName}>{bond.entityName}</td>
-                                    <td className="px-3 py-2.5 text-start text-gray-500 whitespace-nowrap">
+                                    <td className="w-[150px] max-w-[150px] px-3 py-2.5 text-center align-middle text-gray-900 dark:text-white whitespace-nowrap truncate" title={bond.entityName}>{bond.entityName}</td>
+                                    <td className="w-[150px] px-3 py-2.5 text-center align-middle text-gray-500 whitespace-nowrap">
                                         {getEntityLabel(bond.entityType)}
                                     </td>
                                     <td className="px-3 py-2.5 text-start whitespace-nowrap">
