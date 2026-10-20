@@ -199,7 +199,7 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                                             .trim()}
                                                     </span>
                                                 </td>
-                                                <td style={{ padding: '8px 16px', verticalAlign: 'middle' }} className="text-center text-xs font-bold text-gray-600 border-l border-gray-400 whitespace-nowrap">
+                                                <td style={{ padding: '8px 4px', verticalAlign: 'middle', whiteSpace: 'normal', overflowWrap: 'anywhere' }} className="text-center text-xs font-bold text-gray-600 border-l border-gray-400 break-words">
                                                     {hasItemDiscount ? (
                                                         <div className="flex flex-col items-center">
                                                             <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>{formatPrice(itemPrices.original, itemCurrency)}</span>
