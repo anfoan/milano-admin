@@ -120,13 +120,13 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                 { id: 'limited-offers', name: txt.limited_offers }
             ]
         },
-        { id: 'reviews', name: txt.reviews, icon: <Star size={20} /> },
-        { id: 'design', name: txt.design, icon: <Palette size={20} /> },
         { id: 'inbox', name: txt.inbox, icon: <Inbox size={20} /> },
+        { id: 'reviews', name: txt.reviews, icon: <Star size={20} /> },
         { id: 'delivery', name: txt.delivery, icon: <Truck size={20} /> },
         { id: 'payments', name: txt.payments, icon: <CreditCard size={20} /> },
         { id: 'expenses', name: txt.expenses, icon: <Receipt size={20} /> },
         { id: 'financial-reports', name: txt.financial_reports, icon: <BarChart3 size={20} /> },
+        { id: 'design', name: txt.design, icon: <Palette size={20} /> },
         {
             id: 'settings-section',
             name: txt.store_settings,
