@@ -1399,7 +1399,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     <img 
                                                         src={product.mainImage} 
                                                         alt={product.name} 
-                                                        className="w-full h-full object-cover scale-[1.25] group-hover:scale-110 transition-transform duration-300"
+                                                        className="w-full h-full object-cover scale-[1.30] group-hover:scale-110 transition-transform duration-300"
                                                     />
                                                 ) : (
                                                     <ShoppingCart size={32} className="text-gray-300" />
@@ -1417,7 +1417,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <h3 className="font-bold text-xs text-gray-800 dark:text-white truncate" title={product.name}>
+                                            <h3 className="font-bold text-xs leading-relaxed text-gray-800 dark:text-white truncate" title={product.name}>
                                                 {product.name}
                                             </h3>
                                             <div className="flex justify-between items-center mt-2.5 pt-1 border-t border-gray-100 dark:border-white/5">
