@@ -227,6 +227,8 @@ const WalletView = ({ generalSettings }) => {
                 ? `تم تحديث الحالة واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.`
                 : walletResult.reason === 'below-minimum-order-total'
                     ? `تم تحديث الحالة. لا تُضاف مكافأة لأن إجمالي الفاتورة أقل من ${walletRewardMinimumText(order)}.`
+                    : walletResult.reason === 'no-customer-phone'
+                        ? 'لن يتم إيداع مكافأة العميل إلا بعد أن يقوم بفتح محفظة مرتبطة بهذا الرقم.❌'
                     : 'تم تحديث حالة الفاتورة.');
         } catch (error) { console.error(error); setNotice('تعذّر تعديل حالة الفاتورة.'); }
     };
