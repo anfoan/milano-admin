@@ -38,8 +38,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         const isSar = code.includes('SAR') || code.includes('سعود');
         return isSar ? (isRTL ? 'ريال سعودي' : 'SAR') : (isRTL ? 'ريال يمني' : 'YER');
     };
-    const formatPosPrice = (value) => String(Math.round(convertPosPrice(value)));
-    const formatDisplayedPrice = (value) => String(Math.round(Number(value) || 0));
+    const formatPosPrice = (value) => Math.round(convertPosPrice(value)).toLocaleString('en-US');
+    const formatDisplayedPrice = (value) => Math.round(Number(value) || 0).toLocaleString('en-US');
 
     // Auth States
     const [isAuthenticated, setIsAuthenticated] = useState(false);
