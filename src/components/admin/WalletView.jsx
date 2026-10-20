@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { collection, deleteDoc, doc, onSnapshot, runTransaction, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { Check, CheckCircle2, ChevronDown, Clock3, Gift, KeyRound, MapPin, Package, Pencil, Power, Printer, Save, Search, Trash2, Truck, Wallet, WalletMinimal, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
-import { getOrderRewardWalletId, grantWalletRewardForCompletedOrder, isCompletedOrderStatus, isOrderEligibleForWalletReward, syncWalletRewardForOrderStatus, WALLET_REWARD_MINIMUM_SAR, WALLET_REWARD_MINIMUM_YER } from '../../lib/walletRewards';
+import { getOrderRewardWalletId, isCompletedOrderStatus, isOrderEligibleForWalletReward, syncWalletRewardForOrderStatus, WALLET_REWARD_MINIMUM_SAR, WALLET_REWARD_MINIMUM_YER } from '../../lib/walletRewards';
 import { adjustCustomerWalletBalance, ensureWalletSpendLedgerForOrder, setCustomerWalletBalance } from '../../lib/walletLedger';
 import { deleteCustomerOrderHistory, syncCustomerOrderHistory, syncCustomerOrderHistoryById } from '../../lib/customerOrderHistory';
 import InvoiceTemplate from '../InvoiceTemplate';
@@ -80,7 +80,7 @@ const WalletView = ({ generalSettings }) => {
     const [savingCustomerProfile, setSavingCustomerProfile] = useState(false);
     const [customerProfileError, setCustomerProfileError] = useState('');
     const spendLedgerSyncRef = useRef(new Set());
-    const rewardSyncRef = useRef(new Set());
+    const rewardSyncPromisesRef = useRef(new Map());
     const customerHistorySyncRef = useRef(new Set());
 
     useEffect(() => {
@@ -121,6 +121,16 @@ const WalletView = ({ generalSettings }) => {
     const walletEnabled = settings.enabled !== false;
     const walletAmount = value => walletConvertedAmount(value, walletDisplayCurrency);
     const toWalletBase = value => walletBaseAmount(value, walletDisplayCurrency);
+    const syncRewardOnce = (orderId, status) => {
+        const existing = rewardSyncPromisesRef.current.get(orderId);
+        if (existing) return existing;
+        let promise;
+        promise = syncWalletRewardForOrderStatus(orderId, status).finally(() => {
+            if (rewardSyncPromisesRef.current.get(orderId) === promise) rewardSyncPromisesRef.current.delete(orderId);
+        });
+        rewardSyncPromisesRef.current.set(orderId, promise);
+        return promise;
+    };
 
     useEffect(() => {
         // Preserve a complete customer-facing archive for every existing storefront
@@ -152,11 +162,9 @@ const WalletView = ({ generalSettings }) => {
             const eligible = isOrderEligibleForWalletReward(order);
             const needsCredit = completed && eligible && (!order.walletRewardGranted || order.walletRewardReversed);
             const needsReversal = (!completed || !eligible) && order.walletRewardGranted && !order.walletRewardReversed;
-            if ((!needsCredit && !needsReversal) || rewardSyncRef.current.has(order.id)) return;
-            rewardSyncRef.current.add(order.id);
-            syncWalletRewardForOrderStatus(order.id, order.status)
-                .catch(error => console.error('Wallet reward reconciliation:', error))
-                .finally(() => rewardSyncRef.current.delete(order.id));
+            if (!needsCredit && !needsReversal) return;
+            syncRewardOnce(order.id, order.status)
+                .catch(error => console.error('Wallet reward reconciliation:', error));
         });
     }, [orders, settings.defaultReward, settings.enabled, walletSettingsLoaded]);
 
@@ -201,7 +209,7 @@ const WalletView = ({ generalSettings }) => {
     const issueReward = async order => {
         setRewarding(order.id);
         try {
-            const result = await grantWalletRewardForCompletedOrder(order.id);
+            const result = await syncRewardOnce(order.id, order.status);
             setNotice(result.granted
                 ? `تم إيداع $ ${walletAmount(result.amount)} ${walletCurrencyText} في محفظة العميل.`
                 : result.reason === 'below-minimum-order-total'
@@ -213,7 +221,7 @@ const WalletView = ({ generalSettings }) => {
     const saveStatus = async (order, status) => {
         try {
             await updateDoc(doc(db, 'orders', order.id), { status, updatedAt: serverTimestamp() });
-            const walletResult = await syncWalletRewardForOrderStatus(order.id, status);
+            const walletResult = await syncRewardOnce(order.id, status);
             await syncCustomerOrderHistoryById(order.id);
             setNotice(walletResult.reversed
                 ? `تم تحديث الحالة واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.`
@@ -262,7 +270,7 @@ const WalletView = ({ generalSettings }) => {
                     note: `تعديل الرصيد المباشر من الفاتورة ${draft.orderId || draft.id}`
                 });
             }
-            const walletResult = await syncWalletRewardForOrderStatus(draft.id, draft.status);
+            const walletResult = await syncRewardOnce(draft.id, draft.status);
             await syncCustomerOrderHistoryById(draft.id);
             setEditingOrder(null);
             setNotice(walletResult.reversed ? `تم حفظ التعديلات واسترجاع $ ${walletAmount(walletResult.amount)} ${walletCurrencyText} من مكافأة العميل.` : walletResult.reason === 'below-minimum-order-total' ? `تم حفظ التعديلات. لا تُضاف مكافأة لأن إجمالي الفاتورة أقل من ${walletRewardMinimumText(draft)}.` : 'تم حفظ تعديلات الفاتورة.');
