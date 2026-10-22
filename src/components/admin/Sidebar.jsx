@@ -5,7 +5,7 @@ import {
     LayoutDashboard, Box, ShoppingCart, ShoppingBasket, ClipboardList, Plus, Percent,
     UserX, MessageSquare, Settings, CreditCard,
     Palette, Truck, Briefcase, Inbox, Users,
-    PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt, BarChart3, Wallet
+    PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt, BarChart3, Wallet, Store
 } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, toggleLang, unreadCount = 0, newOrdersCount = 0, restrictedTabs = null, businessName = '' }) => {
@@ -116,7 +116,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
         {
             id: 'merchant-stores',
             name: txt.merchant_stores,
-            icon: <img src="/merchant-stores.png" alt="" className="h-7 w-7 object-contain" />
+            icon: <Store size={21} strokeWidth={2.2} />
         },
         {
             id: 'discount',
@@ -236,10 +236,10 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                     : 'text-slate-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}
                             >
-                                <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>
+                                <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'} ${item.id === 'merchant-stores' ? 'translate-x-1' : ''}`}>
                                     {item.icon}
                                 </span>
-                                <span className="text-[17px] font-black flex-1 flex items-center gap-3 whitespace-nowrap">
+                                <span className={`text-[17px] font-black flex-1 flex items-center gap-3 whitespace-nowrap ${item.id === 'merchant-stores' ? 'translate-x-2' : ''}`}>
                                     <span>{item.name}</span>
                                     {item.id === 'inbox' && unreadCount > 0 && (
                                         <span className="inline-flex items-center justify-center w-6 h-6 bg-red-500 text-white text-[12px] rounded-full font-black shadow-md animate-pulse shrink-0">
