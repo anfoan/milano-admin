@@ -276,13 +276,14 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                         initial={{ opacity: 0, x: isRTL ? -20 : 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: isRTL ? 20 : -20 }}
+                        dir="ltr"
                         className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]"
                     >
-                        <aside className="order-2 rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm lg:order-1">
+                        <aside dir={isRTL ? 'rtl' : 'ltr'} className="order-2 rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm lg:order-1">
                             <h3 className="mb-4 text-lg font-black text-gray-800">{lang === 'ar' ? 'ملخص الكوبون' : 'Coupon Summary'}</h3>
                             <div className="space-y-2 text-sm font-bold">
                                 <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{lang === 'ar' ? 'الكود' : 'Code'}</span><b dir="ltr" className="font-mono">{code || '—'}</b></div>
-                                <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{lang === 'ar' ? 'الخصم' : 'Discount'}</span><b>{discountType === 'percent' ? `${Number(discountPercent || 1)}%` : discountType === 'fixed' ? `${Number(discountAmount || 0).toLocaleString('en-US')} ${currency}` : (lang === 'ar' ? 'مجاني' : 'Free')}</b></div>
+                                <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{lang === 'ar' ? 'الخصم' : 'Discount'}</span><b>{discountType === 'percent' ? `${Number(discountPercent || 1).toLocaleString('en-US')}%` : discountType === 'fixed' ? `${Number(discountAmount || 0).toLocaleString('en-US')} ${currency}` : (lang === 'ar' ? 'مجاني' : 'Free')}</b></div>
                                 <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{lang === 'ar' ? 'الاستخدام' : 'Usage'}</span><b>{isUnlimited ? txt.unlimited : `${Number(maxUses || 0).toLocaleString('en-US')} ${lang === 'ar' ? 'مرات' : 'uses'}`}</b></div>
                                 <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{txt.min_order}</span><b dir="ltr">{Number(minOrderAmount || 0).toLocaleString('en-US')} {currency}</b></div>
                             </div>
@@ -290,7 +291,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                             <p className="mt-3 text-center text-[10px] font-bold leading-5 text-gray-400">{lang === 'ar' ? 'يمكنك إيقاف الكوبون أو حذفه في أي وقت من صفحة الكوبونات.' : 'You can disable or delete the coupon at any time.'}</p>
                         </aside>
 
-                        <div className="order-1 space-y-4 lg:order-2">
+                        <div dir={isRTL ? 'rtl' : 'ltr'} className="order-1 space-y-4 lg:order-2">
                             <section className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm">
                                 <div className="mb-4 flex items-center justify-between"><h3 className="text-base font-black text-gray-800">{lang === 'ar' ? 'كود الكوبون' : 'Coupon Code'}</h3><span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-xs font-black text-blue-600">1</span></div>
                                 <div className="flex gap-3">
