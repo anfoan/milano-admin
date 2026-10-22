@@ -116,7 +116,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
         {
             id: 'merchant-stores',
             name: txt.merchant_stores,
-            icon: <img src="/merchant-stores.png" alt="" className="h-6 w-6 object-contain" />
+            icon: <img src="/merchant-stores.png" alt="" className="h-7 w-7 object-contain" />
         },
         {
             id: 'discount',
