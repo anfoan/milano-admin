@@ -783,7 +783,7 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
                             <div className="absolute top-2.5 right-2.5 left-2.5 z-20 flex justify-between items-center transition-opacity">
                                 <button onClick={(e) => { e.stopPropagation(); shareProduct(product); }} className="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center shadow-lg hover:scale-110 transition-transform"><ExternalLink size={15} /></button>
                                 <div className="flex gap-1.5">
-                                    <button onClick={(e) => { e.stopPropagation(); toggleHideProduct(product); }} className={`w-8 h-8 ${product.hidden ? 'bg-gray-400' : 'bg-orange-400'} text-white rounded-lg flex items-center justify-center shadow-lg hover:scale-110 transition-transform`}>
+                                    <button onClick={(e) => { e.stopPropagation(); toggleHideProduct(product); }} className={`w-8 h-8 ${product.hidden ? 'bg-orange-400' : 'bg-green-500'} text-white rounded-lg flex items-center justify-center shadow-lg hover:scale-110 transition-transform`}>
                                         {product.hidden ? <EyeOff size={15} /> : <Eye size={15} />}
                                     </button>
                                     <button onClick={(e) => { e.stopPropagation(); console.log("Trash clicked!"); deleteProduct(product.id); }} className="w-8 h-8 bg-red-500 text-white rounded-lg flex items-center justify-center shadow-lg hover:scale-110 transition-transform active:scale-95"><Trash2 size={15} /></button>
