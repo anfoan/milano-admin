@@ -39,7 +39,8 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             orders_list: 'قائمة الطلبات',
             expenses: 'المصروفات والسندات',
             financial_reports: 'التقارير المالية',
-            wallet: 'المحفظة'
+            wallet: 'المحفظة',
+            merchant_stores: 'متاجر التجار'
         },
         en: {
             milano: 'Milano',
@@ -68,7 +69,8 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             orders_list: 'All Orders',
             expenses: 'Expenses & Bonds',
             financial_reports: 'Financial Reports',
-            wallet: 'Wallet'
+            wallet: 'Wallet',
+            merchant_stores: 'Merchant Stores'
         }
     };
 
@@ -111,6 +113,11 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             ]
         },
         { id: 'wallet', name: txt.wallet, icon: <Wallet size={20} /> },
+        {
+            id: 'merchant-stores',
+            name: txt.merchant_stores,
+            icon: <img src="/merchant-stores.png" alt="" className="h-6 w-6 object-contain" />
+        },
         {
             id: 'discount',
             name: txt.discount,
