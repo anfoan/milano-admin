@@ -15,7 +15,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
     // Form State
     const [code, setCode] = useState('');
+    const [discountType, setDiscountType] = useState('percent');
     const [discountPercent, setDiscountPercent] = useState('');
+    const [discountAmount, setDiscountAmount] = useState('');
     const [isUnlimited, setIsUnlimited] = useState(false);
     const [maxUses, setMaxUses] = useState(1);
     const [expiryDate, setExpiryDate] = useState('');
@@ -165,7 +167,8 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
         // Security & Validation Checks
         if (!code) return alert(txt.alert_missing);
-        if (Number(discountPercent) < 1 || Number(discountPercent) > 100) return alert(txt.alert_amount);
+        if (discountType === 'percent' && (Number(discountPercent) < 1 || Number(discountPercent) > 100)) return alert(txt.alert_amount);
+        if (discountType === 'fixed' && Number(discountAmount) <= 0) return alert(lang === 'ar' ? 'أدخل مبلغ خصم صحيح' : 'Enter a valid fixed discount amount');
         if (!isUnlimited && Number(maxUses) < 1) return alert(lang === 'ar' ? 'أقصى عدد للاستخدام يجب أن يكون 1 على الأقل' : 'Max uses must be at least 1');
         if (minOrderAmount < 0) return alert(lang === 'ar' ? 'مبلغ الحد الأدنى لا يمكن أن يكون سالباً' : 'Min order cannot be negative');
 
@@ -185,9 +188,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
             const couponData = {
                 code: code.toUpperCase(),
-                discountType: 'percent',
-                discountAmount: 0,
-                discountPercent: Math.min(100, Math.max(1, Number(discountPercent))),
+                discountType,
+                discountAmount: discountType === 'fixed' ? toBaseCouponAmount(discountAmount) : 0,
+                discountPercent: discountType === 'percent' ? Math.min(100, Math.max(1, Number(discountPercent))) : 0,
                 maxUses: isUnlimited ? null : Math.max(1, Number(maxUses)),
                 expiryDate: expiryDate || null,
                 minOrderAmount: minimumOrderBaseForSave(),
@@ -209,7 +212,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
     const resetForm = () => {
         setCode('');
+        setDiscountType('percent');
         setDiscountPercent('');
+        setDiscountAmount('');
         setIsUnlimited(false);
         setMaxUses(100);
         setExpiryDate('');
@@ -220,7 +225,9 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const editCoupon = (coupon) => {
         setEditingCoupon(coupon);
         setCode(coupon.code || '');
+        setDiscountType(coupon.discountType || (Number(coupon.discountAmount || 0) > 0 ? 'fixed' : 'percent'));
         setDiscountPercent(coupon.discountPercent || '');
+        setDiscountAmount(fromBaseCouponAmount(coupon.discountAmount) || '');
         setIsUnlimited(Boolean(coupon.isUnlimited));
         setMaxUses(coupon.maxUses || 1);
         setExpiryDate(coupon.expiryDate || '');
@@ -269,116 +276,54 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                         initial={{ opacity: 0, x: isRTL ? -20 : 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: isRTL ? 20 : -20 }}
-                        className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-xl overflow-hidden max-w-4xl mx-auto"
+                        className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]"
                     >
-                        <div className="flex justify-center mb-8 border-b-2 border-blue-500 w-fit mx-auto pb-2">
-                            <h3 className="text-xl font-black text-gray-800">{editingCoupon ? (lang === 'ar' ? 'تعديل الكوبون' : 'Edit Coupon') : txt.add_coupon}</h3>
-                        </div>
-
-                        <div className="space-y-8">
-                            {/* Code Input & Random Button */}
-                            <div className="flex gap-4">
-                                <button
-                                    type="button"
-                                    onClick={generateRandomCode}
-                                    className="px-6 py-3 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition"
-                                >
-                                    {txt.random}
-                                </button>
-                                <input
-                                    type="text"
-                                    placeholder={txt.code_placeholder}
-                                    className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-blue-500 outline-none font-bold text-center text-lg uppercase tracking-widest text-gray-900"
-                                    value={code}
-                                    onChange={e => setCode(e.target.value)}
-                                />
+                        <aside className="order-2 rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm lg:order-1">
+                            <h3 className="mb-4 text-lg font-black text-gray-800">{lang === 'ar' ? 'ملخص الكوبون' : 'Coupon Summary'}</h3>
+                            <div className="space-y-2 text-sm font-bold">
+                                <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{lang === 'ar' ? 'الكود' : 'Code'}</span><b dir="ltr" className="font-mono">{code || '—'}</b></div>
+                                <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{lang === 'ar' ? 'الخصم' : 'Discount'}</span><b>{discountType === 'percent' ? `${Number(discountPercent || 1)}%` : discountType === 'fixed' ? `${Number(discountAmount || 0).toLocaleString('en-US')} ${currency}` : (lang === 'ar' ? 'مجاني' : 'Free')}</b></div>
+                                <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{lang === 'ar' ? 'الاستخدام' : 'Usage'}</span><b>{isUnlimited ? txt.unlimited : `${Number(maxUses || 0).toLocaleString('en-US')} ${lang === 'ar' ? 'مرات' : 'uses'}`}</b></div>
+                                <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{txt.min_order}</span><b dir="ltr">{Number(minOrderAmount || 0).toLocaleString('en-US')} {currency}</b></div>
                             </div>
+                            <button type="button" onClick={handleAddCoupon} className="mt-5 w-full rounded-xl bg-blue-600 py-3 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700">{editingCoupon ? (lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes') : (lang === 'ar' ? 'حفظ الكوبون' : 'Save Coupon')}</button>
+                            <p className="mt-3 text-center text-[10px] font-bold leading-5 text-gray-400">{lang === 'ar' ? 'يمكنك إيقاف الكوبون أو حذفه في أي وقت من صفحة الكوبونات.' : 'You can disable or delete the coupon at any time.'}</p>
+                        </aside>
 
-                            {/* Discount Percentage */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-600 mb-2">{txt.discount_amount}</label>
-                                <div className="flex items-center gap-4">
-                                    <input
-                                        type="range"
-                                        min="1"
-                                        max="100"
-                                        step="1"
-                                        value={discountPercent || 1}
-                                        onChange={e => setDiscountPercent(e.target.value)}
-                                        className="flex-1 accent-pink-500"
-                                    />
-                                    <span className="min-w-[64px] rounded-xl bg-pink-50 px-3 py-2 text-center text-lg font-black text-pink-600" dir="ltr">{Number(discountPercent || 1)}%</span>
+                        <div className="order-1 space-y-4 lg:order-2">
+                            <section className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm">
+                                <div className="mb-4 flex items-center justify-between"><h3 className="text-base font-black text-gray-800">{lang === 'ar' ? 'كود الكوبون' : 'Coupon Code'}</h3><span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-xs font-black text-blue-600">1</span></div>
+                                <div className="flex gap-3">
+                                    <button type="button" onClick={generateRandomCode} className="shrink-0 rounded-xl border border-gray-200 bg-white px-4 py-2.5 font-black text-blue-600 hover:border-blue-400">↻ {lang === 'ar' ? 'توليد كود' : 'Generate Code'}</button>
+                                    <input type="text" placeholder={txt.code_placeholder} className="min-w-0 flex-1 rounded-xl border border-blue-400 bg-white px-4 py-3 text-center text-lg font-black uppercase tracking-widest text-gray-900 outline-none" value={code} onChange={e => setCode(e.target.value.toUpperCase())} />
                                 </div>
-                                <p className="mt-2 text-xs font-bold text-gray-400">{lang === 'ar' ? 'حدد نسبة الخصم التي سيطبقها الكوبون عند الاستخدام.' : 'Choose the percentage discount applied when the coupon is used.'}</p>
-                            </div>
+                                <p className="mt-2 text-right text-[10px] font-bold text-gray-400">{lang === 'ar' ? 'حروف إنجليزية وأرقام فقط من 3 إلى 20 رمزاً.' : 'Use English letters and numbers from 3 to 20 characters.'}</p>
+                            </section>
 
-                            {/* Unlimited Usage Toggle */}
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <div className={isRTL ? "text-right" : "text-left"}>
-                                        <label className="font-bold text-gray-700 block">{txt.unlimited_usage}</label>
-                                        <span className="text-xs text-gray-400 font-bold">{txt.unlimited_desc}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className={`text-sm font-bold text-gray-400`}>{txt.no}</span>
-                                        <div
-                                            onClick={() => setIsUnlimited(!isUnlimited)}
-                                            className={`w-14 h-7 rounded-full p-1 cursor-pointer transition-colors ${isUnlimited ? 'bg-pink-500' : 'bg-gray-300'}`}
-                                        >
-                                            <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${isUnlimited ? (isRTL ? '-translate-x-7' : 'translate-x-7') : 'translate-x-0'}`} />
-                                        </div>
-                                        <span className={`text-sm font-bold ${isUnlimited ? 'text-pink-500' : 'text-gray-400'}`}>{txt.yes}</span>
-                                    </div>
+                            <section className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm">
+                                <div className="mb-4 flex items-center justify-between"><h3 className="text-base font-black text-gray-800">{lang === 'ar' ? 'نوع الخصم' : 'Discount Type'}</h3><span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-xs font-black text-blue-600">2</span></div>
+                                <div className="mb-4 flex flex-wrap gap-2 rounded-xl bg-gray-100 p-1">
+                                    {[['percent', lang === 'ar' ? 'نسبة مئوية' : 'Percentage'], ['fixed', lang === 'ar' ? 'مبلغ ثابت' : 'Fixed Amount'], ['free', lang === 'ar' ? 'توصيل مجاني' : 'Free Delivery']].map(([type, label]) => <button type="button" key={type} onClick={() => setDiscountType(type)} className={`rounded-lg px-4 py-2 text-xs font-black transition ${discountType === type ? 'bg-blue-500 text-white shadow' : 'text-gray-600 hover:bg-white'}`}>{label}</button>)}
                                 </div>
-                            </div>
+                                {discountType === 'percent' && <>
+                                    <div className="rounded-2xl bg-blue-50 p-4"><div className="flex items-center justify-between gap-3"><span className="text-xs font-bold text-gray-500">{lang === 'ar' ? 'قيمة الخصم' : 'Discount value'}</span><div className="flex items-center gap-2"><button type="button" onClick={() => setDiscountPercent(String(Math.max(1, Number(discountPercent || 1) - 1)))} className="h-10 w-10 rounded-xl border border-gray-200 bg-white text-lg font-black text-blue-600">−</button><span className="flex h-10 min-w-20 items-center justify-center rounded-xl border border-blue-400 bg-white px-3 text-lg font-black text-blue-600" dir="ltr">{Number(discountPercent || 1)}%</span><button type="button" onClick={() => setDiscountPercent(String(Math.min(100, Number(discountPercent || 1) + 1)))} className="h-10 w-10 rounded-xl border border-gray-200 bg-white text-lg font-black text-blue-600">+</button></div></div></div>
+                                    <div className="mt-3 flex flex-wrap justify-center gap-2">{[5, 10, 15, 20, 25, 30, 40, 50].map(value => <button type="button" key={value} onClick={() => setDiscountPercent(String(value))} className={`rounded-full border px-4 py-2 text-xs font-black ${Number(discountPercent || 1) === value ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-200 bg-white text-gray-600'}`}>{value}%</button>)}</div>
+                                    <input aria-label={lang === 'ar' ? 'نسبة الخصم' : 'Discount percentage'} type="range" min="1" max="100" step="1" value={discountPercent || 1} onChange={e => setDiscountPercent(e.target.value)} className="mt-4 w-full accent-blue-500" />
+                                </>}
+                                {discountType === 'fixed' && <div className="rounded-2xl bg-blue-50 p-4"><label className="mb-2 block text-xs font-black text-gray-600">{lang === 'ar' ? `مبلغ الخصم (${currency})` : `Discount amount (${currency})`}</label><input type="number" min="0" value={discountAmount} onChange={e => setDiscountAmount(e.target.value)} className="w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-center font-black text-gray-900 outline-none" /></div>}
+                                {discountType === 'free' && <div className="rounded-2xl bg-emerald-50 p-4 text-center text-sm font-black text-emerald-700">{lang === 'ar' ? 'سيتم تطبيق توصيل مجاني على الطلب.' : 'Free delivery will be applied to the order.'}</div>}
+                            </section>
 
-                            {/* Expiry Date */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-600 mb-2">{txt.expiry_date}</label>
-                                <input
-                                    type="date"
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-blue-500 outline-none font-bold text-gray-900"
-                                    value={expiryDate}
-                                    onChange={e => setExpiryDate(e.target.value)}
-                                />
-                            </div>
-
-                            {/* Min Order Amount */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-600 mb-2">{txt.min_order} ({currency})</label>
-                                <input
-                                    type="number"
-                                    placeholder={txt.min_order_placeholder}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-blue-500 outline-none font-bold text-gray-900"
-                                    value={minOrderAmount}
-                                    onChange={e => setMinOrderAmount(e.target.value)}
-                                />
-                            </div>
-
-                            {/* Max Uses Input */}
-                            <div className={`transition-opacity duration-300 ${isUnlimited ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-                                <label className="block text-sm font-bold text-gray-600 mb-2">{txt.max_uses}</label>
-                                <input
-                                    type="number"
-                                    placeholder={txt.max_uses_placeholder}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:border-blue-500 outline-none font-bold text-center text-gray-900"
-                                    value={maxUses}
-                                    onChange={e => setMaxUses(e.target.value)}
-                                    disabled={isUnlimited}
-                                />
-                            </div>
-
-                            <div className="pt-4">
-                                <button
-                                    onClick={handleAddCoupon}
-                                    className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition"
-                                >
-                                    {txt.save}
-                                </button>
-                            </div>
+                            <section className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm">
+                                <div className="mb-5 flex items-center justify-between"><h3 className="text-base font-black text-gray-800">{lang === 'ar' ? 'شروط الاستخدام' : 'Usage Conditions'}</h3><span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-xs font-black text-blue-600">3</span></div>
+                                <div className="space-y-5">
+                                    <div className="flex flex-wrap items-center justify-between gap-4"><label className="text-sm font-black text-gray-700">{lang === 'ar' ? 'عدد مرات الاستخدام' : 'Usage limit'}</label><div className="flex items-center gap-2"><button type="button" disabled={isUnlimited} onClick={() => setMaxUses(Math.max(1, Number(maxUses || 1) - 1))} className="h-10 w-10 rounded-xl border border-gray-200 bg-white text-lg font-black text-blue-600 disabled:opacity-40">−</button><input type="number" min="1" disabled={isUnlimited} value={maxUses} onChange={e => setMaxUses(e.target.value)} className="h-10 w-24 rounded-xl border border-gray-300 text-center font-black text-gray-900 outline-none disabled:bg-gray-100" /><button type="button" disabled={isUnlimited} onClick={() => setMaxUses(Number(maxUses || 0) + 1)} className="h-10 w-10 rounded-xl border border-gray-200 bg-white text-lg font-black text-blue-600 disabled:opacity-40">+</button></div><div className="flex rounded-xl bg-gray-100 p-1"><button type="button" onClick={() => setIsUnlimited(false)} className={`rounded-lg px-4 py-2 text-xs font-black ${!isUnlimited ? 'bg-blue-500 text-white' : 'text-gray-600'}`}>{lang === 'ar' ? 'عدد محدد' : 'Limited'}</button><button type="button" onClick={() => setIsUnlimited(true)} className={`rounded-lg px-4 py-2 text-xs font-black ${isUnlimited ? 'bg-blue-500 text-white' : 'text-gray-600'}`}>{lang === 'ar' ? 'غير محدود' : 'Unlimited'}</button></div></div>
+                                    <div className="border-t border-gray-100 pt-5"><div className="flex flex-wrap items-center justify-between gap-4"><label className="text-sm font-black text-gray-700">{txt.min_order}</label><div className="flex items-center overflow-hidden rounded-xl border border-gray-300 bg-white"><input type="number" min="0" value={minOrderAmount} onChange={e => setMinOrderAmount(e.target.value)} className="w-32 px-3 py-3 text-center font-black text-gray-900 outline-none" /><span className="border-l border-gray-200 px-3 text-xs font-black text-gray-500">{currency}</span></div></div><p className="mt-2 text-right text-[10px] font-bold text-gray-400">{lang === 'ar' ? 'لا يعمل الكوبون إذا لم تصل قيمة المنتجات في السلة إلى الحد الأدنى.' : 'The coupon will not work below the minimum cart amount.'}</p></div>
+                                    <div className="border-t border-gray-100 pt-5"><label className="mb-2 block text-sm font-black text-gray-700">{txt.expiry_date}</label><input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 font-bold text-gray-900 outline-none" /></div>
+                                </div>
+                            </section>
                         </div>
-                    </motion.div>
-                ) : (
+                    </motion.div>                ) : (
                     <motion.div
                         initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -428,8 +373,10 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                                     </span>
                                                 </td>
                                                 <td className="p-6 text-center">
-                                                    {couponHasFixedAmount(coupon) ? (
-                                                        <span className="inline-flex px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-xs font-black">{lang === 'ar' ? 'ثابت' : 'Fixed'}</span>
+                                                    {coupon.discountType === 'free' ? (
+                                                        <span className="inline-flex px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-black">{lang === 'ar' ? 'توصيل مجاني' : 'Free delivery'}</span>
+                                                    ) : couponHasFixedAmount(coupon) ? (
+                                                        <span className="inline-flex px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-xs font-black">{formatDiscountAmount(coupon)}</span>
                                                     ) : (
                                                         <span className="font-black text-gray-400 text-sm">{coupon.discountPercent || 0}%</span>
                                                     )}
