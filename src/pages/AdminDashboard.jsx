@@ -51,6 +51,7 @@ const AdminDashboard = () => {
     const [showProfileMenu, setShowProfileMenu] = useState(false); // Profile Menu State
     const [settingsSection, setSettingsSection] = useState(null); // Settings Section State
     const [editingProduct, setEditingProduct] = useState(null);
+    const [productReturnCategory, setProductReturnCategory] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null); // For Detail Page
     const [isEditMode, setIsEditMode] = useState(false); // For Detail Page Edit Mode
     const [selectedChatId, setSelectedChatId] = useState(null); // For Admin Chat
@@ -299,6 +300,7 @@ const AdminDashboard = () => {
             return;
         }
         if (tab === 'settings') setSettingsSection(null);
+        if (tab === 'product-list') setProductReturnCategory(null);
         startNavigationTransition(() => setActiveTab(tab));
         // A drawer should never remain layered over the newly selected view on phone/tablet.
         if (window.innerWidth < 1280) setIsSidebarOpen(false);
@@ -306,6 +308,7 @@ const AdminDashboard = () => {
 
     const handleEditProduct = (product) => {
         setEditingProduct(product);
+        setProductReturnCategory(product?.category || null);
         setActiveTab('add-product');
     };
 
@@ -353,7 +356,7 @@ const AdminDashboard = () => {
             case 'wallet':
                 return <WalletView lang={lang} generalSettings={generalSettings} />;
             case 'product-list':
-                return <ProductsView onEdit={handleEditProduct} lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
+                return <ProductsView onEdit={handleEditProduct} initialCategory={productReturnCategory} lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
             case 'inventory':
                 return <InventoryView lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
             case 'inbox': return <InboxView onOpenChat={handleOpenChat} lang={lang} />; // Updated to support chat

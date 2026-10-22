@@ -615,7 +615,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
 
                     <div className="p-10">
                         <div className="flex justify-between items-center mb-10">
-                            <h2 className="text-xl font-black text-gray-800">
+                            <h2 className={`text-xl font-black text-gray-800 ${isRTL ? 'mr-12' : 'ml-12'}`}>
                                 {editingProduct ? txt.title_edit : txt.title_add}
                             </h2>
                             <button

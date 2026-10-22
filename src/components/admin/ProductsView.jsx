@@ -21,7 +21,7 @@ const readProductsCache = (key) => {
     }
 };
 
-const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSearchQuery }) => {
+const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSettings, searchQuery, setSearchQuery }) => {
     const t = {
         ar: {
             search_cat_placeholder: 'بحث عن قسم...',
@@ -119,8 +119,8 @@ const ProductsView = ({ onEdit, lang = 'ar', generalSettings, searchQuery, setSe
     const txt = t[lang];
     const isRTL = lang === 'ar';
     const currency = getLocalizedCurrency(generalSettings?.currency || 'YER', lang);
-    const [view, setView] = useState('categories'); // 'categories' or 'product-list'
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [view, setView] = useState(initialCategory ? 'product-list' : 'categories'); // 'categories' or 'product-list'
+    const [selectedCategory, setSelectedCategory] = useState(initialCategory);
     const [products, setProducts] = useState(() => readProductsCache('milano_admin_products_cache'));
     const [loading, setLoading] = useState(() => readProductsCache('milano_admin_categories_cache').length === 0);
     // searchQuery state is now handled via props from AdminDashboard
