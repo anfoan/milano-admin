@@ -3,9 +3,9 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const CurrencyContext = createContext(null);
-// Store reference rates for Sana'a: 1 SAR = 140 YER and 1 USD = 535 YER.
+// Store reference rates for Sana'a: 1 SAR = 140 YER and 1 USD = 532 YER.
 // Values are stored as target-currency units per 1 YER.
-const FALLBACK_RATES = { YER: 1, SAR: 1 / 140, USD: 1 / 535 };
+const FALLBACK_RATES = { YER: 1, SAR: 1 / 140, USD: 1 / 532 };
 const SUPPORTED_CURRENCIES = ['YER', 'SAR', 'USD'];
 
 const asRates = (value) => {
@@ -43,7 +43,7 @@ export const CurrencyProvider = ({ children }) => {
                 setDoc(doc(db, 'settings', 'general'), {
                     exchangeRates: FALLBACK_RATES,
                     exchangeRateUpdatedAt: new Date().toISOString(),
-                    exchangeRateSource: 'Sana\'a local reference rates: 1 SAR = 140 YER; 1 USD = 535 YER'
+                    exchangeRateSource: 'Sana\'a local reference rates: 1 SAR = 140 YER; 1 USD = 532 YER'
                 }, { merge: true })
                     .catch(error => console.warn('Unable to save local exchange-rate reference.', error))
                     .finally(() => { refreshInFlight.current = false; });
