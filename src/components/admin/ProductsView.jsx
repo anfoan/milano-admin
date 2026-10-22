@@ -817,7 +817,7 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
                                     <button className="py-1.5 md:py-2 bg-indigo-50 text-indigo-500 rounded-md md:rounded-lg text-[9px] md:text-[10px] font-black border border-indigo-100 italic">
                                         #{product.order || '9999'} {txt.order}
                                     </button>
-                                    <button className="py-1.5 md:py-2 bg-blue-50 text-blue-500 rounded-md md:rounded-lg text-[9px] md:text-[10px] font-black border border-blue-100">
+                                    <button className={`py-1.5 md:py-2 rounded-md md:rounded-lg text-[9px] md:text-[10px] font-black border ${Number(product.stock) <= 0 ? 'bg-red-100 text-red-600 border-red-200' : Number(product.stock) <= 5 ? 'bg-orange-100 text-orange-600 border-orange-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
                                         {txt.stock_label} {product.stock}
                                     </button>
                                     <button className="py-1.5 md:py-2 bg-blue-50 text-blue-500 rounded-md md:rounded-lg text-[9px] md:text-[10px] font-black border border-blue-100">{txt.options}</button>
