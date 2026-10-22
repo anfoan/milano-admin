@@ -10,6 +10,7 @@ import { db } from '../../lib/firebase';
 import { collection, query, getDocs, doc, deleteDoc, updateDoc, addDoc, serverTimestamp, increment } from 'firebase/firestore';
 import { uploadToCloudinary } from '../../services/uploadService';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
+import { useCurrency } from '../../context/CurrencyContext';
 import VideoShowcaseManager from './VideoShowcaseManager';
 
 const readProductsCache = (key) => {
@@ -118,7 +119,8 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
     };
     const txt = t[lang];
     const isRTL = lang === 'ar';
-    const currency = getLocalizedCurrency(generalSettings?.currency || 'YER', lang);
+    const { activeCurrency, formatPrice } = useCurrency();
+    const currency = getLocalizedCurrency(activeCurrency || generalSettings?.currency || 'YER', lang);
     const [view, setView] = useState(initialCategory ? 'product-list' : 'categories'); // 'categories' or 'product-list'
     const [selectedCategory, setSelectedCategory] = useState(initialCategory);
     const [products, setProducts] = useState(() => readProductsCache('milano_admin_products_cache'));
@@ -675,7 +677,7 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
                                         <span className="text-gray-400 font-mono font-bold text-lg w-8">{index + 1}</span>
                                         <div className={isRTL ? "text-right" : "text-left"}>
                                             <h3 className="font-bold text-gray-700 text-lg select-none line-clamp-1">{product.name}</h3>
-                                            <span className="text-xs font-bold text-gray-400 select-none">{product.price} {currency}</span>
+                                            <span className="text-xs font-bold text-gray-400 select-none">{formatPrice(product.price)}</span>
                                         </div>
                                     </div>
 
@@ -803,8 +805,7 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
                             <div className={`p-3.5 md:p-4.5 text-center space-y-1.5 md:space-y-2.5 ${product.hidden ? 'opacity-60 grayscale' : ''}`}>
                                 <h3 className="font-black text-gray-800 truncate text-[11px] md:text-sm">{product.name}</h3>
                                 <div className="text-gray-900 font-black text-sm md:text-lg italic uppercase flex items-center justify-center gap-1.5">
-                                    <span>{product.price?.toLocaleString()}</span>
-                                    <span>{currency}</span>
+                                    <span>{formatPrice(product.price)}</span>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-1 md:gap-2">

@@ -13,6 +13,7 @@ import { collection, query, getDocs, orderBy, limit, doc, onSnapshot, setDoc, up
 
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import { DEFAULT_STORE_URL, normalizeStoreUrl } from '../../lib/storeUrl';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => {
     const t = {
@@ -131,7 +132,8 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
     };
 
     const txt = t[lang];
-    const currency = getLocalizedCurrency(generalSettings?.currency || 'YER', lang);
+    const { activeCurrency, formatPrice } = useCurrency();
+    const currency = getLocalizedCurrency(activeCurrency || generalSettings?.currency || 'YER', lang);
     const isRTL = lang === 'ar';
 
     const getOrderProductSize = (order) => {
@@ -774,7 +776,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
 
     const statsConfig = [
         { title: txt.completed_orders, value: dashboardStats.completed, icon: <CheckCircle className="text-green-500" />, color: "bg-green-50" },
-        { title: txt.profit, value: `${(dashboardStats.profit || 0).toLocaleString()} ${currency}`, icon: <DollarSign className="text-blue-500" />, color: "bg-blue-50" },
+        { title: txt.profit, value: formatPrice(dashboardStats.profit || 0), icon: <DollarSign className="text-blue-500" />, color: "bg-blue-50" },
         { title: txt.reviews, value: dashboardStats.reviews, icon: <MessageSquare className="text-cyan-500" />, color: "bg-cyan-50" },
         { title: txt.pending_orders, value: dashboardStats.pending, icon: <Clock className="text-red-500" />, color: "bg-red-50" },
     ];
@@ -848,7 +850,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                         <ShoppingBasket className="text-emerald-500" />
                     </div>
                     <span className="text-xl font-black text-gray-800 dark:text-white mb-1">
-                        {(dashboardStats.totalPurchases || 0).toLocaleString('en-US')} {currency}
+                        {formatPrice(dashboardStats.totalPurchases || 0)}
                     </span>
                     <span className="text-gray-400 dark:text-gray-400 font-bold text-xs">{txt.total_purchases}</span>
                     <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">({dashboardStats.purchaseInvoices || 0} {txt.purchase_invoices})</span>
@@ -865,7 +867,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                         <TrendingUp className="text-blue-500" />
                     </div>
                     <span className="text-xl font-black text-gray-800 dark:text-white mb-1">
-                        {(dashboardStats.totalSales || 0).toLocaleString()} {currency}
+                        {formatPrice(dashboardStats.totalSales || 0)}
                     </span>
                     <span className="text-gray-400 dark:text-gray-400 font-bold text-xs">إجمالي المبيعات</span>
                     <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">({dashboardStats.completed} {lang === 'ar' ? 'فاتورة' : 'invoices'})</span>
@@ -882,7 +884,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                         <Package className="text-indigo-500" />
                     </div>
                     <span className="text-xl font-black text-gray-800 dark:text-white mb-1">
-                        {(dashboardStats.stockValue || 0).toLocaleString()} {currency}
+                        {formatPrice(dashboardStats.stockValue || 0)}
                     </span>
                     <span className="text-gray-400 dark:text-gray-400 font-bold text-xs">قيمة المخزون</span>
                     <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">({dashboardStats.stockQty} {lang === 'ar' ? 'منتج' : 'products'})</span>
@@ -1178,7 +1180,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 whitespace-nowrap text-gray-900 text-base font-black">{order.customer?.name || order.name || txt.anonymous}</td>
                                         <td className="translate-x-2 px-6 py-3 text-center md:px-8 md:py-3.5 whitespace-nowrap text-gray-800 text-sm font-sans no-underline" dir="ltr">{String(order.phone || order.customer?.phone || '---').replace(/^\+967[\s-]*/, '')}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 whitespace-nowrap text-gray-700 text-sm font-sans"><div className="flex flex-col leading-5"><span>{formatOrderDateTime(order).date}</span><span className="text-xs text-gray-400">{formatOrderDateTime(order).time}</span></div></td>
-                                        <td className="-translate-x-2 px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-sm font-black uppercase whitespace-nowrap">{(order.total || order.price || 0).toLocaleString()} {currency}</td>
+                                        <td className="-translate-x-2 px-6 py-3 md:px-8 md:py-3.5 text-gray-900 text-sm font-black uppercase whitespace-nowrap">{formatPrice(order.total || order.price || 0)}</td>
                                         <td className="px-6 py-3 md:px-8 md:py-3.5 translate-x-1 whitespace-nowrap">
                                             <span className={`inline-flex whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-black ${getStatusColor(order.status)}`}>
                                                 {formatStatus(order.status)}

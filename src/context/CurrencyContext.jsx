@@ -1,82 +1,105 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
-const CurrencyContext = createContext();
+const CurrencyContext = createContext(null);
+const RATES_URL = 'https://open.er-api.com/v6/latest/YER';
+const FALLBACK_RATES = { YER: 1, SAR: 1 / 140, USD: 1 / 236 };
+const SUPPORTED_CURRENCIES = ['YER', 'SAR', 'USD'];
+
+const asRates = (value) => {
+    const source = value && typeof value === 'object' ? value : {};
+    return SUPPORTED_CURRENCIES.reduce((result, code) => {
+        const rate = Number(source[code]);
+        result[code] = Number.isFinite(rate) && rate > 0 ? rate : FALLBACK_RATES[code];
+        return result;
+    }, {});
+};
 
 export const useCurrency = () => {
     const context = useContext(CurrencyContext);
-    if (!context) {
-        throw new Error('useCurrency must be used within a CurrencyProvider');
-    }
+    if (!context) throw new Error('useCurrency must be used within a CurrencyProvider');
     return context;
 };
 
 export const CurrencyProvider = ({ children }) => {
-    // Default to YER as requested
-    const [activeCurrency, setActiveCurrency] = useState(() => {
-        return localStorage.getItem('activeCurrency') || 'YER';
-    });
-
-    // Exchange rate: 1 SAR = 140 YER
-    const exchangeRate = 140;
+    const [activeCurrency, setActiveCurrency] = useState('YER');
+    const [rates, setRates] = useState(FALLBACK_RATES);
+    const refreshInFlight = useRef(false);
 
     useEffect(() => {
-        localStorage.setItem('activeCurrency', activeCurrency);
-    }, [activeCurrency]);
+        const unsubscribe = onSnapshot(doc(db, 'settings', 'general'), (snapshot) => {
+            if (!snapshot.exists()) return;
+            const settings = snapshot.data();
+            if (SUPPORTED_CURRENCIES.includes(settings.currency)) setActiveCurrency(settings.currency);
+            setRates(asRates(settings.exchangeRates));
+
+            const updatedAt = settings.exchangeRateUpdatedAt ? new Date(settings.exchangeRateUpdatedAt).getTime() : 0;
+            const stale = !updatedAt || (Date.now() - updatedAt) >= 24 * 60 * 60 * 1000;
+            if (!stale || refreshInFlight.current) return;
+            refreshInFlight.current = true;
+
+            fetch(RATES_URL)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Exchange-rate request failed: ${response.status}`);
+                    return response.json();
+                })
+                .then(payload => {
+                    if (payload?.result !== 'success') throw new Error('Exchange-rate provider returned an error');
+                    const nextRates = asRates(payload.rates);
+                    setRates(nextRates);
+                    return setDoc(doc(db, 'settings', 'general'), {
+                        exchangeRates: nextRates,
+                        exchangeRateUpdatedAt: new Date().toISOString(),
+                        exchangeRateSource: 'ExchangeRate-API Open Access (https://www.exchangerate-api.com)'
+                    }, { merge: true });
+                })
+                .catch(error => console.warn('Daily exchange-rate refresh skipped; using cached rates.', error))
+                .finally(() => { refreshInFlight.current = false; });
+        }, error => console.warn('Unable to subscribe to general currency settings.', error));
+
+        return unsubscribe;
+    }, []);
 
     const toggleCurrency = (code) => {
-        if (code === 'YER' || code === 'SAR') {
-            setActiveCurrency(code);
-        }
+        if (SUPPORTED_CURRENCIES.includes(code)) setActiveCurrency(code);
     };
 
-    /**
-     * Converts a YER price (from DB) to a target currency
-     * @param {number} priceInYER - The base price from database (assumed YER)
-     * @param {string} [targetCurrency] - Optional currency code (defaults to activeCurrency)
-     * @returns {number}
-     */
-    const convertPrice = (priceInYER, targetCurrency) => {
-        const currency = targetCurrency || activeCurrency || 'YER';
-        const price = Number(priceInYER) || 0;
-        if (currency === 'SAR') {
-            return price / exchangeRate;
-        }
-        return price;
+    // Firestore amounts stay in YER; only presentation values are converted.
+    const convertPrice = (priceInYER, targetCurrency = activeCurrency) => {
+        const price = Number(priceInYER);
+        const rate = rates[targetCurrency] || 1;
+        return (Number.isFinite(price) ? price : 0) * rate;
     };
 
-    /**
-     * Formats a price according to a target currency with commas and precision
-     * @param {number} priceInYER - The base price from database
-     * @param {string} [targetCurrency] - Optional currency code (defaults to activeCurrency)
-     * @returns {string}
-     */
-    const formatPrice = (priceInYER, targetCurrency) => {
+    const convertFromCurrency = (amount, sourceCurrency = 'YER', targetCurrency = activeCurrency) => {
+        const value = Number(amount);
+        if (!Number.isFinite(value)) return 0;
+        return (value / (rates[sourceCurrency] || 1)) * (rates[targetCurrency] || 1);
+    };
+
+    const formatPrice = (priceInYER, targetCurrency = activeCurrency) => {
         const currency = targetCurrency || activeCurrency || 'YER';
         const converted = convertPrice(priceInYER, currency);
-        const isRTL = document.documentElement.dir === 'rtl' || localStorage.getItem('adminLang') === 'ar' || localStorage.getItem('i18nextLng') === 'ar';
-        const symbol = currency === 'SAR' ? (isRTL ? 'ريال سعودي' : 'SAR') : (isRTL ? 'ريال يمني' : 'YER');
-        
-        // Customer-facing prices use complete currency units only. Calculations
-        // retain their original precision; only the displayed amount is rounded.
-        const formatted = Math.round(converted).toLocaleString('en-US', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        });
-
-        return isRTL ? `${formatted} ${symbol}` : `${symbol} ${formatted}`;
-    };
-
-    const value = {
-        activeCurrency,
-        toggleCurrency,
-        formatPrice,
-        convertPrice,
-        exchangeRate,
-        currencySymbol: activeCurrency === 'SAR' ? 'ريال سعودي' : 'ر.ي'
+        const isRTL = document.documentElement.dir === 'rtl' || localStorage.getItem('adminLang') === 'ar';
+        const labels = isRTL
+            ? { YER: 'ريال يمني', SAR: 'ريال سعودي', USD: 'دولار أمريكي' }
+            : { YER: 'YER', SAR: 'SAR', USD: 'USD' };
+        const formatted = Math.round(converted).toLocaleString('en-US', { maximumFractionDigits: 0 });
+        return isRTL ? `${formatted} ${labels[currency] || currency}` : `${labels[currency] || currency} ${formatted}`;
     };
 
     return (
-        <CurrencyContext.Provider value={value}>
+        <CurrencyContext.Provider value={{
+            activeCurrency,
+            rates,
+            toggleCurrency,
+            formatPrice,
+            convertPrice,
+            convertFromCurrency,
+            exchangeRate: rates.SAR ? 1 / rates.SAR : 140,
+            currencySymbol: activeCurrency === 'SAR' ? 'ريال سعودي' : activeCurrency === 'USD' ? 'دولار أمريكي' : 'ريال يمني'
+        }}>
             {children}
         </CurrencyContext.Provider>
     );

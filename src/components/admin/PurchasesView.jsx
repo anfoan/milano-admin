@@ -2,11 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { addDoc, collection, deleteDoc, doc, increment, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
+import { useCurrency } from '../../context/CurrencyContext';
 import { CalendarDays, Check, ClipboardList, Edit3, FileText, Package, Plus, Printer, Search, Trash2, X, XCircle } from 'lucide-react';
 
 const PurchasesView = ({ lang = 'ar', generalSettings }) => {
     const isRTL = lang === 'ar';
-    const currency = generalSettings?.currency || 'YER';
+    const { activeCurrency, formatPrice } = useCurrency();
+    const currency = activeCurrency || generalSettings?.currency || 'YER';
     const [purchases, setPurchases] = useState([]);
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState('');
@@ -86,7 +88,7 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
         out.total += Number(item.total || 0); out.paid += Number(item.paid || 0); out.remaining += remainingOf(item); out.quantity += Number(item.quantity || 0); return out;
     }, { total: 0, paid: 0, remaining: 0, quantity: 0 });
     const currencyLabel = getLocalizedCurrency(currency, lang);
-    const money = value => `${Number(value || 0).toLocaleString('en-US')} ${currencyLabel}`;
+    const money = value => formatPrice(value, currency);
     const number = value => Number(value || 0).toLocaleString('en-US');
     const toEnglishDigits = value => String(value ?? '').replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
     const numericInput = value => toEnglishDigits(value).replace(/[^0-9.]/g, '');

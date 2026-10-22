@@ -16,6 +16,7 @@ import {
     Printer, Search, ChevronDown, Check, X, FileText
 } from 'lucide-react';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, (digit) => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
 const formatDateField = (value) => toEnglishDigits(value).replace(/-/g, '/');
@@ -39,6 +40,8 @@ const parseTimeField = (value) => {
 
 const ExpensesView = ({ lang = 'ar', generalSettings }) => {
     const currency = generalSettings?.currency || 'YER';
+    const { activeCurrency, convertFromCurrency } = useCurrency();
+    const displayCurrency = activeCurrency || currency;
     const isRTL = lang === 'ar';
     const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
     const workerPerms = isWorker ? JSON.parse(sessionStorage.getItem('posWorkerPermissions') || '{}') : {};
@@ -109,6 +112,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
     };
 
     const getCurrencyLabel = (code = currency) => currencyLabels[code] || code;
+    const formatStoredAmount = (value, sourceCurrency = 'YER') => Math.round(convertFromCurrency(value, sourceCurrency, displayCurrency)).toLocaleString('en-US');
 
     // Helper: map old internal entity type values to display text, or show as-is for free text
     const getEntityLabel = (val) => {
@@ -1526,7 +1530,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                     <td className="w-[120px] px-3 py-2.5 text-center align-middle text-gray-500 whitespace-nowrap">{toEnglishDigits(expense.date)}</td>
                                     <td className="w-[140px] px-3 py-2.5 text-start whitespace-nowrap"><span className={`relative -left-3 inline-flex min-w-[116px] justify-center rounded-full px-2 py-0.5 text-xs font-black ${getPaymentClass(expense.paymentMethod)}`}>{getPaymentLabel(expense.paymentMethod)}</span></td>
                                     <td className="px-3 py-2.5 text-end font-extrabold text-red-500 dark:text-red-400 whitespace-nowrap"><span className="relative -right-2">
-                                        {expense.amount.toLocaleString()} {getCurrencyLabel(expense.currency || currency)}
+                                        {formatStoredAmount(expense.amount, expense.currency || currency)} {getCurrencyLabel(displayCurrency)}
                                     </span>
                                     </td>
                                     <td className="px-3 py-2.5 text-center">
@@ -1573,7 +1577,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                 <td colSpan={7} className="px-3 py-2.5 text-center whitespace-nowrap">
                                     <span className="mx-auto flex w-[45%] min-w-[200px] items-center justify-center gap-2 rounded-lg bg-red-50/70 py-2.5 font-black dark:bg-red-500/10">
                                         <span className="font-bold text-gray-500 dark:text-gray-400">{isRTL ? 'الإجمالي' : 'Total'}</span>
-                                        <span className="text-red-600 dark:text-red-300">{totalExpenses.toLocaleString()} {getCurrencyLabel(currency)}</span>
+                                        <span className="text-red-600 dark:text-red-300">{formatStoredAmount(totalExpenses, currency)} {getCurrencyLabel(displayCurrency)}</span>
                                     </span>
                                 </td>
                             </tr>
@@ -1764,7 +1768,7 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                                         </span>
                                     </td>
                                     <td className={`w-[150px] px-3 py-2.5 text-end font-extrabold whitespace-nowrap transform translate-x-3 ${bond.type === 'receipt' ? 'text-green-500' : 'text-red-500'}`}>
-                                        <span className="inline-flex min-w-[130px] justify-end">{bond.amount.toLocaleString()} {getCurrencyLabel(bond.currency || currency)}</span>
+                                        <span className="inline-flex min-w-[130px] justify-end">{formatStoredAmount(bond.amount, bond.currency || currency)} {getCurrencyLabel(displayCurrency)}</span>
                                     </td>
                                     <td className="px-3 py-2.5 text-center">
                                         <div className="flex items-center justify-center gap-1">
@@ -1812,18 +1816,18 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 px-2 mt-3 border-t border-gray-100 dark:border-white/5 pt-3 font-extrabold text-sm text-gray-700 dark:text-gray-300">
                     <div className="bg-green-100/80 dark:bg-green-500/15 p-2.5 rounded-lg text-center">
                         <span className="text-gray-500 dark:text-gray-300 block text-[13px] font-bold">{isRTL ? 'إجمالي سندات القبض' : 'Total Receipt Bonds'}</span>
-                        <span className="text-green-500 text-base font-black">{totalReceipts.toLocaleString()} {getCurrencyLabel(currency)}</span>
+                        <span className="text-green-500 text-base font-black">{formatStoredAmount(totalReceipts, currency)} {getCurrencyLabel(displayCurrency)}</span>
                     </div>
 
                     <div className="bg-red-100/80 dark:bg-red-500/15 p-2.5 rounded-lg text-center">
                         <span className="text-gray-500 dark:text-gray-300 block text-[13px] font-bold">{isRTL ? 'إجمالي سندات الصرف' : 'Total Payment Bonds'}</span>
-                        <span className="text-red-500 text-base font-black">{totalPayments.toLocaleString()} {getCurrencyLabel(currency)}</span>
+                        <span className="text-red-500 text-base font-black">{formatStoredAmount(totalPayments, currency)} {getCurrencyLabel(displayCurrency)}</span>
                     </div>
 
                     <div className="bg-blue-100/80 dark:bg-blue-500/15 p-2.5 rounded-lg text-center">
                         <span className="text-gray-500 dark:text-gray-300 block text-[13px] font-bold">{isRTL ? 'صافي الرصيد' : 'Net Balance'}</span>
                         <span className={`text-base font-black ${netBalance >= 0 ? 'text-blue-500 dark:text-blue-400' : 'text-orange-500'}`}>
-                            {netBalance >= 0 ? '+' : ''}{netBalance.toLocaleString()} {getCurrencyLabel(currency)}
+                            {netBalance >= 0 ? '+' : ''}{formatStoredAmount(netBalance, currency)} {getCurrencyLabel(displayCurrency)}
                         </span>
                     </div>
                 </div>

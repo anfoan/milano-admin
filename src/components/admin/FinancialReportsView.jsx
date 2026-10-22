@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const toDate = (value) => {
     if (!value) return null;
@@ -60,7 +61,8 @@ const MetricCard = ({ title, hint, amount, currencyLabel, icon, tone, badge }) =
 
 const FinancialReportsView = ({ lang = 'ar', generalSettings = {}, onNavigate, onViewOrder }) => {
     const isRTL = lang === 'ar';
-    const currency = generalSettings?.currency || 'YER';
+    const { activeCurrency, convertPrice, formatPrice } = useCurrency();
+    const currency = activeCurrency || generalSettings?.currency || 'YER';
     const currencyLabel = getLocalizedCurrency(currency, lang);
     const [orders, setOrders] = useState([]);
     const [purchases, setPurchases] = useState([]);
@@ -142,8 +144,8 @@ const FinancialReportsView = ({ lang = 'ar', generalSettings = {}, onNavigate, o
         setPeriod(nextPeriod);
     };
 
-    const money = (value) => `${Number(value || 0).toLocaleString('en-US')} ${currencyLabel}`;
-    const number = (value) => Number(value || 0).toLocaleString('en-US');
+    const money = (value) => formatPrice(value, currency);
+    const number = (value) => Math.round(convertPrice(value, currency)).toLocaleString('en-US');
     const formatDate = (value) => {
         const date = typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? dayAtNoon(value) : toDate(value);
         return date ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date) : '---';
