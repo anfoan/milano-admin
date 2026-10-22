@@ -236,7 +236,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                     : 'text-slate-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-500'
                                     }`}
                             >
-                                <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'} ${item.id === 'merchant-stores' ? 'translate-x-2' : ''}`}>
+                                <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'} ${item.id === 'merchant-stores' ? 'translate-x-1' : ''}`}>
                                     {item.icon}
                                 </span>
                                 <span className={`text-[17px] font-black flex-1 flex items-center gap-3 whitespace-nowrap ${item.id === 'merchant-stores' ? 'translate-x-1' : ''}`}>
