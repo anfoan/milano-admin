@@ -79,7 +79,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
     }, [isEditing]);
 
     const currency = generalSettings?.currency === 'SAR'
-        ? (lang === 'ar' ? "ر.س" : "SAR")
+        ? (lang === 'ar' ? "ريال سعودي" : "SAR")
         : (lang === 'ar' ? "ر.ي" : "YER");
 
     const t = {

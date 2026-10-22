@@ -72,7 +72,7 @@ export const CurrencyProvider = ({ children }) => {
         formatPrice,
         convertPrice,
         exchangeRate,
-        currencySymbol: activeCurrency === 'SAR' ? 'ر.س' : 'ر.ي'
+        currencySymbol: activeCurrency === 'SAR' ? 'ريال سعودي' : 'ر.ي'
     };
 
     return (

@@ -5,7 +5,7 @@ export const getLocalizedCurrency = (currencyCode, language) => {
     if (language === 'ar') {
         const arCurrencies = {
             'YER': 'ريال يمني',
-            'SAR': 'ر.س',
+            'SAR': 'ريال سعودي',
             'USD': 'دولار',
             'AED': 'د.إ',
             'KWD': 'د.ك',
