@@ -40,7 +40,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             expenses: 'المصروفات والسندات',
             financial_reports: 'التقارير المالية',
             wallet: 'المحفظة',
-            merchant_stores: 'متاجر التجار'
+            merchant_stores: 'متاجر البائعين'
         },
         en: {
             milano: 'Milano',
@@ -70,7 +70,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             expenses: 'Expenses & Bonds',
             financial_reports: 'Financial Reports',
             wallet: 'Wallet',
-            merchant_stores: 'Merchant Stores'
+            merchant_stores: 'Seller Stores'
         }
     };
 
