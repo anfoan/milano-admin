@@ -21,7 +21,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
     const [isUnlimited, setIsUnlimited] = useState(false);
     const [maxUses, setMaxUses] = useState(1);
     const [expiryDate, setExpiryDate] = useState('');
-    const [minOrderAmount, setMinOrderAmount] = useState('');
+    const [minOrderAmount, setMinOrderAmount] = useState('0');
     const { formatPrice, exchangeRate } = useCurrency();
 
     const t = {
@@ -111,6 +111,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
 
     const txt = t[lang];
     const isRTL = lang === 'ar';
+    const toEnglishDigits = value => String(value ?? '').replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x660));
     const couponCurrency = generalSettings?.currency === 'SAR' ? 'SAR' : 'YER';
     const currency = getLocalizedCurrency(couponCurrency, lang);
     const toBaseCouponAmount = value => couponCurrency === 'SAR'
@@ -218,7 +219,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
         setIsUnlimited(false);
         setMaxUses(100);
         setExpiryDate('');
-        setMinOrderAmount('');
+        setMinOrderAmount('0');
         setEditingCoupon(null);
     };
 
@@ -231,7 +232,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
         setIsUnlimited(Boolean(coupon.isUnlimited));
         setMaxUses(coupon.maxUses || 1);
         setExpiryDate(coupon.expiryDate || '');
-        setMinOrderAmount(fromBaseCouponAmount(coupon.minOrderAmount) || '');
+        setMinOrderAmount(fromBaseCouponAmount(coupon.minOrderAmount) || '0');
         setIsAdding(true);
     };
 
@@ -279,7 +280,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                         dir="ltr"
                         className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]"
                     >
-                        <aside dir={isRTL ? 'rtl' : 'ltr'} className="order-2 rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm lg:order-1">
+                        <aside dir={isRTL ? 'rtl' : 'ltr'} className="order-2 h-fit self-start rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm lg:order-1">
                             <h3 className="mb-4 text-lg font-black text-gray-800">{lang === 'ar' ? 'ملخص الكوبون' : 'Coupon Summary'}</h3>
                             <div className="space-y-2 text-sm font-bold">
                                 <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"><span className="text-gray-400">{lang === 'ar' ? 'الكود' : 'Code'}</span><b dir="ltr" className="font-mono">{code || '—'}</b></div>
@@ -318,7 +319,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                             <section className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm">
                                 <div className="mb-5 flex items-center justify-between"><h3 className="text-base font-black text-gray-800">{lang === 'ar' ? 'شروط الاستخدام' : 'Usage Conditions'}</h3><span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-xs font-black text-blue-600">3</span></div>
                                 <div className="space-y-5">
-                                    <div className="flex flex-wrap items-center justify-between gap-4"><label className="text-sm font-black text-gray-700">{lang === 'ar' ? 'عدد مرات الاستخدام' : 'Usage limit'}</label><div className="flex items-center gap-2"><button type="button" disabled={isUnlimited} onClick={() => setMaxUses(Math.max(1, Number(maxUses || 1) - 1))} className="h-10 w-10 rounded-xl border border-gray-200 bg-white text-lg font-black text-blue-600 disabled:opacity-40">−</button><input type="number" min="1" disabled={isUnlimited} value={maxUses} onChange={e => setMaxUses(e.target.value)} className="h-10 w-24 rounded-xl border border-gray-300 text-center font-black text-gray-900 outline-none disabled:bg-gray-100" /><button type="button" disabled={isUnlimited} onClick={() => setMaxUses(Number(maxUses || 0) + 1)} className="h-10 w-10 rounded-xl border border-gray-200 bg-white text-lg font-black text-blue-600 disabled:opacity-40">+</button></div><div className="flex rounded-xl bg-gray-100 p-1"><button type="button" onClick={() => setIsUnlimited(false)} className={`rounded-lg px-4 py-2 text-xs font-black ${!isUnlimited ? 'bg-blue-500 text-white' : 'text-gray-600'}`}>{lang === 'ar' ? 'عدد محدد' : 'Limited'}</button><button type="button" onClick={() => setIsUnlimited(true)} className={`rounded-lg px-4 py-2 text-xs font-black ${isUnlimited ? 'bg-blue-500 text-white' : 'text-gray-600'}`}>{lang === 'ar' ? 'غير محدود' : 'Unlimited'}</button></div></div>
+                                    <div className="flex flex-wrap items-center justify-between gap-4"><label className="text-sm font-black text-gray-700">{lang === 'ar' ? 'عدد مرات الاستخدام' : 'Usage limit'}</label><div className="flex items-center gap-2"><button type="button" disabled={isUnlimited} onClick={() => setMaxUses(Math.max(1, Number(maxUses || 1) - 1))} className="h-10 w-10 rounded-xl border border-gray-200 bg-white text-lg font-black text-blue-600 disabled:opacity-40">−</button><input type="text" inputMode="numeric" dir="ltr" min="1" disabled={isUnlimited} value={toEnglishDigits(maxUses)} onChange={e => setMaxUses(toEnglishDigits(e.target.value).replace(/[^0-9]/g, ''))} className="h-10 w-24 rounded-xl border border-gray-300 text-center font-black text-gray-900 outline-none disabled:bg-gray-100" /><button type="button" disabled={isUnlimited} onClick={() => setMaxUses(Number(maxUses || 0) + 1)} className="h-10 w-10 rounded-xl border border-gray-200 bg-white text-lg font-black text-blue-600 disabled:opacity-40">+</button></div><div className="flex rounded-xl bg-gray-100 p-1"><button type="button" onClick={() => setIsUnlimited(false)} className={`rounded-lg px-4 py-2 text-xs font-black ${!isUnlimited ? 'bg-blue-500 text-white' : 'text-gray-600'}`}>{lang === 'ar' ? 'عدد محدد' : 'Limited'}</button><button type="button" onClick={() => setIsUnlimited(true)} className={`rounded-lg px-4 py-2 text-xs font-black ${isUnlimited ? 'bg-blue-500 text-white' : 'text-gray-600'}`}>{lang === 'ar' ? 'غير محدود' : 'Unlimited'}</button></div></div>
                                     <div className="border-t border-gray-100 pt-5"><div className="flex flex-wrap items-center justify-between gap-4"><label className="text-sm font-black text-gray-700">{txt.min_order}</label><div className="flex items-center overflow-hidden rounded-xl border border-gray-300 bg-white"><input type="number" min="0" value={minOrderAmount} onChange={e => setMinOrderAmount(e.target.value)} className="w-32 px-3 py-3 text-center font-black text-gray-900 outline-none" /><span className="border-l border-gray-200 px-3 text-xs font-black text-gray-500">{currency}</span></div></div><p className="mt-2 text-right text-[10px] font-bold text-gray-400">{lang === 'ar' ? 'لا يعمل الكوبون إذا لم تصل قيمة المنتجات في السلة إلى الحد الأدنى.' : 'The coupon will not work below the minimum cart amount.'}</p></div>
                                     <div className="border-t border-gray-100 pt-5"><label className="mb-2 block text-sm font-black text-gray-700">{txt.expiry_date}</label><input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 font-bold text-gray-900 outline-none" /></div>
                                 </div>
