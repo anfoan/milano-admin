@@ -264,7 +264,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                 {isAdding && (
                     <button
                         onClick={() => { setIsAdding(false); resetForm(); }}
-                        className="px-6 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition flex items-center gap-2"
+                        className="px-6 py-3 bg-gray-200 border border-gray-300 text-gray-700 rounded-xl font-bold shadow-sm hover:bg-gray-300 transition flex items-center gap-2"
                     >
                         <span>{txt.cancel}</span>
                     </button>
