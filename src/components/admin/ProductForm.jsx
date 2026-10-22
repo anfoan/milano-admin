@@ -189,6 +189,10 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     const [draggedGalleryIndex, setDraggedGalleryIndex] = useState(null);
 
     const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x660));
+    const formatThousands = (value) => {
+        const normalized = toEnglishDigits(value).replace(/,/g, '').replace(/[^0-9]/g, '');
+        return normalized ? Number(normalized).toLocaleString('en-US') : '';
+    };
 
     // Fetch categories on mount
     useEffect(() => {
@@ -662,9 +666,9 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                             <div className="space-y-2">
                                 <label className={`text-xs font-black ${errors.price ? 'text-red-500' : 'text-gray-600'} block ${isRTL ? 'mr-1' : 'ml-1'}`}>{txt.price} ({txt.yer_suffix}) <span className="text-red-500 text-xl mx-1 font-black">*</span></label>
                                 <input
-                                    value={formData.price}
+                                    value={formatThousands(formData.price)}
                                     onChange={(e) => {
-                                    setFormData({ ...formData, price: toEnglishDigits(e.target.value) });
+                                    setFormData({ ...formData, price: toEnglishDigits(e.target.value).replace(/,/g, '') });
                                         if (errors.price) setErrors({ ...errors, price: false });
                                     }}
                                     type="text"
@@ -710,9 +714,9 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                             <div className="space-y-2">
                                 <label className={`text-xs font-black ${errors.costPrice ? 'text-red-500' : 'text-gray-600'} block ${isRTL ? 'mr-1' : 'ml-1'}`}>{txt.cost_price} ({txt.yer_suffix}) <span className="text-red-500 text-xl mx-1 font-black">*</span></label>
                                 <input
-                                    value={formData.costPrice}
+                                    value={formatThousands(formData.costPrice)}
                                     onChange={(e) => {
-                                        setFormData({ ...formData, costPrice: toEnglishDigits(e.target.value) });
+                                        setFormData({ ...formData, costPrice: toEnglishDigits(e.target.value).replace(/,/g, '') });
                                         if (errors.costPrice) setErrors({ ...errors, costPrice: false });
                                     }}
                                     type="text"
