@@ -605,18 +605,15 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                 />
             )}
             <form onSubmit={handleSave} className="space-y-6 pb-20 font-['Cairo'] text-sm" dir={isRTL ? 'rtl' : 'ltr'}>
-                {editingProduct && (
-                    <button type="button" onClick={() => { setEditingProduct(null); setActiveTab('product-list'); }} className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-600 hover:text-blue-600 hover:border-blue-300 transition-colors" title={isRTL ? 'العودة إلى قائمة المنتجات' : 'Back to products'}>
-                        <ArrowRight size={20} className={isRTL ? '' : 'rotate-180'} />
-                    </button>
-                )}
                 {/* 1. Product Info Section (Matching Image 1) */}
                 <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden relative">
-                    <div className={`absolute top-8 ${isRTL ? 'right-8' : 'left-8'} w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-black z-10 shadow-lg shadow-blue-200`}>
-                        1
-                    </div>
+                    {editingProduct && (
+                        <button type="button" onClick={() => { setEditingProduct(null); setActiveTab('product-list'); }} className={`absolute top-4 ${isRTL ? 'right-4' : 'left-4'} z-10 flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:text-blue-600`} title={isRTL ? 'العودة إلى الأقسام' : 'Back to categories'} aria-label={isRTL ? 'العودة إلى الأقسام' : 'Back to categories'}>
+                            <ArrowRight size={20} className={isRTL ? '' : 'rotate-180'} />
+                        </button>
+                    )}
 
-                    <div className={`p-10 ${isRTL ? 'pr-20' : 'pl-20'}`}>
+                    <div className="p-10">
                         <div className="flex justify-between items-center mb-10">
                             <h2 className="text-xl font-black text-gray-800">
                                 {editingProduct ? txt.title_edit : txt.title_add}
