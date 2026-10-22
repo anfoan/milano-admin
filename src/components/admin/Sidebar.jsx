@@ -239,7 +239,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                                 <span className={`${isSectionActive(item) ? 'text-white' : 'text-slate-700 group-hover:text-blue-500 dark:text-white dark:group-hover:text-blue-400'}`}>
                                     {item.icon}
                                 </span>
-                                <span className="text-[17px] font-black flex-1 flex items-center gap-3 whitespace-nowrap">
+                                <span className={`text-[17px] font-black flex-1 flex items-center gap-3 whitespace-nowrap ${item.id === 'merchant-stores' ? 'translate-x-1' : ''}`}>
                                     <span>{item.name}</span>
                                     {item.id === 'inbox' && unreadCount > 0 && (
                                         <span className="inline-flex items-center justify-center w-6 h-6 bg-red-500 text-white text-[12px] rounded-full font-black shadow-md animate-pulse shrink-0">
