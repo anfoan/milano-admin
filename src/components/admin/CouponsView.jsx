@@ -310,11 +310,11 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                     <div className="rounded-2xl bg-blue-50 p-4" dir="ltr">
                                         <div className="flex flex-wrap items-center justify-between gap-4">
                                             <div className="order-2 min-w-[230px] flex-1 text-right" dir="rtl">
-                                                <p className="text-[11px] font-bold text-gray-500">مثال: سلة قيمتها 100.00 AED</p>
+                                                <p className="text-[11px] font-bold text-gray-500">{lang === 'ar' ? `مثال: سلة قيمتها 100.00 ${currency}` : `Example: a cart worth 100.00 ${currency}`}</p>
                                                 <div className="mt-1 flex items-center justify-end gap-3 text-sm font-black">
                                                     <span className="text-gray-400 line-through">100.00</span>
-                                                    <span className="text-gray-800">{(100 - Number(discountPercent || 1)).toFixed(2)} AED</span>
-                                                    <span className="text-emerald-600">يوفّر الزبون {Number(discountPercent || 1).toFixed(2)} AED</span>
+                                                    <span className="text-gray-800">{(100 - Number(discountPercent || 1)).toFixed(2)} {currency}</span>
+                                                    <span className="text-emerald-600">{lang === 'ar' ? `يوفّر الزبون ${Number(discountPercent || 1).toFixed(2)} ${currency}` : `Customer saves ${Number(discountPercent || 1).toFixed(2)} ${currency}`}</span>
                                                 </div>
                                             </div>
                                             <div className="order-1 flex items-center gap-2" dir="ltr">
