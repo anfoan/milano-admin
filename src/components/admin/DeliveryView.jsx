@@ -330,26 +330,26 @@ const DeliveryView = ({ lang = 'ar', generalSettings }) => {
                                             maxLength={50}
                                             value={region.name}
                                             onChange={(e) => updateRegionName(region.id, e.target.value)}
-                                            className="w-[55%] h-5 ml-auto mr-0 block bg-transparent border-none p-0 text-center font-bold text-gray-700 placeholder-gray-300 focus:ring-0"
+                                            className="w-full max-w-[150px] px-4 py-2 ml-auto mr-0 block bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
                                             placeholder={txt.region_name_placeholder}
                                         />
                                     </td>
 
                                     <td className="px-6 py-4 text-center">
-                                        <div className="w-full max-w-[160px] mx-auto h-8 bg-black rounded-md px-2 flex items-center gap-2" dir="rtl">
+                                        <div className="w-full max-w-[150px] mx-auto px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl flex items-center gap-2 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all" dir="rtl">
                                             <input
                                                 type="text"
                                                 inputMode="numeric"
                                                 value={toEnglishDigits(region.deliveryDuration ?? 1)}
                                                 onChange={(e) => updateRegionCost(region.id, 'deliveryDuration', toEnglishDigits(e.target.value))}
-                                                className="w-12 bg-transparent border-none p-0 text-center text-white font-bold font-mono outline-none focus:ring-0"
+                                                className="w-12 bg-transparent border-none p-0 text-center text-gray-700 font-bold font-mono outline-none focus:ring-0"
                                                 aria-label={txt.duration_col}
                                             />
                                             <input
                                                 type="text"
                                                 value={region.deliveryDurationLabel ?? 'يوم'}
                                                 onChange={(e) => updateRegionText(region.id, 'deliveryDurationLabel', e.target.value)}
-                                                className="min-w-0 flex-1 bg-transparent border-none p-0 text-center text-white font-bold outline-none focus:ring-0"
+                                                className="min-w-0 flex-1 bg-transparent border-none p-0 text-center text-gray-700 font-bold outline-none focus:ring-0"
                                                 placeholder={lang === 'ar' ? 'كلمة' : 'Label'}
                                                 aria-label={lang === 'ar' ? 'كلمة مدة التوصيل' : 'Duration label'}
                                             />
