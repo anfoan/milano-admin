@@ -3,8 +3,9 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const CurrencyContext = createContext(null);
-const RATES_URL = 'https://open.er-api.com/v6/latest/YER';
-const FALLBACK_RATES = { YER: 1, SAR: 1 / 140, USD: 1 / 236 };
+// Store reference rates for Sana'a: 1 SAR = 140 YER and 1 USD = 535 YER.
+// Values are stored as target-currency units per 1 YER.
+const FALLBACK_RATES = { YER: 1, SAR: 1 / 140, USD: 1 / 535 };
 const SUPPORTED_CURRENCIES = ['YER', 'SAR', 'USD'];
 
 const asRates = (value) => {
@@ -32,30 +33,21 @@ export const CurrencyProvider = ({ children }) => {
             if (!snapshot.exists()) return;
             const settings = snapshot.data();
             if (SUPPORTED_CURRENCIES.includes(settings.currency)) setActiveCurrency(settings.currency);
-            setRates(asRates(settings.exchangeRates));
+            const usesOldGlobalSource = String(settings.exchangeRateSource || '').includes('ExchangeRate-API');
+            const nextRates = usesOldGlobalSource || !settings.exchangeRates ? FALLBACK_RATES : asRates(settings.exchangeRates);
+            setRates(nextRates);
 
-            const updatedAt = settings.exchangeRateUpdatedAt ? new Date(settings.exchangeRateUpdatedAt).getTime() : 0;
-            const stale = !updatedAt || (Date.now() - updatedAt) >= 24 * 60 * 60 * 1000;
-            if (!stale || refreshInFlight.current) return;
-            refreshInFlight.current = true;
-
-            fetch(RATES_URL)
-                .then(response => {
-                    if (!response.ok) throw new Error(`Exchange-rate request failed: ${response.status}`);
-                    return response.json();
-                })
-                .then(payload => {
-                    if (payload?.result !== 'success') throw new Error('Exchange-rate provider returned an error');
-                    const nextRates = asRates(payload.rates);
-                    setRates(nextRates);
-                    return setDoc(doc(db, 'settings', 'general'), {
-                        exchangeRates: nextRates,
-                        exchangeRateUpdatedAt: new Date().toISOString(),
-                        exchangeRateSource: 'ExchangeRate-API Open Access (https://www.exchangerate-api.com)'
-                    }, { merge: true });
-                })
-                .catch(error => console.warn('Daily exchange-rate refresh skipped; using cached rates.', error))
-                .finally(() => { refreshInFlight.current = false; });
+            // Replace the previously stored global mid-market values once; do not fetch them again.
+            if ((usesOldGlobalSource || !settings.exchangeRates) && !refreshInFlight.current) {
+                refreshInFlight.current = true;
+                setDoc(doc(db, 'settings', 'general'), {
+                    exchangeRates: FALLBACK_RATES,
+                    exchangeRateUpdatedAt: new Date().toISOString(),
+                    exchangeRateSource: 'Sana\'a local reference rates: 1 SAR = 140 YER; 1 USD = 535 YER'
+                }, { merge: true })
+                    .catch(error => console.warn('Unable to save local exchange-rate reference.', error))
+                    .finally(() => { refreshInFlight.current = false; });
+            }
         }, error => console.warn('Unable to subscribe to general currency settings.', error));
 
         return unsubscribe;
