@@ -777,7 +777,7 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
                     .map((product) => (
                         <div
                             key={product.id}
-                            className={`bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden flex flex-col group relative ${product.hidden ? 'opacity-60 grayscale' : ''}`}
+                            className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden flex flex-col group relative"
                         >
                             {/* Quick Actions (Always Visible) */}
                             <div className="absolute top-2.5 right-2.5 left-2.5 z-20 flex justify-between items-center transition-opacity">
@@ -791,7 +791,7 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
                             </div>
 
                             {/* Image */}
-                            <div className="aspect-square bg-gray-50 relative overflow-hidden">
+                            <div className={`aspect-square bg-gray-50 relative overflow-hidden ${product.hidden ? 'opacity-60 grayscale' : ''}`}>
                                 <img
                                     src={product.mainImage || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400"}
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -800,7 +800,7 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
                             </div>
 
                             {/* Info & Sub-Buttons */}
-                            <div className="p-3.5 md:p-4.5 text-center space-y-1.5 md:space-y-2.5">
+                            <div className={`p-3.5 md:p-4.5 text-center space-y-1.5 md:space-y-2.5 ${product.hidden ? 'opacity-60 grayscale' : ''}`}>
                                 <h3 className="font-black text-gray-800 truncate text-[11px] md:text-sm">{product.name}</h3>
                                 <div className="text-gray-900 font-black text-sm md:text-lg italic uppercase flex items-center justify-center gap-1.5">
                                     <span>{product.price?.toLocaleString()}</span>
