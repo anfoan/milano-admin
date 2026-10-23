@@ -426,6 +426,7 @@ printWindow.onload = () => printWindow.print();
         const totalNetProfit = ordersToExport.reduce((acc, order) => {
             return acc + calculateOrderNetProfit(order);
         }, 0);
+        const totalSales = ordersToExport.reduce((acc, order) => acc + (order.total !== undefined ? Number(order.total || 0) : ((Number(order.subTotal) || 0) - (Number(order.discount) || 0) + (Number(order.deliveryCost) || 0))), 0);
 
         doc.write(`
             <!DOCTYPE html>
@@ -438,7 +439,7 @@ printWindow.onload = () => printWindow.print();
                 <style>
                     :root { color-scheme: light; }
                     html { background-color: #ffffff !important; filter: none !important; }
-                    body { 
+                    body {
                         font-family: 'Cairo', sans-serif; 
                         background-color: #ffffff !important; 
                         color: #000000 !important; 
@@ -448,27 +449,46 @@ printWindow.onload = () => printWindow.print();
                         min-height: 100vh;
                     }
                     .print-wrapper {
-                        background-color: #ffffff !important;
+                        background: linear-gradient(180deg, #f8fbff 0%, #ffffff 260px) !important;
                         color: #000000 !important;
-                        padding: 15px;
+                        padding: 24px 28px 28px;
                         min-height: 100vh;
                         width: 100%;
                         box-sizing: border-box;
                     }
-                    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                    th { 
-                        background-color: #f8fafc !important; 
-                        padding: 8px; 
+                    .report-header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px 20px; background:#ffffff; border:1px solid #dbe7f3; border-radius:16px; box-shadow:0 8px 22px rgba(30,64,175,.08); }
+                    .report-kicker { display:inline-block; margin-bottom:5px; color:#2563eb; font-size:9px; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; }
+                    .report-title { margin:0; color:#0f172a; font-size:22px; font-weight:900; }
+                    .report-date { margin:5px 0 0; color:#64748b; font-size:10px; font-weight:700; }
+                    .print-button { background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; border:0; padding:10px 18px; border-radius:10px; font-weight:900; cursor:pointer; box-shadow:0 5px 12px rgba(37,99,235,.22); }
+                    .table-card { margin-top:18px; padding:8px; background:#fff; border:1px solid #dbe7f3; border-radius:16px; box-shadow:0 8px 22px rgba(15,23,42,.06); }
+                    table { width: 100%; border-collapse: separate; border-spacing: 0; overflow:hidden; }
+                    th {
+                        background:linear-gradient(180deg,#eef5fc,#e7f0fa) !important;
+                        padding:10px 9px;
                         text-align: ${isRTL ? 'right' : 'left'}; 
-                        border-bottom: 2px solid #e2e8f0; 
+                        border-bottom:1px solid #cbdceb;
+                        border-left:1px solid #dbe7f3;
                         font-weight: 800; 
-                        color: #1e293b !important; 
-                        font-size: 11px; 
+                        color: #1e3a5f !important;
+                        font-size: 10px;
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
                     }
-                    tr { border-bottom: 1px solid #eee; background-color: #ffffff !important; }
-                    td { color: #334155 !important; font-size: 11px; background-color: #ffffff !important; padding: 6px 8px; }
+                    th:first-child { border-radius:0 8px 0 0; }
+                    th:last-child { border-left:0; border-radius:8px 0 0 0; }
+                    tr { background-color:#ffffff !important; }
+                    tbody tr:nth-child(even) { background:#f8fbff !important; }
+                    tbody tr:last-child td { border-bottom:0; }
+                    td { color:#334155 !important; font-size:10px; background:transparent !important; padding:9px 9px; border-bottom:1px solid #e5edf5; border-left:1px solid #edf2f7; }
+                    td:last-child { border-left:0; }
+                    .summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px; page-break-inside:avoid; }
+                    .summary-card { padding:14px 16px; border:1px solid #dbe7f3; border-radius:14px; background:#fff; box-shadow:0 6px 15px rgba(15,23,42,.06); }
+                    .summary-label { color:#64748b; font-size:10px; font-weight:900; }
+                    .summary-value { margin-top:5px; color:#0f172a; font-size:20px; font-weight:900; }
+                    .summary-card.sales .summary-value { color:#16a34a; }
+                    .summary-card.profit { background:linear-gradient(135deg,#eff6ff,#f8fbff); border-color:#bfdbfe; }
+                    .summary-card.profit .summary-value { color:#2563eb; }
                     @media print {
                         @page { size: A4 landscape; margin: 10mm; } 
                         html, body, .print-wrapper {
@@ -476,23 +496,25 @@ printWindow.onload = () => printWindow.print();
                             color: #000000 !important;
                         }
                         button { display: none !important; }
+                        .report-header, .table-card, .summary-card { box-shadow:none !important; }
                         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                     }
                 </style>
             </head>
             <body>
                 <div class="print-wrapper">
-                    <div style="display: flex; justify-content: space-between; items-align: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
+                    <div class="report-header">
                         <div>
-                            <h1 style="font-size: 20px; font-weight: 900; color: #0f172a; margin: 0;">${lang === 'ar' ? 'تقرير المبيعات والطلبات' : 'Orders & Sales Report'}</h1>
-                            <p style="color: #64748b; margin-top: 5px;">${lang === 'ar' ? 'تاريخ الاستخراج:' : 'Date:'} ${dateStr}</p>
+                            <span class="report-kicker">MILANO STORE</span>
+                            <h1 class="report-title">${lang === 'ar' ? 'تقرير المبيعات والطلبات' : 'Orders & Sales Report'}</h1>
+                            <p class="report-date">${lang === 'ar' ? 'تاريخ الاستخراج:' : 'Date:'} ${dateStr}</p>
                         </div>
-                        <div style="text-align: left;">
-                            <button onclick="window.print()" style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">${txt.print_report_btn}</button>
+                        <div>
+                            <button class="print-button" onclick="window.print()">${txt.print_report_btn}</button>
                         </div>
                     </div>
 
-                    <table>
+                    <div class="table-card"><table>
                         <thead>
                             <tr>
                                 <th style="text-align: center;">#</th>
@@ -507,24 +529,20 @@ printWindow.onload = () => printWindow.print();
                         <tbody>
                             ${rowsHtml}
                         </tbody>
-                    </table>
+                    </table></div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1.5fr 1.5fr; gap: 15px; margin-top: 25px; page-break-inside: avoid; max-width: 700px;">
-                        <div style="background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <div style="color: #64748b; font-size: 11px; font-weight: bold;">${lang === 'ar' ? 'عدد الطلبات' : 'Total Orders'}</div>
-                            <div style="color: #0f172a; font-size: 20px; font-weight: 900;">${ordersToExport.length}</div>
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <div class="summary-label">${lang === 'ar' ? 'عدد الطلبات' : 'Total Orders'}</div>
+                            <div class="summary-value">${ordersToExport.length}</div>
                         </div>
-                        <div style="background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <div style="color: #64748b; font-size: 11px; font-weight: bold;">${lang === 'ar' ? 'إجمالي المبيعات' : 'Total Sales'}</div>
-                            <div style="color: #16a34a; font-size: 20px; font-weight: 900;">
-                                ${ordersToExport.length > 1 ? ordersToExport.reduce((acc, curr) => acc + (curr.total !== undefined ? curr.total : ((curr.subTotal || 0) - (curr.discount || 0) + (curr.deliveryCost || 0))), 0).toLocaleString() + ' ' + (generalSettings?.currency || 'YER') : formatPrice(ordersToExport[0]?.total !== undefined ? ordersToExport[0]?.total : ((ordersToExport[0]?.subTotal || 0) - (ordersToExport[0]?.discount || 0) + (ordersToExport[0]?.deliveryCost || 0)), generalSettings?.currency || 'YER')}
-                            </div>
+                        <div class="summary-card sales">
+                            <div class="summary-label">${lang === 'ar' ? 'إجمالي المبيعات' : 'Total Sales'}</div>
+                            <div class="summary-value">${formatPrice(totalSales, generalSettings?.currency || 'YER')}</div>
                         </div>
-                        <div style="background: #eff6ff; padding: 12px; border-radius: 10px; border: 1px solid #dbeafe;">
-                            <div style="color: #1e40af; font-size: 11px; font-weight: bold;">${lang === 'ar' ? 'صافي الربح' : 'Net Profit'}</div>
-                            <div style="color: #2563eb; font-size: 20px; font-weight: 900;">
-                                ${totalNetProfit.toLocaleString()} ${generalSettings?.currency || 'YER'}
-                            </div>
+                        <div class="summary-card profit">
+                            <div class="summary-label">${lang === 'ar' ? 'صافي الربح' : 'Net Profit'}</div>
+                            <div class="summary-value">${formatPrice(totalNetProfit, generalSettings?.currency || 'YER')}</div>
                         </div>
                     </div>
                 </div>
