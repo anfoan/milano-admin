@@ -1,37 +1,37 @@
-import React, { useState, useEffect, useTransition } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import Sidebar from '../components/admin/Sidebar';
-import SettingsView from '../components/admin/SettingsView';
-import AccountSettingsView from '../components/admin/AccountSettingsView'; // Account Settings
-import OrdersView from '../components/admin/OrdersView';
-import ProductsView from '../components/admin/ProductsView';
-import ProductForm from '../components/admin/ProductForm';
-import InventoryView from '../components/admin/InventoryView';
-import DashboardHome from '../components/admin/DashboardHome';
-import ReviewsView from '../components/admin/ReviewsView';
-import CouponsView from '../components/admin/CouponsView';
-import LimitedOffersView from '../components/admin/LimitedOffersView';
-import PaymentsView from '../components/admin/PaymentsView';
-import DeliveryView from '../components/admin/DeliveryView'; // New
-import ExpensesView from '../components/admin/ExpensesView';
-import PurchasesView from '../components/admin/PurchasesView';
-import FinancialReportsView from '../components/admin/FinancialReportsView';
-import WalletView from '../components/admin/WalletView';
-import InboxView from '../components/admin/InboxView'; // New
-import AdminChatView from '../components/admin/AdminChatView'; // New Chat View
-import OrderDetailsView from '../components/admin/OrderDetailsView'; // New Detail Page
-import SocialMediaView from '../components/admin/SocialMediaView'; // New Social Media Page
+const SettingsView = lazy(() => import('../components/admin/SettingsView'));
+const AccountSettingsView = lazy(() => import('../components/admin/AccountSettingsView'));
+const OrdersView = lazy(() => import('../components/admin/OrdersView'));
+const ProductsView = lazy(() => import('../components/admin/ProductsView'));
+const ProductForm = lazy(() => import('../components/admin/ProductForm'));
+const InventoryView = lazy(() => import('../components/admin/InventoryView'));
+const DashboardHome = lazy(() => import('../components/admin/DashboardHome'));
+const ReviewsView = lazy(() => import('../components/admin/ReviewsView'));
+const CouponsView = lazy(() => import('../components/admin/CouponsView'));
+const LimitedOffersView = lazy(() => import('../components/admin/LimitedOffersView'));
+const PaymentsView = lazy(() => import('../components/admin/PaymentsView'));
+const DeliveryView = lazy(() => import('../components/admin/DeliveryView'));
+const ExpensesView = lazy(() => import('../components/admin/ExpensesView'));
+const PurchasesView = lazy(() => import('../components/admin/PurchasesView'));
+const FinancialReportsView = lazy(() => import('../components/admin/FinancialReportsView'));
+const WalletView = lazy(() => import('../components/admin/WalletView'));
+const InboxView = lazy(() => import('../components/admin/InboxView'));
+const AdminChatView = lazy(() => import('../components/admin/AdminChatView'));
+const OrderDetailsView = lazy(() => import('../components/admin/OrderDetailsView'));
+const SocialMediaView = lazy(() => import('../components/admin/SocialMediaView'));
 import ThemeToggle from '../components/ThemeToggle'; // Theme Toggle
 import AdminNotifications from '../components/admin/AdminNotifications'; // New Notifications Component
 import AdminSidePanel from '../components/admin/AdminSidePanel'; // Side Panel
-import DesignView from '../components/admin/DesignView'; // New Design View
-import ManualOrderView from '../components/admin/ManualOrderView'; // New Manual Order View
-import FooterSettingsView from '../components/admin/FooterSettingsView'; // New Footer Settings
-import POSView from '../components/admin/POSView';
-import MerchantStoresView from '../components/admin/MerchantStoresView';
+const DesignView = lazy(() => import('../components/admin/DesignView'));
+const ManualOrderView = lazy(() => import('../components/admin/ManualOrderView'));
+const FooterSettingsView = lazy(() => import('../components/admin/FooterSettingsView'));
+const POSView = lazy(() => import('../components/admin/POSView'));
+const MerchantStoresView = lazy(() => import('../components/admin/MerchantStoresView'));
 import { Menu, Search, Bell, User, PanelRight, ArrowRightFromLine, Store, Settings, LogOut, ShoppingBag, MessageSquare, Wallet, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -575,7 +575,9 @@ const AdminDashboard = () => {
 
                 {/* View Content (Scrollable) */}
                 <main className="flex-1 min-w-0 overflow-y-auto pt-3 px-3 sm:px-4 lg:pt-4 lg:px-8 xl:px-10 relative">
-                    {renderView()}
+                    <Suspense fallback={<div className="flex min-h-[260px] items-center justify-center rounded-[28px] bg-white/80 text-sm font-black text-slate-400 shadow-sm dark:bg-white/5">جاري تحميل القسم...</div>}>
+                        {renderView()}
+                    </Suspense>
                 </main>
             </div>
         </div>
