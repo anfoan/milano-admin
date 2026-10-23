@@ -57,7 +57,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
     const t = {
         ar: {
             search_placeholder: 'ابحث عن رقم الطلب، الاسم، أو الهاتف...',
-            invoice_pdf: 'تقرير قائمة الطلبات',
+            invoice_pdf: 'طباعة تقرير الطلبات PDF',
             export_excel: 'تصدير Excel',
             stat_all: 'الكل',
             stat_new: 'طلبات جديدة',
