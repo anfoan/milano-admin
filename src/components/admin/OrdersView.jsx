@@ -1196,14 +1196,14 @@ printWindow.onload = () => printWindow.print();
                 <div className="flex w-full gap-2 md:w-auto">
                     <button
                         onClick={openPDFModal}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-2.5 font-bold text-white shadow-lg shadow-red-500/20 transition hover:bg-red-600 md:flex-none"
+                        className="order-last flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-2.5 font-bold text-white shadow-lg shadow-red-500/20 transition hover:bg-red-600 md:flex-none"
                     >
                         <Printer size={20} />
                         <span>{txt.invoice_pdf}</span>
                     </button>
                     <button
                         onClick={openExcelModal} // Opens modal for now, or could change to direct excel if needed
-                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 md:flex-none"
+                        className="hidden flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 md:flex-none"
                     >
                         <FileDown size={20} />
                         <span>{txt.export_excel}</span>
