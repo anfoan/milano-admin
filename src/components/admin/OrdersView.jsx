@@ -411,7 +411,19 @@ printWindow.onload = () => printWindow.print();
         };
 
         const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-YE' : 'en-GB');
+        const getReportDateTime = (order) => {
+            let date = null;
+            if (order.createdAt && typeof order.createdAt.toDate === 'function') date = order.createdAt.toDate();
+            else if (order.createdAt instanceof Date) date = order.createdAt;
+            else if (typeof order.createdAt === 'string') date = new Date(order.createdAt);
+            if (!date || Number.isNaN(date.getTime())) return { date: order.date || '-', time: '' };
+            return {
+                date: date.toLocaleDateString('en-GB'),
+                time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
+            };
+        };
         const rowsHtml = ordersToExport.map((o, i) => `
+            ${(() => { const reportDateTime = getReportDateTime(o); return `
             <tr style="border-bottom: 1px solid #eee;">
                 <td style="padding: 8px; text-align: center; font-weight: bold;">${i + 1}</td>
                 <td style="padding: 8px; font-weight: bold;">${o.orderId || o.id}</td>
@@ -419,10 +431,11 @@ printWindow.onload = () => printWindow.print();
                 <td style="padding: 8px;">${o.formData?.name || '---'}</td>
                 <td style="padding: 8px;">${o.formData?.phone || '---'}</td>
                 <td style="padding: 8px; text-align: center;">${o.formData?.paymentMethod === 'whatsapp' ? (lang === 'ar' ? 'واتساب' : 'WhatsApp') : (lang === 'ar' ? 'عند الاستلام' : 'Cash on delivery')}</td>
-                <td style="padding: 8px; white-space: nowrap;">${o.date || '-'}</td>
+                <td style="padding: 8px; white-space: nowrap; text-align: center;"><div style="display:flex; flex-direction:column; align-items:center; line-height:1.35;"><span>${reportDateTime.date}</span><span style="font-size:9px; color:#64748b;">${reportDateTime.time}</span></div></td>
                 <td style="padding: 8px;">${getStatusLabel(o.status)}</td>
                 <td style="padding: 8px; text-align: center; font-weight: bold;">${formatPrice(o.total !== undefined ? o.total : ((o.subTotal || 0) - (o.discount || 0) + (o.deliveryCost || 0)), generalSettings?.currency || 'YER')}</td>
             </tr>
+        `; })()}
         `).join('');
 
         const totalNetProfit = ordersToExport.reduce((acc, order) => {
