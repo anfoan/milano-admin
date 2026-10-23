@@ -415,11 +415,13 @@ printWindow.onload = () => printWindow.print();
             <tr style="border-bottom: 1px solid #eee;">
                 <td style="padding: 8px; text-align: center; font-weight: bold;">${i + 1}</td>
                 <td style="padding: 8px; font-weight: bold;">${o.orderId || o.id}</td>
+                <td style="padding: 8px; font-weight: bold;">${getOrderProductsLabel(o) || '---'}</td>
                 <td style="padding: 8px;">${o.formData?.name || '---'}</td>
                 <td style="padding: 8px;">${o.formData?.phone || '---'}</td>
+                <td style="padding: 8px; text-align: center;">${o.formData?.paymentMethod === 'whatsapp' ? (lang === 'ar' ? 'واتساب' : 'WhatsApp') : (lang === 'ar' ? 'عند الاستلام' : 'Cash on delivery')}</td>
+                <td style="padding: 8px; white-space: nowrap;">${o.date || '-'}</td>
                 <td style="padding: 8px;">${getStatusLabel(o.status)}</td>
                 <td style="padding: 8px; text-align: center; font-weight: bold;">${formatPrice(o.total !== undefined ? o.total : ((o.subTotal || 0) - (o.discount || 0) + (o.deliveryCost || 0)), generalSettings?.currency || 'YER')}</td>
-                <td style="padding: 8px; white-space: nowrap;">${o.date || '-'}</td>
             </tr>
         `).join('');
 
@@ -519,11 +521,13 @@ printWindow.onload = () => printWindow.print();
                             <tr>
                                 <th style="text-align: center;">#</th>
                                 <th>${txt.th_order_id}</th>
+                                <th>${txt.th_product_size}</th>
                                 <th>${txt.th_name}</th>
                                 <th>${txt.th_phone}</th>
+                                <th style="text-align: center;">${txt.th_payment}</th>
+                                <th>${txt.th_date}</th>
                                 <th>${txt.th_status}</th>
                                 <th style="text-align: center;">${txt.total_footer}</th>
-                                <th>${txt.th_date}</th>
                             </tr>
                         </thead>
                         <tbody>
