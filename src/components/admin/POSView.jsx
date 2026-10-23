@@ -1870,8 +1870,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 </td>
                                                 <td className="p-3 text-center font-sans">{(receipt.cartItems || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</td>
                                                 <td className="p-3">{receipt.formData?.name || '---'}</td>
-                                                <td className="p-3 whitespace-nowrap">
-                                                    <span className={`inline-block whitespace-nowrap px-2.5 py-1 rounded-md text-[10px] font-black ${
+                                                <td className="p-3">
+                                                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-black ${
                                                         receipt.paymentMethod === 'card' ? 'bg-purple-100 dark:bg-purple-500/10 text-purple-600' :
                                                         receipt.paymentMethod === 'transfer' ? 'bg-cyan-100 dark:bg-cyan-500/10 text-cyan-600' :
                                                         'bg-green-100 dark:bg-green-500/10 text-green-600'
@@ -1882,10 +1882,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                          receipt.paymentMethod}
                                                     </span>
                                                 </td>
-                                                <td className="p-3 whitespace-nowrap">
-                                                    <div className="flex flex-row items-center gap-1 whitespace-nowrap">
+                                                <td className="p-3">
+                                                    <div className="flex flex-col">
                                                         <span>{receipt.formattedDate}</span>
-                                                        <span className="text-[10px] text-gray-400 font-normal">{receipt.formattedTime}</span>
+                                                        <span className="text-[10px] text-gray-400 font-normal mt-0.5">{receipt.formattedTime}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-3 font-sans font-black text-blue-600 dark:text-blue-400">
