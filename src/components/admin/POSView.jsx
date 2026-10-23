@@ -1853,7 +1853,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         <th className="p-3 text-start">{isRTL ? "اسم المنتج + المقاس" : "Product + Size"}</th>
                                         <th className="p-3 text-center">{isRTL ? "الكمية" : "Qty"}</th>
                                         <th className="p-3 text-start">{isRTL ? "اسم العميل" : "Customer"}</th>
-                                        <th className="p-3 text-start">{isRTL ? "طريقة الدفع" : "Payment"}</th>
+                                        <th className="p-3 text-center">{isRTL ? "طريقة الدفع" : "Payment"}</th>
                                         <th className="p-3 text-start">{isRTL ? "التاريخ والوقت" : "Date & Time"}</th>
                                         <th className="p-3 text-start">{isRTL ? "إجمالي الطلب" : "Total"}</th>
                                         <th className="p-3 text-start">{isRTL ? "الحاله" : "Status"}</th>
@@ -1870,7 +1870,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 </td>
                                                 <td className="p-3 text-center font-sans">{(receipt.cartItems || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</td>
                                                 <td className="p-3">{receipt.formData?.name || '---'}</td>
-                                                <td className="p-3">
+                                                <td className="p-3 text-center">
                                                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-black ${
                                                         receipt.paymentMethod === 'card' ? 'bg-purple-100 dark:bg-purple-500/10 text-purple-600' :
                                                         receipt.paymentMethod === 'transfer' ? 'bg-cyan-100 dark:bg-cyan-500/10 text-cyan-600' :
