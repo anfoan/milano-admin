@@ -57,7 +57,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
     const t = {
         ar: {
             search_placeholder: 'ابحث عن رقم الطلب، الاسم، أو الهاتف...',
-            invoice_pdf: 'طباعة جميع الفواتير',
+            invoice_pdf: 'تقرير قائمة الطلبات',
             export_excel: 'تصدير Excel',
             stat_all: 'الكل',
             stat_new: 'طلبات جديدة',
@@ -129,7 +129,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
         },
         en: {
             search_placeholder: 'Search Order ID, Name, or Phone...',
-            invoice_pdf: 'Print all invoices',
+            invoice_pdf: 'Order list report',
             export_excel: 'Export Excel',
             stat_all: 'All',
             stat_new: 'New Orders',
