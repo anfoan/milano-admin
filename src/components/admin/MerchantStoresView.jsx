@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Store, Plus, Save, Trash2, X, Image as ImageIcon } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Store, Plus, Save, Trash2, X, Image as ImageIcon, Upload, Loader2 } from 'lucide-react';
 import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { uploadSettingsImage } from '../../services/uploadService';
 
 const EMPTY_FORM = { name: '', imageUrl: '', category: '', description: '' };
 
@@ -13,10 +14,12 @@ const MerchantStoresView = ({ lang = 'ar' }) => {
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const imageInputRef = useRef(null);
 
     const text = isRTL
-        ? { title: 'متاجر البائعين', subtitle: 'أضف المتاجر التي ستظهر في قسم تسوق حسب المتجر', add: 'إضافة متجر', edit: 'تعديل المتجر', name: 'اسم المتجر', image: 'رابط صورة المتجر', category: 'القسم المرتبط', description: 'وصف مختصر', save: 'حفظ المتجر', cancel: 'إلغاء', delete: 'حذف', empty: 'لا توجد متاجر مضافة حتى الآن', choose: 'اختر القسم', required: 'اكتب اسم المتجر ورابط الصورة' }
-        : { title: 'Seller Stores', subtitle: 'Add the stores that will appear in Shop by Store', add: 'Add Store', edit: 'Edit Store', name: 'Store name', image: 'Store image URL', category: 'Linked category', description: 'Short description', save: 'Save Store', cancel: 'Cancel', delete: 'Delete', empty: 'No stores added yet', choose: 'Choose category', required: 'Enter a store name and image URL' };
+        ? { title: 'متاجر البائعين', subtitle: 'أضف المتاجر التي ستظهر في قسم تسوق حسب المتجر', add: 'إضافة متجر', edit: 'تعديل المتجر', name: 'اسم المتجر', image: 'صورة المتجر', upload: 'رفع صورة المتجر', change: 'تغيير الصورة', category: 'القسم المرتبط', description: 'وصف مختصر', save: 'حفظ المتجر', cancel: 'إلغاء', delete: 'حذف', empty: 'لا توجد متاجر مضافة حتى الآن', choose: 'اختر القسم', required: 'اكتب اسم المتجر وارفع صورته' }
+        : { title: 'Seller Stores', subtitle: 'Add the stores that will appear in Shop by Store', add: 'Add Store', edit: 'Edit Store', name: 'Store name', image: 'Store image', upload: 'Upload store image', change: 'Change image', category: 'Linked category', description: 'Short description', save: 'Save Store', cancel: 'Cancel', delete: 'Delete', empty: 'No stores added yet', choose: 'Choose category', required: 'Enter a store name and upload its image' };
 
     const loadData = async () => {
         setLoading(true);
@@ -32,9 +35,24 @@ const MerchantStoresView = ({ lang = 'ar' }) => {
     useEffect(() => { loadData().catch(error => { console.error('Merchant stores load error:', error); setLoading(false); }); }, []);
 
     const resetForm = () => { setForm(EMPTY_FORM); setEditingId(null); };
+    const handleImageChange = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { alert(isRTL ? 'يرجى اختيار ملف صورة صالح' : 'Please choose a valid image file'); event.target.value = ''; return; }
+        if (file.size > 15 * 1024 * 1024) { alert(isRTL ? 'حجم الصورة يجب أن يكون أقل من 15 ميجابايت' : 'Image must be smaller than 15 MB'); event.target.value = ''; return; }
+        setUploadingImage(true);
+        try {
+            const imageUrl = await uploadSettingsImage(file, `merchant-store-${Date.now()}`);
+            setForm(previous => ({ ...previous, imageUrl }));
+        } catch (error) {
+            console.error('Merchant store image upload error:', error);
+            alert(isRTL ? 'تعذر رفع صورة المتجر' : 'Unable to upload store image');
+        } finally { setUploadingImage(false); event.target.value = ''; }
+    };
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (!form.name.trim() || !form.imageUrl.trim()) return alert(text.required);
+        if (uploadingImage) return;
         setSaving(true);
         try {
             const payload = { name: form.name.trim(), imageUrl: form.imageUrl.trim(), category: form.category, description: form.description.trim(), updatedAt: serverTimestamp() };
@@ -70,7 +88,7 @@ const MerchantStoresView = ({ lang = 'ar' }) => {
                 <div className="mb-4 flex items-center justify-between"><h2 className="text-lg font-black text-slate-900 dark:text-white">{editingId ? text.edit : text.add}</h2>{editingId && <button type="button" onClick={resetForm} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10"><X size={18} /></button>}</div>
                 <div className="grid gap-4 md:grid-cols-2">
                     <label className="space-y-2"><span className="text-sm font-black text-slate-700 dark:text-slate-300">{text.name}</span><input value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-bold outline-none focus:border-blue-500 dark:border-white/10 dark:bg-slate-800" /></label>
-                    <label className="space-y-2"><span className="text-sm font-black text-slate-700 dark:text-slate-300">{text.image}</span><input value={form.imageUrl} onChange={event => setForm({ ...form, imageUrl: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-bold outline-none focus:border-blue-500 dark:border-white/10 dark:bg-slate-800" dir="ltr" /></label>
+                    <div className="space-y-2"><span className="text-sm font-black text-slate-700 dark:text-slate-300">{text.image}</span><input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" /><div className="flex min-h-[76px] items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-2 dark:border-white/15 dark:bg-slate-800"><div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-700">{form.imageUrl ? <img src={form.imageUrl} alt={text.image} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-slate-400"><ImageIcon size={22} /></div>}</div><button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploadingImage} className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-black text-white hover:bg-blue-700 disabled:opacity-60">{uploadingImage ? <Loader2 size={17} className="animate-spin" /> : <Upload size={17} />}{uploadingImage ? (isRTL ? 'جاري الرفع...' : 'Uploading...') : (form.imageUrl ? text.change : text.upload)}</button></div></div>
                     <label className="space-y-2"><span className="text-sm font-black text-slate-700 dark:text-slate-300">{text.category}</span><select value={form.category} onChange={event => setForm({ ...form, category: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-bold outline-none focus:border-blue-500 dark:border-white/10 dark:bg-slate-800"><option value="">{text.choose}</option>{categories.map(category => <option key={category.id} value={category.name}>{category.name}</option>)}</select></label>
                     <label className="space-y-2"><span className="text-sm font-black text-slate-700 dark:text-slate-300">{text.description}</span><input value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-bold outline-none focus:border-blue-500 dark:border-white/10 dark:bg-slate-800" /></label>
                 </div>
