@@ -31,6 +31,7 @@ import DesignView from '../components/admin/DesignView'; // New Design View
 import ManualOrderView from '../components/admin/ManualOrderView'; // New Manual Order View
 import FooterSettingsView from '../components/admin/FooterSettingsView'; // New Footer Settings
 import POSView from '../components/admin/POSView';
+import MerchantStoresView from '../components/admin/MerchantStoresView';
 import { Menu, Search, Bell, User, PanelRight, ArrowRightFromLine, Store, Settings, LogOut, ShoppingBag, MessageSquare, Wallet, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -355,6 +356,8 @@ const AdminDashboard = () => {
                 return <FinancialReportsView lang={lang} generalSettings={generalSettings} onNavigate={handleTabChange} onViewOrder={handleViewOrder} />;
             case 'wallet':
                 return <WalletView lang={lang} generalSettings={generalSettings} />;
+            case 'merchant-stores':
+                return <MerchantStoresView lang={lang} />;
             case 'product-list':
                 return <ProductsView onEdit={handleEditProduct} initialCategory={productReturnCategory} lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
             case 'inventory':
