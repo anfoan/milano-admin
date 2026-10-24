@@ -13,6 +13,7 @@ import ImageWithFallback from '../ImageWithFallback';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import { useCurrency } from '../../context/CurrencyContext';
 import InvoiceTemplate from '../InvoiceTemplate';
+import { getAvailableProductStock, getSizeStock } from '../../lib/stockUtils';
 
 const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initialEditMode = false, onUpdate }) => {
     const { formatPrice, exchangeRate } = useCurrency();
@@ -972,24 +973,56 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                         allProducts.filter(p =>
                                             p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                             p.category?.toLowerCase().includes(searchTerm.toLowerCase())
-                                        ).map(p => (
-                                            <div
-                                                key={p.id}
-                                                className="p-4 hover:bg-blue-50 flex items-center justify-between border-b last:border-0 transition-colors cursor-pointer"
-                                                onClick={() => handleSelectProduct(p)}
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <img src={p.mainImage || '/nav-logo.png'} className="w-12 h-12 rounded-lg object-cover" />
-                                                    <div>
-                                                        <div className="font-black text-gray-800 text-sm">{p.name}</div>
-                                                        <div className="text-[10px] font-bold text-gray-400">{p.category}</div>
+                                        ).map(p => {
+                                            const stockCount = getAvailableProductStock(p);
+                                            const sizes = p.variants?.find(v => v.type === 'size')?.values || [];
+                                            const price = p.priceAfterDiscount && p.priceAfterDiscount < p.price ? p.priceAfterDiscount : p.price;
+                                            return (
+                                                <div
+                                                    key={p.id}
+                                                    className={`p-3 md:p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b last:border-0 transition-colors ${stockCount <= 0 ? 'opacity-60 bg-gray-50' : 'hover:bg-blue-50 cursor-pointer'}`}
+                                                    onClick={() => stockCount > 0 && handleSelectProduct(p)}
+                                                >
+                                                    <div className="flex items-center gap-4 min-w-0">
+                                                        <img src={p.mainImage || '/nav-logo.png'} className={`w-12 h-12 rounded-lg object-cover ${stockCount <= 0 ? 'grayscale' : ''}`} />
+                                                        <div className="min-w-0">
+                                                            <div className="font-black text-gray-800 text-sm flex items-center gap-2">
+                                                                <span className="truncate">{p.name}</span>
+                                                                <span className={`font-black font-sans whitespace-nowrap ${stockCount <= 0 ? 'text-red-600' : stockCount <= 3 ? 'text-orange-500' : 'text-green-600'}`} dir="ltr">
+                                                                    {lang === 'ar' ? 'المخزون: ' : 'Stock: '}{stockCount.toLocaleString('en-US')}
+                                                                </span>
+                                                            </div>
+                                                            <div className="text-[10px] font-bold text-gray-400">{p.category}</div>
+                                                            {sizes.length > 0 && (
+                                                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                                                    {sizes.map(size => {
+                                                                        const sizeStock = getSizeStock(p, size);
+                                                                        return (
+                                                                            <span key={size} className={`px-2 py-0.5 rounded-md text-[10px] font-black border ${sizeStock <= 0 ? 'bg-gray-200 text-gray-400 border-gray-200 line-through opacity-60' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                                                                                {size}
+                                                                            </span>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-3 shrink-0">
+                                                        <div className="text-sm md:text-base font-black text-blue-600 whitespace-nowrap" dir="rtl">
+                                                            {formatPrice(price, generalSettings?.currency || 'YER')}
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => { e.stopPropagation(); if (stockCount > 0) handleSelectProduct(p); }}
+                                                            disabled={stockCount <= 0}
+                                                            className={`bg-blue-600 text-white p-2 rounded-xl transition ${stockCount <= 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                                                        >
+                                                            <Plus size={20} />
+                                                        </button>
                                                     </div>
                                                 </div>
-                                                <div className="text-sm font-black text-blue-600">
-                                                    {Number(p.price).toLocaleString()} {currency}
-                                                </div>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     ) : (
                                         <div className="p-8 text-center text-gray-400 font-bold text-sm">
                                             {lang === 'ar' ? 'لا توجد منتجات تطابق البحث' : 'No products match search'}
