@@ -1109,7 +1109,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 <div className="flex-1 max-w-6xl mx-auto w-full p-3 sm:p-4 lg:p-6 flex flex-col gap-4 lg:gap-6 overflow-y-auto">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-gray-100 dark:border-white/5">
-                        <div>
+                        <div className="relative -top-3">
                             <h2 className="text-2xl font-black text-gray-800 dark:text-white">
                                 {isRTL ? "نقطة البيع" : "Point of Sale"}
                             </h2>
