@@ -123,11 +123,11 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                 <div className={`grid grid-cols-2 gap-y-3 gap-x-4 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
                                     <div className="flex min-w-0 items-start justify-start gap-2">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'اسم المشتري:' : 'Name:'}</span>
-                                        <span className="min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">{order.formData?.name || '---'}</span>
+                                        <span className="relative -top-px min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">{order.formData?.name || '---'}</span>
                                     </div>
                                     <div className="flex min-w-0 items-start justify-start gap-2">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'الدولة:' : 'Country:'}</span>
-                                        <span className="min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">
+                                        <span className="relative -top-px min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">
                                             {order.formData?.country === 'Yemen' && lang === 'ar' ? 'اليمن' : (order.formData?.country || 'Yemen')}
                                         </span>
                                     </div>
@@ -135,21 +135,21 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                     {/* Row 2: Address - Country */}
                                     <div className="flex min-w-0 items-start justify-start gap-2">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'العنوان:' : 'Address:'}</span>
-                                        <span className="min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">{order.formData?.address || '---'}</span>
+                                        <span className="relative -top-px min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">{order.formData?.address || '---'}</span>
                                     </div>
                                     <div className="flex min-w-0 items-start justify-start gap-2">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'رقم الهاتف:' : 'Phone:'}</span>
-                                        <span className="min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">{order.formData?.phone || '---'}</span>
+                                        <span className="relative -top-px min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">{order.formData?.phone || '---'}</span>
                                     </div>
 
                                     {/* Row 3: City - Payment Method */}
                                     <div className="flex min-w-0 items-start justify-start gap-2">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'المدينة:' : 'City:'}</span>
-                                        <span className="min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">{order.formData?.city || order.formData?.governorate || '---'}</span>
+                                        <span className="relative -top-px min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">{order.formData?.city || order.formData?.governorate || '---'}</span>
                                     </div>
                                     <div className="flex min-w-0 items-start justify-start gap-2">
                                         <span className="text-gray-500 text-xs font-bold">{lang === 'ar' ? 'طريقة الدفع:' : 'Payment Method:'}</span>
-                                        <span className="min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">
+                                        <span className="relative -top-px min-w-0 break-words whitespace-normal font-black text-sm text-[#111317] leading-relaxed">
                                             {(() => {
                                                 const topLevelMethod = String(order.paymentMethod || '').toLowerCase();
                                                 const method = topLevelMethod && topLevelMethod !== 'manual'
