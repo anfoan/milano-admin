@@ -932,11 +932,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                   <div class="bottom-totals">
                       <div class="bottom-card-sales">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'الإجمالي النهائي' : 'Final Total'}</span>
-                          <span style="display: block; font-size: 14px; font-weight: 900; color: #2563eb; margin-top: 2px; font-family: monospace;">${reportData.totalSales.toLocaleString()} ${currency}</span>
+                          <span style="display: inline-flex; align-items: baseline; gap: 4px; white-space: nowrap; font-size: 12px; font-weight: 900; color: #2563eb; margin-top: 2px; font-family: monospace;">${reportData.totalSales.toLocaleString()} ${currency}</span>
                       </div>
                       <div class="bottom-card-profit">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'صافي الأرباح' : 'Net Profit'}</span>
-                          <span style="display: block; font-size: 14px; font-weight: 900; color: #10b981; margin-top: 2px; font-family: monospace;">${reportData.netProfit.toLocaleString()} ${currency}</span>
+                          <span style="display: inline-flex; align-items: baseline; gap: 4px; white-space: nowrap; font-size: 12px; font-weight: 900; color: #10b981; margin-top: 2px; font-family: monospace;">${reportData.netProfit.toLocaleString()} ${currency}</span>
                       </div>
                       <div class="bottom-card-count">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'عدد الفواتير' : 'Transactions'}</span>
