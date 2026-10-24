@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { addDoc, collection, deleteDoc, doc, increment, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import { useCurrency } from '../../context/CurrencyContext';
 import { CalendarDays, Check, ClipboardList, Edit3, FileText, Package, Plus, Printer, Search, Trash2, X, XCircle } from 'lucide-react';
@@ -100,7 +99,7 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
     const invoiceStatusTone = value => value === 'paid' ? 'paid' : value === 'deferred' || value === 'partial' ? 'deferred' : 'pending';
     const invoiceStatusTextClass = value => invoiceStatusTone(value) === 'paid' ? 'text-emerald-600' : invoiceStatusTone(value) === 'deferred' ? 'text-amber-600' : 'text-rose-600';
 
-    const resetForm = () => { setForm({ invoiceNumber: '', supplierName: '', supplierPhone: '', date: new Date().toISOString().slice(0, 10), paid: '', remaining: '', notes: '', paymentMethod: 'cash', invoiceStatus: 'pending', items: [] }); setNewItem(makeEmptyItem()); };
+    const resetForm = () => { setForm({ invoiceNumber: `PUR-${Date.now().toString().slice(-6)}`, supplierName: '', supplierPhone: '', date: new Date().toISOString().slice(0, 10), paid: '', remaining: '', notes: '', paymentMethod: 'cash', invoiceStatus: 'pending', items: [] }); setNewItem(makeEmptyItem()); };
     const openAdd = () => { setEditingId(null); resetForm(); setProductPickerOpen(false); setEditingItemIndex(null); setModalOpen(true); };
     const openEdit = item => { setEditingId(item.id); setForm({ invoiceNumber: toEnglishDigits(item.invoiceNumber || ''), supplierName: item.supplierName || '', supplierPhone: toEnglishDigits(item.supplierPhone || ''), date: dateInput(item.date || new Date().toISOString().slice(0, 10)), paid: numericInput(item.paid ?? ''), remaining: numericInput(item.remaining ?? remainingOf(item)), notes: item.notes || '', paymentMethod: item.paymentMethod || 'cash', invoiceStatus: statusOf(item), items: getInvoiceItems(item).map(line => ({ ...line, quantity: toEnglishDigits(line.quantity ?? ''), unitCost: numericInput(line.unitCost ?? '') })) }); setNewItem(makeEmptyItem()); setProductPickerOpen(false); setEditingItemIndex(null); setModalOpen(true); };
     const updateStock = async (productId, delta) => { if (productId && delta) await updateDoc(doc(db, 'products', productId), { stock: increment(Number(delta)) }); };
@@ -134,11 +133,10 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
         e.preventDefault();
         const items = form.items.filter(item => item.productName?.trim() && Number(item.quantity) > 0 && Number(item.unitCost) >= 0).map(item => ({ ...item, quantity: Number(item.quantity), unitCost: Number(item.unitCost) }));
         const total = items.reduce((sum, item) => sum + item.quantity * item.unitCost, 0);
-        if (!form.date || !form.supplierName.trim() || !form.supplierPhone.trim() || !form.invoiceStatus || !items.length) { alert(t.required); return; }
+        if (!form.invoiceNumber.trim() || !form.date || !form.supplierName.trim() || !form.supplierPhone.trim() || !form.invoiceStatus || !items.length) { alert(t.required); return; }
         setSaving(true);
         try {
-            const invoiceNumber = editingId ? form.invoiceNumber.trim() : await getNextInvoiceNumber(db);
-            const payload = { invoiceNumber, supplierName: form.supplierName.trim(), supplierPhone: form.supplierPhone.trim(), productId: items[0]?.productId || '', productName: items.map(item => item.productName).join('، '), date: form.date, quantity: items.reduce((sum, item) => sum + item.quantity, 0), unitCost: items[0]?.unitCost || 0, total, paid: Math.max(0, Number(form.paid) || 0), remaining: Math.max(0, total - (Number(form.paid) || 0)), currency, notes: form.notes.trim(), paymentMethod: form.paymentMethod, invoiceStatus: form.invoiceStatus, items, updatedAt: serverTimestamp() };
+            const payload = { invoiceNumber: form.invoiceNumber.trim() || `PUR-${Date.now().toString().slice(-6)}`, supplierName: form.supplierName.trim(), supplierPhone: form.supplierPhone.trim(), productId: items[0]?.productId || '', productName: items.map(item => item.productName).join('، '), date: form.date, quantity: items.reduce((sum, item) => sum + item.quantity, 0), unitCost: items[0]?.unitCost || 0, total, paid: Math.max(0, Number(form.paid) || 0), remaining: Math.max(0, total - (Number(form.paid) || 0)), currency, notes: form.notes.trim(), paymentMethod: form.paymentMethod, invoiceStatus: form.invoiceStatus, items, updatedAt: serverTimestamp() };
             if (editingId) {
                 const old = purchases.find(item => item.id === editingId);
                 await updateItemStocks(getInvoiceItems(old), -1);

@@ -10,7 +10,7 @@ export const getNextInvoiceNumber = async (db) => {
     const counterRef = doc(db, ...COUNTER_PATH);
     return runTransaction(db, async (transaction) => {
         const snapshot = await transaction.get(counterRef);
-        const current = snapshot.exists() ? Number(snapshot.data()?.invoiceSequence || 156450) : 156450;
+        const current = snapshot.exists() ? Number(snapshot.data()?.invoiceSequence || 119100) : 119100;
         const next = current + 1;
         transaction.set(counterRef, {
             invoiceSequence: next,
