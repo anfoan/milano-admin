@@ -1430,7 +1430,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         {formatPosPrice(finalPrice)} <span style={currencyFontStyle}>{currency}</span>
                                                     </span>
                                                     {hasDiscount && (
-                                                        <span dir="rtl" className="translate-x-3 inline-flex items-center gap-1 whitespace-nowrap text-[13px] font-black text-gray-400 line-through decoration-2" style={{ direction: 'rtl' }}>
+                                                        <span dir="rtl" className="translate-x-3 inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-black text-gray-400 line-through decoration-2" style={{ direction: 'rtl' }}>
                                                             <span dir="ltr">{formatPosPrice(product.price)}</span>
                                                             <span dir="rtl" style={currencyFontStyle}>{currency}</span>
                                                         </span>
