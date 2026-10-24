@@ -452,6 +452,8 @@ printWindow.onload = () => printWindow.print();
             return acc + calculateOrderNetProfit(order);
         }, 0);
         const totalSales = ordersToExport.reduce((acc, order) => acc + (order.total !== undefined ? Number(order.total || 0) : ((Number(order.subTotal) || 0) - (Number(order.discount) || 0) + (Number(order.deliveryCost) || 0))), 0);
+        const reportLogo = generalSettings?.profileImage || generalSettings?.storeLogo || generalSettings?.invoiceLogo || '/logo-rounded.png';
+        const reportLogoUrl = /^https?:\/\//i.test(reportLogo) ? reportLogo : `${window.location.origin}${reportLogo.startsWith('/') ? '' : '/'}${reportLogo}`;
 
         doc.write(`
             <!DOCTYPE html>
@@ -481,11 +483,17 @@ printWindow.onload = () => printWindow.print();
                         width: 100%;
                         box-sizing: border-box;
                     }
-                    .report-header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px 20px; background:#ffffff; border:1px solid #dbe7f3; border-radius:16px; box-shadow:0 8px 22px rgba(30,64,175,.08); }
+                    .report-header { position:relative; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:20px; min-height:112px; padding:18px 20px 48px; direction:ltr; background:#ffffff; border:1px solid #dbe7f3; border-radius:16px; box-shadow:0 8px 22px rgba(30,64,175,.08); }
+                    .report-logo { justify-self:start; display:flex; align-items:center; justify-content:center; width:82px; height:62px; }
+                    .report-logo img { max-width:82px; max-height:62px; object-fit:contain; }
+                    .report-title-block { grid-column:2; text-align:center; direction:rtl; }
+                    .report-store-details { grid-column:3; justify-self:end; text-align:right; direction:rtl; color:#334155; }
+                    .report-store-name { color:#0f172a; font-size:15px; font-weight:900; }
+                    .report-store-line { margin-top:3px; color:#64748b; font-size:10px; font-weight:700; }
                     .report-kicker { display:inline-block; margin-bottom:5px; color:#2563eb; font-size:9px; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; }
                     .report-title { margin:0; color:#0f172a; font-size:22px; font-weight:900; }
                     .report-date { margin:5px 0 0; color:#64748b; font-size:10px; font-weight:700; }
-                    .print-button { background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; border:0; padding:10px 18px; border-radius:10px; font-weight:900; cursor:pointer; box-shadow:0 5px 12px rgba(37,99,235,.22); }
+                    .print-button { position:absolute; right:20px; bottom:12px; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; border:0; padding:8px 16px; border-radius:10px; font-weight:900; cursor:pointer; box-shadow:0 5px 12px rgba(37,99,235,.22); }
                     .table-card { margin-top:18px; padding:8px; background:#fff; border:1px solid #dbe7f3; border-radius:16px; box-shadow:0 8px 22px rgba(15,23,42,.06); }
                     table { width: 100%; border-collapse: separate; border-spacing: 0; overflow:hidden; }
                     th {
@@ -529,14 +537,18 @@ printWindow.onload = () => printWindow.print();
             <body>
                 <div class="print-wrapper">
                     <div class="report-header">
-                        <div>
+                        <div class="report-logo"><img src="${reportLogoUrl}" alt="${lang === 'ar' ? 'شعار المتجر' : 'Store logo'}" onerror="this.style.display='none'"></div>
+                        <div class="report-title-block">
                             <span class="report-kicker">MILANO STORE</span>
                             <h1 class="report-title">${lang === 'ar' ? 'تقرير المبيعات والطلبات' : 'Orders & Sales Report'}</h1>
                             <p class="report-date">${lang === 'ar' ? 'تاريخ الاستخراج:' : 'Date:'} ${dateStr}</p>
                         </div>
-                        <div>
-                            <button class="print-button" onclick="window.print()">${txt.print_report_btn}</button>
+                        <div class="report-store-details">
+                            <div class="report-store-name">${generalSettings?.storeName || (lang === 'ar' ? 'متجر ميلانو' : 'Milano Store')}</div>
+                            ${generalSettings?.storeAddress ? `<div class="report-store-line">${generalSettings.storeAddress}</div>` : ''}
+                            ${generalSettings?.phoneNumber ? `<div class="report-store-line" dir="ltr">${generalSettings.phoneNumber}</div>` : ''}
                         </div>
+                        <button class="print-button" onclick="window.print()">${txt.print_report_btn}</button>
                     </div>
 
                     <div class="table-card"><table>
