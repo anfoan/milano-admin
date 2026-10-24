@@ -15,6 +15,8 @@ import { useCurrency } from '../../context/CurrencyContext';
 import InvoiceTemplate from '../InvoiceTemplate';
 import { getAvailableProductStock, getSizeStock } from '../../lib/stockUtils';
 
+const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 1632)).replace(/[۰-۹]/g, digit => String(digit.charCodeAt(0) - 1776));
+
 const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initialEditMode = false, onUpdate }) => {
     const { formatPrice, exchangeRate } = useCurrency();
     const [status, setStatus] = useState(order.status);
@@ -1090,9 +1092,12 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                                 {isEditing ? (
                                                     <div className="flex items-center justify-center gap-1">
                                                         <input
-                                                            type="number"
-                                                            value={toDisplayPrice(item.price)}
-                                                            onChange={(e) => handleUpdateItem(idx, 'price', toBasePrice(e.target.value))}
+                                                            type="text"
+                                                            inputMode="decimal"
+                                                            lang="en"
+                                                            dir="ltr"
+                                                            value={toEnglishDigits(toDisplayPrice(item.price))}
+                                                            onChange={(e) => handleUpdateItem(idx, 'price', toBasePrice(toEnglishDigits(e.target.value).replace(/,/g, '')))}
                                                             className="w-20 px-2 py-1 bg-white border border-gray-200 rounded text-center text-xs font-bold text-blue-600 outline-none focus:border-blue-500"
                                                             step={isSAR ? "0.01" : "1"}
                                                         />
@@ -1105,9 +1110,12 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                             <td className="py-4 px-4 md:px-6 text-center whitespace-nowrap">
                                                 {isEditing ? (
                                                     <input
-                                                        type="number"
-                                                        value={item.quantity || 1}
-                                                        onChange={(e) => handleUpdateItem(idx, 'quantity', parseInt(e.target.value) || 1)}
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        lang="en"
+                                                        dir="ltr"
+                                                        value={toEnglishDigits(item.quantity || 1)}
+                                                        onChange={(e) => handleUpdateItem(idx, 'quantity', parseInt(toEnglishDigits(e.target.value), 10) || 1)}
                                                         className="w-20 px-2 py-1 bg-white border border-gray-200 rounded text-center text-xs font-bold text-gray-700 outline-none focus:border-blue-500"
                                                         min="1"
                                                     />
