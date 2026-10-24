@@ -1132,7 +1132,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     </div>
 
                     {/* 3 Cards Grid */}
-                    <div className="relative -top-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="relative -top-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Card 1: Enter Terminal */}
                         <div
                             onClick={() => setPosSubView('sell')}
