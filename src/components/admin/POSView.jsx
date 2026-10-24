@@ -932,11 +932,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                   <div class="bottom-totals">
                       <div class="bottom-card-sales">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'الإجمالي النهائي' : 'Final Total'}</span>
-                          <span dir="rtl" style="display: inline-flex; align-items: baseline; justify-content: center; gap: 2px; white-space: nowrap; font-size: 9px; font-weight: 900; color: #2563eb; margin-top: 1px; transform: translateX(9px); font-family: monospace;">${reportData.totalSales.toLocaleString()} ${currency}</span>
+                          <span style="display: flex; flex-wrap: nowrap; align-items: baseline; justify-content: center; gap: 3px; white-space: nowrap; font-size: 9px; font-weight: 900; color: #2563eb; margin-top: 1px; transform: translateX(9px); font-family: monospace; direction: rtl;"><span style="white-space: nowrap; font-family: 'Cairo', Arial, sans-serif;">${currency}</span><span style="white-space: nowrap; direction: ltr;">${reportData.totalSales.toLocaleString()}</span></span>
                       </div>
                       <div class="bottom-card-profit">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'صافي الأرباح' : 'Net Profit'}</span>
-                          <span dir="rtl" style="display: inline-flex; align-items: baseline; justify-content: center; gap: 2px; white-space: nowrap; font-size: 9px; font-weight: 900; color: #10b981; margin-top: 1px; transform: translateX(9px); font-family: monospace;">${reportData.netProfit.toLocaleString()} ${currency}</span>
+                          <span style="display: flex; flex-wrap: nowrap; align-items: baseline; justify-content: center; gap: 3px; white-space: nowrap; font-size: 9px; font-weight: 900; color: #10b981; margin-top: 1px; transform: translateX(9px); font-family: monospace; direction: rtl;"><span style="white-space: nowrap; font-family: 'Cairo', Arial, sans-serif;">${currency}</span><span style="white-space: nowrap; direction: ltr;">${reportData.netProfit.toLocaleString()}</span></span>
                       </div>
                       <div class="bottom-card-count">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'عدد الفواتير' : 'Transactions'}</span>
