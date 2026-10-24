@@ -19,3 +19,17 @@ export const getNextInvoiceNumber = async (db) => {
         return String(next).padStart(6, '0');
     });
 };
+
+export const getNextPurchaseInvoiceNumber = async (db) => {
+    const counterRef = doc(db, ...COUNTER_PATH);
+    return runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(counterRef);
+        const current = snapshot.exists() ? Number(snapshot.data()?.purchaseInvoiceSequence || 18839) : 18839;
+        const next = current + 1;
+        transaction.set(counterRef, {
+            purchaseInvoiceSequence: next,
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+        return String(next);
+    });
+};
