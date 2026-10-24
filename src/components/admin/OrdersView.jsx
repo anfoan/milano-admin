@@ -501,6 +501,7 @@ printWindow.onload = () => printWindow.print();
                         background:linear-gradient(180deg,#eef5fc,#e7f0fa) !important;
                         padding:10px 9px;
                         text-align: center !important;
+                        vertical-align: middle;
                         border-bottom:1px solid #cbdceb;
                         border-left:1px solid #dbe7f3;
                         font-weight: 800; 
@@ -514,7 +515,7 @@ printWindow.onload = () => printWindow.print();
                     tr { background-color:#ffffff !important; }
                     tbody tr:nth-child(even) { background:#f8fbff !important; }
                     tbody tr:last-child td { border-bottom:0; }
-                    td { color:#334155 !important; font-size:10px; background:transparent !important; padding:9px 9px; border-bottom:1px solid #e5edf5; border-left:1px solid #edf2f7; }
+                    td { color:#334155 !important; font-size:10px; background:transparent !important; padding:9px 9px; text-align:center !important; vertical-align:middle; border-bottom:1px solid #e5edf5; border-left:1px solid #edf2f7; }
                     td:last-child { border-left:0; }
                     .summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px; page-break-inside:avoid; }
                     .summary-card { padding:14px 16px; border:1px solid #dbe7f3; border-radius:14px; background:#fff; box-shadow:0 6px 15px rgba(15,23,42,.06); }
