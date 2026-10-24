@@ -753,8 +753,8 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                     {isEditing ? (
                                         <input
                                             type="text"
-                                            value={editOrder.date || ''}
-                                            onChange={(e) => setEditOrder({ ...editOrder, date: e.target.value })}
+                                            value={toEnglishDigits(editOrder.date || '')}
+                                            onChange={(e) => setEditOrder({ ...editOrder, date: toEnglishDigits(e.target.value) })}
                                             className="px-2 py-1 bg-white border border-blue-200 rounded text-gray-800 outline-none focus:border-blue-500 transition-all font-bold text-xs font-mono w-32"
                                             dir="ltr"
                                         />
@@ -783,7 +783,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="text"
-                                                value={editOrder.formData?.country || ''}
+                                                value={String(editOrder.formData?.country || '').trim().toLowerCase() === 'yemen' ? 'اليمن' : (editOrder.formData?.country || '')}
                                                 onChange={(e) => handleUpdateField('country', e.target.value, true)}
                                                 className="px-2 py-1 bg-white border border-blue-200 rounded text-gray-800 outline-none focus:border-blue-500 transition-all font-bold text-xs w-24"
                                             />
