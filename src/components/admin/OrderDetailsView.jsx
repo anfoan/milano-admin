@@ -741,10 +741,11 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                         <span className="font-bold dir-ltr font-mono">
                                             {(() => {
                                                 const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
+                                                const hideDayNumber = value => lang === 'ar' ? String(value).replace(/24/g, '') : value;
                                                 if (order.createdAt && typeof order.createdAt.toDate === 'function') {
-                                                    return order.createdAt.toDate().toLocaleString(locale);
+                                                    return hideDayNumber(order.createdAt.toDate().toLocaleString(locale));
                                                 } else if (typeof order.createdAt === 'string') {
-                                                    return new Date(order.createdAt).toLocaleString(locale);
+                                                    return hideDayNumber(new Date(order.createdAt).toLocaleString(locale));
                                                 }
                                                 return order.date;
                                             })()}
