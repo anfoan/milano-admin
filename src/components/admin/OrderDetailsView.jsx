@@ -1106,6 +1106,19 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                             </table>
                         </div>
 
+                        {!isEditing && (
+                            <div className="border-t border-gray-100 bg-white p-4 md:p-6">
+                                <h3 className="font-black text-gray-700 mb-4">{txt.delivery_location}</h3>
+                                <div className="space-y-2 text-gray-500 font-bold text-sm">
+                                    <p>{order.formData?.city || txt.val_sanaa}</p>
+                                    <p>{txt.payment_gateway} {order.formData?.paymentMethod === 'whatsapp' ? txt.val_manual : (order.formData?.paymentMethod === 'cod' ? txt.val_cod_gateway : txt.val_manual)}</p>
+                                    <p>{txt.payment_method} {order.formData?.paymentMethod === 'whatsapp' ? txt.val_whatsapp : (order.formData?.paymentMethod === 'cod' ? txt.val_cod : (order.formData?.paymentMethod || txt.val_manual))}</p>
+                                    {order.formData?.address && order.formData.address !== '---' && <p>{order.formData.address}</p>}
+                                    <p>{txt.val_yemen}</p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Totals Section */}
                         <div className="bg-gray-50 p-6 border-t border-gray-100">
                             <div className={`flex flex-col items-end gap-3 max-w-xs ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
@@ -1205,20 +1218,6 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                             </div>
                         </div>
                     </div>
-
-                    {!isEditing && (
-                        <div className="bg-white rounded-[20px] border border-gray-100 shadow-sm p-4 md:p-6">
-                            <h3 className="font-black text-gray-700 mb-4">{txt.delivery_location}</h3>
-                            <div className="space-y-2 text-gray-500 font-bold text-sm">
-                                <p>{order.formData?.city || txt.val_sanaa}</p>
-                                <p>{txt.payment_gateway} {order.formData?.paymentMethod === 'whatsapp' ? txt.val_manual : (order.formData?.paymentMethod === 'cod' ? txt.val_cod_gateway : txt.val_manual)}</p>
-                                <p>{txt.payment_method} {order.formData?.paymentMethod === 'whatsapp' ? txt.val_whatsapp : (order.formData?.paymentMethod === 'cod' ? txt.val_cod : (order.formData?.paymentMethod || txt.val_manual))}</p>
-                                <p className="dir-ltr font-mono">{order.formData?.phone}</p>
-                                <p>{order.formData?.address}</p>
-                                <p>{txt.val_yemen}</p>
-                            </div>
-                        </div>
-                    )}
 
                 </div>
 
