@@ -485,8 +485,8 @@ printWindow.onload = () => printWindow.print();
                     }
                     .report-header { position:relative; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:20px; min-height:112px; padding:18px 20px 48px; direction:ltr; background:#ffffff; border:1px solid #dbe7f3; border-radius:16px; box-shadow:0 8px 22px rgba(30,64,175,.08); }
                     .report-logo { justify-self:start; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; width:100px; }
-                    .report-logo img { width:64px; height:64px; border-radius:12px; object-fit:cover; overflow:hidden; transform:translateY(2px); }
-                    .report-logo-date { margin-top:19px; color:#64748b; font-size:9px; font-weight:700; white-space:nowrap; direction:rtl; }
+                    .report-logo img { width:64px; height:64px; border-radius:12px; object-fit:cover; overflow:hidden; position:relative; top:4px; }
+                    .report-logo-date { margin-top:26px; color:#64748b; font-size:9px; font-weight:700; white-space:nowrap; direction:rtl; }
                     .report-title-block { grid-column:2; text-align:center; direction:rtl; }
                     .report-store-details { grid-column:3; justify-self:end; text-align:right; direction:rtl; color:#334155; }
                     .report-store-name { color:#0f172a; font-size:17px; font-weight:900; }
