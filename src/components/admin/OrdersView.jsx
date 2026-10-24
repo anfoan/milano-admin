@@ -57,7 +57,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
     const t = {
         ar: {
             search_placeholder: 'ابحث عن رقم الطلب، الاسم، أو الهاتف...',
-            invoice_pdf: 'طباعة تقرير الطلبات PDF',
+            invoice_pdf: 'تقرير قائمة الطلبات',
             export_excel: 'تصدير Excel',
             stat_all: 'الكل',
             stat_new: 'طلبات جديدة',
@@ -105,7 +105,7 @@ const OrdersView = ({ onViewOrder, lang = 'ar', generalSettings, searchQuery, se
             status_completed: 'مكتمل',
             status_cancelled: 'ملغي',
             export_excel_title: 'تصدير طلباتك عبر ملف Excel',
-            export_pdf_title: 'طباعة تقرير الطلبات PDF',
+            export_pdf_title: 'تقرير قائمة الطلبات',
             export_period: 'الفترة',
             export_period_month: 'شهر (الحالي)',
             export_period_week: 'أسبوع (آخر 7 أيام)',
@@ -1202,7 +1202,7 @@ printWindow.onload = () => printWindow.print();
                                         className="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition shadow-lg shadow-red-500/20 active:scale-95 flex items-center justify-center gap-2"
                                     >
                                         <Printer size={20} />
-                                        <span>{txt.print} PDF</span>
+                                        <span>{txt.invoice_pdf}</span>
                                     </button>
                                 )}
 
