@@ -691,7 +691,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                     <h2 className="absolute right-0 top-0 text-xl md:text-3xl font-black text-gray-800 tracking-tight whitespace-nowrap">
                                         {txt.order_id}
                                     </h2>
-                                    <div className="flex flex-col items-center gap-2">
+                                    <div className="flex -translate-x-10 flex-col items-center gap-2">
                                         {isEditing ? (
                                             <input
                                                 type="text"
