@@ -2275,8 +2275,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     onClick={() => setSizeModalQtys(prev => ({ ...prev, [size]: Math.max(0, (prev[size] || 0) - 1) }))}
                                                     className={`w-8 h-8 rounded-xl flex items-center justify-center font-black transition-all ${
                                                         qty > 0 
-                                                            ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
-                                                            : 'bg-gray-50 text-gray-300 cursor-not-allowed'
+                                                            ? 'bg-red-500 text-white hover:bg-red-600'
+                                                            : 'bg-red-50 text-red-300 cursor-not-allowed'
                                                     }`}
                                                     disabled={qty <= 0}
                                                 >
