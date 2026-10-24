@@ -781,6 +781,11 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     </button>
                                 </div>
                             </div>
+                            {validationError && (
+                                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-black text-red-600" role="alert">
+                                    {validationError}
+                                </div>
+                            )}
                         </motion.div>
                     )}
 
@@ -994,7 +999,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                         </motion.div>
                     )}
 
-                    {validationError && (
+                    {validationError && step > 1 && (
                         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-black text-red-600" role="alert">
                             {validationError}
                         </div>
