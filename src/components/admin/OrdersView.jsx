@@ -1126,12 +1126,8 @@ printWindow.onload = () => printWindow.print();
             {/* Export Modal */}
             <AnimatePresence>
                 {showExportModal && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative"
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] px-4">
+                        <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative"
                         >
                             <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                 <h3 className="font-black text-xl text-gray-800">
@@ -1199,7 +1195,7 @@ printWindow.onload = () => printWindow.print();
                                 ) : (
                                     <button
                                         onClick={handleExportPDF}
-                                        className="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition shadow-lg shadow-red-500/20 active:scale-95 flex items-center justify-center gap-2"
+                                        className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition shadow-lg shadow-red-600/20 active:scale-95 flex items-center justify-center gap-2"
                                     >
                                         <Printer size={20} />
                                         <span>{txt.invoice_pdf}</span>
@@ -1213,7 +1209,7 @@ printWindow.onload = () => printWindow.print();
                                     {txt.cancel_btn}
                                 </button>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 )}
             </AnimatePresence>
@@ -1231,7 +1227,7 @@ printWindow.onload = () => printWindow.print();
                 <div className="flex w-full gap-2 md:w-auto">
                     <button
                         onClick={openPDFModal}
-                        className="order-last flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-2.5 font-bold text-white shadow-lg shadow-red-500/20 transition hover:bg-red-600 md:flex-none"
+                        className="order-last flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 font-bold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 md:flex-none"
                     >
                         <Printer size={20} />
                         <span>{txt.invoice_pdf}</span>
