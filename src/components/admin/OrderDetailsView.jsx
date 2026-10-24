@@ -1092,10 +1092,10 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                                                         {(() => {
                                                                             const product = allProducts.find(p => p.id === item.id);
                                                                             const sizes = product?.variants?.find(v => v.type === 'size')?.values || [];
-                                                                            return sizes.map(size => {
-                                                                                const sizeStock = getSizeStock(product, size);
-                                                                                return <option key={size} value={size} disabled={sizeStock <= 0}>{size}{sizeStock <= 0 ? ' - نفد' : ''}</option>;
-                                                                            });
+                                                                            const availableSizes = sizes.filter(size => getSizeStock(product, size) > 0);
+                                                                            return availableSizes.length > 0
+                                                                                ? availableSizes.map(size => <option key={size} value={size}>{size}</option>)
+                                                                                : <option value="" disabled>لا يوجد مقاس متوفر</option>;
                                                                         })()}
                                                                     </select>
                                                                 </div>
