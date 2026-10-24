@@ -422,6 +422,16 @@ printWindow.onload = () => printWindow.print();
                 time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
             };
         };
+        const getPrintStatusStyle = (status) => {
+            switch (status) {
+                case 'new': return 'background:#fefce8;color:#ca8a04;border:1px solid #fde68a;';
+                case 'processing': return 'background:#eef2ff;color:#4f46e5;border:1px solid #c7d2fe;';
+                case 'shipping': return 'background:rgba(6,182,212,.10);color:#0891b2;border:1px solid rgba(103,232,249,.7);';
+                case 'completed': return 'background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;';
+                case 'cancelled': return 'background:#fef2f2;color:#dc2626;border:1px solid #fecaca;';
+                default: return 'background:#f9fafb;color:#4b5563;border:1px solid #e5e7eb;';
+            }
+        };
         const rowsHtml = ordersToExport.map((o, i) => `
             ${(() => { const reportDateTime = getReportDateTime(o); return `
             <tr style="border-bottom: 1px solid #eee;">
@@ -432,7 +442,7 @@ printWindow.onload = () => printWindow.print();
                 <td style="padding: 8px;">${o.formData?.phone || '---'}</td>
                 <td style="padding: 8px; text-align: center;">${o.formData?.paymentMethod === 'whatsapp' ? (lang === 'ar' ? 'واتساب' : 'WhatsApp') : (lang === 'ar' ? 'عند الاستلام' : 'Cash on delivery')}</td>
                 <td style="padding: 8px; white-space: nowrap; text-align: center;"><div style="display:flex; flex-direction:column; align-items:center; line-height:1.35;"><span>${reportDateTime.date}</span><span style="font-size:9px; color:#64748b;">${reportDateTime.time}</span></div></td>
-                <td style="padding: 8px;">${getStatusLabel(o.status)}</td>
+                <td style="padding: 8px; text-align:center;"><span style="display:inline-block; padding:4px 9px; border-radius:999px; font-size:10px; font-weight:700; line-height:1; white-space:nowrap; ${getPrintStatusStyle(o.status)}">${getStatusLabel(o.status)}</span></td>
                 <td style="padding: 8px; text-align: center; font-weight: bold;">${formatPrice(o.total !== undefined ? o.total : ((o.subTotal || 0) - (o.discount || 0) + (o.deliveryCost || 0)), generalSettings?.currency || 'YER')}</td>
             </tr>
         `; })()}
@@ -540,7 +550,7 @@ printWindow.onload = () => printWindow.print();
                                 <th style="text-align: center;">${txt.th_payment}</th>
                                 <th>${txt.th_date}</th>
                                 <th>${txt.th_status}</th>
-                                <th style="text-align: center;">${txt.total_footer}</th>
+                                <th style="text-align: center;">${lang === 'ar' ? 'إجمالي الطلب' : 'Order Total'}</th>
                             </tr>
                         </thead>
                         <tbody>
