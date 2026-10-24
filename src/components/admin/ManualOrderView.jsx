@@ -56,6 +56,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState(null);
     const [couponError, setCouponError] = useState('');
+    const [validationError, setValidationError] = useState('');
 
     useEffect(() => {
         // Fetch Delivery Settings (Static enough to fetch once)
@@ -370,9 +371,10 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
 
     const handleCreateOrder = async () => {
         if (!formData.name.trim() || !formData.phone.trim() || !formData.region.trim() || cartItems.length === 0) {
-            alert(isRTL ? "يرجى تعبئة جميع بيانات العميل الإجبارية (الاسم، الهاتف، المنطقة) وإضافة منتجات" : "Please fill in all mandatory customer details (Name, Phone, Region) and add products");
+            setValidationError(txt.fill_required);
             return;
         }
+        setValidationError('');
 
         setLoading(true);
         try {
@@ -568,9 +570,14 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
 
     const goNext = () => {
         if (step === 1 && (!formData.name.trim() || !formData.phone.trim() || !formData.region.trim() || !orderCurrency || !formData.paymentMethod)) {
-            return alert(txt.fill_required);
+            setValidationError(txt.fill_required);
+            return;
         }
-        if (step === 2 && cartItems.length === 0) return alert(txt.empty_cart);
+        if (step === 2 && cartItems.length === 0) {
+            setValidationError(txt.empty_cart);
+            return;
+        }
+        setValidationError('');
         setStep(step + 1);
     };
 
@@ -590,6 +597,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
         setCouponCode('');
         setAppliedCoupon(null);
         setCouponError('');
+        setValidationError('');
         setSuccess(false);
         setCreatedOrderId(null);
     };
@@ -984,6 +992,12 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 </div>
                             </div>
                         </motion.div>
+                    )}
+
+                    {validationError && (
+                        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-black text-red-600" role="alert">
+                            {validationError}
+                        </div>
                     )}
 
                     {/* Navigation Buttons */}
