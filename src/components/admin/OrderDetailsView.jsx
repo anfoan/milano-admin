@@ -686,15 +686,15 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                         )}
                                     </p>
                                 </div>
-                                <div className="flex items-center gap-3 md:gap-4 shrink-0">
-                                    <h2 className="text-xl md:text-3xl font-black text-gray-800 tracking-tight flex items-center gap-2 md:gap-3">
+                                <div className="flex flex-col items-center gap-2 shrink-0">
+                                    <h2 className="text-xl md:text-3xl font-black text-gray-800 tracking-tight flex flex-col items-center gap-2 md:gap-3 whitespace-nowrap">
                                         {txt.order_id}
                                         {isEditing ? (
                                             <input
                                                 type="text"
                                                 value={editOrder.orderId}
                                                 onChange={(e) => setEditOrder({ ...editOrder, orderId: e.target.value })}
-                                                className="w-28 md:w-40 px-3 py-1 bg-white border border-blue-200 rounded-xl text-lg md:text-2xl font-black text-blue-600 outline-none focus:border-blue-500 transition-all shadow-inner"
+                                                className="w-28 md:w-40 px-3 py-1 bg-white border border-blue-200 rounded-xl text-center text-lg md:text-2xl font-black text-blue-600 outline-none focus:border-blue-500 transition-all shadow-inner"
                                             />
                                         ) : (
                                             <span className="text-blue-600 hover:scale-105 transition-transform inline-block">

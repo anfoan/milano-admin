@@ -21,6 +21,7 @@ import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { syncOrderInventoryForStatus } from '../../lib/orderInventorySync';
 import { getSizeStock, resolveSizeKey, toStockNumber } from '../../lib/stockUtils';
 import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
+import { isValidYemenPhone } from '../../lib/phoneValidation';
 
 const displayOrderId = (value) => String(value || '').replace(/^#+/, '');
 
@@ -462,6 +463,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const handlePOSCheckout = async () => {
         if (cartItems.length === 0) {
             alert(isRTL ? "السلة فارغة!" : "Cart is empty!");
+            return;
+        }
+        if (checkoutPhone.trim() && !isValidYemenPhone(checkoutPhone)) {
+            alert(isRTL ? "يجب أن يبدأ رقم العميل بـ 77 أو 78 أو 73 أو 71 أو 70" : "The customer number must start with 77, 78, 73, 71, or 70");
             return;
         }
 

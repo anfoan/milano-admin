@@ -17,6 +17,7 @@ import { useCurrency } from '../../context/CurrencyContext';
 import InvoiceTemplate from '../InvoiceTemplate';
 import { getAvailableProductStock, getSizeStock } from '../../lib/stockUtils';
 import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
+import { isValidYemenPhone } from '../../lib/phoneValidation';
 
 const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
     const isRTL = lang === 'ar';
@@ -100,6 +101,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             step3: "تأكيد الطلب",
             name: "الاسم الكامل",
             phone: "رقم الهاتف",
+            invalid_phone: "يجب أن يبدأ رقم العميل بـ 77 أو 78 أو 73 أو 71 أو 70",
             region: "المنطقة / المدينة",
             address: "العنوان التفصيلي",
             delivery_type: "نوع التوصيل",
@@ -147,6 +149,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             step3: "Confirm Order",
             name: "Full Name",
             phone: "Phone Number",
+            invalid_phone: "The customer number must start with 77, 78, 73, 71, or 70",
             region: "Region / City",
             address: "Detailed Address",
             delivery_type: "Delivery Type",
@@ -375,6 +378,10 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             setValidationError(txt.fill_required);
             return;
         }
+        if (!isValidYemenPhone(formData.phone)) {
+            setValidationError(txt.invalid_phone);
+            return;
+        }
         setValidationError('');
 
         setLoading(true);
@@ -574,6 +581,10 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             setValidationError(txt.fill_required);
             return;
         }
+        if (step === 1 && !isValidYemenPhone(formData.phone)) {
+            setValidationError(txt.invalid_phone);
+            return;
+        }
         if (step === 2 && cartItems.length === 0) {
             setValidationError(txt.empty_cart);
             return;
@@ -712,7 +723,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                             dir="ltr"
                                             placeholder="77xxxxxxx"
                                         />
-                                        {validationError && !formData.phone.trim() && <span className="mt-1 block text-[10px] font-bold text-red-600">{txt.fill_required}</span>}
+                                        {validationError && (!formData.phone.trim() || !isValidYemenPhone(formData.phone)) && <span className="mt-1 block text-[10px] font-bold text-red-600">{formData.phone.trim() ? txt.invalid_phone : txt.fill_required}</span>}
                                     </div>
                                 </div>
                                 <div className="space-y-2">
