@@ -628,7 +628,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                     <div className="bg-white rounded-[20px] border border-gray-100 shadow-sm overflow-hidden">
                         {/* Card Header */}
                         <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-start gap-3">
-                            <div>
+                            <div className="text-center">
                                 <h1 className="text-xl md:text-3xl font-black text-blue-800 mb-1">{txt.order_id}</h1>
                                 <p className="text-gray-400 font-mono text-lg font-bold" dir="ltr">{order.orderId}</p>
                             </div>
@@ -849,8 +849,8 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                     </div>
 
 
-                    {/* Notes Section */}
-                    <div className="bg-white rounded-[20px] p-5 md:p-8 border border-gray-100 shadow-sm">
+                    {/* Notes Section (hidden by request) */}
+                    {false && (<div className="bg-white rounded-[20px] p-5 md:p-8 border border-gray-100 shadow-sm">
                         <div className="flex items-center justify-between gap-2 mb-6">
                             <h3 className="font-black text-gray-800 flex items-center gap-2 md:gap-3 text-base md:text-xl shrink-0">
                                 <FileText size={20} className="text-gray-500 md:w-6 md:h-6" />
@@ -943,7 +943,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </div>)}
 
                     {/* Product Search (Add Item) */}
                     {isEditing && (
