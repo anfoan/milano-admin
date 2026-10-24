@@ -847,10 +847,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                   .completed-val { color: #10b981; font-weight: bold; }
                   .cancelled-val { color: #ef4444; font-weight: bold; }
                   
-                  .bottom-totals { margin-top: 8px; border-top: 2px solid #e5e7eb; padding-top: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; page-break-inside: avoid; break-inside: avoid; }
-                  .bottom-card-sales { border: 2px solid #2563eb; border-radius: 10px; padding: 6px 12px; text-align: center; background: #eff6ff; }
-                  .bottom-card-profit { border: 2px solid #10b981; border-radius: 10px; padding: 6px 12px; text-align: center; background: #f0fdf4; }
-                  .bottom-card-count { border: 2px solid #8b5cf6; border-radius: 10px; padding: 6px 12px; text-align: center; background: #f5f3ff; }
+                  .bottom-totals { margin-top: 2px; border-top: 2px solid #e5e7eb; padding-top: 2px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; page-break-inside: avoid; break-inside: avoid; }
+                  .bottom-card-sales { border: 2px solid #2563eb; border-radius: 10px; padding: 3px 8px; text-align: center; background: #eff6ff; min-height: 0; }
+                  .bottom-card-profit { border: 2px solid #10b981; border-radius: 10px; padding: 3px 8px; text-align: center; background: #f0fdf4; min-height: 0; }
+                  .bottom-card-count { border: 2px solid #8b5cf6; border-radius: 10px; padding: 3px 8px; text-align: center; background: #f5f3ff; min-height: 0; }
                   
                   @media print {
                       .print-btn { display: none !important; }
@@ -932,11 +932,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                   <div class="bottom-totals">
                       <div class="bottom-card-sales">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'الإجمالي النهائي' : 'Final Total'}</span>
-                          <span style="display: inline-flex; align-items: baseline; gap: 4px; white-space: nowrap; font-size: 12px; font-weight: 900; color: #2563eb; margin-top: 2px; font-family: monospace;">${reportData.totalSales.toLocaleString()} ${currency}</span>
+                          <span style="display: inline-flex; align-items: baseline; gap: 2px; white-space: nowrap; font-size: 10px; font-weight: 900; color: #2563eb; margin-top: 1px; font-family: monospace;">${reportData.totalSales.toLocaleString()} ${currency}</span>
                       </div>
                       <div class="bottom-card-profit">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'صافي الأرباح' : 'Net Profit'}</span>
-                          <span style="display: inline-flex; align-items: baseline; gap: 4px; white-space: nowrap; font-size: 12px; font-weight: 900; color: #10b981; margin-top: 2px; font-family: monospace;">${reportData.netProfit.toLocaleString()} ${currency}</span>
+                          <span style="display: inline-flex; align-items: baseline; gap: 2px; white-space: nowrap; font-size: 10px; font-weight: 900; color: #10b981; margin-top: 1px; font-family: monospace;">${reportData.netProfit.toLocaleString()} ${currency}</span>
                       </div>
                       <div class="bottom-card-count">
                           <span style="display: block; font-size: 9px; font-weight: 700; color: #4b5563;">${isRTL ? 'عدد الفواتير' : 'Transactions'}</span>
