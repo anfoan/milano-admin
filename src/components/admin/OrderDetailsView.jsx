@@ -794,10 +794,10 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                             style={{ unicodeBidi: 'plaintext' }}
                                         />
                                     ) : (
-                                        <span className="inline-flex items-center gap-1 font-bold font-mono" dir="ltr" style={{ unicodeBidi: 'plaintext' }}>
+                                        <span className="font-bold font-mono" dir="ltr" style={{ unicodeBidi: 'plaintext' }}>
                                             {(() => {
                                                 const [date, time, period] = formatOrderDateTime(order.createdAt || order.date, lang === 'ar').split(' ');
-                                                return <><span>{date}</span><span className="inline-block -translate-x-3">{time} {period}</span></>;
+                                                return `${date}\u00A0\u00A0\u00A0\u00A0${time} ${period}`;
                                             })()}
                                         </span>
                                     )}
