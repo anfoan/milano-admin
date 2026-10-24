@@ -1117,7 +1117,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 {isRTL ? "اختر إجراء للمتابعة" : "Select an action to proceed"}
                             </p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="relative -top-5 flex items-center gap-3">
                             <span className="text-xs font-bold text-gray-500 bg-gray-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/5">
                                 {isRTL ? `المشغل: ${isAdminManager ? 'المدير العام' : 'كاشير المحل'}` : `Operator: ${isAdminManager ? 'General Manager' : 'Cashier'}`}
                             </span>
