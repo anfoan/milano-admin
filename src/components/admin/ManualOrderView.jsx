@@ -752,6 +752,11 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     </div>
                                 </div>
                             </div>
+                            {validationError && (
+                                <p className="text-center text-sm font-black text-red-600" role="alert">
+                                    {validationError}
+                                </p>
+                            )}
                             <div className="space-y-2">
                                 <label className="text-sm font-black text-gray-700 flex items-center gap-1"><span>{txt.payment_method}</span><span className="text-red-600">*</span></label>
                                 <div className="grid grid-cols-3 gap-2">
@@ -781,11 +786,6 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     </button>
                                 </div>
                             </div>
-                            {validationError && (
-                                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-black text-red-600" role="alert">
-                                    {validationError}
-                                </div>
-                            )}
                         </motion.div>
                     )}
 
@@ -1000,9 +1000,9 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                     )}
 
                     {validationError && step > 1 && (
-                        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-black text-red-600" role="alert">
+                        <p className="text-center text-sm font-black text-red-600" role="alert">
                             {validationError}
-                        </div>
+                        </p>
                     )}
 
                     {/* Navigation Buttons */}
