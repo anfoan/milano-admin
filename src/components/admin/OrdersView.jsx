@@ -484,12 +484,13 @@ printWindow.onload = () => printWindow.print();
                         box-sizing: border-box;
                     }
                     .report-header { position:relative; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:20px; min-height:112px; padding:18px 20px 48px; direction:ltr; background:#ffffff; border:1px solid #dbe7f3; border-radius:16px; box-shadow:0 8px 22px rgba(30,64,175,.08); }
-                    .report-logo { justify-self:start; display:flex; align-items:center; justify-content:center; width:82px; height:62px; }
-                    .report-logo img { max-width:82px; max-height:62px; object-fit:contain; }
+                    .report-logo { justify-self:start; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; width:100px; }
+                    .report-logo img { width:64px; height:64px; border-radius:12px; object-fit:cover; overflow:hidden; }
+                    .report-logo-date { margin-top:5px; color:#64748b; font-size:9px; font-weight:700; white-space:nowrap; direction:rtl; }
                     .report-title-block { grid-column:2; text-align:center; direction:rtl; }
                     .report-store-details { grid-column:3; justify-self:end; text-align:right; direction:rtl; color:#334155; }
-                    .report-store-name { color:#0f172a; font-size:15px; font-weight:900; }
-                    .report-store-line { margin-top:3px; color:#64748b; font-size:10px; font-weight:700; }
+                    .report-store-name { color:#0f172a; font-size:17px; font-weight:900; }
+                    .report-store-line { margin-top:4px; color:#64748b; font-size:11px; font-weight:700; }
                     .report-kicker { display:inline-block; margin-bottom:5px; color:#2563eb; font-size:9px; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; }
                     .report-title { margin:0; color:#0f172a; font-size:22px; font-weight:900; }
                     .report-date { margin:5px 0 0; color:#64748b; font-size:10px; font-weight:700; }
@@ -537,11 +538,10 @@ printWindow.onload = () => printWindow.print();
             <body>
                 <div class="print-wrapper">
                     <div class="report-header">
-                        <div class="report-logo"><img src="${reportLogoUrl}" alt="${lang === 'ar' ? 'شعار المتجر' : 'Store logo'}" onerror="this.style.display='none'"></div>
+                        <div class="report-logo"><img src="${reportLogoUrl}" alt="${lang === 'ar' ? 'شعار المتجر' : 'Store logo'}" onerror="this.style.display='none'"><span class="report-logo-date">${lang === 'ar' ? 'تاريخ الاستخراج:' : 'Date:'} ${dateStr}</span></div>
                         <div class="report-title-block">
                             <span class="report-kicker">MILANO STORE</span>
                             <h1 class="report-title">${lang === 'ar' ? 'تقرير المبيعات والطلبات' : 'Orders & Sales Report'}</h1>
-                            <p class="report-date">${lang === 'ar' ? 'تاريخ الاستخراج:' : 'Date:'} ${dateStr}</p>
                         </div>
                         <div class="report-store-details">
                             <div class="report-store-name">${generalSettings?.storeName || (lang === 'ar' ? 'متجر ميلانو' : 'Milano Store')}</div>
