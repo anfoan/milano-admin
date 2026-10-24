@@ -640,7 +640,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                         e.target.src = '/nav-logo.png';
                                     }}
                                     alt="Milano Logo"
-                                    className="h-16 w-auto object-contain"
+                                    className="h-16 w-auto rounded-[18px] object-contain overflow-hidden"
                                 />
                             </div>
                         </div>
