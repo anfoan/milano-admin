@@ -686,24 +686,26 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                         )}
                                     </p>
                                 </div>
-                                <div className="relative flex w-full min-w-[220px] flex-col items-center gap-2 shrink-0">
-                                    <h2 className="relative flex w-full flex-col items-center text-xl md:text-3xl font-black text-gray-800 tracking-tight whitespace-nowrap">
-                                        <span className="absolute right-0 top-0 whitespace-nowrap">{txt.order_id}</span>
+                                <div className="relative flex w-full min-w-[240px] flex-col items-center shrink-0">
+                                    <h2 className="absolute right-0 top-0 text-xl md:text-3xl font-black text-gray-800 tracking-tight whitespace-nowrap">
+                                        {txt.order_id}
+                                    </h2>
+                                    <div className="flex flex-col items-center gap-2">
                                         {isEditing ? (
                                             <input
                                                 type="text"
                                                 value={editOrder.orderId}
                                                 onChange={(e) => setEditOrder({ ...editOrder, orderId: e.target.value })}
-                                                className="mt-10 w-28 md:w-40 px-3 py-1 bg-white border border-blue-200 rounded-xl text-center text-lg md:text-2xl font-black text-blue-600 outline-none focus:border-blue-500 transition-all shadow-inner"
+                                                className="w-28 md:w-40 px-3 py-1 bg-white border border-blue-200 rounded-xl text-center text-lg md:text-2xl font-black text-blue-600 outline-none focus:border-blue-500 transition-all shadow-inner"
                                             />
                                         ) : (
-                                            <span className="mt-10 text-blue-600 hover:scale-105 transition-transform inline-block">
+                                            <span className="text-blue-600 hover:scale-105 transition-transform inline-block">
                                                 {order.orderId}
                                             </span>
                                         )}
-                                    </h2>
-                                    <div className={`absolute left-0 top-1 px-3 py-1 md:px-4 md:py-1.5 rounded-full font-black text-[10px] md:text-xs uppercase tracking-wider shadow-sm ${getStatusColor(isEditing ? editOrder.status : status)}`}>
-                                        {getStatusLabel(isEditing ? editOrder.status : status)}
+                                        <div className={`px-3 py-1 md:px-4 md:py-1.5 rounded-full font-black text-[10px] md:text-xs uppercase tracking-wider shadow-sm ${getStatusColor(isEditing ? editOrder.status : status)}`}>
+                                            {getStatusLabel(isEditing ? editOrder.status : status)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
