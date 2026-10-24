@@ -17,6 +17,40 @@ import { getAvailableProductStock, getSizeStock } from '../../lib/stockUtils';
 
 const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 1632)).replace(/[۰-۹]/g, digit => String(digit.charCodeAt(0) - 1776));
 
+const formatOrderDateTime = (value, useArabicPeriod = true) => {
+    const formatParts = (day, month, year, hours, minutes) => {
+        const hour24 = Number(hours) || 0;
+        const period = hour24 >= 12 ? (useArabicPeriod ? 'م' : 'PM') : (useArabicPeriod ? 'ص' : 'AM');
+        const hour12 = hour24 % 12 || 12;
+        return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year} ${hour12}:${String(minutes).padStart(2, '0')} ${period}`;
+    };
+
+    if (value && typeof value.toDate === 'function') {
+        const date = value.toDate();
+        return formatParts(date.getDate(), date.getMonth() + 1, date.getFullYear(), date.getHours(), date.getMinutes());
+    }
+
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+        return formatParts(value.getDate(), value.getMonth() + 1, value.getFullYear(), value.getHours(), value.getMinutes());
+    }
+
+    const normalized = toEnglishDigits(value).trim();
+    const dateMatch = normalized.match(/(\d{1,4})[\/.\-](\d{1,2})[\/.\-](\d{1,4})/);
+    const timeMatch = normalized.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*([صم]|a\.?m\.?|p\.?m\.?)?/i);
+    if (dateMatch) {
+        const [, first, second, third] = dateMatch;
+        const [day, month, year] = first.length === 4 ? [third, second, first] : [first, second, third];
+        let hours = Number(timeMatch?.[1] || 0);
+        const minutes = Number(timeMatch?.[2] || 0);
+        const marker = String(timeMatch?.[3] || '').toLowerCase();
+        if ((marker === 'م' || marker.startsWith('p')) && hours < 12) hours += 12;
+        if ((marker === 'ص' || marker.startsWith('a')) && hours === 12) hours = 0;
+        return formatParts(day, month, year, hours, minutes);
+    }
+
+    return normalized;
+};
+
 const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initialEditMode = false, onUpdate }) => {
     const { formatPrice, exchangeRate } = useCurrency();
     const [status, setStatus] = useState(order.status);
@@ -753,23 +787,15 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                     {isEditing ? (
                                         <input
                                             type="text"
-                                            value={toEnglishDigits(editOrder.date || '')}
+                                            value={formatOrderDateTime(editOrder.date || order.createdAt || order.date, lang === 'ar')}
                                             onChange={(e) => setEditOrder({ ...editOrder, date: toEnglishDigits(e.target.value) })}
-                                            className="px-2 py-1 bg-white border border-blue-200 rounded text-gray-800 outline-none focus:border-blue-500 transition-all font-bold text-xs font-mono w-32"
+                                            className="px-2 py-1 bg-white border border-blue-200 rounded text-gray-800 outline-none focus:border-blue-500 transition-all font-bold text-xs font-mono w-36 text-left"
                                             dir="ltr"
+                                            style={{ unicodeBidi: 'plaintext' }}
                                         />
                                     ) : (
-                                        <span className="font-bold dir-ltr font-mono">
-                                            {(() => {
-                                                const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
-                                                const hideDayNumber = value => lang === 'ar' ? String(value).replace(/24/g, '') : value;
-                                                if (order.createdAt && typeof order.createdAt.toDate === 'function') {
-                                                    return hideDayNumber(order.createdAt.toDate().toLocaleString(locale));
-                                                } else if (typeof order.createdAt === 'string') {
-                                                    return hideDayNumber(new Date(order.createdAt).toLocaleString(locale));
-                                                }
-                                                return order.date;
-                                            })()}
+                                        <span className="font-bold font-mono" dir="ltr" style={{ unicodeBidi: 'plaintext' }}>
+                                            {formatOrderDateTime(order.createdAt || order.date, lang === 'ar')}
                                         </span>
                                     )}
                                 </div>
