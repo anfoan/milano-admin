@@ -1106,8 +1106,9 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                             </table>
                         </div>
 
+                        <div className={!isEditing ? 'grid grid-cols-1 md:grid-cols-2 items-start gap-4' : ''} dir="ltr">
                         {!isEditing && (
-                            <div className="border-t border-gray-100 bg-white p-4 md:p-6">
+                            <div className="order-1 md:order-2 border-t border-gray-100 bg-white p-4 md:p-6" dir={isRTL ? 'rtl' : 'ltr'}>
                                 <h3 className="font-black text-gray-700 mb-4">{txt.delivery_location}</h3>
                                 <div className="space-y-2 text-gray-500 font-bold text-sm">
                                     <p>{order.formData?.city || txt.val_sanaa}</p>
@@ -1120,7 +1121,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                         )}
 
                         {/* Totals Section */}
-                        <div className="bg-gray-50 p-6 border-t border-gray-100">
+                        <div className={`bg-gray-50 p-6 border-t border-gray-100 ${!isEditing ? 'order-2 md:order-1' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             <div className={`flex flex-col items-end gap-3 max-w-xs ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
                                 <div className="flex justify-between w-full text-sm font-bold text-gray-500">
                                     <span>{txt.subtotal}</span>
@@ -1216,6 +1217,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                     </span>
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </div>
 
