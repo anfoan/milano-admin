@@ -2050,11 +2050,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 <div className="stats-grid grid grid-cols-3 gap-4">
                                     <div className="stat-card p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5 text-center">
                                         <span className="text-[10px] text-gray-400 font-bold block">{isRTL ? "إجمالي المبيعات" : "Total Sales"}</span>
-                                        <span dir="ltr" className="stat-val mt-1 inline-flex items-baseline whitespace-nowrap text-sm font-black text-blue-600 dark:text-blue-400" style={{ direction: 'ltr', whiteSpace: 'nowrap' }}>{generatedReport.totalSales.toLocaleString()}&nbsp;{currency}</span>
+                                        <span dir="rtl" className="stat-val mt-1 inline-flex items-baseline whitespace-nowrap text-sm font-black text-blue-600 dark:text-blue-400" style={{ direction: 'rtl', whiteSpace: 'nowrap' }}><span dir="ltr">{generatedReport.totalSales.toLocaleString()}</span><span dir="rtl">&nbsp;{currency}</span></span>
                                     </div>
                                     <div className="stat-card p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5 text-center">
                                         <span className="text-[10px] text-gray-400 font-bold block">{isRTL ? "صافي الأرباح" : "Net Profit"}</span>
-                                        <span dir="ltr" className="stat-val mt-1 inline-flex items-baseline whitespace-nowrap text-sm font-black text-green-500" style={{ direction: 'ltr', whiteSpace: 'nowrap' }}>{generatedReport.netProfit.toLocaleString()}&nbsp;{currency}</span>
+                                        <span dir="rtl" className="stat-val mt-1 inline-flex items-baseline whitespace-nowrap text-sm font-black text-green-500" style={{ direction: 'rtl', whiteSpace: 'nowrap' }}><span dir="ltr">{generatedReport.netProfit.toLocaleString()}</span><span dir="rtl">&nbsp;{currency}</span></span>
                                     </div>
                                     <div className="stat-card p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5 text-center">
                                         <span className="text-[10px] text-gray-400 font-bold block">{isRTL ? "عدد الفواتير" : "Transaction Count"}</span>
@@ -2062,7 +2062,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     </div>
                                 </div>
 
-                                <div className="p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5">
+                                <div className="-mt-2 p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5">
                                     <h4 className="text-xs font-black text-gray-700 dark:text-white mb-3">{isRTL ? "تفصيل طرق الدفع" : "Payment Method Details"}</h4>
                                     <div className="grid grid-cols-3 gap-2 text-xs font-bold text-center text-gray-500">
                                         <div>
@@ -2080,7 +2080,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="-mt-1 space-y-2">
                                     <h4 className="text-xs font-black text-gray-700 dark:text-white">{isRTL ? "سجل الإيصالات خلال الفترة" : "Invoices List"}</h4>
                                     <table className="table w-full text-start text-xs border border-gray-100 dark:border-white/5 rounded-xl overflow-hidden">
                                         <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 font-bold text-[10px]">
