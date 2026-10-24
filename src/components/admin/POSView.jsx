@@ -2031,7 +2031,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 <h3 className="text-base font-black text-gray-900 dark:text-white">
                                     {isRTL ? "تقرير المبيعات التفصيلي" : "Sales Report Overview"}
                                 </h3>
-                                <button onClick={() => setShowReportModal(false)} className="p-1.5 hover:bg-gray-50 dark:hover:bg-white/5 rounded-full transition-colors text-gray-400">
+                                <button onClick={() => setShowReportModal(false)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-colors text-red-600">
                                     <X size={18} />
                                 </button>
                             </div>
