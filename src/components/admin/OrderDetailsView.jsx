@@ -1267,13 +1267,24 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                     {/* Tracking Link Card */}
                     <div className="bg-white rounded-[20px] p-6 border border-gray-100 shadow-sm">
                         <div className="flex justify-between items-center mb-5">
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(String(order.orderId || ''));
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 2000);
+                                }}
+                                className={`text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md active:scale-95 ${copied ? 'bg-green-500 shadow-green-500/20' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'}`}
+                            >
+                                {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                                {copied ? (lang === 'ar' ? 'تم النسخ' : 'Copied') : (lang === 'ar' ? 'نسخ رقم الطلب' : 'Copy order number')}
+                            </button>
                             <h3 className="font-black text-gray-800 text-base flex items-center gap-2">
                                 <MapPin size={20} className="text-blue-600" />
                                 {txt.tracking_title}
                             </h3>
                         </div>
                         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-3 group relative">
-                            <p className="font-mono text-xs font-bold text-gray-600 break-all dir-ltr select-all">
+                            <p className="font-mono text-xs font-bold text-gray-600 break-all dir-ltr select-all text-center">
                                 {order.orderId}
                             </p>
                         </div>
