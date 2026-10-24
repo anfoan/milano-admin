@@ -803,7 +803,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                         </div>
 
                         {/* Delivery Location Footer */}
-                        <div className={`border-t border-gray-100 p-4 md:p-6 bg-gray-50/50 ${!isEditing ? 'hidden' : ''}`}>
+                        <div className="hidden">
                             <h3 className="font-black text-gray-700 mb-4">{txt.delivery_location}</h3>
                             <div className="space-y-4">
                                 {isEditing ? (
@@ -1107,22 +1107,22 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                             </table>
                         </div>
 
-                        <div className={!isEditing ? 'grid grid-cols-1 md:grid-cols-2 items-start gap-4' : ''} dir="ltr">
-                        {!isEditing && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-4" dir="ltr">
+                        {
                             <div className="order-1 md:order-2 border-t border-gray-100 bg-white p-4 md:p-6" dir={isRTL ? 'rtl' : 'ltr'}>
                                 <h3 className="font-black text-gray-700 mb-4">{txt.delivery_location}</h3>
                                 <div className="space-y-2 text-gray-500 font-bold text-sm">
-                                    <p>{order.formData?.city || txt.val_sanaa}</p>
-                                    <p>{txt.payment_gateway} {order.formData?.paymentMethod === 'whatsapp' ? txt.val_manual : (order.formData?.paymentMethod === 'cod' ? txt.val_cod_gateway : txt.val_manual)}</p>
-                                    <p>{txt.payment_method} {order.formData?.paymentMethod === 'whatsapp' ? txt.val_whatsapp : (order.formData?.paymentMethod === 'cod' ? txt.val_cod : (order.formData?.paymentMethod || txt.val_manual))}</p>
-                                    {order.formData?.address && order.formData.address !== '---' && <p>{order.formData.address}</p>}
+                                    <p>{(isEditing ? editOrder.formData?.city : order.formData?.city) || txt.val_sanaa}</p>
+                                    <p>{txt.payment_gateway} {(isEditing ? editOrder.formData?.paymentMethod : order.formData?.paymentMethod) === 'whatsapp' ? txt.val_manual : ((isEditing ? editOrder.formData?.paymentMethod : order.formData?.paymentMethod) === 'cod' ? txt.val_cod_gateway : txt.val_manual)}</p>
+                                    <p>{txt.payment_method} {(isEditing ? editOrder.formData?.paymentMethod : order.formData?.paymentMethod) === 'whatsapp' ? txt.val_whatsapp : ((isEditing ? editOrder.formData?.paymentMethod : order.formData?.paymentMethod) === 'cod' ? txt.val_cod : ((isEditing ? editOrder.formData?.paymentMethod : order.formData?.paymentMethod) || txt.val_manual))}</p>
+                                    {(isEditing ? editOrder.formData?.address : order.formData?.address) && (isEditing ? editOrder.formData?.address : order.formData?.address) !== '---' && <p>{isEditing ? editOrder.formData.address : order.formData.address}</p>}
                                     <p>{txt.val_yemen}</p>
                                 </div>
                             </div>
-                        )}
+                        }
 
                         {/* Totals Section */}
-                        <div className={`bg-gray-50 p-6 border-t border-gray-100 ${!isEditing ? 'order-2 md:order-1' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <div className="order-2 md:order-1 bg-gray-50 p-6 border-t border-gray-100" dir={isRTL ? 'rtl' : 'ltr'}>
                             <div className={`flex flex-col items-end gap-3 max-w-xs ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
                                 <div className="flex justify-between w-full text-sm font-bold text-gray-500">
                                     <span>{txt.subtotal}</span>
