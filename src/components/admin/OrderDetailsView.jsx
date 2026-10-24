@@ -742,10 +742,16 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                             {(() => {
                                                 const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
                                                 const dateOptions = lang === 'ar' ? { year: 'numeric', month: '2-digit', hour: 'numeric', minute: '2-digit', second: '2-digit' } : undefined;
+                                                const englishDigits = value => String(value).replace(/[٠-٩۰-۹]/g, digit => {
+                                                    const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+                                                    const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+                                                    const index = arabicDigits.indexOf(digit);
+                                                    return String(index >= 0 ? index : persianDigits.indexOf(digit));
+                                                });
                                                 if (order.createdAt && typeof order.createdAt.toDate === 'function') {
-                                                    return order.createdAt.toDate().toLocaleString(locale, dateOptions);
+                                                    return englishDigits(order.createdAt.toDate().toLocaleString(locale, dateOptions));
                                                 } else if (typeof order.createdAt === 'string') {
-                                                    return new Date(order.createdAt).toLocaleString(locale, dateOptions);
+                                                    return englishDigits(new Date(order.createdAt).toLocaleString(locale, dateOptions));
                                                 }
                                                 return order.date;
                                             })()}
