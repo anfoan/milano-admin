@@ -11,6 +11,13 @@ const getInvoiceItemPrices = (item) => {
     };
 };
 
+const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩۰-۹]/g, digit => {
+    const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+    const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+    const arabicIndex = arabicDigits.indexOf(digit);
+    return String(arabicIndex >= 0 ? arabicIndex : persianDigits.indexOf(digit));
+});
+
 const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, generalSettings, hideHeader = false }, ref) => {
     const { formatPrice } = useCurrency();
     const currency = generalSettings?.currency || 'YER';
@@ -95,7 +102,7 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
                                     <div className="space-y-1.5 text-sm font-bold text-gray-800">
                                         <div className="flex items-center gap-3">
                                             <span className="text-gray-800 font-bold">{lang === 'ar' ? 'تاريخ الطلب:' : 'Order Date:'}</span>
-                                            <span className="text-base">{order.date || new Date().toLocaleDateString('en-GB')}</span>
+                                            <span className="text-base">{toEnglishDigits(order.date || new Date().toLocaleDateString('en-GB'))}</span>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <span className="text-gray-800 font-bold">{lang === 'ar' ? 'رقم الطلب:' : 'Order ID:'}</span>
