@@ -354,10 +354,16 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
 
     const handleUpdateItem = (idx, field, value) => {
         const newItems = [...editOrder.cartItems];
+        const product = allProducts.find(p => p.id === newItems[idx]?.id);
 
         // Handle numeric fields
         if (field === 'price' || field === 'quantity') {
             value = Number(value) || 0;
+        }
+        if (field === 'quantity' && product) {
+            const selectedSize = newItems[idx].selectedSize || newItems[idx].size;
+            const available = selectedSize && product.sizeStocks ? getSizeStock(product, selectedSize) : getAvailableProductStock(product);
+            if (available > 0) value = Math.min(value, available);
         }
 
         newItems[idx][field] = value;
@@ -368,6 +374,16 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
             newItems[idx].size = value;
         }
 
+        handleRecalculate({ ...editOrder, cartItems: newItems });
+    };
+
+    const handleUpdateItemSize = (idx, value) => {
+        const newItems = [...editOrder.cartItems];
+        const product = allProducts.find(p => p.id === newItems[idx]?.id);
+        const available = product ? getSizeStock(product, value) : 0;
+        newItems[idx].selectedSize = value;
+        newItems[idx].size = value;
+        if (available > 0) newItems[idx].quantity = Math.min(Number(newItems[idx].quantity) || 1, available);
         handleRecalculate({ ...editOrder, cartItems: newItems });
     };
 
@@ -1068,12 +1084,20 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                                                 />
                                                                 <div className="flex items-center gap-2">
                                                                     <span className="text-[10px] text-gray-400 font-bold whitespace-nowrap">{txt.size}</span>
-                                                                    <input
-                                                                        type="text"
+                                                                    <select
                                                                         value={item.selectedSize || item.size || ''}
-                                                                        onChange={(e) => handleUpdateItem(idx, 'selectedSize', e.target.value)}
-                                                                        className="w-full px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-bold text-gray-600 outline-none focus:border-blue-500"
-                                                                    />
+                                                                        onChange={(e) => handleUpdateItemSize(idx, e.target.value)}
+                                                                        className="w-full px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-bold text-gray-600 outline-none focus:border-blue-500 cursor-pointer"
+                                                                    >
+                                                                        {(() => {
+                                                                            const product = allProducts.find(p => p.id === item.id);
+                                                                            const sizes = product?.variants?.find(v => v.type === 'size')?.values || [];
+                                                                            return sizes.map(size => {
+                                                                                const sizeStock = getSizeStock(product, size);
+                                                                                return <option key={size} value={size} disabled={sizeStock <= 0}>{size}{sizeStock <= 0 ? ' - نفد' : ''}</option>;
+                                                                            });
+                                                                        })()}
+                                                                    </select>
                                                                 </div>
                                                             </div>
                                                         ) : (
