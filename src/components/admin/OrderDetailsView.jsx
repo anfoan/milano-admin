@@ -1107,7 +1107,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                         </div>
 
                         {!isEditing && (
-                            <div className="mx-4 my-4 rounded-[18px] border border-gray-200 bg-gray-50 p-4 md:p-5">
+                            <div className="border-t border-gray-100 bg-white p-4 md:p-6">
                                 <h3 className="font-black text-gray-700 mb-4">{txt.delivery_location}</h3>
                                 <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-center text-gray-500 font-bold text-sm">
                                     <p className="whitespace-nowrap">{order.formData?.city || txt.val_sanaa}</p>
