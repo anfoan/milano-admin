@@ -740,7 +740,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                     ) : (
                                         <span className="font-bold dir-ltr font-mono">
                                             {(() => {
-                                                const locale = lang === 'ar' ? 'ar-YE' : 'en-GB';
+                                                const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
                                                 if (order.createdAt && typeof order.createdAt.toDate === 'function') {
                                                     return order.createdAt.toDate().toLocaleString(locale);
                                                 } else if (typeof order.createdAt === 'string') {
