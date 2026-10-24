@@ -802,7 +802,7 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                         </div>
 
                         {/* Delivery Location Footer */}
-                        <div className="border-t border-gray-100 p-4 md:p-6 bg-gray-50/50">
+                        <div className={`border-t border-gray-100 p-4 md:p-6 bg-gray-50/50 ${!isEditing ? 'hidden' : ''}`}>
                             <h3 className="font-black text-gray-700 mb-4">{txt.delivery_location}</h3>
                             <div className="space-y-4">
                                 {isEditing ? (
@@ -1206,6 +1206,19 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                         </div>
                     </div>
 
+                    {!isEditing && (
+                        <div className="bg-white rounded-[20px] border border-gray-100 shadow-sm p-4 md:p-6">
+                            <h3 className="font-black text-gray-700 mb-4">{txt.delivery_location}</h3>
+                            <div className="space-y-2 text-gray-500 font-bold text-sm">
+                                <p>{order.formData?.city || txt.val_sanaa}</p>
+                                <p>{txt.payment_gateway} {order.formData?.paymentMethod === 'whatsapp' ? txt.val_manual : (order.formData?.paymentMethod === 'cod' ? txt.val_cod_gateway : txt.val_manual)}</p>
+                                <p>{txt.payment_method} {order.formData?.paymentMethod === 'whatsapp' ? txt.val_whatsapp : (order.formData?.paymentMethod === 'cod' ? txt.val_cod : (order.formData?.paymentMethod || txt.val_manual))}</p>
+                                <p className="dir-ltr font-mono">{order.formData?.phone}</p>
+                                <p>{order.formData?.address}</p>
+                                <p>{txt.val_yemen}</p>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
 
