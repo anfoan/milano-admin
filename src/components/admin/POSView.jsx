@@ -2050,11 +2050,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 <div className="stats-grid grid grid-cols-3 gap-4">
                                     <div className="stat-card p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5 text-center">
                                         <span className="text-[10px] text-gray-400 font-bold block">{isRTL ? "إجمالي المبيعات" : "Total Sales"}</span>
-                                        <span className="stat-val text-lg font-black text-blue-600 dark:text-blue-400 mt-1 block">{generatedReport.totalSales.toLocaleString()} {currency}</span>
+                                        <span dir="ltr" className="stat-val mt-1 inline-flex items-baseline whitespace-nowrap text-sm font-black text-blue-600 dark:text-blue-400" style={{ direction: 'ltr', whiteSpace: 'nowrap' }}>{generatedReport.totalSales.toLocaleString()}&nbsp;{currency}</span>
                                     </div>
                                     <div className="stat-card p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5 text-center">
                                         <span className="text-[10px] text-gray-400 font-bold block">{isRTL ? "صافي الأرباح" : "Net Profit"}</span>
-                                        <span className="stat-val text-lg font-black text-green-500 mt-1 block">{generatedReport.netProfit.toLocaleString()} {currency}</span>
+                                        <span dir="ltr" className="stat-val mt-1 inline-flex items-baseline whitespace-nowrap text-sm font-black text-green-500" style={{ direction: 'ltr', whiteSpace: 'nowrap' }}>{generatedReport.netProfit.toLocaleString()}&nbsp;{currency}</span>
                                     </div>
                                     <div className="stat-card p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5 text-center">
                                         <span className="text-[10px] text-gray-400 font-bold block">{isRTL ? "عدد الفواتير" : "Transaction Count"}</span>
