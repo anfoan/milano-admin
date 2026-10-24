@@ -1197,7 +1197,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     </div>
 
                     {/* Recent Transactions Table */}
-                    <div className="bg-white dark:bg-[#1c1c1e] rounded-[28px] border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden flex flex-col flex-1 min-h-[300px]">
+                    <div className="relative -top-8 bg-white dark:bg-[#1c1c1e] rounded-[28px] border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden flex flex-col flex-1 min-h-[300px]">
                         <div className="p-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
                             <h3 className="font-black text-xs text-gray-800 dark:text-white">
                                 {isRTL ? "آخر العمليات" : "Recent Activity"}
