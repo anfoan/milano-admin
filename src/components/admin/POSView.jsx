@@ -1274,8 +1274,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="flex flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-[8px] font-black leading-none" title={isRTL ? "العملة وسعر الصرف" : "Currency and exchange rate"}>
-                                <button type="button" onClick={() => setPosCurrencyCode('YER')} className={`px-2 py-1 transition-colors ${baseCurrencyCode === 'YER' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال يمني' : 'YER'}</button>
-                                <button type="button" onClick={() => setPosCurrencyCode('SAR')} className={`px-2 py-1 transition-colors border-t border-gray-200 dark:border-white/10 ${baseCurrencyCode === 'SAR' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال سعودي' : 'SAR'}</button>
+                                <button type="button" onClick={() => setPosCurrencyCode('YER')} className={`px-2 py-1 transition-colors ${posCurrencyCode === 'YER' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال يمني' : 'YER'}</button>
+                                <button type="button" onClick={() => setPosCurrencyCode('SAR')} className={`px-2 py-1 transition-colors border-t border-gray-200 dark:border-white/10 ${posCurrencyCode === 'SAR' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال سعودي' : 'SAR'}</button>
                             </div>
                             {(isAdminManager || workerPermissions.allowViewHistory) && (
                                 <button
