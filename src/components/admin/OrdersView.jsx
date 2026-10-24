@@ -499,7 +499,7 @@ printWindow.onload = () => printWindow.print();
                     th {
                         background:linear-gradient(180deg,#eef5fc,#e7f0fa) !important;
                         padding:10px 9px;
-                        text-align: ${isRTL ? 'right' : 'left'}; 
+                        text-align: center !important;
                         border-bottom:1px solid #cbdceb;
                         border-left:1px solid #dbe7f3;
                         font-weight: 800; 
