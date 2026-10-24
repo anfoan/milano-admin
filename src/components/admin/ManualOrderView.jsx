@@ -696,6 +696,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                             className="w-full pr-10 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 transition-all font-bold"
                                             placeholder="محمد مروان..."
                                         />
+                                        {validationError && !formData.name.trim() && <span className="mt-1 block text-[10px] font-bold text-red-600">{txt.fill_required}</span>}
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -710,6 +711,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                             dir="ltr"
                                             placeholder="77xxxxxxx"
                                         />
+                                        {validationError && !formData.phone.trim() && <span className="mt-1 block text-[10px] font-bold text-red-600">{txt.fill_required}</span>}
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -722,6 +724,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                         <option value="">اختر المنطقة...</option>
                                         {regions.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
                                     </select>
+                                    {validationError && !formData.region.trim() && <span className="mt-1 block text-[10px] font-bold text-red-600">{txt.fill_required}</span>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-black text-gray-700 flex items-center gap-1"><span>عملة الفاتورة والطلب</span><span className="text-red-600">*</span></label>
@@ -752,11 +755,6 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                     </div>
                                 </div>
                             </div>
-                            {validationError && (
-                                <p className="text-center text-sm font-black text-red-600" role="alert">
-                                    {validationError}
-                                </p>
-                            )}
                             <div className="space-y-2">
                                 <label className="text-sm font-black text-gray-700 flex items-center gap-1"><span>{txt.payment_method}</span><span className="text-red-600">*</span></label>
                                 <div className="grid grid-cols-3 gap-2">
@@ -997,12 +995,6 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 </div>
                             </div>
                         </motion.div>
-                    )}
-
-                    {validationError && step > 1 && (
-                        <p className="text-center text-sm font-black text-red-600" role="alert">
-                            {validationError}
-                        </p>
                     )}
 
                     {/* Navigation Buttons */}
