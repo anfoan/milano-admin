@@ -16,6 +16,7 @@ import { motion } from 'framer-motion';
 import { useCurrency } from '../../context/CurrencyContext';
 import InvoiceTemplate from '../InvoiceTemplate';
 import { getAvailableProductStock, getSizeStock } from '../../lib/stockUtils';
+import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 
 const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
     const isRTL = lang === 'ar';
@@ -392,7 +393,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             const deliveryCost = convertPrice(deliveryCostInYER, orderCurrency);
             const convertedDiscount = convertPrice(discount, orderCurrency);
             const total = convertPrice(totalInYER, orderCurrency);
-            const orderId = `MIL-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+            const orderId = await getNextInvoiceNumber(db);
 
             const orderData = {
                 orderId,

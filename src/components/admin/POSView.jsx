@@ -20,6 +20,7 @@ import DraggableScrollContainer from '../DraggableScrollContainer';
 import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { syncOrderInventoryForStatus } from '../../lib/orderInventorySync';
 import { getSizeStock, resolveSizeKey, toStockNumber } from '../../lib/stockUtils';
+import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 
 const displayOrderId = (value) => String(value || '').replace(/^#+/, '');
 
@@ -469,7 +470,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         try {
             const subtotal = calculateSubtotal();
             const total = calculateTotal();
-            const orderId = `POS-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+            const orderId = await getNextInvoiceNumber(db);
 
             const orderData = {
                 orderId,
