@@ -741,11 +741,10 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                                         <span className="font-bold dir-ltr font-mono">
                                             {(() => {
                                                 const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB';
-                                                const dateOptions = lang === 'ar' ? { year: 'numeric', month: '2-digit', hour: 'numeric', minute: '2-digit', second: '2-digit' } : undefined;
                                                 if (order.createdAt && typeof order.createdAt.toDate === 'function') {
-                                                    return order.createdAt.toDate().toLocaleString(locale, dateOptions);
+                                                    return order.createdAt.toDate().toLocaleString(locale);
                                                 } else if (typeof order.createdAt === 'string') {
-                                                    return new Date(order.createdAt).toLocaleString(locale, dateOptions);
+                                                    return new Date(order.createdAt).toLocaleString(locale);
                                                 }
                                                 return order.date;
                                             })()}
