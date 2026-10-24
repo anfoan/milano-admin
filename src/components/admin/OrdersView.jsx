@@ -410,7 +410,7 @@ printWindow.onload = () => printWindow.print();
             return netProductsRevenue - totalCost;
         };
 
-        const dateStr = new Date().toLocaleDateString(lang === 'ar' ? 'ar-YE' : 'en-GB');
+        const dateStr = new Date().toLocaleDateString('en-GB');
         const getReportDateTime = (order) => {
             let date = null;
             if (order.createdAt && typeof order.createdAt.toDate === 'function') date = order.createdAt.toDate();
@@ -486,7 +486,7 @@ printWindow.onload = () => printWindow.print();
                     .report-header { position:relative; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:20px; min-height:112px; padding:18px 20px 48px; direction:ltr; background:#ffffff; border:1px solid #dbe7f3; border-radius:16px; box-shadow:0 8px 22px rgba(30,64,175,.08); }
                     .report-logo { justify-self:start; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; width:100px; }
                     .report-logo img { width:64px; height:64px; border-radius:12px; object-fit:cover; overflow:hidden; }
-                    .report-logo-date { margin-top:5px; color:#64748b; font-size:9px; font-weight:700; white-space:nowrap; direction:rtl; }
+                    .report-logo-date { margin-top:12px; color:#64748b; font-size:9px; font-weight:700; white-space:nowrap; direction:rtl; }
                     .report-title-block { grid-column:2; text-align:center; direction:rtl; }
                     .report-store-details { grid-column:3; justify-self:end; text-align:right; direction:rtl; color:#334155; }
                     .report-store-name { color:#0f172a; font-size:17px; font-weight:900; }
@@ -540,7 +540,6 @@ printWindow.onload = () => printWindow.print();
                     <div class="report-header">
                         <div class="report-logo"><img src="${reportLogoUrl}" alt="${lang === 'ar' ? 'شعار المتجر' : 'Store logo'}" onerror="this.style.display='none'"><span class="report-logo-date">${lang === 'ar' ? 'تاريخ الاستخراج:' : 'Date:'} ${dateStr}</span></div>
                         <div class="report-title-block">
-                            <span class="report-kicker">MILANO STORE</span>
                             <h1 class="report-title">${lang === 'ar' ? 'تقرير المبيعات والطلبات' : 'Orders & Sales Report'}</h1>
                         </div>
                         <div class="report-store-details">
