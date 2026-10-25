@@ -114,10 +114,10 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
         resetForm();
         setProductPickerOpen(false);
         setEditingItemIndex(null);
+        setModalOpen(true);
         try {
             const invoiceNumber = await getNextPurchaseInvoiceNumber(db);
-            setForm(prev => ({ ...prev, invoiceNumber }));
-            setModalOpen(true);
+            setForm(prev => ({ ...prev, invoiceNumber: prev.invoiceNumber || invoiceNumber }));
         } catch (error) {
             console.error('Reserve purchase invoice number:', error);
             alert(isRTL ? 'تعذر إنشاء رقم فاتورة المشتريات' : 'Could not create a purchase invoice number');
