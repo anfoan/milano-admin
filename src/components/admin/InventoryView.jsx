@@ -564,17 +564,17 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     {/* Cost columns */}
                                     <th className="px-3" style={{ width: '10%' }}>
                                         <div className="flex flex-col gap-0.5">
-                                            <span className="text-gray-700">{txt.th_cost}</span>
+                                            <span className="inline-block translate-x-2 text-gray-700">{txt.th_cost}</span>
                                         </div>
                                     </th>
                                     <th className="px-3" style={{ width: '10%' }}>
                                         <div className="flex flex-col gap-0.5">
-                                            <span className="text-orange-500">{txt.th_total_cost}</span>
+                                            <span className="inline-block translate-x-2 text-orange-500">{txt.th_total_cost}</span>
                                         </div>
                                     </th>
                                     {/* Sell columns */}
                                     <th className="px-3" style={{ width: '10%' }}>
-                                        <span className="text-gray-700">{txt.th_sell}</span>
+                                        <span className="inline-block translate-x-2 text-gray-700">{txt.th_sell}</span>
                                     </th>
                                     <th className="px-3" style={{ width: '10%' }}>
                                         <span className="text-green-600">{txt.th_total_sell}</span>
