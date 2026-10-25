@@ -24,7 +24,8 @@ export const getNextPurchaseInvoiceNumber = async (db) => {
     const counterRef = doc(db, ...COUNTER_PATH);
     return runTransaction(db, async (transaction) => {
         const snapshot = await transaction.get(counterRef);
-        const current = snapshot.exists() ? Number(snapshot.data()?.purchaseInvoiceSequence || 18839) : 18839;
+        const stored = snapshot.exists() ? Number(snapshot.data()?.purchaseInvoiceSequence || 0) : 0;
+        const current = Math.max(stored, 19400);
         const next = current + 1;
         transaction.set(counterRef, {
             purchaseInvoiceSequence: next,
