@@ -1295,7 +1295,7 @@ printWindow.onload = () => printWindow.print();
                                     <input type="checkbox" className="w-5 h-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" checked={currentOrders.length > 0 && currentOrders.every(o => selectedOrdersIds.includes(o.id))} onChange={toggleSelectAll} />
                                 </th>
                                 <th className="w-[120px] whitespace-nowrap p-2 text-center">{txt.th_order_id}</th>
-                                <th className="w-[210px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-3">{txt.th_product_size}</span></th>
+                                <th className="w-[210px] whitespace-nowrap p-2 text-right">{txt.th_product_size}</th>
                                 <th className="w-[125px] whitespace-nowrap p-2 text-right"><span className="inline-block -translate-x-10">{txt.th_name}</span></th>
                                 <th className="w-[135px] whitespace-nowrap p-2 text-center"><span className="inline-block -translate-x-2">{txt.th_phone}</span></th>
                                 <th className="w-[105px] whitespace-nowrap p-2 text-center">{txt.th_payment}</th>
