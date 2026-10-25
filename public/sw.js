@@ -1,70 +1,66 @@
-// Service Worker - Milano Store v3 (Force Update for New Database)
-const CACHE_NAME = 'milano-cache-v5'; // Keep manifests and branding icons fresh
+// Milano Admin service worker: cache images for responsiveness, but always refresh application code.
+const CACHE_NAME = 'milano-admin-cache-v6-runtime-safe';
 
-// On install: Skip waiting to activate immediately
-self.addEventListener('install', (event) => {
-    self.skipWaiting(); // Force immediate activation
-});
+self.addEventListener('install', () => self.skipWaiting());
 
-// On activate: Clear ALL old caches
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    // Delete ALL caches that don't match current version
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('Deleting old cache:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        }).then(() => {
-            // Take control of all clients immediately
-            return self.clients.claim();
-        })
+        caches.keys()
+            .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
+            .then(() => self.clients.claim())
     );
 });
 
-// On fetch: Network-first strategy (always get fresh data, fallback to cache only if offline)
+const isHttpGet = (request) => request.method === 'GET'
+    && (request.url.startsWith('http://') || request.url.startsWith('https://'));
+
+const isApplicationCode = (request, url) => request.destination === 'document'
+    || request.destination === 'script'
+    || request.destination === 'style'
+    || request.destination === 'worker'
+    || /\/assets\/.*\.(?:js|mjs|css)(?:$|\?)/i.test(url.pathname);
+
+const networkFirst = async (request) => {
+    try {
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response?.ok && new URL(request.url).origin === self.location.origin) {
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(request, response.clone());
+        }
+        return response;
+    } catch {
+        const cached = await caches.match(request);
+        return cached || new Response('', { status: 503, statusText: 'Offline' });
+    }
+};
+
 self.addEventListener('fetch', (event) => {
-    // Skip caching for localhost (Vite dev) and Firebase/Firestore
-    if (event.request.url.includes('localhost') ||
-        event.request.url.includes('firestore.googleapis.com') ||
-        event.request.url.includes('firebase') ||
-        event.request.url.includes('cloudinary.com')) {
-        event.respondWith(fetch(event.request).catch(() => new Response('', { status: 503, statusText: 'Offline' })));
+    const { request } = event;
+    if (!isHttpGet(request)) return;
+
+    const url = new URL(request.url);
+    const isRemoteData = /firestore\.googleapis\.com|firebase|cloudinary\.com/i.test(url.hostname);
+    const isBranding = request.destination === 'manifest' || /manifest\.json|icon-\d+|favicon|admin-icon/i.test(url.pathname);
+
+    // Never serve an outdated Vite chunk, page, manifest, or Firebase response after deployment.
+    if (isApplicationCode(request, url) || isRemoteData || isBranding) {
+        event.respondWith(networkFirst(request));
         return;
     }
 
-    // Only cache GET requests with http/https schemes (ignore POST, chrome-extension, etc.)
-    if (event.request.method !== 'GET' || 
-        (!event.request.url.startsWith('http://') && !event.request.url.startsWith('https://'))) {
-        event.respondWith(fetch(event.request).catch(() => new Response('', { status: 503, statusText: 'Offline' })));
-        return;
-    }
-
-    const requestUrl = new URL(event.request.url);
-    const isBrandingResource = event.request.destination === 'manifest'
-        || /manifest\.json|icon-\d+|favicon|admin-icon/i.test(requestUrl.pathname);
-    if (isBrandingResource) {
-        event.respondWith(fetch(event.request, { cache: 'no-store' }));
-        return;
-    }
-
-    event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Clone the response for caching
-                const responseClone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, responseClone);
-                });
+    // Local images/fonts can still open instantly on repeat visits and fall back to the network on first visit.
+    if (url.origin === self.location.origin) {
+        event.respondWith(
+            caches.match(request).then((cached) => cached || fetch(request).then(async (response) => {
+                if (response?.ok) {
+                    const cache = await caches.open(CACHE_NAME);
+                    await cache.put(request, response.clone());
+                }
                 return response;
-            })
-            .catch(() => {
-                // Only use cache if network fails (offline mode)
-                return caches.match(event.request);
-            })
-    );
+            }).catch(() => new Response('', { status: 503, statusText: 'Offline' })))
+        );
+        return;
+    }
+
+    event.respondWith(networkFirst(request));
 });

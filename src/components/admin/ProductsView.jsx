@@ -1,3 +1,4 @@
+import { safeLocalGet, safeLocalSet } from '../../lib/safeStorage';
 import React, { useState, useEffect } from 'react';
 import {
     Search, Plus, MoreVertical, Edit2, Trash2,
@@ -15,7 +16,7 @@ import VideoShowcaseManager from './VideoShowcaseManager';
 
 const readProductsCache = (key) => {
     try {
-        const cached = localStorage.getItem(key);
+        const cached = safeLocalGet(key);
         return cached ? JSON.parse(cached) : [];
     } catch {
         return [];
@@ -151,12 +152,12 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
                         ...doc.data()
                     }));
                     setProducts(items);
-                    localStorage.setItem('milano_admin_products_cache', JSON.stringify(items));
+                    safeLocalSet('milano_admin_products_cache', JSON.stringify(items));
                 });
                 const categoriesPromise = getDocs(qCat).then(catSnapshot => {
                     const fetchedCats = catSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name, image: doc.data().image, order: doc.data().order }));
                     setCategories(fetchedCats);
-                    localStorage.setItem('milano_admin_categories_cache', JSON.stringify(fetchedCats));
+                    safeLocalSet('milano_admin_categories_cache', JSON.stringify(fetchedCats));
                 });
                 await Promise.all([productsPromise, categoriesPromise]);
             } catch (err) {

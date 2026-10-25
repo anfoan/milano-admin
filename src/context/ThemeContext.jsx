@@ -1,3 +1,4 @@
+import { safeLocalGet, safeLocalSet } from '../lib/safeStorage';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { db } from '../lib/firebase';
@@ -9,7 +10,7 @@ export function ThemeProvider({ children }) {
     // 1. User Theme (Initial state from local storage or null)
     const [userTheme, setUserTheme] = useState(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('theme');
+            return safeLocalGet('theme');
         }
         return null;
     });
@@ -17,7 +18,7 @@ export function ThemeProvider({ children }) {
     // 2. Admin Theme (Default: Light)
     const [adminTheme, setAdminTheme] = useState(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('admin-theme') || 'light';
+            return safeLocalGet('admin-theme') || 'light';
         }
         return 'light';
     });
@@ -32,11 +33,11 @@ export function ThemeProvider({ children }) {
         const unsubscribe = onSnapshot(doc(db, "settings", "design"), (docSnap) => {
             if (docSnap.exists()) {
                 const defaultTheme = docSnap.data().defaultTheme;
-                const storedPref = localStorage.getItem('theme_manually_set');
+                const storedPref = safeLocalGet('theme_manually_set');
 
                 if (!storedPref && defaultTheme) {
                     setUserTheme(defaultTheme);
-                    localStorage.setItem('theme', defaultTheme);
+                    safeLocalSet('theme', defaultTheme);
                 }
             }
         });
@@ -55,9 +56,9 @@ export function ThemeProvider({ children }) {
 
         // Persist local storage
         if (isAdmin) {
-            localStorage.setItem('admin-theme', adminTheme);
+            safeLocalSet('admin-theme', adminTheme);
         } else if (userTheme) {
-            localStorage.setItem('theme', userTheme);
+            safeLocalSet('theme', userTheme);
         }
 
     }, [currentTheme, userTheme, adminTheme, isAdmin]);
@@ -69,7 +70,7 @@ export function ThemeProvider({ children }) {
         } else {
             const next = currentTheme === 'dark' ? 'light' : 'dark';
             setUserTheme(next);
-            localStorage.setItem('theme_manually_set', 'true');
+            safeLocalSet('theme_manually_set', 'true');
         }
     };
 

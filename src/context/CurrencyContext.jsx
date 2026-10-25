@@ -1,3 +1,4 @@
+import { safeLocalGet } from '../lib/safeStorage';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -73,7 +74,7 @@ export const CurrencyProvider = ({ children }) => {
     const formatPrice = (priceInYER, targetCurrency = activeCurrency) => {
         const currency = targetCurrency || activeCurrency || 'YER';
         const converted = convertPrice(priceInYER, currency);
-        const isRTL = document.documentElement.dir === 'rtl' || localStorage.getItem('adminLang') === 'ar';
+        const isRTL = document.documentElement.dir === 'rtl' || safeLocalGet('adminLang') === 'ar';
         const labels = isRTL
             ? { YER: 'ريال يمني', SAR: 'ريال سعودي', USD: 'دولار أمريكي' }
             : { YER: 'YER', SAR: 'SAR', USD: 'USD' };

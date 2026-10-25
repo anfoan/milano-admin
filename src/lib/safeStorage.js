@@ -1,3 +1,13 @@
+const getBrowserStorage = (kind) => {
+    if (typeof window === 'undefined') return null;
+    try {
+        return kind === 'session' ? window.sessionStorage : window.localStorage;
+    } catch {
+        // Some privacy modes expose window but deny storage access entirely.
+        return null;
+    }
+};
+
 const readStorage = (storage, key, fallback = null) => {
     try {
         return storage?.getItem(key) ?? fallback;
@@ -23,12 +33,12 @@ const removeStorage = (storage, key) => {
     }
 };
 
-export const safeLocalGet = (key, fallback = null) => readStorage(typeof window !== 'undefined' ? window.localStorage : null, key, fallback);
-export const safeSessionGet = (key, fallback = null) => readStorage(typeof window !== 'undefined' ? window.sessionStorage : null, key, fallback);
-export const safeLocalSet = (key, value) => writeStorage(typeof window !== 'undefined' ? window.localStorage : null, key, value);
-export const safeSessionSet = (key, value) => writeStorage(typeof window !== 'undefined' ? window.sessionStorage : null, key, value);
-export const safeLocalRemove = (key) => removeStorage(typeof window !== 'undefined' ? window.localStorage : null, key);
-export const safeSessionRemove = (key) => removeStorage(typeof window !== 'undefined' ? window.sessionStorage : null, key);
+export const safeLocalGet = (key, fallback = null) => readStorage(getBrowserStorage('local'), key, fallback);
+export const safeSessionGet = (key, fallback = null) => readStorage(getBrowserStorage('session'), key, fallback);
+export const safeLocalSet = (key, value) => writeStorage(getBrowserStorage('local'), key, value);
+export const safeSessionSet = (key, value) => writeStorage(getBrowserStorage('session'), key, value);
+export const safeLocalRemove = (key) => removeStorage(getBrowserStorage('local'), key);
+export const safeSessionRemove = (key) => removeStorage(getBrowserStorage('session'), key);
 
 export const safeJsonParse = (value, fallback) => {
     if (value == null || value === '') return fallback;

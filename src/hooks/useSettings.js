@@ -1,3 +1,4 @@
+import { safeLocalGet, safeLocalSet } from '../lib/safeStorage';
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -12,7 +13,7 @@ const CACHE_KEYS = {
 
 const getCached = (key, defaultValue) => {
     try {
-        const cached = localStorage.getItem(key);
+        const cached = safeLocalGet(key);
         return cached ? JSON.parse(cached) : defaultValue;
     } catch (e) {
         return defaultValue;
@@ -63,7 +64,7 @@ export const useSettings = () => {
             if (doc.exists()) {
                 const data = doc.data();
                 setInterfaceSettings(prev => ({ ...prev, ...data }));
-                localStorage.setItem(CACHE_KEYS.INTERFACE, JSON.stringify(data));
+                safeLocalSet(CACHE_KEYS.INTERFACE, JSON.stringify(data));
             }
         }, (error) => console.error("Interface settings error:", error));
 
@@ -72,7 +73,7 @@ export const useSettings = () => {
             if (doc.exists()) {
                 const data = doc.data();
                 setGeneralSettings(prev => ({ ...prev, ...data }));
-                localStorage.setItem(CACHE_KEYS.GENERAL, JSON.stringify(data));
+                safeLocalSet(CACHE_KEYS.GENERAL, JSON.stringify(data));
             }
         }, (error) => console.error("General settings error:", error));
 
@@ -81,7 +82,7 @@ export const useSettings = () => {
             if (doc.exists()) {
                 const data = doc.data();
                 setImageSettings(prev => ({ ...prev, ...data }));
-                localStorage.setItem(CACHE_KEYS.IMAGES, JSON.stringify(data));
+                safeLocalSet(CACHE_KEYS.IMAGES, JSON.stringify(data));
             }
         }, (error) => console.error("Image settings error:", error));
 
@@ -90,7 +91,7 @@ export const useSettings = () => {
             if (doc.exists()) {
                 const data = doc.data();
                 setCartSettings(prev => ({ ...prev, ...data }));
-                localStorage.setItem(CACHE_KEYS.CART, JSON.stringify(data));
+                safeLocalSet(CACHE_KEYS.CART, JSON.stringify(data));
             }
         }, (error) => console.error("Cart settings error:", error));
 
@@ -99,7 +100,7 @@ export const useSettings = () => {
             if (doc.exists()) {
                 const data = doc.data();
                 setSocialLinks(data);
-                localStorage.setItem(CACHE_KEYS.SOCIAL, JSON.stringify(data));
+                safeLocalSet(CACHE_KEYS.SOCIAL, JSON.stringify(data));
             }
         }, (error) => console.error("Social links error:", error));
 

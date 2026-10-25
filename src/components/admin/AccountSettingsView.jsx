@@ -6,7 +6,7 @@ import { addAdminEmail } from '../../lib/adminEmails';
 import { auth, db } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { safeSessionGet } from '../../lib/safeStorage';
+import { safeSessionGet, safeLocalRemove } from '../../lib/safeStorage';
 
 const AccountSettingsView = ({ lang = 'ar' }) => {
     const { currentUser } = useAuth();
@@ -380,7 +380,7 @@ const AccountSettingsView = ({ lang = 'ar' }) => {
         try {
             // In a real app, delete Firestore user data here if needed
             await deleteUser(currentUser);
-            localStorage.removeItem('isAdminAuthenticated');
+            safeLocalRemove('isAdminAuthenticated');
             navigate('/');
         } catch (error) {
             handleAuthError(error);

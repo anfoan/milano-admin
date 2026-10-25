@@ -1,3 +1,4 @@
+import { safeLocalGet, safeLocalRemove } from '../lib/safeStorage';
 import { useState, useEffect, useRef } from 'react';
 import { Menu, X, ShoppingBag, ShoppingCart, Search, ArrowRight, CheckCircle2, Check, Home, LayoutGrid, BadgePercent, Package } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -69,7 +70,7 @@ const Navbar = () => {
     // Listen for cart updates
     const updateCartCount = () => {
         try {
-            const stored = localStorage.getItem('cart');
+            const stored = safeLocalGet('cart');
             const cart = stored ? JSON.parse(stored) : [];
             if (!Array.isArray(cart)) throw new Error("Invalid cart format");
 
@@ -78,7 +79,7 @@ const Navbar = () => {
             setCartItems(cart);
         } catch (error) {
             console.error("Cart data corrupted, resetting:", error);
-            localStorage.removeItem('cart');
+            safeLocalRemove('cart');
             setCartCount(0);
             setCartItems([]);
         }

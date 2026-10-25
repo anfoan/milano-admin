@@ -1,3 +1,4 @@
+import { safeLocalGet } from '../../lib/safeStorage';
 import React, { useState, useEffect, useRef } from 'react';
 import {
     CheckCircle, Clock, DollarSign, MessageSquare,
@@ -461,7 +462,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
             }));
         }, error => console.error('Purchases dashboard listener:', error));
 
-        const savedStatus = localStorage.getItem('store_status');
+        const savedStatus = safeLocalGet('store_status');
         if (savedStatus) setStoreOpen(savedStatus === 'open');
 
         return () => {

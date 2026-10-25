@@ -54,11 +54,63 @@
 
 <body>
   <div id="root"></div>
+  <script>
+    // A deployment may replace hashed Vite files while a previous page is still open.
+    // Recover once automatically instead of rendering a broken application screen.
+    (() => {
+      const marker = '__milano_recovery';
+      let recoveryInProgress = false;
+      const isChunkError = (value) => /failed to fetch dynamically imported module|importing a module script failed|chunkloaderror|loading chunk|preload error/i.test(String(value?.message || value || ''));
+      const alreadyRecovered = () => {
+        try {
+          return new URLSearchParams(window.location.search).has(marker) || window.sessionStorage.getItem(marker) === '1';
+        } catch {
+          return new URLSearchParams(window.location.search).has(marker);
+        }
+      };
+      const recover = async () => {
+        if (recoveryInProgress || alreadyRecovered()) return;
+        recoveryInProgress = true;
+        try { window.sessionStorage.setItem(marker, '1'); } catch (_) {}
+        try {
+          const cacheKeys = await window.caches?.keys?.();
+          await Promise.all((cacheKeys || []).map((key) => window.caches.delete(key)));
+        } catch (_) {}
+        try {
+          const registrations = await window.navigator?.serviceWorker?.getRegistrations?.();
+          await Promise.all((registrations || []).map((registration) => registration.unregister()));
+        } catch (_) {}
+        const nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set(marker, '1');
+        window.location.replace(nextUrl.toString());
+      };
+      window.addEventListener('vite:preloadError', (event) => {
+        event.preventDefault();
+        recover();
+      });
+      window.addEventListener('error', (event) => {
+        if (isChunkError(event.error || event.message)) recover();
+      }, true);
+      window.addEventListener('unhandledrejection', (event) => {
+        if (isChunkError(event.reason)) recover();
+      });
+      // Once the corrected version has remained open, allow a future unrelated deploy to recover once too.
+      window.setTimeout(() => {
+        if (!new URLSearchParams(window.location.search).has(marker)) return;
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete(marker);
+        window.history.replaceState(null, '', cleanUrl.toString());
+        try { window.sessionStorage.removeItem(marker); } catch (_) {}
+      }, 8000);
+    })();
+  </script>
   <script type="module" src="/src/main.jsx"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
+        navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+          .then((registration) => registration.update().catch(() => {}))
+          .catch(() => {});
       });
     }
   </script>

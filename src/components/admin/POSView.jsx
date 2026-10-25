@@ -1,3 +1,4 @@
+import { safeSessionGet, safeSessionSet, safeSessionRemove } from '../../lib/safeStorage';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
     Calculator, Search, Plus, Minus, Trash2, CreditCard, User, 
@@ -144,7 +145,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     // Check Auth Status (either Admin user or Local Worker)
     useEffect(() => {
         const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
-            const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
+            const isWorker = safeSessionGet('isPOSWorkerAuthenticated') === 'true';
 
             // Worker identity is local; never wait for the admin-email document
             // (which is intentionally unreadable to anonymous workers).
@@ -212,8 +213,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 } catch (authErr) {
                     console.error("Anonymous sign-in error:", authErr);
                 }
-                sessionStorage.setItem('isPOSWorkerAuthenticated', 'true');
-                sessionStorage.setItem('posWorkerId', foundWorker.id);
+                safeSessionSet('isPOSWorkerAuthenticated', 'true');
+                safeSessionSet('posWorkerId', foundWorker.id);
                 setIsAuthenticated(true);
                 setIsAdminManager(false);
                 setCurrentWorkerId(foundWorker.id);
@@ -236,7 +237,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
     // Logout Handler
     const handleLogout = () => {
-        sessionStorage.removeItem('isPOSWorkerAuthenticated');
+        safeSessionRemove('isPOSWorkerAuthenticated');
         if (isAdminManager) {
             // If they are Admin, let them stay logged in to Firebase but exit POS view
             if (standalone) {
@@ -260,7 +261,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         // Fetch POS worker permissions from saved session
         const fetchPermissions = async () => {
             try {
-                const workerId = sessionStorage.getItem('posWorkerId');
+                const workerId = safeSessionGet('posWorkerId');
                 if (workerId) {
                     const docSnap = await getDoc(doc(db, "settings", "pos", "workers", workerId));
                     if (docSnap.exists()) {
