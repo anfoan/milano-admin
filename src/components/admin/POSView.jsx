@@ -1857,7 +1857,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <tr>
                                         <th className="p-3 w-8 text-center">#</th>
                                         <th className="p-3 text-start">{isRTL ? "رقم الفاتورة" : "Invoice ID"}</th>
-                                        <th className="p-3 text-start">{isRTL ? "اسم المنتج + المقاس" : "Product + Size"}</th>
+                                        <th className="p-3 text-start"><span className="inline-block -translate-x-6">{isRTL ? "اسم المنتج + المقاس" : "Product + Size"}</span></th>
                                         <th className="p-3 text-center">{isRTL ? "الكمية" : "Qty"}</th>
                                         <th className="p-3 text-start">{isRTL ? "اسم العميل" : "Customer"}</th>
                                         <th className="p-3 text-center">{isRTL ? "طريقة الدفع" : "Payment"}</th>
@@ -1873,7 +1873,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 <td className="p-3 text-center text-gray-400 w-8">{idx + 1}</td>
                                                 <td className="p-3 font-sans font-black">{displayOrderId(receipt.orderId)}</td>
                                                 <td className="p-3">
-                                                    <div className="space-y-0.5">{(receipt.cartItems || []).map((item, itemIdx) => <div key={itemIdx}>{item.title}{(item.selectedSize || item.size) ? ` / ${item.selectedSize || item.size}` : ''}</div>)}</div>
+                                                    <div className="translate-x-6 space-y-0.5">{(receipt.cartItems || []).map((item, itemIdx) => <div key={itemIdx}>{item.title}{(item.selectedSize || item.size) ? ` / ${item.selectedSize || item.size}` : ''}</div>)}</div>
                                                 </td>
                                                 <td className="p-3 text-center font-sans">{(receipt.cartItems || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</td>
                                                 <td className="p-3">{receipt.formData?.name || '---'}</td>
