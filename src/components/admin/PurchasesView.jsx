@@ -110,14 +110,16 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
 
     const resetForm = () => { setForm({ invoiceNumber: '', supplierName: '', supplierPhone: '', date: new Date().toISOString().slice(0, 10), paid: '', remaining: '', notes: '', paymentMethod: 'cash', invoiceStatus: 'pending', items: [] }); setNewItem(makeEmptyItem()); };
     const openAdd = async () => {
+        const localNextNumber = String(Math.max(19400, ...purchases.map(item => Number(item.invoiceNumber) || 0)) + 1);
         setEditingId(null);
         resetForm();
+        setForm(prev => ({ ...prev, invoiceNumber: localNextNumber }));
         setProductPickerOpen(false);
         setEditingItemIndex(null);
         setModalOpen(true);
         try {
             const invoiceNumber = await getNextPurchaseInvoiceNumber(db);
-            setForm(prev => ({ ...prev, invoiceNumber: prev.invoiceNumber || invoiceNumber }));
+            setForm(prev => ({ ...prev, invoiceNumber: prev.invoiceNumber === localNextNumber ? invoiceNumber : prev.invoiceNumber }));
         } catch (error) {
             console.error('Reserve purchase invoice number:', error);
             alert(isRTL ? 'تعذر إنشاء رقم فاتورة المشتريات' : 'Could not create a purchase invoice number');
