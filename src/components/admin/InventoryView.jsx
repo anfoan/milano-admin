@@ -579,7 +579,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     <th className="px-3" style={{ width: '10%' }}>
                                         <span className="text-green-600">{txt.th_total_sell}</span>
                                     </th>
-                                    <th className="px-3 text-gray-900 dark:text-white" style={{ width: '12%' }}>{txt.th_stock}</th>
+                                    <th className="px-3 text-gray-900 dark:text-white" style={{ width: '12%' }}><span className="inline-block -translate-x-1">{txt.th_stock}</span></th>
                                     <th className="px-3 no-print text-center text-gray-900 dark:text-white" style={{ width: '6%' }}>{txt.th_actions}</th>
                                 </tr>
                             </thead>
