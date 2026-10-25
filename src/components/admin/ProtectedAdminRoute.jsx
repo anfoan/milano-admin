@@ -3,13 +3,14 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { getAdminEmails, FALLBACK_ADMIN_EMAILS } from '../../lib/adminEmails';
+import { safeSessionGet } from '../../lib/safeStorage';
 
 const ProtectedAdminRoute = ({ children }) => {
     const { currentUser, loading } = useAuth();
     const [adminEmails, setAdminEmails] = useState(null); // null = still loading
 
     // Allow workers through session storage (no Firebase Auth needed)
-    const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
+    const isWorker = safeSessionGet('isPOSWorkerAuthenticated') === 'true';
 
     useEffect(() => {
         let mounted = true;

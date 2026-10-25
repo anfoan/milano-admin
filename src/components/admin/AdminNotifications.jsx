@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Bell, Check, ShoppingBag, Clock, MessageSquare, X } from 'lucide-react';
 import { db, auth } from '../../lib/firebase';
+import { safeLocalGet, safeLocalSet, safeSessionGet } from '../../lib/safeStorage';
 import { signInAnonymously } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, limit, updateDoc, doc } from 'firebase/firestore';
 // eslint-disable-next-line no-unused-vars -- motion is used as <motion.div> in JSX
@@ -16,9 +17,9 @@ const AdminNotifications = ({ lang: propLang }) => {
     // Counters to prevent sound/toast looping
     const lastOrderCount = useRef(0);
     const lastMessageCount = useRef(0);
-    const lastNotifiedId = useRef(localStorage.getItem('milano_last_notified_order_id') || '');
+    const lastNotifiedId = useRef(safeLocalGet('milano_last_notified_order_id') || '');
 
-    const lang = propLang || localStorage.getItem('adminLang') || 'ar';
+    const lang = propLang || safeLocalGet('adminLang') || 'ar';
     const isRTL = lang === 'ar';
     const dropdownRef = useRef(null);
     const toastTimerRef = useRef(null);
@@ -33,7 +34,7 @@ const AdminNotifications = ({ lang: propLang }) => {
     // before starting the notification listeners.
     useEffect(() => {
         let mounted = true;
-        const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
+        const isWorker = safeSessionGet('isPOSWorkerAuthenticated') === 'true';
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (isWorker && !user) {
                 try {
@@ -118,7 +119,7 @@ const AdminNotifications = ({ lang: propLang }) => {
             if (latestOrder.id !== lastNotifiedId.current) {
                 showToast(latestOrder);
                 lastNotifiedId.current = latestOrder.id;
-                localStorage.setItem('milano_last_notified_order_id', latestOrder.id);
+                safeLocalSet('milano_last_notified_order_id', latestOrder.id);
             }
             lastOrderCount.current = snapshot.size;
 

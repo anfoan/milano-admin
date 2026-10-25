@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import { useCurrency } from '../../context/CurrencyContext';
+import { safeSessionGet, safeJsonParse } from '../../lib/safeStorage';
 
 const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, (digit) => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
 const formatDateField = (value) => toEnglishDigits(value).replace(/-/g, '/');
@@ -43,8 +44,8 @@ const ExpensesView = ({ lang = 'ar', generalSettings }) => {
     const { activeCurrency, convertFromCurrency } = useCurrency();
     const displayCurrency = activeCurrency || currency;
     const isRTL = lang === 'ar';
-    const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
-    const workerPerms = isWorker ? JSON.parse(sessionStorage.getItem('posWorkerPermissions') || '{}') : {};
+    const isWorker = safeSessionGet('isPOSWorkerAuthenticated') === 'true';
+    const workerPerms = isWorker ? safeJsonParse(safeSessionGet('posWorkerPermissions'), {}) : {};
 
     // State for Expenses
     const [expenses, setExpenses] = useState([]);

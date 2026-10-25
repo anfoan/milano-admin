@@ -6,6 +6,7 @@ import { addAdminEmail } from '../../lib/adminEmails';
 import { auth, db } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { safeSessionGet } from '../../lib/safeStorage';
 
 const AccountSettingsView = ({ lang = 'ar' }) => {
     const { currentUser } = useAuth();

@@ -4,6 +4,7 @@ import { auth, db } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import Sidebar from '../components/admin/Sidebar';
+import { safeLocalGet, safeLocalSet, safeLocalRemove, safeSessionGet, safeSessionRemove, safeJsonParse } from '../lib/safeStorage';
 const SettingsView = lazy(() => import('../components/admin/SettingsView'));
 const AccountSettingsView = lazy(() => import('../components/admin/AccountSettingsView'));
 const OrdersView = lazy(() => import('../components/admin/OrdersView'));
@@ -38,8 +39,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 const AdminDashboard = () => {
     const navigate = useNavigate();
     // Determine worker access before the first render so no empty view flashes briefly.
-    const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
-    const workerPerms = isWorker ? JSON.parse(sessionStorage.getItem('posWorkerPermissions') || '{}') : {};
+    const isWorker = safeSessionGet('isPOSWorkerAuthenticated') === 'true';
+    const workerPerms = isWorker ? safeJsonParse(safeSessionGet('posWorkerPermissions'), {}) : {};
     const workerAllowedTabs = [];
     if (isWorker) {
         if (workerPerms.allowViewHistory || workerPerms.allowOnlyPrint || workerPerms.allowDiscount || workerPerms.allowChangePayment) workerAllowedTabs.push('pos');
@@ -56,8 +57,8 @@ const AdminDashboard = () => {
     const [selectedOrder, setSelectedOrder] = useState(null); // For Detail Page
     const [isEditMode, setIsEditMode] = useState(false); // For Detail Page Edit Mode
     const [selectedChatId, setSelectedChatId] = useState(null); // For Admin Chat
-    const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth >= 1280); // Drawer on phones and iPads; fixed rail only on large desktop
-    const [lang, setLang] = useState(localStorage.getItem('adminLang') || 'ar'); // Admin Language
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1280); // Drawer on phones and iPads; fixed rail only on large desktop
+    const [lang, setLang] = useState(safeLocalGet('adminLang') || 'ar'); // Admin Language
     const [generalSettings, setGeneralSettings] = useState({ currency: 'YER' });
     const [unreadCount, setUnreadCount] = useState(0); // For Inbox Badge
     const [newOrdersCount, setNewOrdersCount] = useState(0); // For New Orders Badge
@@ -121,7 +122,7 @@ const AdminDashboard = () => {
         const unsubscribeLanguage = onSnapshot(doc(db, "settings", "language"), (docSnap) => {
             const selectedLanguage = docSnap.data()?.currentLanguage === 'en' ? 'en' : 'ar';
             setLang(selectedLanguage);
-            localStorage.setItem('adminLang', selectedLanguage);
+            safeLocalSet('adminLang', selectedLanguage);
         });
         return () => { unsubscribe(); unsubscribeImages(); unsubscribeBranding(); unsubscribeLanguage(); };
     }, []);
@@ -211,7 +212,7 @@ const AdminDashboard = () => {
     const toggleLang = () => {
         const newLang = lang === 'ar' ? 'en' : 'ar';
         setLang(newLang);
-        localStorage.setItem('adminLang', newLang);
+        safeLocalSet('adminLang', newLang);
         setDoc(doc(db, "settings", "language"), { currentLanguage: newLang }, { merge: true }).catch(error => {
             console.error('Error saving dashboard language:', error);
         });
@@ -261,7 +262,7 @@ const AdminDashboard = () => {
 
     // Strict Access Control
     useEffect(() => {
-        const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
+        const isWorker = safeSessionGet('isPOSWorkerAuthenticated') === 'true';
         if (isWorker) return; // Allow workers through session
 
         const unsubscribe = auth.onAuthStateChanged(user => {
@@ -276,13 +277,13 @@ const AdminDashboard = () => {
     // ... (existing imports, but make sure to include auth and signOut if not just relying on local storage)
 
     const handleLogout = async () => {
-        const isWorker = sessionStorage.getItem('isPOSWorkerAuthenticated') === 'true';
+        const isWorker = safeSessionGet('isPOSWorkerAuthenticated') === 'true';
         
         if (isWorker) {
-            sessionStorage.removeItem('isPOSWorkerAuthenticated');
-            sessionStorage.removeItem('posWorkerId');
-            sessionStorage.removeItem('posWorkerName');
-            sessionStorage.removeItem('posWorkerPermissions');
+            safeSessionRemove('isPOSWorkerAuthenticated');
+            safeSessionRemove('posWorkerId');
+            safeSessionRemove('posWorkerName');
+            safeSessionRemove('posWorkerPermissions');
             // Sign out from Firebase Auth too so it doesn't conflict with admin
             try { await signOut(auth); } catch(e) {}
             navigate('/milano-secure-gate-99');
@@ -291,7 +292,7 @@ const AdminDashboard = () => {
 
         try {
             await signOut(auth);
-            localStorage.removeItem('isAdminAuthenticated');
+            safeLocalRemove('isAdminAuthenticated');
             navigate('/milano-secure-gate-99');
         } catch (error) {
             console.error("Logout Error:", error);
