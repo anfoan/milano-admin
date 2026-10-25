@@ -126,8 +126,11 @@ const AdminDashboard = () => {
         return () => { unsubscribe(); unsubscribeImages(); unsubscribeBranding(); unsubscribeLanguage(); };
     }, []);
 
-    // Search Indexer (Fetch basic data for instant search)
+    // Load the global search index only while the search box is active.
+    // Keeping full products/orders listeners alive on every admin screen made
+    // navigation and first paint unnecessarily expensive.
     useEffect(() => {
+        if (!isSearchFocused) return undefined;
         const prodQ = query(collection(db, "products"));
         const unsubProd = onSnapshot(prodQ, (snap) => {
             const data = snap.docs.map(doc => ({ id: doc.id, label: doc.data().name, category: 'product', code: doc.data().code }));
@@ -141,7 +144,7 @@ const AdminDashboard = () => {
         });
 
         return () => { unsubProd(); unsubOrder(); };
-    }, []);
+    }, [isSearchFocused]);
 
     // Global Search Logic
     useEffect(() => {

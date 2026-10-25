@@ -43,11 +43,19 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
             list.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
             setPurchases(list);
         }, err => console.error('Purchases listener:', err));
+        return () => unsubPurchases();
+    }, []);
+
+    // Product data is only needed by the add/edit form. Delaying this listener
+    // keeps the purchases list responsive and avoids loading the full catalog
+    // before the user asks to create or edit an invoice.
+    useEffect(() => {
+        if (!modalOpen) return undefined;
         const unsubProducts = onSnapshot(collection(db, 'products'), snap => {
             setProducts(snap.docs.map(item => ({ id: item.id, ...item.data() })).sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''))));
         }, err => console.error('Products listener:', err));
-        return () => { unsubPurchases(); unsubProducts(); };
-    }, []);
+        return () => unsubProducts();
+    }, [modalOpen]);
 
     const handlePeriodChange = nextPeriod => {
         setPeriod(nextPeriod);
