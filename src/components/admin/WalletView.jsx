@@ -591,9 +591,8 @@ const CreateCustomerWalletModal = ({ onClose, onSaved }) => {
                 if (walletSnapshot.exists() && previous.pinConfigured === true) throw new Error('PHONE_ALREADY_REGISTERED');
                 const walletData = {
                     walletId,
-                    customerName: customerName.trim() || previous.customerName || 'عميل المتجر',
                     phone: normalizedPhone,
-                    balance: walletSnapshot.exists() ? Number(previous.balance || 0) : targetBalance,
+                    balance: walletSnapshot.exists() ? Number(previous.balance || 0) : 0,
                     pinHash,
                     pinConfigured: true,
                     deviceBound: true,
@@ -603,6 +602,11 @@ const CreateCustomerWalletModal = ({ onClose, onSaved }) => {
                 if (!walletSnapshot.exists()) walletData.createdAt = serverTimestamp();
                 transaction.set(walletRef, walletData, { merge: true });
                 transaction.set(credentialRef, { walletId, phone: normalizedPhone, password, updatedAt: serverTimestamp() }, { merge: true });
+            });
+            await updateDoc(doc(db, 'customer_wallets', walletId), {
+                customerName: customerName.trim() || 'عميل المتجر',
+                balance: savedBalance,
+                updatedAt: serverTimestamp()
             });
             onSaved?.({
                 id: walletId,
