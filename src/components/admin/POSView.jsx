@@ -26,6 +26,109 @@ import { isValidYemenPhone } from '../../lib/phoneValidation';
 
 const displayOrderId = (value) => String(value || '').replace(/^#+/, '');
 
+const normalizePosWalletPhone = value => {
+    const digits = String(value || '')
+        .replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
+        .replace(/[^0-9]/g, '');
+    return digits.startsWith('967') && digits.length === 12 ? digits.slice(3) : digits;
+};
+
+const hashPosWalletPin = async pin => {
+    const bytes = new TextEncoder().encode(`milano-wallet-v1:${pin}`);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+};
+
+const POSWalletCreateModal = ({ onClose, onSaved, isRTL }) => {
+    const [customerName, setCustomerName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [pin, setPin] = useState('');
+    const [confirmPin, setConfirmPin] = useState('');
+    const [initialBalance, setInitialBalance] = useState('0');
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async event => {
+        event.preventDefault();
+        const normalizedPhone = normalizePosWalletPhone(phone);
+        if (normalizedPhone.length < 7) {
+            setError(isRTL ? 'أدخل رقم هاتف صحيح للعميل.' : 'Enter a valid customer phone number.');
+            return;
+        }
+        if (!/^[0-9]{4,6}$/.test(pin)) {
+            setError(isRTL ? 'كلمة المرور يجب أن تكون من 4 إلى 6 أرقام.' : 'The password must contain 4 to 6 digits.');
+            return;
+        }
+        if (pin !== confirmPin) {
+            setError(isRTL ? 'كلمتا المرور غير متطابقتين.' : 'The passwords do not match.');
+            return;
+        }
+        const balance = Math.max(0, Number(initialBalance || 0));
+        if (!Number.isFinite(balance)) {
+            setError(isRTL ? 'أدخل رصيدًا صحيحًا.' : 'Enter a valid balance.');
+            return;
+        }
+        const walletId = `phone-${normalizedPhone}`;
+        setSaving(true);
+        setError('');
+        try {
+            const pinHash = await hashPosWalletPin(pin);
+            await runTransaction(db, async transaction => {
+                const walletRef = doc(db, 'customer_wallets', walletId);
+                const credentialRef = doc(db, 'wallet_customer_credentials', walletId);
+                const walletSnapshot = await transaction.get(walletRef);
+                if (walletSnapshot.exists() && walletSnapshot.data()?.pinConfigured === true) {
+                    throw new Error('PHONE_ALREADY_REGISTERED');
+                }
+                transaction.set(walletRef, {
+                    ...(walletSnapshot.exists() ? walletSnapshot.data() : {}),
+                    walletId,
+                    customerName: customerName.trim() || 'عميل المتجر',
+                    phone: normalizedPhone,
+                    balance,
+                    pinHash,
+                    pinConfigured: true,
+                    deviceBound: false,
+                    updatedAt: serverTimestamp(),
+                    ...(walletSnapshot.exists() ? {} : { createdAt: serverTimestamp() })
+                }, { merge: true });
+                transaction.set(credentialRef, {
+                    walletId,
+                    phone: normalizedPhone,
+                    password: pin,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+            });
+            onSaved?.({ customerName: customerName.trim(), phone: normalizedPhone });
+            onClose();
+        } catch (saveError) {
+            console.error('POS wallet creation failed:', saveError);
+            setError(saveError?.message === 'PHONE_ALREADY_REGISTERED'
+                ? (isRTL ? 'هذا الرقم لديه محفظة مسجلة مسبقًا.' : 'This phone number already has a wallet.')
+                : (isRTL ? 'تعذر إنشاء المحفظة، حاول مرة أخرى.' : 'Unable to create the wallet. Try again.'));
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return <div className="fixed inset-0 z-[260] flex items-center justify-center bg-slate-950/65 p-3 backdrop-blur-sm">
+        <form dir="rtl" onSubmit={handleSubmit} className="w-full max-w-[390px] overflow-hidden rounded-[22px] border border-blue-100 bg-white shadow-2xl dark:border-blue-400/20 dark:bg-[#1a1d23]">
+            <header className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-white/10">
+                <button type="button" onClick={onClose} className="rounded-lg p-1 text-slate-400 transition hover:bg-rose-50 hover:text-rose-500"><X size={19}/></button>
+                <div className="flex items-center gap-2 text-right"><div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-400/10 dark:text-blue-300"><Wallet size={17}/></div><div><h2 className="text-sm font-black text-slate-900 dark:text-white">إضافة محفظة عميل</h2><p className="mt-0.5 text-[9px] font-bold text-slate-400">ربط رقم العميل بمحفظة المتجر</p></div></div>
+            </header>
+            <div className="space-y-3 px-5 py-4">
+                <input value={customerName} onChange={event => setCustomerName(event.target.value)} placeholder="اسم العميل (اختياري)" className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-right text-xs font-bold outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/5" />
+                <input required dir="ltr" value={phone} onChange={event => setPhone(event.target.value)} inputMode="tel" placeholder="رقم الهاتف" className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-center font-mono text-sm font-black outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/5" />
+                <div className="grid grid-cols-2 gap-2"><input required dir="ltr" type="password" inputMode="numeric" value={pin} onChange={event => setPin(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="كلمة المرور" className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-2 text-center font-mono text-sm font-black outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/5" /><input required dir="ltr" type="password" inputMode="numeric" value={confirmPin} onChange={event => setConfirmPin(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="تأكيد كلمة المرور" className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-2 text-center font-mono text-sm font-black outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/5" /></div>
+                <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-3 dark:border-blue-400/25 dark:bg-blue-400/10"><label className="flex items-center justify-between gap-2 text-[10px] font-black text-blue-700 dark:text-blue-200"><span>الرصيد الابتدائي</span><input dir="ltr" inputMode="decimal" value={initialBalance} onChange={event => setInitialBalance(event.target.value.replace(/[^0-9.]/g, ''))} className="w-28 rounded-lg border border-blue-200 bg-white px-2 py-1.5 text-center font-mono text-sm font-black text-blue-700 outline-none dark:border-blue-400/25 dark:bg-white/10 dark:text-blue-200" /></label></div>
+                {error && <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-center text-[10px] font-black text-rose-700 dark:border-rose-400/30 dark:bg-rose-400/10 dark:text-rose-200">{error}</p>}
+            </div>
+            <footer className="flex items-center gap-3 border-t border-slate-100 px-5 py-3 dark:border-white/10"><button type="submit" disabled={saving} className="flex-1 rounded-xl bg-blue-600 py-2.5 text-xs font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:opacity-60">{saving ? 'جاري الحفظ...' : 'حفظ وإضافة المحفظة'}</button><button type="button" onClick={onClose} className="px-2 text-xs font-black text-slate-500">إلغاء</button></footer>
+        </form>
+    </div>;
+};
+
 const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const isRTL = lang === 'ar';
     const [posCurrencyCode, setPosCurrencyCode] = useState(generalSettings?.currency || 'YER');
@@ -114,6 +217,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const [showSizeModal, setShowSizeModal] = useState(false);
     const [sizeModalProduct, setSizeModalProduct] = useState(null);
     const [sizeModalQtys, setSizeModalQtys] = useState({});
+    const [showWalletModal, setShowWalletModal] = useState(false);
 
     const printRef = useRef(null);
 
@@ -1586,6 +1690,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
                         {/* Customer Form and Totals Panel */}
                         <div className="p-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 space-y-4">
+                            <button type="button" onClick={() => setShowWalletModal(true)} className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-300/70 bg-blue-500/10 py-2.5 text-xs font-black text-blue-700 shadow-sm transition hover:bg-blue-500/20 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-200 dark:hover:bg-blue-400/20">
+                                <Wallet size={15} />
+                                إضافة محفظة
+                            </button>
                             {/* Optional Customer info */}
                             <div className="grid grid-cols-2 gap-2">
                                 <input
@@ -2378,6 +2486,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         </div>
                     </div>
                 )}
+                {showWalletModal && <POSWalletCreateModal isRTL={isRTL} onClose={() => setShowWalletModal(false)} onSaved={({ customerName, phone }) => { if (customerName) setCheckoutName(customerName); setCheckoutPhone(phone); }} />}
         </div>
     );
 };
