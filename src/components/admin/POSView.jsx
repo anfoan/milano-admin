@@ -1524,7 +1524,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             
                                             <button 
                                                 onClick={() => handleRemoveFromCart(index)}
-                                                className="text-red-500 hover:text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg"
+                                                className="p-1.5 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/25 transition-colors"
                                             >
                                                 <Trash2 size={15} />
                                             </button>
@@ -1563,19 +1563,19 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             {/* Quantity controls */}
                                             <div className="flex items-center gap-2">
                                                 <button 
-                                                    onClick={() => handleUpdateCartItem(index, 'quantity', Math.max(1, item.quantity - 1))}
-                                                    className="p-1 bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                                                    onClick={() => handleUpdateCartItem(index, 'quantity', item.quantity + 1)}
+                                                    className="p-1 bg-blue-500/10 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 border border-blue-200/70 dark:border-blue-400/20 rounded-md hover:bg-blue-500/20 transition-colors"
                                                 >
-                                                    <Minus size={12} className="text-gray-600 dark:text-gray-300" />
+                                                    <Plus size={12} />
                                                 </button>
                                                 <span className="text-xs font-black w-5 text-center text-gray-800 dark:text-white font-sans">
                                                     {item.quantity}
                                                 </span>
                                                 <button 
-                                                    onClick={() => handleUpdateCartItem(index, 'quantity', item.quantity + 1)}
-                                                    className="p-1 bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                                                    onClick={() => handleUpdateCartItem(index, 'quantity', Math.max(1, item.quantity - 1))}
+                                                    className="p-1 bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400 border border-red-200/70 dark:border-red-400/20 rounded-md hover:bg-red-500/20 transition-colors"
                                                 >
-                                                    <Plus size={12} className="text-gray-600 dark:text-gray-300" />
+                                                    <Minus size={12} />
                                                 </button>
                                             </div>
                                         </div>
