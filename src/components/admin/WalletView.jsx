@@ -589,6 +589,7 @@ const CreateCustomerWalletModal = ({ onClose, onSaved }) => {
                 const walletSnapshot = await transaction.get(walletRef);
                 const previous = walletSnapshot.exists() ? walletSnapshot.data() : {};
                 if (walletSnapshot.exists() && previous.pinConfigured === true) throw new Error('PHONE_ALREADY_REGISTERED');
+                savedBalance = walletSnapshot.exists() ? Number(previous.balance || 0) : targetBalance;
                 const walletData = {
                     walletId,
                     phone: normalizedPhone,
@@ -598,7 +599,6 @@ const CreateCustomerWalletModal = ({ onClose, onSaved }) => {
                     deviceBound: true,
                     updatedAt: serverTimestamp()
                 };
-                savedBalance = walletData.balance;
                 if (!walletSnapshot.exists()) walletData.createdAt = serverTimestamp();
                 transaction.set(walletRef, walletData, { merge: true });
                 transaction.set(credentialRef, { walletId, phone: normalizedPhone, password, updatedAt: serverTimestamp() }, { merge: true });
