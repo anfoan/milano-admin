@@ -551,7 +551,7 @@ const WalletView = ({ generalSettings }) => {
         {managingWallet && <WalletAdjustmentModal wallet={managingWallet.wallet} order={managingWallet.order} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingWalletAdjustment} onClose={() => setManagingWallet(null)} onSave={saveWalletAdjustment}/>}
         {customerDataOpen && <CustomerDataModal wallets={customerWallets} credentials={customerCredentialMap} search={customerSearch} onSearch={setCustomerSearch} currencyLabel={walletCurrencyText} formatAmount={walletAmount} onClose={() => setCustomerDataOpen(false)} onEdit={wallet => { setCustomerProfileError(''); setCustomerDataOpen(false); setEditingCustomerWallet({ wallet, credential: customerCredentialMap.get(wallet.walletId || wallet.id) }); }}/>}
         {editingCustomerWallet && <CustomerWalletProfileModal wallet={editingCustomerWallet.wallet} credential={editingCustomerWallet.credential} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} saving={savingCustomerProfile} error={customerProfileError} onClose={() => { setCustomerProfileError(''); setEditingCustomerWallet(null); }} onSave={draft => saveCustomerProfile({ ...draft, balance: toWalletBase(draft.balance) })}/>}
-        {createWalletOpen && <CreateCustomerWalletModal onClose={() => setCreateWalletOpen(false)} onSaved={() => { setCreateWalletOpen(false); setNotice('تمت إضافة محفظة العميل وربطها برقم الهاتف بنجاح.'); }} />}
+        {createWalletOpen && <CreateCustomerWalletModal onClose={() => setCreateWalletOpen(false)} onSaved={wallet => { setWallets(previous => [wallet, ...previous.filter(item => (item.walletId || item.id) !== wallet.walletId)]); setCreateWalletOpen(false); setNotice('تمت إضافة محفظة العميل وربطها برقم الهاتف بنجاح.'); }} />}
         </>}
 
         {notice && <div dir="rtl" className={`fixed inset-x-0 bottom-5 z-[160] mx-auto w-fit max-w-[calc(100vw-2rem)] -translate-x-5 rounded-xl border px-4 py-3 text-center text-xs font-black shadow-xl ${notice.startsWith('لن يتم إيداع مكافأة العميل') ? 'border-rose-400/70 bg-rose-500/20 text-rose-700 backdrop-blur-sm dark:border-rose-400/55 dark:bg-rose-500/20 dark:text-rose-200' : 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-400/40 dark:bg-[#183127] dark:text-emerald-200'}`}>{notice}</div>}
@@ -582,6 +582,7 @@ const CreateCustomerWalletModal = ({ onClose, onSaved }) => {
         setError('');
         try {
             const pinHash = await hashWalletPassword(password);
+            let savedBalance = targetBalance;
             await runTransaction(db, async transaction => {
                 const walletRef = doc(db, 'customer_wallets', walletId);
                 const credentialRef = doc(db, 'wallet_customer_credentials', walletId);
@@ -598,11 +599,20 @@ const CreateCustomerWalletModal = ({ onClose, onSaved }) => {
                     deviceBound: true,
                     updatedAt: serverTimestamp()
                 };
+                savedBalance = walletData.balance;
                 if (!walletSnapshot.exists()) walletData.createdAt = serverTimestamp();
                 transaction.set(walletRef, walletData, { merge: true });
                 transaction.set(credentialRef, { walletId, phone: normalizedPhone, password, updatedAt: serverTimestamp() }, { merge: true });
             });
-            onSaved?.();
+            onSaved?.({
+                id: walletId,
+                walletId,
+                customerName: customerName.trim() || 'عميل المتجر',
+                phone: normalizedPhone,
+                balance: savedBalance,
+                pinConfigured: true,
+                deviceBound: true
+            });
         } catch (saveError) {
             console.error('Wallet creation from wallet section failed:', saveError);
             setError(saveError?.message === 'PHONE_ALREADY_REGISTERED' ? 'هذا الرقم لديه محفظة مسجلة مسبقًا.' : 'تعذّر إنشاء المحفظة، حاول مرة أخرى.');
