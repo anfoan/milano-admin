@@ -378,6 +378,15 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         return totals;
     }, { cash: 0, card: 0, transfer: 0 });
 
+    const getCartItemStockLimit = (item) => {
+        const product = products.find(productItem => productItem.id === item?.id);
+        if (!product) return 0;
+        const hasSizeInventory = product.sizeStocks && typeof product.sizeStocks === 'object' && Object.keys(product.sizeStocks).length > 0;
+        return hasSizeInventory && item?.selectedSize
+            ? getSizeStock(product, item.selectedSize)
+            : toStockNumber(product.stock);
+    };
+
     const handleAddToCart = (product) => {
         const sizeValues = product.variants?.find(v => v.type === 'size')?.values || [];
         const colorValues = product.variants?.find(v => v.type === 'color')?.values || [];
@@ -407,6 +416,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         const finalPrice = hasDiscount ? Number(product.priceAfterDiscount) : Number(product.price);
 
         if (existingIdx > -1) {
+            const availableStock = getCartItemStockLimit(cartItems[existingIdx]);
+            if (cartItems[existingIdx].quantity >= availableStock) {
+                alert(isRTL ? 'لا يمكن بيع كمية أكبر من المخزون المتوفر لهذا المنتج' : 'You cannot sell more than the available stock for this product');
+                return;
+            }
             const updated = [...cartItems];
             updated[existingIdx].quantity += 1;
             setCartItems(updated);
@@ -443,6 +457,16 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     }, [applyStoreOffers, products, posCurrencyCode]);
 
     const handleUpdateCartItem = (index, key, val) => {
+        if (key === 'quantity') {
+            const currentItem = cartItems[index];
+            const requestedQuantity = Math.max(1, Number(val) || 1);
+            const availableStock = getCartItemStockLimit(currentItem);
+            if (requestedQuantity > availableStock) {
+                alert(isRTL ? 'لا يمكن بيع كمية أكبر من المخزون المتوفر لهذا المنتج' : 'You cannot sell more than the available stock for this product');
+                return;
+            }
+            val = requestedQuantity;
+        }
         const updated = [...cartItems];
         updated[index] = { ...updated[index], [key]: val };
         setCartItems(updated);
