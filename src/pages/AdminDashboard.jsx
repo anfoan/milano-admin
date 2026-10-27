@@ -33,6 +33,33 @@ const ManualOrderView = lazy(() => import('../components/admin/ManualOrderView')
 const FooterSettingsView = lazy(() => import('../components/admin/FooterSettingsView'));
 const POSView = lazy(() => import('../components/admin/POSView'));
 const MerchantStoresView = lazy(() => import('../components/admin/MerchantStoresView'));
+const preloadAdminSections = [
+    () => import('../components/admin/SettingsView'),
+    () => import('../components/admin/AccountSettingsView'),
+    () => import('../components/admin/OrdersView'),
+    () => import('../components/admin/ProductsView'),
+    () => import('../components/admin/ProductForm'),
+    () => import('../components/admin/InventoryView'),
+    () => import('../components/admin/DashboardHome'),
+    () => import('../components/admin/ReviewsView'),
+    () => import('../components/admin/CouponsView'),
+    () => import('../components/admin/LimitedOffersView'),
+    () => import('../components/admin/PaymentsView'),
+    () => import('../components/admin/DeliveryView'),
+    () => import('../components/admin/ExpensesView'),
+    () => import('../components/admin/PurchasesView'),
+    () => import('../components/admin/FinancialReportsView'),
+    () => import('../components/admin/WalletView'),
+    () => import('../components/admin/InboxView'),
+    () => import('../components/admin/AdminChatView'),
+    () => import('../components/admin/OrderDetailsView'),
+    () => import('../components/admin/SocialMediaView'),
+    () => import('../components/admin/DesignView'),
+    () => import('../components/admin/ManualOrderView'),
+    () => import('../components/admin/FooterSettingsView'),
+    () => import('../components/admin/POSView'),
+    () => import('../components/admin/MerchantStoresView'),
+];
 import { Menu, Search, Bell, User, PanelRight, ArrowRightFromLine, Store, Settings, LogOut, ShoppingBag, MessageSquare, Wallet, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -66,6 +93,27 @@ const AdminDashboard = () => {
     const [searchResults, setSearchResults] = useState([]); // Search Results State
     const [isSearchFocused, setIsSearchFocused] = useState(false); // Search Focus State
     const [searchIndex, setSearchIndex] = useState({ products: [], orders: [] }); // Data Index
+
+    // Warm lazy section chunks after the first paint so switching sections does not wait for a new import.
+    useEffect(() => {
+        let cancelled = false;
+        const warmSections = () => {
+            if (cancelled) return;
+            preloadAdminSections.forEach(load => load().catch(() => {}));
+        };
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+            const idleId = window.requestIdleCallback(warmSections, { timeout: 1200 });
+            return () => {
+                cancelled = true;
+                window.cancelIdleCallback?.(idleId);
+            };
+        }
+        const timerId = window.setTimeout(warmSections, 500);
+        return () => {
+            cancelled = true;
+            window.clearTimeout(timerId);
+        };
+    }, []);
 
     // Keep the navigation drawer from consuming tablet content space after a rotation or resize.
     useEffect(() => {
