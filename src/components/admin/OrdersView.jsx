@@ -963,6 +963,10 @@ printWindow.onload = () => printWindow.print();
     // customer cannot retain a wallet credit from an invoice that no longer exists.
     const removeOrderPermanently = async (orderId) => {
         const order = orders.find(item => item.id === orderId);
+        // Restore inventory first. The transaction is a no-op for orders that
+        // were never completed, and reverses both product and size quantities
+        // for completed orders before the invoice is removed.
+        await syncOrderInventoryForStatus(orderId, 'cancelled');
         await reverseWalletRewardForOrder(orderId);
         await deleteDoc(doc(db, 'orders', orderId));
         if (order) await deleteCustomerOrderHistory(order);
