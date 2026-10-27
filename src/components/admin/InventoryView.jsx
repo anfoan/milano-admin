@@ -7,6 +7,16 @@ import {
 import { db } from '../../lib/firebase';
 import { collection, query, getDocs, doc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
+import { safeSessionGet, safeSessionSet, safeJsonParse } from '../../lib/safeStorage';
+
+const INVENTORY_CACHE_KEY = 'milano_admin_inventory_snapshot_v1';
+const getCachedInventoryItems = () => {
+    const cached = safeJsonParse(safeSessionGet(INVENTORY_CACHE_KEY), []);
+    return Array.isArray(cached) ? cached : [];
+};
+const toInventoryCacheItems = items => items.map(({ id, name, code, mainImage, costPrice, price, stock, sizeStocks, variants, sortOrder }) => ({
+    id, name, code, mainImage, costPrice, price, stock, sizeStocks, variants, sortOrder
+}));
 
 const getInventorySizeSlots = (product) => {
     const values = product.variants?.find(v => v.type === 'size')?.values || [];
@@ -127,8 +137,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
     const txt = t[lang];
     const isRTL = lang === 'ar';
     const currency = getLocalizedCurrency(generalSettings?.currency || 'YER', lang);
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [products, setProducts] = useState(() => getCachedInventoryItems());
+    const [loading, setLoading] = useState(() => getCachedInventoryItems().length === 0);
     const [filter, setFilter] = useState('all');
     const [sortBy, setSortBy] = useState('');
     const [manualOrder, setManualOrder] = useState([]);
@@ -151,6 +161,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                 items.sort((a, b) => (a.sortOrder ?? 99999) - (b.sortOrder ?? 99999));
                 setProducts(items);
                 setManualOrder(items);
+                safeSessionSet(INVENTORY_CACHE_KEY, JSON.stringify(toInventoryCacheItems(items)));
                 // Render the inventory immediately; data cleanup continues in the background.
                 setLoading(false);
                 
