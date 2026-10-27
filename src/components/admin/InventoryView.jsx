@@ -560,21 +560,21 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     <th className="px-3" style={{ width: '10%' }}>{txt.th_code}</th>
                                     <th className="px-3 -translate-x-5" style={{ width: '28%' }}>{txt.th_name}</th>
                                     {/* Cost columns */}
-                                    <th className="px-3" style={{ width: '10%' }}>
-                                        <div className="flex flex-col gap-0.5">
-                                            <span className="inline-block translate-x-3 text-gray-700">{txt.th_cost}</span>
+                                    <th className="px-3 text-center" style={{ width: '10%' }}>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <span className="text-gray-700">{txt.th_cost}</span>
                                         </div>
                                     </th>
-                                    <th className="px-3" style={{ width: '10%' }}>
-                                        <div className="flex flex-col gap-0.5">
-                                            <span className="inline-block translate-x-3 text-orange-500">{txt.th_total_cost}</span>
+                                    <th className="px-3 text-center" style={{ width: '10%' }}>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <span className="text-orange-500">{txt.th_total_cost}</span>
                                         </div>
                                     </th>
                                     {/* Sell columns */}
-                                    <th className="px-3" style={{ width: '10%' }}>
-                                        <span className="inline-block translate-x-2 text-gray-700">{txt.th_sell}</span>
+                                    <th className="px-3 text-center" style={{ width: '10%' }}>
+                                        <span className="text-gray-700">{txt.th_sell}</span>
                                     </th>
-                                    <th className="px-3" style={{ width: '10%' }}>
+                                    <th className="px-3 text-center" style={{ width: '10%' }}>
                                         <span className="text-green-600">{txt.th_total_sell}</span>
                                     </th>
                                     <th className="px-3 text-gray-900 dark:text-white" style={{ width: '12%' }}><span className="inline-block -translate-x-1">{txt.th_stock}</span></th>
@@ -669,25 +669,25 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                             </td>
 
                                             {/* Cost Price - larger */}
-                                            <td className="px-3">
-                                                <span className="text-sm font-black text-gray-700 print:text-[10px]">{costPrice.toLocaleString()}</span>
-                                                <span className="text-[10px] text-gray-400 font-bold block">{currency}</span>
+                                            <td className="px-3 text-center align-middle">
+                                                <span className="text-sm font-black text-gray-700 print:text-[10px] block text-center">{costPrice.toLocaleString()}</span>
+                                                <span className="text-[10px] text-gray-400 font-bold block text-center">{currency}</span>
                                             </td>
                                             {/* Total Cost (cost × stock) */}
-                                            <td className="px-3">
-                                                <span className="text-sm font-black text-orange-600 print:text-[10px]">{totalCostItem.toLocaleString()}</span>
-                                                <span className="text-[10px] text-gray-400 font-bold block">{currency}</span>
+                                            <td className="px-3 text-center align-middle">
+                                                <span className="text-sm font-black text-orange-600 print:text-[10px] block text-center">{totalCostItem.toLocaleString()}</span>
+                                                <span className="text-[10px] text-gray-400 font-bold block text-center">{currency}</span>
                                             </td>
 
                                             {/* Sell Price - larger */}
-                                            <td className="px-3">
-                                                <span className="text-sm font-black text-gray-900 dark:text-white print:text-[10px]">{sellPrice.toLocaleString()}</span>
-                                                <span className="text-[10px] text-gray-400 font-bold block">{currency}</span>
+                                            <td className="px-3 text-center align-middle">
+                                                <span className="text-sm font-black text-gray-900 dark:text-white print:text-[10px] block text-center">{sellPrice.toLocaleString()}</span>
+                                                <span className="text-[10px] text-gray-400 font-bold block text-center">{currency}</span>
                                             </td>
                                             {/* Total Sell (sell × stock) */}
-                                            <td className="px-3">
-                                                <span className="text-base font-black text-green-700 print:text-[10px]">{totalSellItem.toLocaleString()}</span>
-                                                <span className="text-[10px] text-gray-400 font-bold block">{currency}</span>
+                                            <td className="px-3 text-center align-middle">
+                                                <span className="text-base font-black text-green-700 print:text-[10px] block text-center">{totalSellItem.toLocaleString()}</span>
+                                                <span className="text-[10px] text-gray-400 font-bold block text-center">{currency}</span>
                                             </td>
 
                                             {/* Stock */}
@@ -749,24 +749,24 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                         {txt.total} — {filteredItems.length} {lang === 'ar' ? 'منتج' : 'Products'}
                                     </td>
                                     {/* Total cost (unit) */}
-                                    <td className="px-3">
-                                        <span className="text-xs font-black text-gray-500 block">{txt.th_cost}</span>
+                                    <td className="px-3 text-center align-middle">
+                                        <span className="text-xs font-black text-gray-500 block text-center">{txt.th_cost}</span>
                                         <span className="text-sm font-black text-gray-700">—</span>
                                     </td>
                                     {/* Total cost value */}
-                                    <td className="px-3">
-                                        <span className="text-xs font-black text-orange-500 block">{txt.th_total_cost}</span>
-                                        <span className="text-base font-black text-orange-600">{totalCost.toLocaleString()} <span className="text-xs font-bold text-gray-400">{currency}</span></span>
+                                    <td className="px-3 text-center align-middle">
+                                        <span className="text-xs font-black text-orange-500 block text-center">{txt.th_total_cost}</span>
+                                        <span className="text-base font-black text-orange-600 block text-center">{totalCost.toLocaleString()} <span className="text-xs font-bold text-gray-400">{currency}</span></span>
                                     </td>
                                     {/* Total sell (unit) */}
-                                    <td className="px-3">
-                                        <span className="text-xs font-black text-gray-500 block">{txt.th_sell}</span>
+                                    <td className="px-3 text-center align-middle">
+                                        <span className="text-xs font-black text-gray-500 block text-center">{txt.th_sell}</span>
                                         <span className="text-sm font-black text-gray-700">—</span>
                                     </td>
                                     {/* Total sell value */}
-                                    <td className="px-3">
-                                        <span className="text-xs font-black text-green-600 block">{txt.th_total_sell}</span>
-                                        <span className="text-base font-black text-green-700">{totalSell.toLocaleString()} <span className="text-xs font-bold text-gray-400">{currency}</span></span>
+                                    <td className="px-3 text-center align-middle">
+                                        <span className="text-xs font-black text-green-600 block text-center">{txt.th_total_sell}</span>
+                                        <span className="text-base font-black text-green-700 block text-center">{totalSell.toLocaleString()} <span className="text-xs font-bold text-gray-400">{currency}</span></span>
                                     </td>
                                     <td className="px-3">
                                         <span className="text-xs font-black text-gray-500 block">{txt.th_stock}</span>
