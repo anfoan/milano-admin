@@ -34,7 +34,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             filter_available: 'متوفر في المخزون',
             filter_near: 'قارب على النفاذ',
             filter_out: 'نفذ من المخزون',
-            filter_audit: 'جرد المنتجات',
+            filter_audit: 'جرد منتجات المخزون',
             click_to_view: 'اضغط لعرض النتائج',
             th_hash: '#',
             th_code: 'رمز المنتج',
@@ -616,9 +616,9 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                                     const storedQty = product.sizeStocks?.[size] ?? product.sizeStocks?.[displaySize];
                                                                     const qty = storedQty !== undefined ? Number(storedQty) : 0;
                                                                     return (
-                                                                        <span key={size} className={`relative z-10 min-w-0 max-w-full overflow-hidden whitespace-nowrap text-[12px] font-black border rounded-lg px-2.5 py-0.5 flex items-center justify-center gap-1 ${qty === 0 ? 'border-transparent bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300' : 'border-gray-200 bg-gray-50 text-gray-700'}`}>
-                                                                            <span className="shrink-0 text-gray-400">مقاس {displaySize}:</span>
-                                                                            <span className={`shrink-0 font-black text-[11px] ${qty === 0 ? 'text-red-500' : 'text-blue-600'}`}>{qty}</span>
+                                                                        <span key={size} className={`relative z-10 min-w-0 max-w-full overflow-hidden whitespace-nowrap text-[10px] font-black border rounded-lg px-2 py-0 flex items-center justify-center gap-0.5 ${qty === 0 ? 'border-transparent bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300' : 'border-gray-200 bg-gray-50 text-gray-700'}`}>
+                                                                            <span className="shrink-0 text-[9px] text-gray-400">مقاس {displaySize}:</span>
+                                                                            <span className={`shrink-0 font-black text-[10px] ${qty === 0 ? 'text-red-500' : 'text-blue-600'}`}>{qty}</span>
                                                                         </span>
                                                                     );
                                                                 })}
