@@ -114,11 +114,6 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
         },
         { id: 'wallet', name: txt.wallet, icon: <Wallet size={20} /> },
         {
-            id: 'merchant-stores',
-            name: txt.merchant_stores,
-            icon: <Store size={23} strokeWidth={2.2} />
-        },
-        {
             id: 'discount',
             name: txt.discount,
             icon: <Tag size={20} />,
