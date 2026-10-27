@@ -508,13 +508,13 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     const sizeVariant = product.variants?.find(v => v.type === 'size');
                                     const sizeValues = sizeVariant?.values || [];
                                     return (
-                                        <tr key={product.id} className="hover:bg-purple-50/30 transition-colors">
+                                        <tr key={product.id} className="hover:bg-purple-50/30 transition-colors" style={{ contentVisibility: 'auto', containIntrinsicSize: '70px' }}>
                                             <td className="px-4 text-center text-xs font-black text-gray-400">{idx + 1}</td>
                                             <td className="px-3 text-xs font-mono text-blue-700 font-bold">{product.code || '---'}</td>
                                             <td className="px-3 py-3">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex-shrink-0 no-print">
-                                                        <img src={product.mainImage || "/nav-logo.png"} className="w-full h-full object-cover" alt={product.name} onError={(e) => e.target.src = "/nav-logo.png"} />
+                                                        <img src={product.mainImage || "/nav-logo.png"} width="40" height="40" loading="lazy" decoding="async" className="w-full h-full object-cover" alt={product.name} onError={(e) => e.target.src = "/nav-logo.png"} />
                                                     </div>
                                                     <span className="text-sm font-black text-gray-800">{product.name}</span>
                                                 </div>
@@ -591,20 +591,20 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     const totalCostItem = costPrice * stock;
                                     const totalSellItem = sellPrice * stock;
                                     return (
-                                        <tr key={product.id} className="hover:bg-gray-50 transition-colors print:bg-white" style={{ height: '58px' }}>
+                                        <tr key={product.id} className="hover:bg-gray-50 transition-colors print:bg-white" style={{ height: '58px', contentVisibility: 'auto', containIntrinsicSize: '58px' }}>
                                             <td className="px-3 text-center text-xs font-black text-gray-400">{idx + 1}</td>
                                             <td className="px-3 text-xs font-mono text-blue-700 font-bold">{product.code || '---'}</td>
                                             <td className="px-3 py-2 translate-x-8">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-11 h-11 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 shadow-inner flex-shrink-0 no-print">
-                                                        <img src={product.mainImage || "/nav-logo.png"} className="w-full h-full object-cover" alt={product.name} onError={(e) => e.target.src = "/nav-logo.png"} />
+                                                        <img src={product.mainImage || "/nav-logo.png"} width="44" height="44" loading="lazy" decoding="async" className="w-full h-full object-cover" alt={product.name} onError={(e) => e.target.src = "/nav-logo.png"} />
                                                     </div>
                                                     <img src={product.mainImage} className="hidden print:block print-report-img rounded-md border border-gray-50" onError={(e) => e.target.style.display = 'none'} />
                                                     <div className="flex flex-col">
                                                         {/* LARGER product name (was text-sm, now text-base + font-extrabold) */}
                                                         <span className="text-base font-extrabold text-gray-900 print:text-[10px]">{product.name}</span>
                                                         <div className="flex items-center gap-1.5 no-print mt-0.5">
-                                                            <div className={`w-1.5 h-1.5 rounded-full ${stock > 5 ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />
+                                                            <div className={`w-1.5 h-1.5 rounded-full ${stock > 5 ? 'bg-green-500' : 'bg-red-500'}`} />
                                                             <span className="text-[10px] text-gray-400 font-bold">{txt.active_in_store}</span>
                                                         </div>
                                                         {/* Sizes: larger and clearer */}
