@@ -798,10 +798,9 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         if (!confirm(isRTL ? "هل أنت متأكد من حذف هذا الإيصال نهائياً؟ سيتم إعادة الكميات للمخزون." : "Are you sure you want to delete this receipt permanently? Stock will be restored.")) return;
 
         try {
-            if (receipt.status !== 'cancelled') {
-                await syncOrderInventoryForStatus(receipt.id, 'cancelled');
-            }
-
+            // Restore completed product and size quantities before deletion.
+            // The inventory transaction safely no-ops when nothing was committed.
+            await syncOrderInventoryForStatus(receipt.id, 'cancelled');
             await deleteDoc(doc(db, "orders", receipt.id));
             alert(isRTL ? "تم حذف الإيصال بنجاح" : "Receipt deleted successfully");
         } catch (err) {
