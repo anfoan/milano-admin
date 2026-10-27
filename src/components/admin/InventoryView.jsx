@@ -151,6 +151,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                 items.sort((a, b) => (a.sortOrder ?? 99999) - (b.sortOrder ?? 99999));
                 setProducts(items);
                 setManualOrder(items);
+                // Render the inventory immediately; data cleanup continues in the background.
+                setLoading(false);
                 
                 // Auto-fix negative or mismatched stock on load
                 const negativeItems = items.filter(p => Number(p.stock || 0) < 0);
@@ -166,8 +168,9 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                 });
                 
                 if (negativeItems.length > 0 || negativeSizesItems.length > 0 || mismatchedStockItems.length > 0) {
+                    const fixesById = new Map();
                     for (const p of negativeItems) {
-                        await updateDoc(doc(db, 'products', p.id), { stock: 0 });
+                        fixesById.set(p.id, { ...(fixesById.get(p.id) || {}), stock: 0 });
                     }
                     for (const p of negativeSizesItems) {
                         const fixes = {};
@@ -176,20 +179,15 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                 fixes[`sizeStocks.${size}`] = 0;
                             }
                         }
-                        if (Object.keys(fixes).length > 0) {
-                            await updateDoc(doc(db, 'products', p.id), fixes);
-                        }
+                        if (Object.keys(fixes).length > 0) fixesById.set(p.id, { ...(fixesById.get(p.id) || {}), ...fixes });
                     }
                     for (const p of mismatchedStockItems) {
                         const correctStock = Object.values(p.sizeStocks).reduce((sum, qty) => sum + Number(qty || 0), 0);
-                        await updateDoc(doc(db, 'products', p.id), { stock: correctStock });
+                        fixesById.set(p.id, { ...(fixesById.get(p.id) || {}), stock: correctStock });
                     }
-                    // Re-fetch after fix
-                    const freshSnap = await getDocs(q);
-                    const fixedItems = freshSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    fixedItems.sort((a, b) => (a.sortOrder ?? 99999) - (b.sortOrder ?? 99999));
-                    setProducts(fixedItems);
-                    setManualOrder(fixedItems);
+                    const batch = writeBatch(db);
+                    fixesById.forEach((fixes, id) => batch.update(doc(db, 'products', id), fixes));
+                    await batch.commit();
                 }
             } catch (err) {
                 console.error("Error fetching inventory:", err);
@@ -527,7 +525,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                         {sizeValues.map(size => {
                                                             const qty = Number(product.sizeStocks?.[size] || 0);
                                                             return (
-                                                                <span key={size} className={`w-fit min-w-fit max-w-none inline-flex flex-none overflow-visible text-[11px] font-black border-2 rounded-xl px-5 py-1 whitespace-nowrap items-center justify-center gap-1.5 ${qty === 0 ? 'border-red-200 bg-red-50 text-red-600 dark:border-white dark:text-white' : qty <= 3 ? 'border-orange-200 bg-orange-50 text-orange-600 dark:border-white dark:text-white' : 'border-blue-100 bg-blue-50 text-blue-700 dark:border-white dark:text-white'}`}>
+                                                                <span key={size} className={`w-fit min-w-fit max-w-none inline-flex flex-none overflow-visible text-[11px] font-black border-2 rounded-xl px-5 py-1 whitespace-nowrap items-center justify-center gap-1.5 ${qty === 0 ? 'border-transparent bg-red-50 text-red-600 dark:border-transparent dark:bg-red-500/10 dark:text-red-300' : qty <= 3 ? 'border-orange-200 bg-orange-50 text-orange-600 dark:border-white dark:text-white' : 'border-blue-100 bg-blue-50 text-blue-700 dark:border-white dark:text-white'}`}>
                                                                     <span className="font-bold text-gray-500 dark:text-white">{size}:</span>
                                                                     <span className="font-black text-base dark:text-white">{qty}</span>
                                                                 </span>
@@ -618,7 +616,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                                     const storedQty = product.sizeStocks?.[size] ?? product.sizeStocks?.[displaySize];
                                                                     const qty = storedQty !== undefined ? Number(storedQty) : 0;
                                                                     return (
-                                                                        <span key={size} className={`relative z-10 min-w-0 max-w-full overflow-hidden whitespace-nowrap text-[12px] font-black border rounded-lg px-2.5 py-0.5 flex items-center justify-center gap-1 ${qty === 0 ? 'border-red-200 bg-red-50 text-red-600' : 'border-gray-200 bg-gray-50 text-gray-700'}`}>
+                                                                        <span key={size} className={`relative z-10 min-w-0 max-w-full overflow-hidden whitespace-nowrap text-[12px] font-black border rounded-lg px-2.5 py-0.5 flex items-center justify-center gap-1 ${qty === 0 ? 'border-transparent bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300' : 'border-gray-200 bg-gray-50 text-gray-700'}`}>
                                                                             <span className="shrink-0 text-gray-400">مقاس {displaySize}:</span>
                                                                             <span className={`shrink-0 font-black text-[11px] ${qty === 0 ? 'text-red-500' : 'text-blue-600'}`}>{qty}</span>
                                                                         </span>
