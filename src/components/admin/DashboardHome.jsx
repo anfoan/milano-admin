@@ -896,16 +896,22 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7 }}
-                    className="bg-white dark:bg-[#1c1c1e] p-5 rounded-[24px] border border-gray-100 dark:border-white/5 shadow-sm flex flex-col items-center justify-center relative overflow-hidden"
+                    className={`bg-white dark:bg-[#1c1c1e] p-5 rounded-[24px] border shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-shadow duration-300 ${
+                        Number(dashboardStats.outOfStock || 0) > 0
+                            ? 'border-red-300 dark:border-red-500/40 shadow-red-200/70 dark:shadow-red-500/10'
+                            : Number(dashboardStats.lowStock || 0) > 0
+                                ? 'border-orange-300 dark:border-orange-500/40 shadow-orange-200/70 dark:shadow-orange-500/10'
+                                : 'border-gray-100 dark:border-white/5'
+                    }`}
                 >
-                    <div className="absolute top-3 right-3 text-red-500">
+                    <div className={`absolute top-3 right-3 ${Number(dashboardStats.outOfStock || 0) > 0 ? 'text-red-500 animate-pulse' : Number(dashboardStats.lowStock || 0) > 0 ? 'text-orange-500 animate-pulse' : 'text-red-500'}`}>
                         <AlertTriangle size={16} />
                     </div>
                     <div className="flex items-center gap-4 sm:gap-8 justify-center w-full mt-2">
                         {/* Low Stock (Orange) */}
                         <div className="flex flex-col items-center text-center">
                             <span className="text-gray-400 dark:text-gray-400 font-bold text-xs mb-1">منخفض المخزون</span>
-                            <span className="text-xl font-black text-orange-500">
+                            <span className={`text-xl font-black text-orange-500 ${Number(dashboardStats.lowStock || 0) > 0 ? 'animate-pulse' : ''}`}>
                                 {dashboardStats.lowStock || 0}
                             </span>
                         </div>
@@ -916,7 +922,7 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                         {/* Out of Stock (Red) */}
                         <div className="flex flex-col items-center text-center">
                             <span className="text-gray-400 dark:text-gray-400 font-bold text-xs mb-1">نفذ من المخزون</span>
-                            <span className="text-xl font-black text-red-500">
+                            <span className={`text-xl font-black text-red-500 ${Number(dashboardStats.outOfStock || 0) > 0 ? 'animate-pulse' : ''}`}>
                                 {dashboardStats.outOfStock || 0}
                             </span>
                         </div>
