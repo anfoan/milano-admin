@@ -2394,7 +2394,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             qty > 0 
                                                 ? 'border-blue-500 bg-blue-50/50 shadow-sm' 
                                                 : sizeStock <= 0 
-                                                    ? 'border-red-200 bg-red-50/30 opacity-60'
+                                                    ? 'border-transparent bg-red-50/30 opacity-60'
                                                     : 'border-gray-100 hover:border-gray-200'
                                         }`}>
                                             <div className="flex items-center gap-3">
