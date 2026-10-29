@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect, useTransition } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -74,8 +74,11 @@ const AdminDashboard = () => {
         if (workerPerms.allowExpenses || workerPerms.allowBonds) workerAllowedTabs.push('expenses');
         if (workerPerms.allowManualOrder) workerAllowedTabs.push('manual-order');
     }
-    const [activeTab, setActiveTab] = useState(() => isWorker ? (workerAllowedTabs[0] || '') : 'overview');
-    const [, startNavigationTransition] = useTransition();
+    const initialTab = isWorker ? (workerAllowedTabs[0] || '') : 'overview';
+    const [activeTab, setActiveTab] = useState(initialTab);
+    // Keep visited sections mounted so their Firestore listeners and local UI state
+    // survive navigation. This removes the loading/reconnect delay on every return.
+    const [visitedTabs, setVisitedTabs] = useState(() => initialTab ? [initialTab] : []);
     const [showRightPanel, setShowRightPanel] = useState(false); // Right Panel State
     const [showProfileMenu, setShowProfileMenu] = useState(false); // Profile Menu State
     const [settingsSection, setSettingsSection] = useState(null); // Settings Section State
@@ -347,6 +350,10 @@ const AdminDashboard = () => {
         }
     };
 
+    const rememberTab = (tab) => {
+        if (!tab) return;
+        setVisitedTabs(previous => previous.includes(tab) ? previous : [...previous, tab]);
+    };
     const handleTabChange = (tab) => {
         if (!tab || tab === activeTab) {
             if (window.innerWidth < 1280) setIsSidebarOpen(false);
@@ -354,7 +361,8 @@ const AdminDashboard = () => {
         }
         if (tab === 'settings') setSettingsSection(null);
         if (tab === 'product-list') setProductReturnCategory(null);
-        startNavigationTransition(() => setActiveTab(tab));
+        rememberTab(tab);
+        setActiveTab(tab);
         // A drawer should never remain layered over the newly selected view on phone/tablet.
         if (window.innerWidth < 1280) setIsSidebarOpen(false);
     };
@@ -362,17 +370,20 @@ const AdminDashboard = () => {
     const handleEditProduct = (product) => {
         setEditingProduct(product);
         setProductReturnCategory(product?.category || null);
+        rememberTab('add-product');
         setActiveTab('add-product');
     };
 
     const handleViewOrder = (order, edit = false) => {
         setSelectedOrder(order);
         setIsEditMode(edit);
+        rememberTab('order-details');
         setActiveTab('order-details');
     };
 
     const handleOpenChat = (chatId) => {
         setSelectedChatId(chatId);
+        rememberTab('admin-chat');
         setActiveTab('admin-chat');
     };
     // Keep the global notification navigation listener after its handlers are defined.
@@ -385,9 +396,9 @@ const AdminDashboard = () => {
         return () => window.removeEventListener('admin-navigate', handleNavigation);
     }, []);
 
-    const renderView = () => {
+    const renderView = (tab = activeTab) => {
         // Guard: restrict workers to allowed tabs only
-        if (isWorker && !workerAllowedTabs.includes(activeTab)) {
+        if (isWorker && !workerAllowedTabs.includes(tab)) {
             return (
                 <div className="flex flex-col items-center justify-center p-20 bg-white rounded-[32px] border border-gray-100 shadow-sm">
                     <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300 mb-4 font-black text-2xl">!</div>
@@ -397,11 +408,11 @@ const AdminDashboard = () => {
             );
         }
 
-        switch (activeTab) {
+        switch (tab) {
             case 'overview':
-                return <DashboardHome setActiveTab={setActiveTab} onViewOrder={handleViewOrder} lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
+                return <DashboardHome setActiveTab={handleTabChange} onViewOrder={handleViewOrder} lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
             case 'add-product':
-                return <ProductForm editingProduct={editingProduct} setEditingProduct={setEditingProduct} setActiveTab={setActiveTab} lang={lang} />;
+                return <ProductForm editingProduct={editingProduct} setEditingProduct={setEditingProduct} setActiveTab={handleTabChange} lang={lang} />;
             case 'purchases':
                 return <PurchasesView lang={lang} generalSettings={generalSettings} />;
             case 'financial-reports':
@@ -415,7 +426,7 @@ const AdminDashboard = () => {
             case 'inventory':
                 return <InventoryView lang={lang} generalSettings={generalSettings} searchQuery={globalSearch} setSearchQuery={setGlobalSearch} />;
             case 'inbox': return <InboxView onOpenChat={handleOpenChat} lang={lang} />; // Updated to support chat
-            case 'admin-chat': return <AdminChatView chatId={selectedChatId} onBack={() => setActiveTab('inbox')} lang={lang} />;
+            case 'admin-chat': return <AdminChatView chatId={selectedChatId} onBack={() => handleTabChange('inbox')} lang={lang} />;
             case 'delivery': return <DeliveryView lang={lang} generalSettings={generalSettings} />; // New Delivery View
             case 'payments':
                 return <PaymentsView lang={lang} generalSettings={generalSettings} />;
@@ -436,7 +447,7 @@ const AdminDashboard = () => {
             case 'order-details':
                 return <OrderDetailsView
                     order={selectedOrder}
-                    onBack={() => setActiveTab('orders')}
+                    onBack={() => handleTabChange('orders')}
                     lang={lang}
                     generalSettings={generalSettings}
                     initialEditMode={isEditMode}
@@ -461,7 +472,7 @@ const AdminDashboard = () => {
                     <div className="flex flex-col items-center justify-center p-20 bg-white rounded-[32px] border border-gray-100 shadow-sm">
                         <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300 mb-4 font-black text-2xl">!</div>
                         <h2 className="text-xl font-black text-gray-800 mb-2">هذه الصفحة قيد الإنشاء</h2>
-                        <p className="text-gray-400 font-bold">نعمل حالياً على تطوير قسم ({activeTab})</p>
+                        <p className="text-gray-400 font-bold">نعمل حالياً على تطوير قسم ({tab})</p>
                     </div>
                 );
         }
@@ -593,7 +604,7 @@ const AdminDashboard = () => {
                                         <Store size={18} className="text-gray-400" />
                                         <span>{txt.your_store}</span>
                                     </a>
-                                    <button onClick={() => { setActiveTab('account-settings'); setShowProfileMenu(false); }} className="px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors">
+                                    <button onClick={() => { handleTabChange('account-settings'); setShowProfileMenu(false); }} className="px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 transition-colors">
                                         <Settings size={18} className="text-gray-400" />
                                         <span>{txt.settings}</span>
                                     </button>
@@ -628,7 +639,11 @@ const AdminDashboard = () => {
                 {/* View Content (Scrollable) */}
                 <main className="flex-1 min-w-0 overflow-y-auto pt-3 px-3 sm:px-4 lg:pt-4 lg:px-8 xl:px-10 relative">
                     <Suspense fallback={<div className="flex min-h-[260px] items-center justify-center rounded-[28px] bg-white/80 text-sm font-black text-slate-400 shadow-sm dark:bg-white/5">جاري تحميل القسم...</div>}>
-                        {renderView()}
+                        {visitedTabs.map(tab => (
+                            <div key={tab} className={tab === activeTab ? 'block' : 'hidden'} aria-hidden={tab !== activeTab}>
+                                {renderView(tab)}
+                            </div>
+                        ))}
                     </Suspense>
                 </main>
             </div>
