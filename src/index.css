@@ -262,13 +262,42 @@ input[type=number] {
 }
 
 .dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card {
-  background-color: #2b3038 !important;
-  border-color: #718096 !important;
+  border-width: 1px !important;
 }
 
 .dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card .text-slate-600,
 .dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card .text-slate-900 {
   color: #ffffff !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card[data-metric-key="stock"] {
+  background-color: #315fa8 !important;
+  border-color: #79a9f5 !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card[data-metric-key="purchases"] {
+  background-color: #a96b18 !important;
+  border-color: #f4c76b !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card[data-metric-key="expenses"] {
+  background-color: #a83d4b !important;
+  border-color: #f58b98 !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card[data-metric-key="sales"] {
+  background-color: #237c54 !important;
+  border-color: #79d5a7 !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card[data-metric-key="revenue"] {
+  background-color: #704f9f !important;
+  border-color: #c8a9f3 !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card[data-metric-key="profit"] {
+  background-color: #197f91 !important;
+  border-color: #78d9e7 !important;
 }
 
 .dark .admin-dashboard-root .bg-gray-50 {
