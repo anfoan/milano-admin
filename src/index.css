@@ -261,6 +261,16 @@ input[type=number] {
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
+.dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card {
+  background-color: #2b3038 !important;
+  border-color: #718096 !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card .text-slate-600,
+.dark .admin-dashboard-root .report-preview-modal .report-preview-metric-card .text-slate-900 {
+  color: #ffffff !important;
+}
+
 .dark .admin-dashboard-root .bg-gray-50 {
   background-color: #0d0d0e !important;
 }
