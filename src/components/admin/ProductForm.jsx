@@ -824,7 +824,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                             <div className="space-y-2">
                                 <label className={`text-xs font-black ${errors.mainImage ? 'text-red-500' : 'text-gray-600'} block ${isRTL ? 'mr-1' : 'ml-1'}`}>{txt.main_image_label} <span className="text-red-500 text-xl mx-1 font-black">*</span></label>
                                 <div className="flex items-center gap-2" dir="ltr">
-                                    <div className={`order-3 ml-auto w-1/2 min-w-0 bg-white border ${errors.mainImage ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-2.5 px-4 font-bold ${formData.mainImage ? 'text-blue-600' : 'text-gray-500'} text-center truncate transition-all flex items-center justify-center`}>
+                                    <div className={`order-3 ml-auto w-3/5 min-w-0 bg-white border ${errors.mainImage ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-2.5 px-4 font-bold ${formData.mainImage ? 'text-blue-600' : 'text-gray-500'} text-center truncate transition-all flex items-center justify-center`}>
                                         {formData.mainImage ? txt.uploaded : txt.click_upload}
                                     </div>
                                     <input type="file" hidden ref={mainImageInputRef} onChange={handleMainImageChange} accept="image/*" />
