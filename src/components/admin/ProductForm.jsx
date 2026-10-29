@@ -136,6 +136,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                 category: '', description: '', mainImage: null, gallery: [],
                 hidden: false, order: ''
             });
+            setMainImagePreview(null);
             setVariants([
                 { type: 'size', name: txt.sizes, values: [] },
                 { type: 'color', name: txt.colors, values: [] }
@@ -186,7 +187,14 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     const [newCategoryName, setNewCategoryName] = useState('');
     const [descriptionView, setDescriptionView] = useState('editor'); // 'editor' or 'preview'
     const [croppingImage, setCroppingImage] = useState(null); // State for image to crop
+    const [mainImagePreview, setMainImagePreview] = useState(null);
     const [draggedGalleryIndex, setDraggedGalleryIndex] = useState(null);
+
+    useEffect(() => {
+        return () => {
+            if (mainImagePreview?.startsWith('blob:')) URL.revokeObjectURL(mainImagePreview);
+        };
+    }, [mainImagePreview]);
 
     const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x660));
     const formatThousands = (value) => {
@@ -341,6 +349,8 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     const handleCropComplete = async (croppedBlob) => {
         setCroppingImage(null); // Close cropper
         setLoading(true);
+        const localPreviewUrl = URL.createObjectURL(croppedBlob);
+        setMainImagePreview(localPreviewUrl);
         try {
             // The crop utility normalizes every source dimension to a sharp,
             // safe square before uploading it to Cloudinary.
@@ -351,6 +361,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
             alert(txt.alert_success_main_img);
         } catch (error) {
             console.error('Product image upload failed:', error);
+            setMainImagePreview(null);
             alert(isRTL ? 'تعذر رفع الصورة. يرجى المحاولة مرة أخرى.' : 'The image could not be uploaded. Please try again.');
         } finally {
             setLoading(false);
@@ -581,6 +592,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                 category: '', description: '', mainImage: null, gallery: [],
                 hidden: false
             });
+            setMainImagePreview(null);
             setVariants([
                 { type: 'size', name: txt.sizes, values: [] },
                 { type: 'color', name: txt.colors, values: [] }
@@ -812,7 +824,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                             <div className="space-y-2">
                                 <label className={`text-xs font-black ${errors.mainImage ? 'text-red-500' : 'text-gray-600'} block ${isRTL ? 'mr-1' : 'ml-1'}`}>{txt.main_image_label} <span className="text-red-500 text-xl mx-1 font-black">*</span></label>
                                 <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
-                                    <div className={`bg-white border ${errors.mainImage ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-4 px-4 font-bold ${formData.mainImage ? 'text-blue-600' : 'text-gray-500'} text-center truncate w-full transition-all`}>
+                                    <div className={`bg-white border ${errors.mainImage ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-2.5 px-4 font-bold ${formData.mainImage ? 'text-blue-600' : 'text-gray-500'} text-center truncate w-full transition-all flex items-center justify-center`}>
                                         {formData.mainImage ? txt.uploaded : txt.click_upload}
                                     </div>
                                     <input type="file" hidden ref={mainImageInputRef} onChange={handleMainImageChange} accept="image/*" />
@@ -822,10 +834,17 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                             mainImageInputRef.current.click();
                                             if (errors.mainImage) setErrors({ ...errors, mainImage: false });
                                         }}
-                                        className="px-6 py-4 bg-blue-500 text-white rounded-xl font-black text-sm hover:bg-blue-600 shadow-md transition whitespace-nowrap"
+                                        className="px-6 py-3 bg-blue-500 text-white rounded-xl font-black text-sm hover:bg-blue-600 shadow-md transition whitespace-nowrap"
                                     >
                                         {txt.upload_btn}
                                     </button>
+                                </div>
+                                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 shadow-sm dark:border-gray-700 dark:bg-gray-800" aria-label={txt.main_image_label}>
+                                    {(mainImagePreview || formData.mainImage) ? (
+                                        <img src={mainImagePreview || formData.mainImage} alt={txt.main_image_label} className="h-full w-full object-cover" />
+                                    ) : (
+                                        <ImageIcon size={26} className="text-gray-300 dark:text-gray-500" />
+                                    )}
                                 </div>
                                 {errors.mainImage && <p className="text-[10px] font-bold text-red-500 px-2 animate-in fade-in slide-in-from-top-1">صورة المنتج مطلوبة</p>}
                             </div>
