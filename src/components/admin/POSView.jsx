@@ -4,7 +4,7 @@ import {
     Calculator, Search, Plus, Minus, Trash2, CreditCard, User, 
     Printer, LogOut, CheckCircle, AlertTriangle, Clock, Calendar,
     Edit, X, ShoppingCart, RefreshCw, Layers, DollarSign, ArrowLeftRight,
-    RotateCcw, Monitor, Store, History, BarChart3, ArrowLeft, ArrowRight, ChevronDown
+    RotateCcw, Monitor, Store, History, BarChart3, Wallet, ArrowLeft, ArrowRight, ChevronDown
 } from 'lucide-react';
 import { db, auth } from '../../lib/firebase';
 import { signInAnonymously, signOut } from 'firebase/auth';
