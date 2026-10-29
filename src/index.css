@@ -229,6 +229,15 @@ input[type=number] {
   background-color: #1c1c1e !important;
 }
 
+/* Keep the financial report preview paper-like in dark mode. */
+.dark .admin-dashboard-root .report-preview-modal .bg-white {
+  background-color: #ffffff !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .bg-slate-100 {
+  background-color: #f1f5f9 !important;
+}
+
 .dark .admin-dashboard-root .bg-gray-50 {
   background-color: #0d0d0e !important;
 }
