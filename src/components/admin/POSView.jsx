@@ -1848,7 +1848,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-white dark:bg-[#1c1c1e] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm pt-4 pb-5 px-3 sm:px-5 flex flex-col gap-2 overflow-visible lg:overflow-hidden h-auto lg:h-[calc(100vh-10rem)]">
+                    <div className="flex-1 -mx-3 bg-white dark:bg-[#1c1c1e] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm pt-4 pb-5 px-3 sm:px-5 flex flex-col gap-2 overflow-visible lg:overflow-hidden h-auto lg:h-[calc(100vh-10rem)]">
                     {/* Payment totals use the same visible period/search filter as the invoice table. */}
                     <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-1">
                         {[
