@@ -229,13 +229,36 @@ input[type=number] {
   background-color: #1c1c1e !important;
 }
 
-/* Keep the financial report preview paper-like in dark mode. */
+/* Keep the financial report preview fully aligned with the dark theme. */
 .dark .admin-dashboard-root .report-preview-modal .bg-white {
-  background-color: #ffffff !important;
+  background-color: #1c1c1e !important;
 }
 
 .dark .admin-dashboard-root .report-preview-modal .bg-slate-100 {
-  background-color: #f1f5f9 !important;
+  background-color: #0d0d0e !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .bg-slate-50 {
+  background-color: #242428 !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .text-slate-700,
+.dark .admin-dashboard-root .report-preview-modal .text-slate-600,
+.dark .admin-dashboard-root .report-preview-modal .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+.dark .admin-dashboard-root .report-preview-modal .border-slate-200,
+.dark .admin-dashboard-root .report-preview-modal .border-slate-100 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 .dark .admin-dashboard-root .bg-gray-50 {
