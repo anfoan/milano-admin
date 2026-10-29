@@ -961,9 +961,9 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
                   .store-header { display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 2px solid #9ca3af; padding-bottom: 10px; page-break-inside: avoid; break-inside: avoid; }
                   .store-logo { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; }
-                  .store-text { text-align: right; }
-                  .store-name { font-size: 18px; font-weight: 900; color: #111827; line-height: 1.2; }
-                  .store-info { font-size: 13px; font-weight: 600; color: #374151; margin-top: 3px; }
+                  .store-text { text-align: right; font-family: 'Cairo', system-ui, sans-serif; }
+                  .store-name { font-family: 'Cairo', system-ui, sans-serif; font-size: 20px; font-weight: 900; color: #111827; line-height: 1.35; }
+                  .store-info { font-family: 'Cairo', system-ui, sans-serif; font-size: 14px; font-weight: 700; color: #374151; line-height: 1.5; margin-top: 3px; }
                   
                   .report-title { text-align: center; margin: 0; font-weight: 900; font-size: 15px; color: #111827; }
                   .report-date { text-align: center; margin: 2px 0 0 0; font-weight: 600; font-size: 11px; color: #6b7280; }
