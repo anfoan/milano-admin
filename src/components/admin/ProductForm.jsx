@@ -823,7 +823,14 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                             </div>
                             <div className="space-y-2">
                                 <label className={`text-xs font-black ${errors.mainImage ? 'text-red-500' : 'text-gray-600'} block ${isRTL ? 'mr-1' : 'ml-1'}`}>{txt.main_image_label} <span className="text-red-500 text-xl mx-1 font-black">*</span></label>
-                                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+                                <div className={`flex items-center gap-2 ${isRTL ? 'flex-row' : 'flex-row-reverse'}`}>
+                                    <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 shadow-sm dark:border-gray-700 dark:bg-gray-800" aria-label={txt.main_image_label}>
+                                        {(mainImagePreview || formData.mainImage) ? (
+                                            <img src={mainImagePreview || formData.mainImage} alt={txt.main_image_label} className="h-full w-full object-cover" />
+                                        ) : (
+                                            <ImageIcon size={22} className="text-gray-300 dark:text-gray-500" />
+                                        )}
+                                    </div>
                                     <div className={`bg-white border ${errors.mainImage ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-2.5 px-4 font-bold ${formData.mainImage ? 'text-blue-600' : 'text-gray-500'} text-center truncate w-full transition-all flex items-center justify-center`}>
                                         {formData.mainImage ? txt.uploaded : txt.click_upload}
                                     </div>
@@ -838,13 +845,6 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                     >
                                         {txt.upload_btn}
                                     </button>
-                                </div>
-                                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 shadow-sm dark:border-gray-700 dark:bg-gray-800" aria-label={txt.main_image_label}>
-                                    {(mainImagePreview || formData.mainImage) ? (
-                                        <img src={mainImagePreview || formData.mainImage} alt={txt.main_image_label} className="h-full w-full object-cover" />
-                                    ) : (
-                                        <ImageIcon size={26} className="text-gray-300 dark:text-gray-500" />
-                                    )}
                                 </div>
                                 {errors.mainImage && <p className="text-[10px] font-bold text-red-500 px-2 animate-in fade-in slide-in-from-top-1">صورة المنتج مطلوبة</p>}
                             </div>
