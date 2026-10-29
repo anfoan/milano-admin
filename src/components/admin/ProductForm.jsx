@@ -824,7 +824,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                             <div className="space-y-2">
                                 <label className={`text-xs font-black ${errors.mainImage ? 'text-red-500' : 'text-gray-600'} block ${isRTL ? 'mr-1' : 'ml-1'}`}>{txt.main_image_label} <span className="text-red-500 text-xl mx-1 font-black">*</span></label>
                                 <div className="flex items-center gap-2" dir="ltr">
-                                    <div className={`min-w-0 flex-1 bg-white border ${errors.mainImage ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-2.5 px-4 font-bold ${formData.mainImage ? 'text-blue-600' : 'text-gray-500'} text-center truncate transition-all flex items-center justify-center`}>
+                                    <div className={`order-3 ml-auto w-1/2 min-w-0 bg-white border ${errors.mainImage ? 'border-red-500 bg-red-50/30' : 'border-gray-200'} rounded-xl py-2.5 px-4 font-bold ${formData.mainImage ? 'text-blue-600' : 'text-gray-500'} text-center truncate transition-all flex items-center justify-center`}>
                                         {formData.mainImage ? txt.uploaded : txt.click_upload}
                                     </div>
                                     <input type="file" hidden ref={mainImageInputRef} onChange={handleMainImageChange} accept="image/*" />
@@ -834,11 +834,11 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                             mainImageInputRef.current.click();
                                             if (errors.mainImage) setErrors({ ...errors, mainImage: false });
                                         }}
-                                        className="px-6 py-3 bg-blue-500 text-white rounded-xl font-black text-sm hover:bg-blue-600 shadow-md transition whitespace-nowrap"
+                                        className="order-1 px-6 py-3 bg-blue-500 text-white rounded-xl font-black text-sm hover:bg-blue-600 shadow-md transition whitespace-nowrap"
                                     >
                                         {txt.upload_btn}
                                     </button>
-                                    <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 shadow-sm dark:border-gray-700 dark:bg-gray-800" aria-label={txt.main_image_label}>
+                                    <div className="order-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 shadow-sm dark:border-gray-700 dark:bg-gray-800" aria-label={txt.main_image_label}>
                                         {(mainImagePreview || formData.mainImage) ? (
                                             <img src={mainImagePreview || formData.mainImage} alt={txt.main_image_label} className="h-full w-full object-cover" />
                                         ) : (
