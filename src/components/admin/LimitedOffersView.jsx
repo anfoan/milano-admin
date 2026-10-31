@@ -267,7 +267,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                     priceAfterDiscount: priceAfterDiscount,
                     offerEndDate: isTimeLimited ? endDate : null,
                     offerEndTime: isTimeLimited ? endTime : null,
-                    offerTimezone: 'Asia/Dubai',
+                    offerTimezone: 'Asia/Aden',
                     hasOffer: true
                 });
             });
@@ -406,9 +406,9 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
         const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         
-        if (d > 0) return `${d}d ${h}h`;
-        if (h > 0) return `${h}h ${m}m`;
-        return `${m}m`;
+        if (d > 0) return `${d}ي ${h}س`;
+        if (h > 0) return `${h}س ${m}د`;
+        return `${m}د`;
     };
 
     const removeOffer = async (productId) => {
@@ -821,9 +821,9 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                                     {isTimeLimited && (
                                         <div className="grid grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-2">
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-400 mb-1">{txt.timezone}</label>
+                                                <label className="block text-center text-xs font-bold text-gray-400 mb-1">{txt.timezone}</label>
                                                 <select className="w-full h-[46px] px-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 appearance-none">
-                                                    <option value="Asia/Aden">Aden (Yemen)</option>
+                                                    <option value="Asia/Aden">صنعاء (اليمن)</option>
                                                     <option value="Asia/Riyadh">Riyadh (KSA)</option>
                                                     <option value="Asia/Dubai">Dubai (UAE)</option>
                                                     <option value="Africa/Cairo">Cairo (Egypt)</option>
@@ -835,15 +835,15 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-400 mb-1">{txt.end_date}</label>
-                                                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-[46px] px-3 bg-gray-50 border border-gray-200 rounded-xl font-mono text-sm text-gray-900" />
+                                                <label className="block text-center text-xs font-bold text-gray-400 mb-1">{txt.end_date}</label>
+                                                <input dir="ltr" lang="en" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-[46px] px-3 bg-gray-50 border border-gray-200 rounded-xl font-mono text-sm text-gray-900" />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-400 mb-1">{txt.end_time}</label>
-                                                <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="w-full h-[46px] px-3 bg-gray-50 border border-gray-200 rounded-xl font-mono text-sm text-gray-900" />
+                                                <label className="block text-center text-xs font-bold text-gray-400 mb-1">{txt.end_time}</label>
+                                                <input dir="ltr" lang="en" type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="w-full h-[46px] px-3 bg-gray-50 border border-gray-200 rounded-xl font-mono text-sm text-gray-900" />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-400 mb-1">{txt.estimated_duration}</label>
+                                                <label className="block text-center text-xs font-bold text-gray-400 mb-1">{txt.estimated_duration}</label>
                                                 <div className="w-full h-[46px] px-3 bg-gray-50 border border-gray-200 rounded-xl font-mono text-sm text-gray-900 flex items-center justify-center whitespace-nowrap overflow-hidden" dir="ltr">
                                                     {(() => {
                                                         if (!endDate) return "0d 0h 0m";
@@ -856,7 +856,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                                                         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                                                         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-                                                        return `${days}d ${hours}h ${minutes}m`;
+                                                        return `${days}ي ${hours}س ${minutes}د`;
                                                     })()}
                                                 </div>
                                             </div>
@@ -1037,7 +1037,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                                                 {(product.offerEndDate || product.pausedOfferEndDate) || txt.val_unlimited}
                                             </td>
                                             <td className="px-2 py-4 text-gray-400 font-bold text-[11px] whitespace-nowrap">
-                                                {(product.offerEndDate || product.pausedOfferEndDate) ? (product.offerTimezone || product.pausedOfferTimezone || "Asia/Dubai") : txt.val_unlimited}
+                                                {(product.offerEndDate || product.pausedOfferEndDate) ? ((product.offerTimezone || product.pausedOfferTimezone) === 'Asia/Aden' ? 'صنعاء (اليمن)' : (product.offerTimezone || product.pausedOfferTimezone || 'صنعاء (اليمن)')) : txt.val_unlimited}
                                             </td>
                                             <td className="px-2 py-4 text-center font-black text-sm text-gray-800">
                                                 {editingId === product.id ? (
