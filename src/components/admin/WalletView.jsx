@@ -29,8 +29,8 @@ const normalizeWalletCustomerPhone = value => {
     const digits = String(value || '')
         .replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
         .replace(/[^0-9]/g, '');
-    if (digits.startsWith('00967') && digits.length === 14) return digits.slice(5);
-    return digits.startsWith('967') && digits.length === 12 ? digits.slice(3) : digits;
+    if (digits.startsWith('00967')) return digits.slice(5);
+    return digits.startsWith('967') ? digits.slice(3) : digits;
 };
 const walletIdForCustomerPhone = value => {
     const phone = normalizeWalletCustomerPhone(value);
