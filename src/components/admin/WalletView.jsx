@@ -692,7 +692,7 @@ const Metric = ({ tone, icon, label, value, currencyLabel = '', openDigits = fal
 };
 const Filter = ({ active, tone, onClick, children }) => <button onClick={onClick} className={`rounded-xl border px-3 py-2 text-[10px] font-black transition ${tone === 'blue' ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-400/40 dark:bg-blue-400/15 dark:text-blue-200' : tone === 'emerald' ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-400/15 dark:text-emerald-200' : tone === 'maroon' ? 'border-red-300/60 bg-red-500/10 text-red-700 italic dark:border-red-300/40 dark:bg-red-400/15 dark:text-white' : 'border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-400/40 dark:bg-rose-400/15 dark:text-rose-200'} ${active ? 'ring-2 ring-red-400/30 dark:ring-red-200/30' : 'opacity-80 hover:opacity-100'}`}>{children}</button>;
 
-const InvoiceMeta = ({ label, value, ltr = false, tone = '' }) => <div className="min-h-[62px] px-3 py-2 text-right"><p className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{label}</p><div dir={ltr ? 'ltr' : undefined} className={`mt-1 truncate text-[11px] font-black ${tone === 'emerald' ? 'text-emerald-600 dark:text-emerald-400' : tone === 'amber' ? 'text-amber-600 dark:text-amber-300' : 'text-slate-800 dark:text-slate-100'}`}>{value ?? '---'}</div></div>;
+const InvoiceMeta = ({ label, value, ltr = false, tone = '', center = false }) => <div className={`min-h-[62px] px-3 py-2 ${center ? 'text-center' : 'text-right'}`}><p className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{label}</p><div dir={ltr ? 'ltr' : undefined} className={`mt-1 truncate text-[11px] font-black ${tone === 'emerald' ? 'text-emerald-600 dark:text-emerald-400' : tone === 'amber' ? 'text-amber-600 dark:text-amber-300' : 'text-slate-800 dark:text-slate-100'}`}>{value ?? '---'}</div></div>;
 
 const InvoiceCard = ({ order, wallet, position, isLatest, rewarding, deleting, defaultReward, formatAmount, currencyLabel, onReward, onEdit, onDelete, onPrint, onChangeStatus, onManageWallet }) => {
     const [statusMenuOpen, setStatusMenuOpen] = useState(false);
@@ -731,10 +731,10 @@ const InvoiceCard = ({ order, wallet, position, isLatest, rewarding, deleting, d
         <div className="mx-3 mt-3">
             <div dir="rtl" className="grid grid-cols-2 md:grid-cols-6">
                 <InvoiceMeta label="اسم العميل" value={customerName(order)}/>
-                <InvoiceMeta label="الهاتف" value={customerPhone(order)} ltr/>
+                <InvoiceMeta label="الهاتف" value={customerPhone(order)} ltr center/>
                 <InvoiceMeta label="كلمة المرور:" tone="amber" value={<span dir="ltr" className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[10px] text-amber-700 dark:border-amber-500/35 dark:bg-amber-950/60 dark:text-amber-300"><span>{wallet?.pinConfigured ? 'محمي' : '---'}</span><KeyRound size={11}/></span>}/>
                 <InvoiceMeta label="تكلفة التوصيل" tone="amber" value={<span dir="ltr" className="inline-flex items-center gap-1"><span>{formatAmount(deliveryCost)}</span><span className="rounded bg-amber-500/15 px-1 font-sans text-[9px]">$</span></span>}/>
-                <InvoiceMeta label="المدينة / التوصيل" value={destination}/>
+                <InvoiceMeta label="المدينة / التوصيل" value={destination} center/>
                 <InvoiceMeta label="إجمالي الفاتورة" tone="emerald" value={<span dir="rtl" className="inline-flex items-baseline gap-1"><span dir="ltr">{formatAmount(order.total)}</span><span className="font-sans text-[9px]">{currencyLabel}</span></span>}/>
             </div>
         </div>
