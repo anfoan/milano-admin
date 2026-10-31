@@ -29,6 +29,7 @@ const normalizeWalletCustomerPhone = value => {
     const digits = String(value || '')
         .replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
         .replace(/[^0-9]/g, '');
+    if (digits.startsWith('00967') && digits.length === 14) return digits.slice(5);
     return digits.startsWith('967') && digits.length === 12 ? digits.slice(3) : digits;
 };
 const walletIdForCustomerPhone = value => {
@@ -36,8 +37,24 @@ const walletIdForCustomerPhone = value => {
     return phone.length >= 7 ? `phone-${phone}` : '';
 };
 const customerName = order => order.formData?.name || order.customer?.name || order.customerName || order.name || 'عميل المتجر';
-const customerPhone = order => order.formData?.fullPhone || order.formData?.phone || order.customer?.phone || order.phone || '---';
-const orderDate = value => { const date = value?.toDate?.() || new Date(value || Date.now()); return Number.isNaN(date.getTime()) ? '---' : new Intl.DateTimeFormat('ar-YE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(date); };
+const customerPhone = order => normalizeWalletCustomerPhone(order.formData?.fullPhone || order.formData?.phone || order.customer?.phone || order.phone) || '---';
+const orderDate = value => {
+    const date = value?.toDate?.() || new Date(value || Date.now());
+    if (Number.isNaN(date.getTime())) return '---';
+    const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Riyadh',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    }).formatToParts(date);
+    const getPart = type => parts.find(part => part.type === type)?.value || '';
+    const hour24 = Number(getPart('hour'));
+    const hour12 = String(hour24 % 12 || 12).padStart(2, '0');
+    return `${getPart('day')}/${getPart('month')}/${getPart('year')} ${hour12}:${getPart('minute')} ${hour24 < 12 ? 'ص' : 'م'}`;
+};
 const statusKey = status => {
     const value = String(status || '').toLowerCase();
     if (value.includes('return') || value.includes('مسترجع')) return 'returned';
@@ -556,7 +573,7 @@ const WalletView = ({ generalSettings }) => {
 
         {notice && <div dir="rtl" className={`fixed inset-x-0 bottom-5 z-[160] mx-auto w-fit max-w-[calc(100vw-2rem)] -translate-x-5 rounded-xl border px-4 py-3 text-center text-xs font-black shadow-xl ${notice.startsWith('لن يتم إيداع مكافأة العميل') ? 'border-rose-400/70 bg-rose-500/20 text-rose-700 backdrop-blur-sm dark:border-rose-400/55 dark:bg-rose-500/20 dark:text-rose-200' : 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-400/40 dark:bg-[#183127] dark:text-emerald-200'}`}>{notice}</div>}
         {editingOrder && <InvoiceEditModal key={editingOrder.id} order={editingOrder} wallet={walletMap.get(editingOrder.customerWalletId)} defaultReward={settings.defaultReward} currencyCode={walletDisplayCurrency} currencyLabel={walletCurrencyText} formatAmount={walletAmount} onClose={() => setEditingOrder(null)} onSave={draft => saveInvoice({ ...draft, total: toWalletBase(draft.total), walletRewardOverride: toWalletBase(draft.walletRewardOverride), walletBalance: toWalletBase(draft.walletBalance) })}/>}
-        {printingOrder && <div style={{ position: 'fixed', left: '-10000px', top: 0 }}><div id="wallet-printable-single-invoice"><InvoiceTemplate orders={[printingOrder]} lang="ar" generalSettings={generalSettings} hideHeader={true}/></div></div>}
+        {printingOrder && <div style={{ position: 'fixed', left: '-10000px', top: 0 }}><div id="wallet-printable-single-invoice"><InvoiceTemplate orders={[{ ...printingOrder, date: orderDate(printingOrder.createdAt || printingOrder.date), formData: { ...printingOrder.formData, phone: customerPhone(printingOrder) } }]} lang="ar" generalSettings={generalSettings} hideHeader={true}/></div></div>}
     </div>;
 };
 
