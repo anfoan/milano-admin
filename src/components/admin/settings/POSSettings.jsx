@@ -297,10 +297,13 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
                                     <input
                                         type="text"
                                         name="username"
+                                        autoComplete="new-password"
+                                        data-lpignore="true"
+                                        data-1p-ignore="true"
                                         value={formData.username}
                                         onChange={handleFormChange}
                                         placeholder={t.username_placeholder}
-                                        className="w-full bg-gray-50 dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-xl py-2.5 pr-9 pl-3 outline-none focus:border-blue-500 transition-colors font-bold text-sm text-gray-900 dark:text-white text-right"
+                                        className="w-full bg-gray-50 dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-xl py-2.5 pr-9 pl-3 outline-none focus:border-blue-500 transition-colors font-bold text-sm text-gray-900 dark:text-white text-right [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#0d0d0e] [&:-webkit-autofill]:[-webkit-text-fill-color:#fff]"
                                         required
                                     />
                                     <User className="absolute top-3 right-3 text-gray-400" size={15} />
@@ -314,10 +317,13 @@ const POSSettings = ({ lang = 'ar', onBack }) => {
                                     <input
                                         type={showWorkerPassword ? 'text' : 'password'}
                                         name="password"
+                                        autoComplete="new-password"
+                                        data-lpignore="true"
+                                        data-1p-ignore="true"
                                         value={formData.password}
                                         onChange={handleFormChange}
                                         placeholder={t.password_placeholder}
-                                        className="w-full bg-gray-50 dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-xl py-2.5 pr-9 pl-10 outline-none focus:border-blue-500 transition-colors font-bold text-sm text-gray-900 dark:text-white text-right"
+                                        className="w-full bg-gray-50 dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-xl py-2.5 pr-9 pl-10 outline-none focus:border-blue-500 transition-colors font-bold text-sm text-gray-900 dark:text-white text-right [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#0d0d0e] [&:-webkit-autofill]:[-webkit-text-fill-color:#fff]"
                                         required={!editingId}
                                     />
                                     <Key className="absolute top-3 right-3 text-gray-400" size={15} />
