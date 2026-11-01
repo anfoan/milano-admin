@@ -1,5 +1,5 @@
 import { safeSessionGet, safeSessionSet, safeSessionRemove } from '../../lib/safeStorage';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
     Calculator, Search, Plus, Minus, Trash2, CreditCard, User, 
     Printer, LogOut, CheckCircle, AlertTriangle, Clock, Calendar,
@@ -452,18 +452,18 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     }, [isAuthenticated]);
 
     // Product search filter
-    const filteredProducts = products.filter(p => {
+    const filteredProducts = useMemo(() => products.filter(p => {
         const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
                              p.code?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
         return matchesSearch && matchesCategory;
-    });
+    }), [products, searchTerm, selectedCategory]);
     const getReceiptDate = (receipt) => {
         if (receipt.createdAt?.toDate) return receipt.createdAt.toDate();
         if (receipt.date) { const parsed = new Date(`${receipt.date}T00:00:00`); return Number.isNaN(parsed.getTime()) ? null : parsed; }
         return null;
     };
-    const visibleReceipts = receipts.filter((receipt) => {
+    const visibleReceipts = useMemo(() => receipts.filter((receipt) => {
         const receiptDate = getReceiptDate(receipt);
         let inPeriod = true;
         if (reportStartDate || reportEndDate) {
@@ -474,13 +474,13 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         const queryText = searchReceiptId.trim().toLowerCase();
         const matchesSearch = !queryText || String(receipt.orderId || '').toLowerCase().includes(queryText) || String(receipt.formData?.name || '').toLowerCase().includes(queryText);
         return inPeriod && matchesSearch;
-    });
-    const activeVisibleReceipts = visibleReceipts.filter(receipt => receipt.status !== 'cancelled');
-    const paymentTotals = activeVisibleReceipts.reduce((totals, receipt) => {
+    }), [receipts, reportStartDate, reportEndDate, searchReceiptId]);
+    const activeVisibleReceipts = useMemo(() => visibleReceipts.filter(receipt => receipt.status !== 'cancelled'), [visibleReceipts]);
+    const paymentTotals = useMemo(() => activeVisibleReceipts.reduce((totals, receipt) => {
         const method = receipt.paymentMethod === 'card' ? 'card' : receipt.paymentMethod === 'transfer' ? 'transfer' : 'cash';
         totals[method] += Number(receipt.total || 0);
         return totals;
-    }, { cash: 0, card: 0, transfer: 0 });
+    }, { cash: 0, card: 0, transfer: 0 }), [activeVisibleReceipts]);
 
     const getCartItemStockLimit = (item) => {
         const product = products.find(productItem => productItem.id === item?.id);
@@ -1343,8 +1343,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <tr>
                                         <th className="p-3 text-start">{isRTL ? "رقم الإيصال" : "Receipt ID"}</th>
                                         <th className="p-3 text-start">{isRTL ? "الوقت" : "Time"}</th>
-                                        <th className="p-3 text-start">{isRTL ? "المبلغ" : "Amount"}</th>
-                                        <th className="p-3 text-start">{isRTL ? "الحالة" : "Status"}</th>
+                                        <th className="p-3 text-center">{isRTL ? "إجمالي الطلب" : "Total Order"}</th>
+                                        <th className="p-3 text-center">{isRTL ? "الحالة" : "Status"}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1990,8 +1990,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         <th className="p-3 text-start">{isRTL ? "اسم العميل" : "Customer"}</th>
                                         <th className="p-3 text-center">{isRTL ? "طريقة الدفع" : "Payment"}</th>
                                         <th className="p-3 text-start">{isRTL ? "التاريخ والوقت" : "Date & Time"}</th>
-                                        <th className="p-3 text-start">{isRTL ? "إجمالي الطلب" : "Total"}</th>
-                                        <th className="p-3 text-start">{isRTL ? "الحاله" : "Status"}</th>
+                                        <th className="p-3 text-center">{isRTL ? "إجمالي الطلب" : "Total"}</th>
+                                        <th className="p-3 text-center">{isRTL ? "الحالة" : "Status"}</th>
                                         <th className="p-3 text-center">{isRTL ? "إجراءات" : "Actions"}</th>
                                     </tr>
                                 </thead>
