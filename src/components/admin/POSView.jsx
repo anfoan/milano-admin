@@ -1991,13 +1991,13 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <tr>
                                         <th className="p-3 w-8 text-center">#</th>
                                         <th className="p-3 text-start">{isRTL ? "رقم الفاتورة" : "Invoice ID"}</th>
-                                        <th className="p-3 text-start"><span className="inline-block -translate-x-6">{isRTL ? "اسم المنتج + المقاس" : "Product + Size"}</span></th>
+                                        <th className="p-3 text-start"><span className="inline-block -translate-x-4">{isRTL ? "اسم المنتج + المقاس" : "Product + Size"}</span></th>
                                         <th className="p-3 text-center">{isRTL ? "الكمية" : "Qty"}</th>
                                         <th className="p-3 text-start">{isRTL ? "اسم العميل" : "Customer"}</th>
                                         <th className="p-3 text-center">{isRTL ? "طريقة الدفع" : "Payment"}</th>
                                         <th className="p-3 text-start">{isRTL ? "التاريخ والوقت" : "Date & Time"}</th>
-                                        <th className="p-3 text-center">{isRTL ? "إجمالي الطلب" : "Total"}</th>
-                                        <th className="p-3 text-center">{isRTL ? "الحالة" : "Status"}</th>
+                                        <th className="p-3 text-center"><span className="inline-block translate-x-2">{isRTL ? "إجمالي الطلب" : "Total"}</span></th>
+                                        <th className="p-3 text-center"><span className="inline-block translate-x-2">{isRTL ? "الحالة" : "Status"}</span></th>
                                         <th className="p-3 text-center">{isRTL ? "إجراءات" : "Actions"}</th>
                                     </tr>
                                 </thead>
