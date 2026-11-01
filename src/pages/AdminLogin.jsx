@@ -166,9 +166,12 @@ const AdminLogin = () => {
                         <div className="relative">
                             <input
                                 type="text"
+                                autoComplete="new-password"
+                                data-lpignore="true"
+                                data-1p-ignore="true"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-[#2a2e35] border border-gray-100 dark:border-white/5 rounded-2xl py-4 pr-12 pl-4 outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#2a2e35] transition-all font-bold text-gray-900 dark:text-white text-right"
+                                className="w-full bg-gray-50 dark:bg-[#2a2e35] border border-gray-100 dark:border-white/5 rounded-2xl py-4 pr-12 pl-4 outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#2a2e35] transition-all font-bold text-gray-900 dark:text-white text-right [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#2a2e35] [&:-webkit-autofill]:[-webkit-text-fill-color:#fff]"
                                 placeholder="اسم المستخدم أو البريد الإلكتروني"
                                 dir="auto"
                                 required
@@ -183,9 +186,12 @@ const AdminLogin = () => {
                         <div className="relative">
                             <input
                                 type={showPassword ? 'text' : 'password'}
+                                autoComplete="new-password"
+                                data-lpignore="true"
+                                data-1p-ignore="true"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-[#2a2e35] border border-gray-100 dark:border-white/5 rounded-2xl py-4 pr-12 pl-12 outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#2a2e35] transition-all font-bold text-gray-900 dark:text-white"
+                                className="w-full bg-gray-50 dark:bg-[#2a2e35] border border-gray-100 dark:border-white/5 rounded-2xl py-4 pr-12 pl-12 outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-[#2a2e35] transition-all font-bold text-gray-900 dark:text-white [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#2a2e35] [&:-webkit-autofill]:[-webkit-text-fill-color:#fff]"
                                 placeholder="••••••••"
                                 required
                             />

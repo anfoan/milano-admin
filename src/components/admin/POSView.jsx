@@ -1689,10 +1689,6 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
                         {/* Customer Form and Totals Panel */}
                         <div className="p-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 space-y-4">
-                            <button type="button" onClick={() => setShowWalletModal(true)} className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-300/70 bg-blue-500/10 py-2.5 text-xs font-black text-blue-700 shadow-sm transition hover:bg-blue-500/20 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-200 dark:hover:bg-blue-400/20">
-                                <Wallet size={15} />
-                                إضافة محفظة
-                            </button>
                             {/* Optional Customer info */}
                             <div className="grid grid-cols-2 gap-2">
                                 <input
@@ -1718,7 +1714,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <span className="text-gray-800 dark:text-white font-sans">{formatDisplayedPrice(calculateSubtotal())} <span className="inline-block leading-normal align-middle" style={currencyFontStyle}>{currency}</span></span>
                                 </div>
                                 <div className="flex justify-between items-center text-red-600 dark:text-red-300">
-                                    <span className="font-black">{isRTL ? "خصم إضافي بالفاتورة" : "Additional Invoice Discount"}</span>
+                                    <span className="font-black">{isRTL ? "خصم إضافي للفاتورة" : "Additional Invoice Discount"}</span>
                                     <div className="flex items-center gap-1 text-red-600 dark:text-red-300">
                                         <input
                                             type="text"
