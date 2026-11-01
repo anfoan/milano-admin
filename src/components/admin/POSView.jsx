@@ -668,7 +668,13 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     });
                 }
                 const productRefs = [...deltas.keys()].map((id) => doc(db, "products", id));
-                const productSnaps = await Promise.all(productRefs.map((ref) => transaction.get(ref)));
+                // Firestore transactions require all reads to complete before writes.
+                // Read the product documents in order so the sale transaction is not
+                // rejected by concurrent transaction reads on some devices/browsers.
+                const productSnaps = [];
+                for (const productRef of productRefs) {
+                    productSnaps.push(await transaction.get(productRef));
+                }
                 productSnaps.forEach((snap, index) => {
                     if (!snap.exists()) throw new Error('PRODUCT_NOT_FOUND');
                     const data = snap.data();
