@@ -1990,7 +1990,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 font-black uppercase text-[10px] sticky top-0 z-10">
                                     <tr>
                                         <th className="p-3 w-8 text-center">#</th>
-                                        <th className="p-3 text-start">{isRTL ? "رقم الفاتورة" : "Invoice ID"}</th>
+                                        <th className="p-3 text-center">{isRTL ? "رقم الفاتورة" : "Invoice ID"}</th>
                                         <th className="p-3 text-start"><span className="inline-block -translate-x-2">{isRTL ? "اسم المنتج + المقاس" : "Product + Size"}</span></th>
                                         <th className="p-3 text-center">{isRTL ? "الكمية" : "Qty"}</th>
                                         <th className="p-3 text-start">{isRTL ? "اسم العميل" : "Customer"}</th>
@@ -2005,7 +2005,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     {visibleReceipts.map((receipt, idx) => (
                                             <tr key={receipt.id} className="border-b border-gray-100 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
                                                 <td className="p-3 text-center text-gray-400 w-8">{idx + 1}</td>
-                                                <td className="p-3 font-sans font-black">{displayOrderId(receipt.orderId)}</td>
+                                                <td className="p-3 text-center font-sans font-black">{displayOrderId(receipt.orderId)}</td>
                                                 <td className="p-3">
                                                     <div className="translate-x-6 space-y-0.5">{(receipt.cartItems || []).map((item, itemIdx) => <div key={itemIdx}>{item.title}{(item.selectedSize || item.size) ? ` / ${item.selectedSize || item.size}` : ''}</div>)}</div>
                                                 </td>
