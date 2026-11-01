@@ -1349,8 +1349,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <tr>
                                         <th className="p-3 text-start">{isRTL ? "رقم الإيصال" : "Receipt ID"}</th>
                                         <th className="p-3 text-start">{isRTL ? "الوقت" : "Time"}</th>
-                                        <th className="p-3 text-center"><span className="flex w-full justify-center">{isRTL ? "إجمالي الطلب" : "Total Order"}</span></th>
-                                        <th className="p-3 text-center"><span className="flex w-full justify-center">{isRTL ? "الحالة" : "Status"}</span></th>
+                                        <th className="p-3 text-center"><span className="flex w-full translate-x-8 justify-center">{isRTL ? "إجمالي الطلب" : "Total Order"}</span></th>
+                                        <th className="p-3 text-center"><span className="flex w-full translate-x-8 justify-center">{isRTL ? "الحالة" : "Status"}</span></th>
                                     </tr>
                                 </thead>
                                 <tbody>
