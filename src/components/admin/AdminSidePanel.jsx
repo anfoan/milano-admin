@@ -175,10 +175,14 @@ const AdminSidePanel = ({ isOpen, onClose, lang = 'ar' }) => {
                                             </div>
                                         ) : (
                                             messages.map(msg => {
-                                                const date = msg.createdAt ? new Date(msg.createdAt.seconds * 1000) : new Date();
+                                                const date = msg.createdAt?.toDate ? msg.createdAt.toDate() : (msg.createdAt?.seconds ? new Date(msg.createdAt.seconds * 1000) : new Date());
                                                 const timeDiff = Math.floor((new Date() - date) / 60000); // minutes
                                                 let timeDisplay = timeDiff < 60 ? `${timeDiff} ${txt.minutes}` : (timeDiff < 1440 ? `${Math.floor(timeDiff / 60)} ${txt.hour}` : `${Math.floor(timeDiff / 1440)} ${txt.day}`);
                                                 if (timeDiff < 1) timeDisplay = txt.now;
+                                                const messageTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
+                                                    .replace(/am/i, 'ص')
+                                                    .replace(/pm/i, 'م');
+                                                const messageDate = date.toLocaleDateString('en-GB');
 
                                                 return (
                                                     <div
@@ -195,14 +199,15 @@ const AdminSidePanel = ({ isOpen, onClose, lang = 'ar' }) => {
                                                         className="relative p-4 bg-white dark:bg-white/5 rounded-[20px] hover:shadow-md cursor-pointer transition-all border border-gray-100 dark:border-white/5 group mb-3"
                                                     >
                                                         {/* Date Top Corner */}
-                                                        <span className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} text-[10px] text-gray-400 font-bold bg-gray-50 dark:bg-white/10 px-2 py-0.5 rounded-lg`}>
-                                                            {date.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB')}
+                                                        <span dir="ltr" className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} flex flex-col items-center text-[10px] leading-tight text-gray-400 font-bold bg-gray-50 dark:bg-white/10 px-2 py-1 rounded-lg`}>
+                                                            <span>{messageTime}</span>
+                                                            <span>{messageDate}</span>
                                                         </span>
 
                                                         <div className="flex items-center gap-3 mt-1">
                                                             <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/20 overflow-hidden shrink-0 border-2 border-white dark:border-[#1c1c1e] shadow-sm">
                                                                 <img
-                                                                    src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${msg.name}`}
+                                                                    src="/customer-avatar.jpg"
                                                                     alt="Avatar"
                                                                     className="w-full h-full object-cover"
                                                                 />
