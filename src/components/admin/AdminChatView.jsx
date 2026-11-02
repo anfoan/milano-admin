@@ -47,6 +47,16 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
 
     const txt = t[lang];
     const isRTL = lang === 'ar';
+    const formatMessageDateTime = (timestamp) => {
+        const date = timestamp?.toDate?.();
+        if (!date) return { time: txt.just_now, date: '' };
+        return {
+            time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
+                .replace(/am/i, 'ص')
+                .replace(/pm/i, 'م'),
+            date: date.toLocaleDateString('en-GB')
+        };
+    };
 
     // Fetch Chat Details
     useEffect(() => {
@@ -240,11 +250,12 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                 {messages.map((msg) => {
                     const mediaUrl = msg.mediaUrl || msg.imageUrl;
                     const isVideo = msg.mediaType === 'video' || (!msg.mediaType && /\.(mp4|webm|mov)(?:[?#]|$)/i.test(mediaUrl || ''));
+                    const messageDateTime = formatMessageDateTime(msg.createdAt);
                     return <div key={msg.id} className={`flex ${msg.sender === 'admin' ? (isRTL ? 'flex-row' : 'flex-row-reverse') : (isRTL ? 'flex-row-reverse' : 'flex-row')} items-end gap-3`}>
                         {/* Avatar */}
                         <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white dark:border-zinc-800 shadow-sm flex-shrink-0">
                             <img
-                                src={msg.sender === 'admin' ? "/logo.jpg" : "/user-icon.png"}
+                                src={msg.sender === 'admin' ? "/logo.jpg" : "/customer-avatar.jpg"}
                                 alt="avatar"
                                 className="w-full h-full object-cover"
                                 onError={(e) => e.target.src = "/logo.jpg"}
@@ -266,15 +277,17 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                                             <img src={mediaUrl} alt="attachment" className="w-full h-auto cursor-zoom-in hover:brightness-95 transition-all" onClick={() => setSelectedImage(mediaUrl)} />
                                         )}
                                     </div>
-                                    <span className={`text-[8px] block ${msg.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
-                                        {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : txt.just_now}
+                                    <span dir="ltr" className={`text-[8px] block leading-tight ${msg.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
+                                        <span className="block">{messageDateTime.time}</span>
+                                        {messageDateTime.date && <span className="block">{messageDateTime.date}</span>}
                                     </span>
                                 </div>
                             ) : (
                                 <>
                                     <p className="text-sm font-bold leading-relaxed">{msg.text}</p>
-                                    <span className={`text-[8px] block mt-1 ${msg.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
-                                        {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : txt.just_now}
+                                    <span dir="ltr" className={`text-[8px] block mt-1 leading-tight ${msg.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
+                                        <span className="block">{messageDateTime.time}</span>
+                                        {messageDateTime.date && <span className="block">{messageDateTime.date}</span>}
                                     </span>
                                 </>
                             )}
