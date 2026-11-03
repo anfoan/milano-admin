@@ -42,7 +42,8 @@
   top: 0;
   left: 50%;
   z-index: 80;
-  width: clamp(74px, 16vw, 112px);
+  width: clamp(86px, 18vw, 128px);
+  height: clamp(130px, calc(110px + var(--pull-distance)), 330px);
   pointer-events: none;
   user-select: none;
   transform: translate(-50%, -115%);
@@ -50,15 +51,34 @@
 }
 
 .scroll-hand-guide img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: fill;
   filter: saturate(.92);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.scroll-hand-guide .scroll-hand-closed {
+  opacity: 0;
+  transform: scale(.94) translateY(5px);
 }
 
 .scroll-hand-guide.is-pulling {
-  transform: translate(-50%, calc(-115% + var(--pull-distance)));
+  transform: translate(-50%, 0);
   opacity: 1;
+}
+
+.scroll-hand-guide.is-gripping .scroll-hand-open {
+  opacity: 0;
+  transform: scale(.96) translateY(4px);
+}
+
+.scroll-hand-guide.is-gripping .scroll-hand-closed {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 
 .scroll-hand-guide.is-settling {
@@ -70,7 +90,7 @@ html.dark .scroll-hand-guide img {
 }
 
 @keyframes scroll-hand-release {
-  from { transform: translate(-50%, 18vh); opacity: 1; }
+  from { transform: translate(-50%, 0); opacity: 1; }
   to { transform: translate(-50%, -115%); opacity: 0; }
 }
 

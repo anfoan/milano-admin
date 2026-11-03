@@ -4,6 +4,7 @@ const ScrollHandGuide = () => {
     const [pullDistance, setPullDistance] = useState(0);
     const [pulling, setPulling] = useState(false);
     const [settling, setSettling] = useState(false);
+    const [gripping, setGripping] = useState(false);
     const startY = useRef(null);
     const settleTimer = useRef(null);
 
@@ -19,8 +20,10 @@ const ScrollHandGuide = () => {
             if (startY.current === null || window.scrollY > 2 || event.touches.length !== 1) return;
             const distance = event.touches[0].clientY - startY.current;
             if (distance <= 8) return;
+            const nextDistance = Math.min(distance, 220);
             setPulling(true);
-            setPullDistance(Math.min(distance, 170));
+            setPullDistance(nextDistance);
+            setGripping(nextDistance >= 105);
         };
 
         const handleTouchEnd = () => {
@@ -29,10 +32,12 @@ const ScrollHandGuide = () => {
             setPulling(currentlyPulling => {
                 if (!currentlyPulling) return false;
                 setSettling(true);
+                setGripping(true);
                 clearTimeout(settleTimer.current);
                 settleTimer.current = window.setTimeout(() => {
                     setPulling(false);
                     setSettling(false);
+                    setGripping(false);
                     setPullDistance(0);
                 }, 700);
                 return true;
@@ -52,14 +57,11 @@ const ScrollHandGuide = () => {
         };
     }, []);
 
-    const className = `scroll-hand-guide${pulling ? ' is-pulling' : ''}${settling ? ' is-settling' : ''}`;
+    const className = `scroll-hand-guide${pulling ? ' is-pulling' : ''}${settling ? ' is-settling' : ''}${gripping ? ' is-gripping' : ''}`;
     return (
-        <div
-            className={className}
-            style={{ '--pull-distance': `${pullDistance}px` }}
-            aria-hidden="true"
-        >
-            <img src="/scroll-hand.svg" alt="" />
+        <div className={className} style={{ '--pull-distance': `${pullDistance}px` }} aria-hidden="true">
+            <img className="scroll-hand-open" src="/scroll-hand.svg" alt="" />
+            <img className="scroll-hand-closed" src="/scroll-hand-grip.svg" alt="" />
         </div>
     );
 };
