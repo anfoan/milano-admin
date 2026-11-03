@@ -36,7 +36,7 @@
   direction: ltr;
 }
 
-/* One-time scroll gesture cue shown at the center of the admin panel. */
+/* Pull-to-refresh gesture cue: visible only while the user pulls from the top. */
 .scroll-hand-guide {
   position: fixed;
   top: 0;
@@ -46,7 +46,7 @@
   pointer-events: none;
   user-select: none;
   transform: translate(-50%, -115%);
-  animation: scroll-hand-drop 2.4s cubic-bezier(.42, 0, .2, 1) 1 forwards;
+  opacity: 0;
 }
 
 .scroll-hand-guide img {
@@ -56,17 +56,26 @@
   filter: saturate(.92);
 }
 
-@keyframes scroll-hand-drop {
-  0% { transform: translate(-50%, -115%); opacity: 0; }
-  12% { opacity: 1; }
-  42% { transform: translate(-50%, 0); opacity: 1; }
-  62% { transform: translate(-50%, 18vh); opacity: 1; }
-  76% { transform: translate(-50%, 18vh); opacity: 1; }
-  100% { transform: translate(-50%, -115%); opacity: 0; }
+.scroll-hand-guide.is-pulling {
+  transform: translate(-50%, calc(-115% + var(--pull-distance)));
+  opacity: 1;
+}
+
+.scroll-hand-guide.is-settling {
+  animation: scroll-hand-release .7s cubic-bezier(.42, 0, .2, 1) forwards;
+}
+
+html.dark .scroll-hand-guide img {
+  filter: grayscale(1) brightness(0) invert(1);
+}
+
+@keyframes scroll-hand-release {
+  from { transform: translate(-50%, 18vh); opacity: 1; }
+  to { transform: translate(-50%, -115%); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scroll-hand-guide { animation-duration: 1ms; animation-delay: 0s; }
+  .scroll-hand-guide.is-settling { animation-duration: .2s; }
 }
 
 /* Hide number input spinners */
