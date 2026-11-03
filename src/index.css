@@ -36,6 +36,39 @@
   direction: ltr;
 }
 
+/* One-time scroll gesture cue shown at the center of the admin panel. */
+.scroll-hand-guide {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 80;
+  width: clamp(74px, 16vw, 112px);
+  pointer-events: none;
+  user-select: none;
+  transform: translate(-50%, -115%);
+  animation: scroll-hand-drop 2.4s cubic-bezier(.42, 0, .2, 1) 1 forwards;
+}
+
+.scroll-hand-guide img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: saturate(.92);
+}
+
+@keyframes scroll-hand-drop {
+  0% { transform: translate(-50%, -115%); opacity: 0; }
+  12% { opacity: 1; }
+  42% { transform: translate(-50%, 0); opacity: 1; }
+  62% { transform: translate(-50%, 18vh); opacity: 1; }
+  76% { transform: translate(-50%, 18vh); opacity: 1; }
+  100% { transform: translate(-50%, -115%); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hand-guide { animation-duration: 1ms; animation-delay: 0s; }
+}
+
 /* Hide number input spinners */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {

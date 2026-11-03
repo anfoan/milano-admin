@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 230" role="img" aria-label="Scroll gesture hand">
+  <defs>
+    <linearGradient id="arm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101b52"/>
+      <stop offset="0.45" stop-color="#172b78"/>
+      <stop offset="0.78" stop-color="#0b1647"/>
+      <stop offset="1" stop-color="#050a28"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="38%" cy="25%" r="72%">
+      <stop offset="0" stop-color="#5265bd" stop-opacity=".72"/>
+      <stop offset=".42" stop-color="#24398a" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#050a28" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-35%" y="-15%" width="170%" height="145%">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#020617" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M53 0h54c8 0 14 6 14 14v102c0 18-5 31-13 42l-9 16H61l-10-17c-8-13-12-26-12-42V14C39 6 45 0 53 0Z" fill="url(#arm)"/>
+    <path d="M43 126c4-18 17-30 37-30 25 0 38 15 39 37 1 17-7 29-18 39l-8 8H64l-10-10c-10-11-14-26-11-44Z" fill="url(#arm)"/>
+    <path d="M61 151c-7 8-11 17-10 28 1 12 7 20 16 22 8 1 13-5 14-14l1-22c0-10-8-18-21-14Z" fill="url(#arm)"/>
+    <path d="M78 159c-4 10-5 23-2 34 2 9 8 14 15 13 7-1 10-7 9-16l-3-24c-1-9-12-13-19-7Z" fill="url(#arm)"/>
+    <path d="M101 156c-1 11 1 24 6 32 4 7 10 9 16 5 6-4 6-11 2-19l-10-21c-4-8-13-6-14 3Z" fill="url(#arm)"/>
+    <path d="M118 145c3 10 9 20 16 25 6 4 12 2 15-4 3-6 0-12-7-18l-15-15c-6-6-12 3-9 12Z" fill="url(#arm)"/>
+    <path d="M53 12h53v103c0 13-3 23-8 31-6 9-18 14-29 9-11-6-16-18-16-34V12Z" fill="url(#shine)" opacity=".7"/>
+    <ellipse cx="78" cy="128" rx="18" ry="24" fill="#30489d" opacity=".32"/>
+  </g>
+</svg>

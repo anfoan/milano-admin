@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CurrencyProvider } from './context/CurrencyContext';
 import PageMetadataHandler from './components/PageMetadataHandler';
+import ScrollHandGuide from './components/ScrollHandGuide';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
@@ -19,6 +20,7 @@ export default function App() {
   return (
     <CurrencyProvider>
       <PageMetadataHandler />
+      <ScrollHandGuide />
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<AdminLogin />} />
