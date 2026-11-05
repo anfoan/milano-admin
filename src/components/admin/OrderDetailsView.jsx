@@ -1352,11 +1352,11 @@ const OrderDetailsView = ({ order, onBack, lang = 'ar', generalSettings, initial
                     <div className="bg-white rounded-[20px] p-5 border border-gray-100 shadow-sm">
                         <h3 className="font-bold text-gray-800 mb-4 text-sm">{txt.status_update_title}</h3>
                         <div className="space-y-2">
+                            <button onClick={() => handleStatusUpdate('new')} disabled={updating} className={`w-full py-2.5 rounded-xl font-bold text-sm transition-colors ${status === 'new' ? 'bg-green-100 text-green-700 ring-2 ring-green-500' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}>{txt.st_new}</button>
                             <button onClick={() => handleStatusUpdate('processing')} disabled={updating} className={`w-full py-2.5 rounded-xl font-bold text-sm transition-colors ${status === 'processing' ? 'bg-blue-100 text-blue-700 ring-2 ring-blue-500' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>({txt.st_processing})</button>
                             <button onClick={() => handleStatusUpdate('shipping')} disabled={updating} className={`w-full py-2.5 rounded-xl font-bold text-sm transition-colors ${status === 'shipping' ? 'bg-purple-100 text-purple-700 ring-2 ring-purple-500' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>({txt.st_shipping})</button>
                             <button onClick={() => handleStatusUpdate('completed')} disabled={updating} className={`w-full py-2.5 rounded-xl font-bold text-sm transition-colors ${status === 'completed' ? 'bg-green-100 text-green-700 ring-2 ring-green-500' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>({txt.st_completed})</button>
                             <button onClick={() => handleStatusUpdate('cancelled')} disabled={updating} className={`w-full py-2.5 rounded-xl font-bold text-sm transition-colors ${status === 'cancelled' ? 'bg-red-500 text-white ring-2 ring-red-300' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}>({txt.st_cancelled})</button>
-                            <button onClick={() => handleStatusUpdate('new')} disabled={updating} className={`w-full py-2.5 rounded-xl font-bold text-sm transition-colors ${status === 'new' ? 'bg-green-100 text-green-700 ring-2 ring-green-500' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}>{txt.st_new}</button>
                         </div>
                     </div>
 
