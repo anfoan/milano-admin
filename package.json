@@ -31,6 +31,7 @@
     "react-to-print": "^3.2.0",
     "react-whatsapp-widget": "^2.2.0",
     "recharts": "^3.6.0",
+    "web-push": "^4.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

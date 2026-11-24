@@ -8,6 +8,7 @@ import { collection, query, where, orderBy, onSnapshot, limit, updateDoc, doc } 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCurrency } from '../../context/CurrencyContext';
 import { reconcilePendingCustomerOrder } from '../../lib/pendingOrderSync';
+import { enableAdminPush, getAdminPushState } from '../../lib/pushNotifications';
 
 const AdminNotifications = ({ lang: propLang }) => {
     const { formatPrice } = useCurrency();
@@ -29,6 +30,9 @@ const AdminNotifications = ({ lang: propLang }) => {
     const [authReady, setAuthReady] = useState(false);
     const notificationAudioRef = useRef(null);
     const pendingSyncIdsRef = useRef(new Set());
+    const [pushState, setPushState] = useState({ supported: false, enabled: false, permission: 'default' });
+    const [pushLoading, setPushLoading] = useState(false);
+    const [pushError, setPushError] = useState('');
 
     // Workers use a local login, so prepare their Firebase anonymous session
     // before starting the notification listeners.
@@ -86,6 +90,23 @@ const AdminNotifications = ({ lang: propLang }) => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    useEffect(() => {
+        getAdminPushState().then(setPushState).catch(() => {});
+    }, []);
+
+    const handleEnablePush = async () => {
+        setPushLoading(true);
+        setPushError('');
+        try {
+            const subscription = await enableAdminPush();
+            setPushState({ supported: true, enabled: Boolean(subscription), permission: Notification.permission, subscription });
+        } catch (error) {
+            setPushError(error.message === 'permission-denied' ? (isRTL ? 'تم رفض إذن الإشعارات من المتصفح.' : 'Browser notification permission was denied.') : (isRTL ? 'تعذر تفعيل الإشعارات حالياً.' : 'Notifications could not be enabled right now.'));
+        } finally {
+            setPushLoading(false);
+        }
+    };
 
     // New Listeners for both Orders and Messages
     useEffect(() => {
@@ -348,6 +369,14 @@ const AdminNotifications = ({ lang: propLang }) => {
                                 </button>
                             )}
                         </div>
+                        {pushState.supported && !pushState.enabled && (
+                            <div className="border-b border-gray-100 bg-emerald-50/70 p-3 dark:border-white/5 dark:bg-emerald-400/10">
+                                <button onClick={handleEnablePush} disabled={pushLoading} className="w-full rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60">
+                                    {pushLoading ? (isRTL ? 'جارٍ التفعيل...' : 'Enabling...') : (isRTL ? 'تفعيل إشعارات الجهاز' : 'Enable device notifications')}
+                                </button>
+                                {pushError && <p className="mt-2 text-center text-[10px] font-bold text-red-600">{pushError}</p>}
+                            </div>
+                        )}
 
                         <div className="max-h-[400px] overflow-y-auto">
                             {notifications.length === 0 ? (

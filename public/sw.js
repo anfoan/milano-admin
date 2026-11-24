@@ -11,6 +11,33 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+self.addEventListener('push', (event) => {
+    let data = {};
+    try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data?.text?.() || '' }; }
+    event.waitUntil(self.registration.showNotification(data.title || 'إشعار جديد من ميلانو', {
+        body: data.body || 'وصل طلب جديد إلى لوحة التحكم.',
+        icon: data.icon || '/admin-icon-192.png',
+        badge: data.badge || '/admin-icon-192.png',
+        tag: data.tag || `milano-${data.orderId || Date.now()}`,
+        renotify: true,
+        vibrate: [180, 80, 180],
+        data: { url: data.url || '/milano-dashboard-vault-77', orderId: data.orderId || '' }
+    }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const targetUrl = new URL(event.notification.data?.url || '/milano-dashboard-vault-77', self.location.origin).href;
+    event.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        const openClient = clientList.find((client) => 'focus' in client);
+        if (openClient) {
+            openClient.navigate(targetUrl);
+            return openClient.focus();
+        }
+        return clients.openWindow(targetUrl);
+    }));
+});
+
 const isHttpGet = (request) => request.method === 'GET'
     && (request.url.startsWith('http://') || request.url.startsWith('https://'));
 

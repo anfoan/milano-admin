@@ -23,6 +23,7 @@ import { syncOrderInventoryForStatus } from '../../lib/orderInventorySync';
 import { getSizeStock, resolveSizeKey, toStockNumber } from '../../lib/stockUtils';
 import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 import { isValidYemenPhone } from '../../lib/phoneValidation';
+import { notifyAdminOfNewOrder } from '../../lib/pushOrderEvent';
 
 const displayOrderId = (value) => String(value || '').replace(/^#+/, '');
 
@@ -703,6 +704,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     savedOrderDocumentId = orderRef.id;
                 }
             });
+
+            if (!editingOrderId) void notifyAdminOfNewOrder({ ...orderData, id: orderRef.id }, 'pos');
 
             setLastCreatedOrderId(orderId);
             setLastCreatedOrderData({ id: orderRef.id, ...orderData });

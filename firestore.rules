@@ -163,6 +163,17 @@ service cloud.firestore {
     match /admins/{document=**} {
       allow read, write: if isAdmin();
     }
+    // Browser push subscriptions belong to the admin dashboard only. The
+    // server-side sender needs to enumerate these records without exposing any
+    // storefront data, while only authenticated administrators may write them.
+    match /push_subscriptions/{subscriptionId} {
+      allow read: if true;
+      allow create, update: if isAdmin() &&
+        request.resource.data.endpoint is string &&
+        request.resource.data.p256dh is string &&
+        request.resource.data.auth is string;
+      allow delete: if isAdmin();
+    }
     match /expenses/{document=**} {
       allow read, write: if isAdmin() || isPOSWorker();
     }
