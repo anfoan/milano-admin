@@ -18,6 +18,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
         ar: {
             loading_chat: "تحميل...",
             online: "متصل الآن",
+            subject: "الموضوع",
             settings_title: "الإعدادات",
             close_chat: "إغلاق المحادثة",
             confirm_close: "هل تريد إغلاق المحادثة؟",
@@ -32,6 +33,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
         en: {
             loading_chat: "Loading...",
             online: "Online",
+            subject: "Subject",
             settings_title: "Settings",
             close_chat: "Close Chat",
             confirm_close: "Do you want to close this chat?",
@@ -178,7 +180,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
         <div className="h-[calc(100vh-100px)] flex flex-col bg-gray-50 dark:bg-zinc-950 font-['Cairo'] overflow-hidden rounded-[32px] border border-gray-100 dark:border-white/5 shadow-sm relative" dir={isRTL ? "rtl" : "ltr"}>
 
             {/* Header */}
-            <div className="bg-white dark:bg-zinc-900 px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between shadow-sm z-10">
+            <div className="bg-white dark:bg-zinc-900 px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between shadow-sm z-10 relative">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onBack}
@@ -186,7 +188,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                     >
                         {isRTL ? <ArrowRight size={24} /> : <ArrowLeft size={24} />}
                     </button>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 translate-x-3">
                         <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-black text-lg">
                             {chatDetails?.name?.charAt(0) || 'U'}
                         </div>
@@ -194,12 +196,13 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                             <h2 className="font-black text-gray-800 dark:text-white text-base leading-none mb-1">
                                 {chatDetails?.name || txt.loading_chat}
                             </h2>
-                            <span className="text-[10px] font-bold text-green-500">{txt.online}</span>
+                            <p dir="ltr" className="text-[10px] font-mono font-bold text-gray-400 leading-none mb-1">
+                                {chatDetails?.email || '—'}
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 relative">
-
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-2" dir="ltr">
                     <button
                         onClick={() => setShowCloseConfirm(true)}
                         className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-md shadow-red-500/20 transition-all active:scale-95"
@@ -208,6 +211,13 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                     >
                         <img src="/chat-close-icon.jfif" alt="" className="h-6 w-6 rounded-md object-cover" />
                     </button>
+                    <span className="text-[10px] font-bold text-green-500 whitespace-nowrap">{txt.online}</span>
+                </div>
+                <div className="absolute left-1/2 -translate-x-1/2 text-center max-w-[38%]">
+                    <span className="text-[9px] font-bold text-gray-400">{txt.subject}</span>
+                    <p className="text-xs font-black text-gray-700 dark:text-gray-200 truncate">
+                        {chatDetails?.subject || chatDetails?.title || '—'}
+                    </p>
                 </div>
             </div>
 
