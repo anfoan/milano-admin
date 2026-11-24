@@ -122,7 +122,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             'opened': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
             'replied': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
             'closed_by_buyer': 'bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400',
-            'closed': 'bg-red-500/20 text-red-700 dark:bg-red-500/25 dark:text-red-300 ring-1 ring-red-500/30'
+            'closed': 'bg-red-500/35 text-red-700 dark:bg-red-500/35 dark:text-red-200 border border-red-500/50 shadow-sm shadow-red-500/20'
         };
         return map[status] || 'bg-gray-100 text-gray-600';
     };
