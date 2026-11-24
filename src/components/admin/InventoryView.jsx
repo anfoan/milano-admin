@@ -766,26 +766,6 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
 
                                             <td className="px-3 no-print text-center">
                                                 <div className="flex items-center justify-center gap-1">
-                                                    {sortBy === 'default' && (
-                                                        <>
-                                                            <button
-                                                                onClick={() => moveUp(idx)}
-                                                                disabled={idx === 0}
-                                                                className="p-1.5 bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                                                                title={isRTL ? "تحريك لأعلى" : "Move up"}
-                                                            >
-                                                                <ChevronUp size={14} />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => moveDown(idx)}
-                                                                disabled={idx === filteredItems.length - 1}
-                                                                className="p-1.5 bg-gray-50 text-gray-500 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                                                                title={isRTL ? "تحريك لأسفل" : "Move down"}
-                                                            >
-                                                                <ChevronDown size={14} />
-                                                            </button>
-                                                        </>
-                                                    )}
                                                     <button
                                                         type="button"
                                                         onClick={() => { setEditingId(product.id); setTempStock(product.stock); setTempSizeStocks(product.sizeStocks || {}); }}
