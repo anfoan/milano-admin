@@ -28,6 +28,7 @@ const SocialMediaView = lazy(() => import('../components/admin/SocialMediaView')
 import ThemeToggle from '../components/ThemeToggle'; // Theme Toggle
 import AdminNotifications from '../components/admin/AdminNotifications'; // New Notifications Component
 import AdminSidePanel from '../components/admin/AdminSidePanel'; // Side Panel
+import { disableAdminPush } from '../lib/pushNotifications';
 const DesignView = lazy(() => import('../components/admin/DesignView'));
 const ManualOrderView = lazy(() => import('../components/admin/ManualOrderView'));
 const FooterSettingsView = lazy(() => import('../components/admin/FooterSettingsView'));
@@ -329,6 +330,7 @@ const AdminDashboard = () => {
 
     const handleLogout = async () => {
         const isWorker = safeSessionGet('isPOSWorkerAuthenticated') === 'true';
+        try { await disableAdminPush(); } catch (_) {}
         
         if (isWorker) {
             safeSessionRemove('isPOSWorkerAuthenticated');

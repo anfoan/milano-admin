@@ -58,3 +58,10 @@ export const getAdminPushState = async () => {
   const subscription = await registration.pushManager.getSubscription();
   return { supported: true, enabled: Boolean(subscription), permission: Notification.permission, subscription };
 };
+
+export const disableAdminPush = async () => {
+  if (!('serviceWorker' in navigator)) return;
+  const registration = await getAdminPushRegistration();
+  const subscription = await registration.pushManager.getSubscription();
+  if (subscription) await subscription.unsubscribe();
+};

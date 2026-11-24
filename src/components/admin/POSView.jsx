@@ -25,6 +25,7 @@ import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 import { isValidYemenPhone } from '../../lib/phoneValidation';
 import { notifyAdminOfNewOrder } from '../../lib/pushOrderEvent';
 import { notifyAdminOfInventoryChanges } from '../../lib/pushEvent';
+import { disableAdminPush } from '../../lib/pushNotifications';
 
 const displayOrderId = (value) => String(value || '').replace(/^#+/, '');
 
@@ -342,7 +343,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     };
 
     // Logout Handler
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try { await disableAdminPush(); } catch (_) {}
         safeSessionRemove('isPOSWorkerAuthenticated');
         if (isAdminManager) {
             // If they are Admin, let them stay logged in to Firebase but exit POS view
