@@ -369,10 +369,10 @@ const AdminNotifications = ({ lang: propLang }) => {
                                 </button>
                             )}
                         </div>
-                        {pushState.supported && !pushState.enabled && (
+                        {pushState.supported && (
                             <div className="border-b border-gray-100 bg-emerald-50/70 p-3 dark:border-white/5 dark:bg-emerald-400/10">
                                 <button onClick={handleEnablePush} disabled={pushLoading} className="w-full rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60">
-                                    {pushLoading ? (isRTL ? 'جارٍ التفعيل...' : 'Enabling...') : (isRTL ? 'تفعيل إشعارات الجهاز' : 'Enable device notifications')}
+                                    {pushLoading ? (isRTL ? 'جارٍ التفعيل...' : 'Enabling...') : (isRTL ? (pushState.enabled ? 'إعادة تفعيل إشعارات الجهاز' : 'تفعيل إشعارات الجهاز') : (pushState.enabled ? 'Renew device notifications' : 'Enable device notifications'))}
                                 </button>
                                 {pushError && <p className="mt-2 text-center text-[10px] font-bold text-red-600">{pushError}</p>}
                             </div>
