@@ -52,10 +52,11 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
     const formatMessageDateTime = (timestamp) => {
         const date = timestamp?.toDate?.();
         if (!date) return { time: txt.just_now, date: '' };
+        const timeWithPeriod = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const period = /am$/i.test(timeWithPeriod) ? 'ص' : 'م';
         return {
-            time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
-                .replace(/am/i, 'ص')
-                .replace(/pm/i, 'م'),
+            time: timeWithPeriod.replace(/\s?(am|pm)$/i, ''),
+            period,
             date: date.toLocaleDateString('en-GB')
         };
     };
@@ -295,7 +296,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                                     </div>
                                     <span dir="ltr" className={`text-[8px] block leading-tight ${msg.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
                                         {messageDateTime.date && <span className="block">{messageDateTime.date}</span>}
-                                        <span className="block">{messageDateTime.time}</span>
+                                        <span className="flex items-center gap-1"><span>{messageDateTime.period}</span><span>{messageDateTime.time}</span></span>
                                     </span>
                                 </div>
                             ) : (
@@ -303,7 +304,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                                     <p className="text-sm font-bold leading-relaxed">{msg.text}</p>
                                     <span dir="ltr" className={`text-[8px] block mt-1 leading-tight ${msg.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
                                         {messageDateTime.date && <span className="block">{messageDateTime.date}</span>}
-                                        <span className="block">{messageDateTime.time}</span>
+                                        <span className="flex items-center gap-1"><span>{messageDateTime.period}</span><span>{messageDateTime.time}</span></span>
                                     </span>
                                 </>
                             )}
