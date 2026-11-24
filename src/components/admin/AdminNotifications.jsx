@@ -355,7 +355,7 @@ const AdminNotifications = ({ lang: propLang }) => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed top-24 left-1/2 -translate-x-1/2 w-[92vw] max-w-[32rem] bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden z-[100] lg:absolute lg:top-auto lg:left-auto lg:right-0 lg:mt-2 lg:w-96 lg:max-w-none lg:translate-x-0"
+                        className="fixed top-24 left-1/2 -translate-x-1/2 w-[92vw] max-w-[32rem] bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden z-[100] xl:absolute xl:top-auto xl:left-auto xl:right-0 xl:mt-2 xl:w-96 xl:max-w-none xl:translate-x-0"
                     >
                         <div className="p-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
                             <h3 className="font-black text-gray-800 dark:text-white">{txt.title}</h3>
