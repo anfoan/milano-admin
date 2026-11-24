@@ -3,10 +3,6 @@ import React from 'react';
 const RECOVERY_KEY = 'milano_runtime_recovery_attempted';
 let recoveryStarted = false;
 
-const isChunkLoadFailure = (error) => /failed to fetch dynamically imported module|importing a module script failed|chunkloaderror|loading chunk|preload error/i.test(
-    String(error?.message || error || '')
-);
-
 const recoveryAlreadyAttempted = () => {
     if (recoveryStarted || typeof window === 'undefined') return recoveryStarted;
     try {
@@ -45,7 +41,9 @@ class ErrorBoundary extends React.Component {
 
     componentDidCatch(error, errorInfo) {
         console.error('Uncaught application error:', error, errorInfo);
-        if (!isChunkLoadFailure(error) || recoveryAlreadyAttempted() || typeof window === 'undefined') return;
+        // A stale PWA chunk can prevent the dashboard and its push controls from
+        // mounting. Recover once for any runtime load error, not only dynamic imports.
+        if (recoveryAlreadyAttempted() || typeof window === 'undefined') return;
 
         recoveryStarted = true;
         try { window.sessionStorage.setItem(RECOVERY_KEY, '1'); } catch { /* storage is optional */ }
