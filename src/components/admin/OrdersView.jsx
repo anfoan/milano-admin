@@ -1049,6 +1049,9 @@ printWindow.onload = () => printWindow.print();
             default: return 'bg-gray-50 text-gray-600 border-gray-200';
         }
     };
+    const getOrdersTableStatusColor = (status) => status === 'new'
+        ? 'bg-orange-500/15 text-orange-700 border-orange-300/70 ring-1 ring-orange-300/40'
+        : getStatusColor(status);
 
     const getStatusLabel = (status) => {
         switch (status) {
@@ -1341,7 +1344,7 @@ printWindow.onload = () => printWindow.print();
                                                 <span className="text-[9px] text-gray-400 font-sans">{(() => { const locale = lang === 'ar' ? 'ar-YE-u-nu-latn' : 'en-GB'; if (order.createdAt && typeof order.createdAt.toDate === 'function') return order.createdAt.toDate().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }); if (typeof order.createdAt === 'string') return new Date(order.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }); return ''; })()}</span>
                                             </div>
                                         </td>
-                                        <td className="p-1.5 text-center"><span className={`inline-flex h-7 min-w-[76px] items-center justify-center gap-1 whitespace-nowrap rounded-full border px-2 py-1 text-[10px] font-bold leading-none ${getStatusColor(order.status)}`}><span className={`h-1.5 w-1.5 shrink-0 rounded-full ${getStatusColor(order.status).replace('bg-', 'bg-current-').replace('text-', 'bg-').split(' ')[1]}`}></span>{getStatusLabel(order.status)}</span></td>
+                                        <td className="p-1.5 text-center"><span className={`inline-flex h-7 min-w-[76px] items-center justify-center gap-1 whitespace-nowrap rounded-full border px-2 py-1 text-[10px] font-bold leading-none ${getOrdersTableStatusColor(order.status)}`}><span className={`h-1.5 w-1.5 shrink-0 rounded-full ${getOrdersTableStatusColor(order.status).replace('bg-', 'bg-current-').replace('text-', 'bg-').split(' ')[1]}`}></span>{getStatusLabel(order.status)}</span></td>
                                         <td className="p-2 text-center"><div className="flex flex-col items-center gap-0.5 whitespace-nowrap font-black text-gray-800"><span className="text-xs md:text-sm">{formatPrice(order.subTotal ? (order.subTotal - (order.discount || 0) + (order.deliveryCost || 0)) : order.total, generalSettings?.currency || 'YER')}</span>{order.deliveryCost > 0 && <span className="text-[9px] text-gray-400 font-normal">{lang === 'ar' ? 'شامل التوصيل' : 'Inc. Delivery'}</span>}</div></td>
                                         <td className="p-1 text-center"><div className="flex items-center justify-center gap-1"><button onClick={() => handlePrintSingleInvoice(order)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-600 shadow-sm transition-all hover:bg-gray-200 active:scale-95" title={lang === 'ar' ? 'طباعة الفاتورة' : 'Print Invoice'}><Printer size={17} /></button><button onClick={() => onViewOrder && onViewOrder(order, true)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95" title={lang === 'ar' ? 'تعديل الطلب' : 'Edit Order'}><Pencil size={18} /></button><button onClick={() => deleteOrder(order.id)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500 text-white shadow-md shadow-red-500/20 transition-all hover:bg-red-600 active:scale-95" title={lang === 'ar' ? 'حذف الطلب' : 'Delete Order'}><Trash2 size={18} /></button></div></td>
                                     </tr>
