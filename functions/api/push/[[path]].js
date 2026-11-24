@@ -1,4 +1,4 @@
-import webpush from 'web-push';
+import * as webpush from 'web-push';
 
 const PROJECT_ID = 'milano-anfoan-store-2026';
 const FIREBASE_API_KEY = 'AIzaSyBg8X5nruSDOHbirXjbFMqEQ2bSh9nr4qw';
