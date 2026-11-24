@@ -12,7 +12,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             search_placeholder: "ابحث عن البريد الإلكتروني / اسم العميل / الحالة",
             search_btn: "بحث",
             name: "الاسم",
-            subject: "الموضوع",
+            subject: "موضوع المحادثة",
             email: "رقم الهاتف",
             block_list: "قائمة الحظر",
             date: "التاريخ والوقت",
@@ -36,7 +36,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             search_placeholder: "Search Email / Name / Status",
             search_btn: "Search",
             name: "Name",
-            subject: "Subject",
+            subject: "Conversation Subject",
             email: "Phone Number",
             block_list: "Block List",
             date: "Date",
@@ -129,10 +129,11 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
     const formatDateTime = (timestamp, fallback) => {
         const date = timestamp?.toDate?.() || (fallback ? new Date(fallback) : null);
         if (!date || Number.isNaN(date.getTime())) return { date: fallback || '—', time: '' };
+        const timeWithPeriod = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const period = timeWithPeriod.endsWith('AM') ? 'ص' : 'م';
         return {
             date: date.toLocaleDateString('en-US'),
-            time: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-                .replace('AM', 'ص').replace('PM', 'م')
+            time: `${period} ${timeWithPeriod.replace(/\s?(AM|PM)$/, '')}`
         };
     };
 
@@ -160,9 +161,9 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                     <table className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
                         <thead>
                             <tr className="border-b border-gray-50 text-gray-400 text-xs font-bold bg-gray-50/50">
-                                <th className="px-6 py-5">{txt.name}</th>
-                                <th className="px-6 py-5 -translate-x-3">{txt.subject}</th>
+                                <th className="px-6 py-5 -translate-x-2">{txt.name}</th>
                                 <th className="px-6 py-5 text-center">{txt.email}</th>
+                                <th className="px-6 py-5 -translate-x-3">{txt.subject}</th>
                                 <th className="px-6 py-5 text-center">{txt.block_list}</th>
                                 <th className="px-6 py-5 text-center">{txt.date}</th>
                                 <th className="px-6 py-5 text-center">{txt.status}</th>
@@ -179,8 +180,8 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                     messages.map((msg) => (
                                         <tr key={msg.id} className="hover:bg-gray-50 transition-colors group">
                                             <td className="px-6 py-5 font-bold text-gray-700">{msg.name}</td>
-                                            <td className="px-6 py-5 text-gray-500 text-sm">{msg.subject || msg.title}</td>
                                             <td className="px-6 py-5 text-center text-gray-400 text-xs font-mono dir-ltr">{msg.email}</td>
+                                            <td className="px-6 py-5 text-gray-500 text-sm">{msg.subject || msg.title}</td>
                                             <td className="px-6 py-5 text-center">
                                                 <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold ${msg.isBlocked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
                                                     {msg.isBlocked ? txt.blocked_yes : txt.blocked_no}
