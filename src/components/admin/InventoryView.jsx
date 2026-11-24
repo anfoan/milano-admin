@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Reorder } from 'framer-motion';
 import {
     Search, Plus, Printer, Edit2, Trash2,
     CheckCircle, Package, Filter,
@@ -153,8 +154,6 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
     const [editingId, setEditingId] = useState(null);
     const [tempStock, setTempStock] = useState('');
     const [tempSizeStocks, setTempSizeStocks] = useState({});
-    const [draggedProductId, setDraggedProductId] = useState(null);
-    const [dragOverProductId, setDragOverProductId] = useState(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -294,48 +293,15 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
         setManualOrder(newOrder);
     };
 
-    const handleProductDragStart = (event, productId) => {
-        setDraggedProductId(productId);
-        setDragOverProductId(null);
-        event.dataTransfer.effectAllowed = 'move';
-        event.dataTransfer.setData('text/plain', productId);
-    };
-
-    const handleProductDragEnter = (event, targetProductId) => {
-        event.preventDefault();
-        const sourceProductId = draggedProductId || event.dataTransfer.getData('text/plain');
-        if (!sourceProductId || sourceProductId === targetProductId) return;
-        setDragOverProductId(targetProductId);
+    const handleManualReorder = (reorderedVisibleProducts) => {
+        const visibleIds = new Set(reorderedVisibleProducts.map(product => product.id));
         setManualOrder(previousOrder => {
-            const nextOrder = [...previousOrder];
-            const sourceIndex = nextOrder.findIndex(product => product.id === sourceProductId);
-            const targetIndex = nextOrder.findIndex(product => product.id === targetProductId);
-            if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return previousOrder;
-            const [movedProduct] = nextOrder.splice(sourceIndex, 1);
-            nextOrder.splice(nextOrder.findIndex(product => product.id === targetProductId), 0, movedProduct);
-            return nextOrder;
+            let visibleIndex = 0;
+            return previousOrder.map(product => {
+                if (!visibleIds.has(product.id)) return product;
+                return reorderedVisibleProducts[visibleIndex++];
+            });
         });
-    };
-
-    const handleProductDrop = (event, targetProductId) => {
-        event.preventDefault();
-        const sourceProductId = draggedProductId || event.dataTransfer.getData('text/plain');
-        if (!sourceProductId || sourceProductId === targetProductId) {
-            setDraggedProductId(null);
-            setDragOverProductId(null);
-            return;
-        }
-        setManualOrder(previousOrder => {
-            const nextOrder = [...previousOrder];
-            const sourceIndex = nextOrder.findIndex(product => product.id === sourceProductId);
-            const targetIndex = nextOrder.findIndex(product => product.id === targetProductId);
-            if (sourceIndex === -1 || targetIndex === -1) return previousOrder;
-            const [movedProduct] = nextOrder.splice(sourceIndex, 1);
-            nextOrder.splice(targetIndex, 0, movedProduct);
-            return nextOrder;
-        });
-        setDraggedProductId(null);
-        setDragOverProductId(null);
     };
 
     const saveManualOrder = async () => {
@@ -658,7 +624,13 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     <th className="px-3 no-print text-center text-gray-900 dark:text-white" style={{ width: '6%' }}>{txt.th_actions}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 print:divide-gray-300">
+                            <Reorder.Group
+                                as="tbody"
+                                axis="y"
+                                values={filteredItems}
+                                onReorder={handleManualReorder}
+                                className="divide-y divide-gray-100 print:divide-gray-300"
+                            >
                                 {filteredItems.map((product, idx) => {
                                     const costPrice = Number(product.costPrice || 0);
                                     const sellPrice = Number(product.price || 0);
@@ -668,15 +640,12 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     const totalCostItem = costPrice * stock;
                                     const totalSellItem = sellPrice * stock;
                                     return (
-                                        <tr
+                                        <Reorder.Item
+                                            as="tr"
                                             key={product.id}
-                                            draggable={sortBy === 'default'}
-                                            onDragStart={(event) => sortBy === 'default' && handleProductDragStart(event, product.id)}
-                                            onDragOver={(event) => sortBy === 'default' && event.preventDefault()}
-                                            onDragEnter={(event) => sortBy === 'default' && handleProductDragEnter(event, product.id)}
-                                            onDrop={(event) => sortBy === 'default' && handleProductDrop(event, product.id)}
-                                            onDragEnd={() => { setDraggedProductId(null); setDragOverProductId(null); }}
-                                            className={`hover:bg-gray-50 transition-colors print:bg-white ${sortBy === 'default' ? 'cursor-grab active:cursor-grabbing' : ''} ${draggedProductId === product.id ? 'opacity-50' : ''} ${dragOverProductId === product.id ? 'border-t-2 border-blue-500' : ''}`}
+                                            value={product}
+                                            dragListener={sortBy === 'default'}
+                                            className={`hover:bg-gray-50 transition-colors print:bg-white ${sortBy === 'default' ? 'cursor-grab active:cursor-grabbing' : ''}`}
                                             style={{ height: '58px', contentVisibility: 'auto', containIntrinsicSize: '58px' }}
                                         >
                                             <td className="px-3 text-center text-xs font-black text-gray-400">
@@ -830,10 +799,10 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                     </button>
                                                 </div>
                                             </td>
-                                        </tr>
+                                        </Reorder.Item>
                                     );
                                 })}
-                            </tbody>
+                            </Reorder.Group>
                             {/* Table footer for filtered totals — hidden during print to avoid per-page repetition */}
                             <tfoot className="border-t-2 border-gray-200 bg-gray-50/80 print:hidden">
                                 <tr style={{ height: '50px' }}>
