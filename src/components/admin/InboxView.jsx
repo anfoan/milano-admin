@@ -9,7 +9,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
 
     const t = {
         ar: {
-            search_placeholder: "ابحث عن البريد الإلكتروني / اسم العميل / الحالة",
+            search_placeholder: "ابحث عن اسم العميل / رقم الهاتف",
             search_btn: "بحث",
             name: "الاسم",
             subject: "موضوع المحادثة",
