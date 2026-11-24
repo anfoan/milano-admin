@@ -795,8 +795,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                 })}
                             </Reorder.Group>
                             {/* Table footer for filtered totals — hidden during print to avoid per-page repetition */}
-                            <tfoot className="border-t-2 border-gray-200 bg-gray-50/80 print:hidden">
-                                <tr style={{ height: '60px' }}>
+                            <tfoot className="border-t-2 border-gray-200 bg-gray-50/80 print:hidden [&>tr>td]:py-4">
+                                <tr style={{ height: '80px' }}>
                                     <td colSpan={3} className="px-4 text-sm font-black text-gray-700">
                                         {txt.total} — {filteredItems.length} {lang === 'ar' ? 'منتج' : 'Products'}
                                     </td>
