@@ -1,4 +1,4 @@
-import * as webpush from 'web-push';
+import { buildPushPayload } from '@block65/webcrypto-web-push';
 
 export const PROJECT_ID = 'milano-anfoan-store-2026';
 export const FIREBASE_API_KEY = 'AIzaSyBg8X5nruSDOHbirXjbFMqEQ2bSh9nr4qw';
@@ -27,8 +27,24 @@ export const sendToSubscriptions = async (payload, env) => {
   if (!response.ok) throw new Error(`Firestore subscription read failed: ${response.status}`);
   const data = await response.json();
   const subscriptions = (data.documents || []).map(document => ({ id: document.name.split('/').pop(), ...readFields(document.fields) })).filter(item => item.endpoint && item.p256dh && item.auth);
-  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
-  const results = await Promise.allSettled(subscriptions.map(subscription => webpush.sendNotification({ endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } }, JSON.stringify(payload))));
+  const vapid = { subject: VAPID_SUBJECT, publicKey: VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY };
+  const results = await Promise.allSettled(subscriptions.map(async (subscription) => {
+    const pushSubscription = {
+      endpoint: subscription.endpoint,
+      expirationTime: null,
+      keys: { p256dh: subscription.p256dh, auth: subscription.auth }
+    };
+    const request = await buildPushPayload({ data: JSON.stringify(payload), options: { ttl: 86400 } }, pushSubscription, vapid);
+    const response = await fetch(subscription.endpoint, request);
+    if (!response.ok) {
+      const body = await response.text();
+      const error = new Error(body || `Push service returned ${response.status}`);
+      error.statusCode = response.status;
+      error.body = body;
+      throw error;
+    }
+    return response;
+  }));
   return {
     sent: results.filter(result => result.status === 'fulfilled').length,
     attempted: results.length,

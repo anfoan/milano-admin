@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@block65/webcrypto-web-push": "^2.0.0",
     "firebase": "^12.7.0",
     "firebase-admin": "^13.7.0",
     "framer-motion": "^12.23.26",
@@ -31,7 +32,6 @@
     "react-to-print": "^3.2.0",
     "react-whatsapp-widget": "^2.2.0",
     "recharts": "^3.6.0",
-    "web-push": "^4.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
