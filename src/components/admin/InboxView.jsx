@@ -163,7 +163,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                             <tr className="border-b border-gray-50 text-gray-400 text-xs font-bold bg-gray-50/50">
                                 <th className="px-6 py-5 -translate-x-2">{txt.name}</th>
                                 <th className="px-6 py-5 text-center">{txt.email}</th>
-                                <th className="px-6 py-5 -translate-x-3">{txt.subject}</th>
+                                <th className="px-6 py-5 -translate-x-4">{txt.subject}</th>
                                 <th className="px-6 py-5 text-center">{txt.block_list}</th>
                                 <th className="px-6 py-5 text-center">{txt.date}</th>
                                 <th className="px-6 py-5 text-center">{txt.status}</th>
@@ -180,7 +180,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                     messages.map((msg) => (
                                         <tr key={msg.id} className="hover:bg-gray-50 transition-colors group">
                                             <td className="px-6 py-5 font-bold text-gray-700">{msg.name}</td>
-                                            <td className="px-6 py-5 text-center text-gray-400 text-xs font-mono dir-ltr">{msg.email}</td>
+                                            <td className="px-6 py-5 text-center text-gray-400 text-xl font-mono dir-ltr">{msg.email}</td>
                                             <td className="px-6 py-5 text-gray-500 text-sm">{msg.subject || msg.title}</td>
                                             <td className="px-6 py-5 text-center">
                                                 <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold ${msg.isBlocked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
@@ -190,7 +190,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                             <td className="px-6 py-5 text-center text-gray-400 text-xs dir-ltr font-mono">
                                                 {(() => {
                                                     const dateTime = formatDateTime(msg.createdAt, msg.date);
-                                                    return <><span className="block">{dateTime.date}</span>{dateTime.time && <span className="block">{dateTime.time}</span>}</>;
+                                                    return <><span dir="ltr" className="block">{dateTime.date}</span>{dateTime.time && <span dir="ltr" className="block">{dateTime.time}</span>}</>;
                                                 })()}
                                             </td>
                                             <td className={`px-6 py-5 text-center whitespace-nowrap ${msg.status === 'closed' ? 'opacity-50' : ''}`}>
