@@ -196,7 +196,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                             <h2 className="font-black text-gray-800 dark:text-white text-base leading-none mb-1">
                                 {chatDetails?.name || txt.loading_chat}
                             </h2>
-                            <p dir="ltr" className="text-[10px] font-mono font-bold text-gray-400 leading-none mb-1">
+                            <p dir="ltr" className="text-[10px] font-mono font-bold text-gray-400 leading-none mb-1 translate-y-3">
                                 {chatDetails?.email || '—'}
                             </p>
                         </div>
@@ -214,7 +214,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                     <span className="text-[10px] font-bold text-green-500 whitespace-nowrap">{txt.online}</span>
                 </div>
                 <div className="absolute left-1/2 -translate-x-1/2 text-center max-w-[38%]">
-                    <span className="text-[9px] font-bold text-gray-400">{txt.subject}</span>
+                    <span className="text-[9px] font-bold text-gray-400 -translate-y-2">{txt.subject}</span>
                     <p className="text-xs font-black text-gray-700 dark:text-gray-200 truncate">
                         {chatDetails?.subject || chatDetails?.title || '—'}
                     </p>
