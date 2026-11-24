@@ -38,13 +38,13 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
             sort_cat_desc: 'تحكم في ترتيب ظهور الأقسام في المتجر',
             save_order: 'حفظ الترتيب',
             categories_header: 'الأقسام',
-            sort_prod_title: 'فرز المنتجات',
+            sort_prod_title: 'ترتيب المنتجات',
             sort_prod_desc: 'قائمة المنتجات - ',
             products_header: 'المنتجات',
             back_to_cats: 'العودة للأقسام',
             search_prod_placeholder: 'ابحث عن اسم المنتج / رمز المنتج',
             search_btn: 'بحث',
-            sort_prod_btn: 'فرز المنتجات',
+            sort_prod_btn: 'ترتيب المنتجات',
             edit_product: 'تعديل المنتج',
             no_products: 'لا توجد منتجات في هذا القسم حالياً',
             alert_del_cat: 'هل أنت متأكد من حذف قسم "{name}"؟ سيتم حذف جميع المنتجات التابعة لهذا القسم أيضاً!',
@@ -84,13 +84,13 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
             sort_cat_desc: 'Control the order of categories in the store',
             save_order: 'Save Order',
             categories_header: 'Categories',
-            sort_prod_title: 'Sort Products',
+            sort_prod_title: 'Arrange Products',
             sort_prod_desc: 'Product List - ',
             products_header: 'Products',
             back_to_cats: 'Back to Categories',
             search_prod_placeholder: 'Search product name / SKU',
             search_btn: 'Search',
-            sort_prod_btn: 'Sort Products',
+            sort_prod_btn: 'Arrange Products',
             edit_product: 'Edit Product',
             no_products: 'No products in this category currently',
             alert_del_cat: 'Are you sure you want to delete category "{name}"? All products in this category will also be deleted!',
@@ -416,9 +416,9 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
                 return sortedItem ? { ...p, order: sortedProducts.indexOf(sortedItem) + 1 } : p;
             });
             setProducts(updatedAllProducts);
-
-            alert(txt.alert_save_prod_order_success);
+            setSortedProducts([]);
             setView('product-list');
+            alert(txt.alert_save_prod_order_success);
         } catch (error) {
             console.error("Error saving order:", error);
             alert(txt.alert_save_order_error);
