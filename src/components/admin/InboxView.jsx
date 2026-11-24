@@ -6,6 +6,8 @@ import { collection, query, orderBy, limit, getDocs, onSnapshot, deleteDoc, doc 
 const InboxView = ({ onOpenChat, lang = 'ar' }) => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchInput, setSearchInput] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const t = {
         ar: {
@@ -121,10 +123,15 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             'opened': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
             'replied': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
             'closed_by_buyer': 'bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400',
-            'closed': 'bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400'
+            'closed': 'bg-red-500/20 text-red-700 dark:bg-red-500/25 dark:text-red-300 ring-1 ring-red-500/30'
         };
         return map[status] || 'bg-gray-100 text-gray-600';
     };
+
+    const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
+    const visibleMessages = normalizedSearchQuery
+        ? messages.filter((msg) => [msg.name, msg.email].some((value) => String(value || '').toLocaleLowerCase().includes(normalizedSearchQuery)))
+        : messages;
 
     const formatDateTime = (timestamp, fallback) => {
         const date = timestamp?.toDate?.() || (fallback ? new Date(fallback) : null);
@@ -147,11 +154,20 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                     <input
                         type="text"
                         placeholder={txt.search_placeholder}
+                        value={searchInput}
+                        onChange={(event) => setSearchInput(event.target.value)}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter') setSearchQuery(searchInput);
+                        }}
                         className={`w-full ${isRTL ? 'pl-12 pr-4' : 'pl-4 pr-12'} py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors ${isRTL ? 'text-right' : 'text-left'}`}
                     />
                     <Search className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 text-gray-400`} size={20} />
                 </div>
-                <button className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20">
+                <button
+                    type="button"
+                    onClick={() => setSearchQuery(searchInput)}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
+                >
                     {txt.search_btn}
                 </button>
             </div>
@@ -177,8 +193,8 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                     <td colSpan="7" className="p-10 text-center text-gray-400">{txt.loading}</td>
                                 </tr>
                             ) : (
-                                messages.length > 0 ? (
-                                    messages.map((msg) => (
+                                visibleMessages.length > 0 ? (
+                                    visibleMessages.map((msg) => (
                                         <tr key={msg.id} className="hover:bg-gray-50 transition-colors group">
                                             <td className="px-6 py-5 font-bold text-gray-700">{msg.name}</td>
                                             <td className="px-6 py-5 text-center text-gray-400 text-xl font-mono dir-ltr">{msg.email}</td>
