@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, RefreshCw, Trash2, Mail, MessageSquare, XCircle, CheckCircle } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, orderBy, limit, getDocs, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
@@ -6,8 +6,8 @@ import { collection, query, orderBy, limit, getDocs, onSnapshot, deleteDoc, doc 
 const InboxView = ({ onOpenChat, lang = 'ar' }) => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const searchInputRef = useRef(null);
 
     const t = {
         ar: {
@@ -154,18 +154,14 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                     <input
                         type="text"
                         placeholder={txt.search_placeholder}
-                        value={searchInput}
-                        onChange={(event) => setSearchInput(event.target.value)}
-                        onKeyDown={(event) => {
-                            if (event.key === 'Enter') setSearchQuery(searchInput);
-                        }}
+                        ref={searchInputRef}
                         className={`w-full ${isRTL ? 'pl-12 pr-4' : 'pl-4 pr-12'} py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors ${isRTL ? 'text-right' : 'text-left'}`}
                     />
                     <Search className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 text-gray-400`} size={20} />
                 </div>
                 <button
                     type="button"
-                    onClick={() => setSearchQuery(searchInput)}
+                    onClick={() => setSearchQuery(searchInputRef.current?.value || '')}
                     className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
                 >
                     {txt.search_btn}
