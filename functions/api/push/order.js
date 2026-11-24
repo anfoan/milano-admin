@@ -14,6 +14,7 @@ export async function onRequestPost({ request, env }) {
       body: `${order.formData?.name || 'عميل'} — ${order.orderId || order.id || ''}`,
       orderId: order.orderId || order.id || '',
       image: firstImage,
+      icon: firstImage || '/admin-icon-192.png',
       url: '/milano-dashboard-vault-77?view=orders'
     }, env);
     return json({ ok: true, ...result });
