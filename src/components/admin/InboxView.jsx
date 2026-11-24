@@ -207,7 +207,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                                 })()}
                                             </td>
                                             <td className={`px-6 py-5 text-center whitespace-nowrap ${msg.status === 'closed' ? 'opacity-50' : ''}`}>
-                                                <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black ${getStatusColor(msg.status)}`}>
+                                                    <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black ${msg.status === 'closed' ? 'text-xs' : ''} ${getStatusColor(msg.status)}`}>
                                                     {getStatusLabel(msg.status)}
                                                 </span>
                                             </td>
