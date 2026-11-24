@@ -16,6 +16,22 @@ import ImageCropper from './ImageCropper';
 import { useCurrency } from '../../context/CurrencyContext';
 import { safeLocalGet, safeLocalSet } from '../../lib/safeStorage';
 
+const CATEGORY_ORDER = [
+    'بواتي حبوب درجه اولى',
+    'بواتي طرح درجه اولى',
+    'فنايل نسخة اللاعبين',
+    'فنايل كلاسيك قديم',
+    'فنايل صوف تركي رياضيه',
+    'شباشب طبي رياضيه',
+    'شرابات رياضيه',
+    'كوافي صوف رياضيه',
+    'كوافي قطن شمسيه',
+    'فنايل قطن رسمي قلاب',
+    'فنايل قطن رسمي دائري',
+    'شناط يد للبواتي الرياضيه',
+    'كسارات رياضيه',
+];
+
 const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = 'ar' }) => {
     const { convertPrice } = useCurrency();
     const mainImageInputRef = useRef(null);
@@ -209,7 +225,16 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
             try {
                 const q = query(collection(db, "categories"));
                 const querySnapshot = await getDocs(q);
-                const cats = querySnapshot.docs.map(doc => doc.data().name);
+                const cats = querySnapshot.docs
+                    .map(doc => String(doc.data().name || '').trim())
+                    .filter(Boolean)
+                    .sort((a, b) => {
+                        const aIndex = CATEGORY_ORDER.indexOf(a);
+                        const bIndex = CATEGORY_ORDER.indexOf(b);
+                        const aRank = aIndex === -1 ? CATEGORY_ORDER.length : aIndex;
+                        const bRank = bIndex === -1 ? CATEGORY_ORDER.length : bIndex;
+                        return aRank - bRank;
+                    });
                 if (cats.length > 0) {
                     setLocalCategories(cats);
                 } else {
