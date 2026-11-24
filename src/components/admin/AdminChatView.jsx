@@ -68,7 +68,13 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                 const docRef = doc(db, "contact_messages", chatId);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    setChatDetails(docSnap.data());
+                    const data = docSnap.data();
+                    if (data.status !== 'closed' && data.status !== 'closed_by_buyer' && data.status !== 'opened') {
+                        await updateDoc(docRef, { status: 'opened' });
+                        setChatDetails({ ...data, status: 'opened' });
+                    } else {
+                        setChatDetails(data);
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching chat details:", error);
@@ -137,7 +143,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                 sender: 'admin',
                 createdAt: serverTimestamp(),
             });
-            await updateDoc(doc(db, 'contact_messages', chatId), { status: 'replied' });
+            await updateDoc(doc(db, 'contact_messages', chatId), { status: 'opened' });
         } catch (error) {
             console.error('Admin chat media upload failed:', error);
             alert(chatMediaError(error));
@@ -158,8 +164,8 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                 createdAt: serverTimestamp(),
             });
             setNewMessage('');
-            // Update main doc status to replied
-            await updateDoc(doc(db, "contact_messages", chatId), { status: 'replied' });
+            // Keep the conversation in the opened state after the admin replies.
+            await updateDoc(doc(db, "contact_messages", chatId), { status: 'opened' });
         } catch (error) {
             console.error("Error sending message:", error);
         }

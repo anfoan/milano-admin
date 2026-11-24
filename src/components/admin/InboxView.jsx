@@ -13,11 +13,11 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             search_btn: "بحث",
             name: "الاسم",
             subject: "الموضوع",
-            email: "البريد الالكتروني",
+            email: "رقم الهاتف",
             block_list: "قائمة الحظر",
-            date: "تاريخ الإنشاء",
+            date: "التاريخ والوقت",
             status: "الحالة",
-            actions: "عمليات",
+            actions: "إجراءات",
             loading: "جاري تحميل الرسائل...",
             no_messages: "لا توجد رسائل حالياً",
             blocked_yes: "نعم",
@@ -28,7 +28,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             delete: "حذف",
             status_new: 'لم يتم الرد',
             status_pending: 'انتظار رد العميل',
-            status_replied: 'تم الرد',
+            status_opened: 'تم فتح المحادثة',
             status_closed_by_buyer: 'مغلق من قبل العميل',
             status_closed: 'مغلق من قبل المتجر'
         },
@@ -37,7 +37,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             search_btn: "Search",
             name: "Name",
             subject: "Subject",
-            email: "Email",
+            email: "Phone Number",
             block_list: "Block List",
             date: "Date",
             status: "Status",
@@ -52,7 +52,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             delete: "Delete",
             status_new: 'New',
             status_pending: 'Pending User',
-            status_replied: 'Replied',
+            status_opened: 'Conversation Opened',
             status_closed_by_buyer: 'Closed by Customer',
             status_closed: 'Closed'
         }
@@ -106,7 +106,8 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
         const map = {
             'new': txt.status_new,
             'pending': txt.status_pending,
-            'replied': txt.status_replied,
+            'opened': txt.status_opened,
+            'replied': txt.status_opened,
             'closed_by_buyer': txt.status_closed_by_buyer,
             'closed': txt.status_closed
         };
@@ -115,13 +116,24 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
 
     const getStatusColor = (status) => {
         const map = {
-            'new': 'bg-blue-100 text-blue-600',
-            'pending': 'bg-orange-100 text-orange-600',
-            'replied': 'bg-green-100 text-green-600',
-            'closed_by_buyer': 'bg-red-100 text-red-600',
-            'closed': 'bg-gray-100 text-gray-600'
+            'new': 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400',
+            'pending': 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400',
+            'opened': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
+            'replied': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
+            'closed_by_buyer': 'bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400',
+            'closed': 'bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400'
         };
         return map[status] || 'bg-gray-100 text-gray-600';
+    };
+
+    const formatDateTime = (timestamp, fallback) => {
+        const date = timestamp?.toDate?.() || (fallback ? new Date(fallback) : null);
+        if (!date || Number.isNaN(date.getTime())) return { date: fallback || '—', time: '' };
+        return {
+            date: date.toLocaleDateString('en-US'),
+            time: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+                .replace('AM', 'ص').replace('PM', 'م')
+        };
     };
 
 
@@ -149,7 +161,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                         <thead>
                             <tr className="border-b border-gray-50 text-gray-400 text-xs font-bold bg-gray-50/50">
                                 <th className="px-6 py-5">{txt.name}</th>
-                                <th className="px-6 py-5">{txt.subject}</th>
+                                <th className="px-6 py-5 -translate-x-3">{txt.subject}</th>
                                 <th className="px-6 py-5 text-center">{txt.email}</th>
                                 <th className="px-6 py-5 text-center">{txt.block_list}</th>
                                 <th className="px-6 py-5 text-center">{txt.date}</th>
@@ -174,7 +186,12 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                                     {msg.isBlocked ? txt.blocked_yes : txt.blocked_no}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5 text-center text-gray-400 text-xs dir-ltr font-mono">{msg.date}</td>
+                                            <td className="px-6 py-5 text-center text-gray-400 text-xs dir-ltr font-mono">
+                                                {(() => {
+                                                    const dateTime = formatDateTime(msg.createdAt, msg.date);
+                                                    return <><span className="block">{dateTime.date}</span>{dateTime.time && <span className="block">{dateTime.time}</span>}</>;
+                                                })()}
+                                            </td>
                                             <td className={`px-6 py-5 text-center whitespace-nowrap ${msg.status === 'closed' ? 'opacity-50' : ''}`}>
                                                 <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black ${getStatusColor(msg.status)}`}>
                                                     {getStatusLabel(msg.status)}
