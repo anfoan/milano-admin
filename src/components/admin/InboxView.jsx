@@ -122,7 +122,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             'opened': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
             'replied': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
             'closed_by_buyer': 'bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400',
-            'closed': 'bg-red-500/35 text-red-700 dark:bg-red-500/35 dark:text-red-200 border border-red-500/50 shadow-sm shadow-red-500/20'
+            'closed': 'bg-red-100 text-red-700 dark:bg-red-500/35 dark:text-red-200 border border-red-300 dark:border-red-500/50 shadow-sm shadow-red-200 dark:shadow-red-500/20'
         };
         return map[status] || 'bg-gray-100 text-gray-600';
     };
@@ -193,21 +193,21 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                     visibleMessages.map((msg) => (
                                         <tr key={msg.id} className="hover:bg-gray-50 transition-colors group">
                                             <td className="px-6 py-5 font-bold text-gray-700">{msg.name}</td>
-                                            <td className="px-6 py-5 text-center text-gray-400 text-xl font-mono dir-ltr">{msg.email}</td>
+                                            <td className="px-6 py-5 text-center text-gray-700 dark:text-gray-400 text-xl font-mono font-bold dir-ltr">{msg.email}</td>
                                             <td className="px-6 py-5 text-gray-500 text-sm">{msg.subject || msg.title}</td>
                                             <td className="px-6 py-5 text-center">
                                                 <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold ${msg.isBlocked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
                                                     {msg.isBlocked ? txt.blocked_yes : txt.blocked_no}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5 text-center text-gray-400 text-xs dir-ltr font-mono">
+                                            <td className="px-6 py-5 text-center text-gray-700 dark:text-gray-400 text-xs dir-ltr font-mono font-semibold">
                                                 {(() => {
                                                     const dateTime = formatDateTime(msg.createdAt, msg.date);
                                                     return <><span dir="ltr" className="block">{dateTime.date}</span>{dateTime.time && <span dir="ltr" className="flex flex-row items-center justify-center gap-1"><span>{dateTime.period}</span><span>{dateTime.time}</span></span>}</>;
                                                 })()}
                                             </td>
                                             <td className={`px-6 py-5 text-center whitespace-nowrap ${msg.status === 'closed' ? 'opacity-50' : ''}`}>
-                                                    <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black ${msg.status === 'closed' ? 'text-xs' : ''} ${getStatusColor(msg.status)}`}>
+                                                    <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black ${msg.status === 'closed' ? 'text-sm dark:text-lg' : ''} ${getStatusColor(msg.status)}`}>
                                                     {getStatusLabel(msg.status)}
                                                 </span>
                                             </td>
