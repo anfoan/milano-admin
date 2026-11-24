@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
     Search, Plus, Printer, Edit2, Trash2,
     CheckCircle, Package, Filter,
-    ChevronDown, ChevronUp, Save, ArrowUpDown, ClipboardList
+    ChevronDown, ChevronUp, Save, ArrowUpDown, ClipboardList, GripVertical
 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, getDocs, doc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
@@ -154,6 +154,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
     const [tempStock, setTempStock] = useState('');
     const [tempSizeStocks, setTempSizeStocks] = useState({});
     const [draggedProductId, setDraggedProductId] = useState(null);
+    const [dragOverProductId, setDragOverProductId] = useState(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -295,8 +296,25 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
 
     const handleProductDragStart = (event, productId) => {
         setDraggedProductId(productId);
+        setDragOverProductId(null);
         event.dataTransfer.effectAllowed = 'move';
         event.dataTransfer.setData('text/plain', productId);
+    };
+
+    const handleProductDragEnter = (event, targetProductId) => {
+        event.preventDefault();
+        const sourceProductId = draggedProductId || event.dataTransfer.getData('text/plain');
+        if (!sourceProductId || sourceProductId === targetProductId) return;
+        setDragOverProductId(targetProductId);
+        setManualOrder(previousOrder => {
+            const nextOrder = [...previousOrder];
+            const sourceIndex = nextOrder.findIndex(product => product.id === sourceProductId);
+            const targetIndex = nextOrder.findIndex(product => product.id === targetProductId);
+            if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return previousOrder;
+            const [movedProduct] = nextOrder.splice(sourceIndex, 1);
+            nextOrder.splice(nextOrder.findIndex(product => product.id === targetProductId), 0, movedProduct);
+            return nextOrder;
+        });
     };
 
     const handleProductDrop = (event, targetProductId) => {
@@ -304,6 +322,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
         const sourceProductId = draggedProductId || event.dataTransfer.getData('text/plain');
         if (!sourceProductId || sourceProductId === targetProductId) {
             setDraggedProductId(null);
+            setDragOverProductId(null);
             return;
         }
         setManualOrder(previousOrder => {
@@ -316,6 +335,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             return nextOrder;
         });
         setDraggedProductId(null);
+        setDragOverProductId(null);
     };
 
     const saveManualOrder = async () => {
@@ -653,12 +673,18 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                             draggable={sortBy === 'default'}
                                             onDragStart={(event) => sortBy === 'default' && handleProductDragStart(event, product.id)}
                                             onDragOver={(event) => sortBy === 'default' && event.preventDefault()}
+                                            onDragEnter={(event) => sortBy === 'default' && handleProductDragEnter(event, product.id)}
                                             onDrop={(event) => sortBy === 'default' && handleProductDrop(event, product.id)}
-                                            onDragEnd={() => setDraggedProductId(null)}
-                                            className={`hover:bg-gray-50 transition-colors print:bg-white ${sortBy === 'default' ? 'cursor-grab active:cursor-grabbing' : ''} ${draggedProductId === product.id ? 'opacity-50' : ''}`}
+                                            onDragEnd={() => { setDraggedProductId(null); setDragOverProductId(null); }}
+                                            className={`hover:bg-gray-50 transition-colors print:bg-white ${sortBy === 'default' ? 'cursor-grab active:cursor-grabbing' : ''} ${draggedProductId === product.id ? 'opacity-50' : ''} ${dragOverProductId === product.id ? 'border-t-2 border-blue-500' : ''}`}
                                             style={{ height: '58px', contentVisibility: 'auto', containIntrinsicSize: '58px' }}
                                         >
-                                            <td className="px-3 text-center text-xs font-black text-gray-400">{idx + 1}</td>
+                                            <td className="px-3 text-center text-xs font-black text-gray-400">
+                                                <div className="flex items-center justify-center gap-1.5">
+                                                    {sortBy === 'default' && <GripVertical size={14} className="text-blue-400" aria-label={isRTL ? 'اسحب لترتيب المنتج' : 'Drag to arrange'} />}
+                                                    <span>{idx + 1}</span>
+                                                </div>
+                                            </td>
                                             <td className="px-3 text-xs font-mono text-blue-700 font-bold">{product.code || '---'}</td>
                                             <td className="px-3 py-2 translate-x-8">
                                                 <div className="flex items-center gap-3">
