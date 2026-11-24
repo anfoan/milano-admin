@@ -294,16 +294,16 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                                         )}
                                     </div>
                                     <span dir="ltr" className={`text-[8px] block leading-tight ${msg.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
-                                        <span className="block">{messageDateTime.time}</span>
                                         {messageDateTime.date && <span className="block">{messageDateTime.date}</span>}
+                                        <span className="block">{messageDateTime.time}</span>
                                     </span>
                                 </div>
                             ) : (
                                 <>
                                     <p className="text-sm font-bold leading-relaxed">{msg.text}</p>
                                     <span dir="ltr" className={`text-[8px] block mt-1 leading-tight ${msg.sender === 'admin' ? 'text-blue-100' : 'text-gray-400'}`}>
-                                        <span className="block">{messageDateTime.time}</span>
                                         {messageDateTime.date && <span className="block">{messageDateTime.date}</span>}
+                                        <span className="block">{messageDateTime.time}</span>
                                     </span>
                                 </>
                             )}
