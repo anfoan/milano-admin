@@ -21,6 +21,7 @@ self.addEventListener('push', (event) => {
         badge: data.badge || '/admin-icon-192.png',
         tag: data.tag || `milano-${data.orderId || data.productId || data.messageId || Date.now()}`,
         renotify: true,
+        silent: false,
         vibrate: [180, 80, 180],
         data: {
             url: data.url || '/milano-dashboard-vault-77',
