@@ -63,7 +63,7 @@ const ProductsView = ({ onEdit, initialCategory = null, lang = 'ar', generalSett
             alert_save_order_error: 'حدث خطأ أثناء حفظ الترتيب',
             alert_save_prod_order_success: 'تم حفظ ترتيب المنتجات بنجاح!',
             code_label: 'رمز المنتج',
-            stock_label: 'مخزون:',
+            stock_label: 'المخزون:',
             options: 'خيارات',
             discount: 'خصم',
             images: 'صور',
