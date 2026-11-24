@@ -122,7 +122,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             'opened': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
             'replied': 'bg-green-500/10 text-green-600 dark:bg-green-500/15 dark:text-green-400',
             'closed_by_buyer': 'bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400',
-            'closed': 'bg-red-100 text-red-700 dark:bg-red-500/35 dark:text-red-200 border border-red-300 dark:border-red-500/50 shadow-sm shadow-red-200 dark:shadow-red-500/20'
+            'closed': 'bg-red-500/20 text-red-700 dark:bg-red-500/35 dark:text-red-200 border border-red-500/40 dark:border-red-500/50 shadow-sm shadow-red-500/20 dark:shadow-red-500/20'
         };
         return map[status] || 'bg-gray-100 text-gray-600';
     };
@@ -194,7 +194,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                         <tr key={msg.id} className="hover:bg-gray-50 transition-colors group">
                                             <td className="px-6 py-5 font-bold text-gray-700">{msg.name}</td>
                                             <td className="px-6 py-5 text-center text-gray-700 dark:text-gray-400 text-xl font-mono font-bold dir-ltr">{msg.email}</td>
-                                            <td className="px-6 py-5 text-gray-500 text-sm">{msg.subject || msg.title}</td>
+                                            <td className="px-6 py-5 text-gray-700 dark:text-gray-400 text-sm font-semibold">{msg.subject || msg.title}</td>
                                             <td className="px-6 py-5 text-center">
                                                 <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold ${msg.isBlocked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
                                                     {msg.isBlocked ? txt.blocked_yes : txt.blocked_no}
