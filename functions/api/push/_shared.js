@@ -34,7 +34,8 @@ export const sendToSubscriptions = async (payload, env) => {
     attempted: results.length,
     failed: results.filter(result => result.status === 'rejected').map(result => ({
       statusCode: result.reason?.statusCode || null,
-      body: result.reason?.body || null
+      body: result.reason?.body || null,
+      message: result.reason?.message || String(result.reason || 'Unknown push error')
     }))
   };
 };
