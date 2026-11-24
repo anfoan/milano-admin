@@ -133,7 +133,8 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
         const period = timeWithPeriod.endsWith('AM') ? 'ص' : 'م';
         return {
             date: date.toLocaleDateString('en-US'),
-            time: `${period} ${timeWithPeriod.replace(/\s?(AM|PM)$/, '')}`
+            period,
+            time: timeWithPeriod.replace(/\s?(AM|PM)$/, '')
         };
     };
 
@@ -163,7 +164,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                             <tr className="border-b border-gray-50 text-gray-400 text-xs font-bold bg-gray-50/50">
                                 <th className="px-6 py-5 -translate-x-2">{txt.name}</th>
                                 <th className="px-6 py-5 text-center">{txt.email}</th>
-                                <th className="px-6 py-5 -translate-x-4">{txt.subject}</th>
+                                <th className="px-6 py-5 -translate-x-6">{txt.subject}</th>
                                 <th className="px-6 py-5 text-center">{txt.block_list}</th>
                                 <th className="px-6 py-5 text-center">{txt.date}</th>
                                 <th className="px-6 py-5 text-center">{txt.status}</th>
@@ -190,7 +191,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                             <td className="px-6 py-5 text-center text-gray-400 text-xs dir-ltr font-mono">
                                                 {(() => {
                                                     const dateTime = formatDateTime(msg.createdAt, msg.date);
-                                                    return <><span dir="ltr" className="block">{dateTime.date}</span>{dateTime.time && <span dir="ltr" className="block">{dateTime.time}</span>}</>;
+                                                    return <><span dir="ltr" className="block">{dateTime.date}</span>{dateTime.time && <span dir="ltr" className="flex flex-row items-center justify-center gap-1"><span>{dateTime.period}</span><span>{dateTime.time}</span></span>}</>;
                                                 })()}
                                             </td>
                                             <td className={`px-6 py-5 text-center whitespace-nowrap ${msg.status === 'closed' ? 'opacity-50' : ''}`}>
