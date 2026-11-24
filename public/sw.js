@@ -1,5 +1,5 @@
 // Milano Admin service worker: cache images for responsiveness, but always refresh application code.
-const CACHE_NAME = 'milano-admin-cache-v6-runtime-safe';
+const CACHE_NAME = 'milano-admin-cache-v7-runtime-safe';
 
 self.addEventListener('install', () => self.skipWaiting());
 

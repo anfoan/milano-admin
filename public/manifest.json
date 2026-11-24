@@ -1,6 +1,6 @@
 {
-    "name": "إعدادات ميلانو",
-    "short_name": "إعدادات ميلانو",
+    "name": "ميلانو",
+    "short_name": "ميلانو",
     "id": "milano-admin",
     "description": "لوحة تحكم إعدادات متجر ميلانو الذكي",
     "start_url": "/milano-secure-gate-99",
