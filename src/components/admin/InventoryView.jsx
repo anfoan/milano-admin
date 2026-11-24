@@ -65,7 +65,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             active_in_store: 'نشط في المتجر',
             total: 'الإجمالي',
             piece: 'قطعة',
-            sort_label: 'فرز المنتجات',
+            sort_label: 'ترتيب المنتجات',
             sort_default: 'فرز يدوي',
             sort_name_az: 'الاسم (أ - ي)',
             sort_name_za: 'الاسم (ي - أ)',
@@ -114,7 +114,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             active_in_store: 'Active',
             total: 'Total',
             piece: 'pcs',
-            sort_label: 'Sort Products',
+            sort_label: 'Arrange Products',
             sort_default: 'Manual Sort',
             sort_name_az: 'Name (A - Z)',
             sort_name_za: 'Name (Z - A)',
@@ -153,6 +153,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
     const [editingId, setEditingId] = useState(null);
     const [tempStock, setTempStock] = useState('');
     const [tempSizeStocks, setTempSizeStocks] = useState({});
+    const [draggedProductId, setDraggedProductId] = useState(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -292,6 +293,31 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
         setManualOrder(newOrder);
     };
 
+    const handleProductDragStart = (event, productId) => {
+        setDraggedProductId(productId);
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', productId);
+    };
+
+    const handleProductDrop = (event, targetProductId) => {
+        event.preventDefault();
+        const sourceProductId = draggedProductId || event.dataTransfer.getData('text/plain');
+        if (!sourceProductId || sourceProductId === targetProductId) {
+            setDraggedProductId(null);
+            return;
+        }
+        setManualOrder(previousOrder => {
+            const nextOrder = [...previousOrder];
+            const sourceIndex = nextOrder.findIndex(product => product.id === sourceProductId);
+            const targetIndex = nextOrder.findIndex(product => product.id === targetProductId);
+            if (sourceIndex === -1 || targetIndex === -1) return previousOrder;
+            const [movedProduct] = nextOrder.splice(sourceIndex, 1);
+            nextOrder.splice(targetIndex, 0, movedProduct);
+            return nextOrder;
+        });
+        setDraggedProductId(null);
+    };
+
     const saveManualOrder = async () => {
         setSavingOrder(true);
         try {
@@ -301,6 +327,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             });
             await batch.commit();
             setProducts([...manualOrder]);
+            setSortBy('');
+            setShowSortMenu(false);
             alert(txt.order_saved);
         } catch (err) {
             console.error("Error saving order:", err);
@@ -620,7 +648,16 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     const totalCostItem = costPrice * stock;
                                     const totalSellItem = sellPrice * stock;
                                     return (
-                                        <tr key={product.id} className="hover:bg-gray-50 transition-colors print:bg-white" style={{ height: '58px', contentVisibility: 'auto', containIntrinsicSize: '58px' }}>
+                                        <tr
+                                            key={product.id}
+                                            draggable={sortBy === 'default'}
+                                            onDragStart={(event) => sortBy === 'default' && handleProductDragStart(event, product.id)}
+                                            onDragOver={(event) => sortBy === 'default' && event.preventDefault()}
+                                            onDrop={(event) => sortBy === 'default' && handleProductDrop(event, product.id)}
+                                            onDragEnd={() => setDraggedProductId(null)}
+                                            className={`hover:bg-gray-50 transition-colors print:bg-white ${sortBy === 'default' ? 'cursor-grab active:cursor-grabbing' : ''} ${draggedProductId === product.id ? 'opacity-50' : ''}`}
+                                            style={{ height: '58px', contentVisibility: 'auto', containIntrinsicSize: '58px' }}
+                                        >
                                             <td className="px-3 text-center text-xs font-black text-gray-400">{idx + 1}</td>
                                             <td className="px-3 text-xs font-mono text-blue-700 font-bold">{product.code || '---'}</td>
                                             <td className="px-3 py-2 translate-x-8">
