@@ -30,7 +30,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
             status_pending: 'انتظار رد العميل',
             status_opened: 'تم فتح المحادثة',
             status_closed_by_buyer: 'مغلق من قبل العميل',
-            status_closed: 'مغلق من قبل المتجر'
+            status_closed: 'تم إغلاق المحادثة'
         },
         en: {
             search_placeholder: "Search Email / Name / Status",
