@@ -225,11 +225,16 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
     // Handle Edit Mode
     useEffect(() => {
         if (editingProduct) {
+            const sizeVariant = editingProduct.variants?.find(variant => variant.type === 'size');
+            const editedSizeStocks = editingProduct.sizeStocks || {};
+            const calculatedSizeStock = sizeVariant?.values?.length
+                ? sizeVariant.values.reduce((sum, size) => sum + (Number(editedSizeStocks[size]) || 0), 0)
+                : null;
             setFormData({
                 name: editingProduct.name || '',
                 price: toEnglishDigits(editingProduct.price || ''),
                 costPrice: toEnglishDigits(editingProduct.costPrice || ''),
-                stock: toEnglishDigits(editingProduct.stock || ''),
+                stock: toEnglishDigits(calculatedSizeStock === null ? (editingProduct.stock || '') : calculatedSizeStock),
                 code: editingProduct.code || '',
                 category: editingProduct.category || '',
                 description: editingProduct.description || '',
@@ -248,9 +253,9 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                 return stocks;
             }, {});
             setSizeStocks(normalizedStocks);
-            sizeStockLimitRef.current = editingProduct.stock === '' || editingProduct.stock === undefined
+            sizeStockLimitRef.current = calculatedSizeStock === null && (editingProduct.stock === '' || editingProduct.stock === undefined)
                 ? null
-                : Math.max(0, Number(toEnglishDigits(editingProduct.stock)) || 0);
+                : Math.max(0, Number(toEnglishDigits(calculatedSizeStock === null ? editingProduct.stock : calculatedSizeStock)) || 0);
         }
     }, [editingProduct]);
 
@@ -530,8 +535,13 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
         setLoading(true);
         try {
             // Prepare data for saving
-            let finalData = { 
+            const hasSizeVariants = variants[0]?.values?.length > 0;
+            const calculatedStock = hasSizeVariants
+                ? variants[0].values.reduce((sum, size) => sum + (Number(sizeStocks[size]) || 0), 0)
+                : formData.stock;
+            let finalData = {
                 ...formData,
+                stock: calculatedStock,
                 order: formData.order ? Number(formData.order) : 999999
             };
 
