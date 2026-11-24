@@ -26,7 +26,12 @@ export const enableAdminPush = async () => {
   const { publicKey } = await configResponse.json();
   if (!publicKey) throw new Error('push-config-missing');
   let subscription = await registration.pushManager.getSubscription();
-  if (!subscription) subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: decodeVapidKey(publicKey) });
+  // Recreate the subscription after a PWA/Service Worker update so iOS does not
+  // keep routing pushes through a stale Apple endpoint.
+  if (subscription) {
+    try { await subscription.unsubscribe(); } catch (_) { /* continue with a fresh subscription */ }
+  }
+  subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: decodeVapidKey(publicKey) });
   const subscriptionJson = subscription.toJSON();
   const record = {
     endpoint: subscriptionJson.endpoint,
