@@ -355,7 +355,7 @@ const AdminNotifications = ({ lang: propLang }) => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className={`absolute mt-2 w-80 md:w-96 bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden z-[100] ${isRTL ? 'left-0' : 'right-0'}`}
+                        className="absolute right-0 left-auto mt-2 w-[calc(100vw-1rem)] max-w-80 md:w-96 bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden z-[100]"
                     >
                         <div className="p-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
                             <h3 className="font-black text-gray-800 dark:text-white">{txt.title}</h3>
