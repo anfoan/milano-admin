@@ -14,10 +14,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('push', (event) => {
     let data = {};
     try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data?.text?.() || '' }; }
-    const notificationTitle = data.title || 'إشعار جديد من ميلانو';
-    const notificationBody = data.body || 'وصل طلب جديد إلى لوحة التحكم.';
-    event.waitUntil(self.registration.showNotification('إعدادات ميلانو', {
-        body: `${notificationTitle}\n${notificationBody}`,
+    event.waitUntil(self.registration.showNotification(data.title || 'إشعار جديد من ميلانو', {
+        body: data.body || 'وصل طلب جديد إلى لوحة التحكم.',
         icon: data.icon || '/admin-icon-192.png',
         image: data.image || undefined,
         badge: data.badge || '/admin-icon-192.png',

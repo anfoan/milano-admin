@@ -5,12 +5,15 @@ export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => ({}));
   const order = body?.order || {};
   if (!order.id && !order.orderId) return json({ error: 'Order id is required' }, 400);
+  const firstItem = Array.isArray(order.cartItems) ? order.cartItems.find((item) => item?.image || item?.imageUrl || item?.productImage) : null;
+  const firstImage = firstItem?.image || firstItem?.imageUrl || firstItem?.productImage || '';
   try {
     const result = await sendToSubscriptions({
       type: 'new-order',
       title: order.isPOS ? 'طلب جديد من نقطة البيع' : 'طلب جديد من المتجر',
       body: `${order.formData?.name || 'عميل'} — ${order.orderId || order.id || ''}`,
       orderId: order.orderId || order.id || '',
+      image: firstImage,
       url: '/milano-dashboard-vault-77?view=orders'
     }, env);
     return json({ ok: true, ...result });
