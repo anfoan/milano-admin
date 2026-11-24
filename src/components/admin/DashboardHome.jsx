@@ -295,7 +295,10 @@ const DashboardHome = ({ onViewOrder, setActiveTab, lang, generalSettings }) => 
                     const p = doc.data();
                     if (p.name) productCostMap[p.name] = Number(p.costPrice || 0);
                     
-                    const stock = Number(p.stock || 0);
+                    const sizeValues = p.variants?.find(variant => variant.type === 'size')?.values || [];
+                    const stock = sizeValues.length
+                        ? sizeValues.reduce((sum, size) => sum + (Number(p.sizeStocks?.[size]) || 0), 0)
+                        : Number(p.stock || 0);
                     const price = Number(p.price || 0);
                     calculatedStockQty += stock;
                     calculatedStockValue += stock * price;

@@ -808,7 +808,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     {/* Total cost value */}
                                     <td className="px-3 text-center align-middle">
                                         <span className="text-xs font-black text-orange-500 block text-center">{txt.th_total_cost}</span>
-                                        <span className="text-base font-black text-orange-600 block text-center">{totalCost.toLocaleString()} <span className="text-xs font-bold text-gray-400">{currency}</span></span>
+                                        <span className="text-base font-black text-orange-600 block text-center">{totalCost.toLocaleString()}</span>
+                                        <span className="text-xs font-bold text-gray-400 block text-center">{currency}</span>
                                     </td>
                                     {/* Total sell (unit) */}
                                     <td className="px-3 text-center align-middle">
@@ -818,7 +819,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                     {/* Total sell value */}
                                     <td className="px-3 text-center align-middle">
                                         <span className="text-xs font-black text-green-600 block text-center">{txt.th_total_sell}</span>
-                                        <span className="text-base font-black text-green-700 block text-center">{totalSell.toLocaleString()} <span className="text-xs font-bold text-gray-400">{currency}</span></span>
+                                        <span className="text-base font-black text-green-700 block text-center">{totalSell.toLocaleString()}</span>
+                                        <span className="text-xs font-bold text-gray-400 block text-center">{currency}</span>
                                     </td>
                                     <td className="px-3">
                                         <span className="text-xs font-black text-gray-500 block">{txt.th_stock}</span>
