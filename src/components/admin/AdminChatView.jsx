@@ -221,7 +221,7 @@ const AdminChatView = ({ chatId, onBack, lang = 'ar' }) => {
                     <span className="text-[10px] font-bold text-green-500 whitespace-nowrap">{txt.online}</span>
                 </div>
                 <div className="absolute left-1/2 -translate-x-1/2 text-center max-w-[38%]">
-                    <span className="text-[9px] font-bold text-gray-400 -translate-y-5">{txt.subject}</span>
+                    <span className="inline-block text-[9px] font-bold text-gray-400 -translate-y-5">{txt.subject}</span>
                     <p className="text-xs font-black text-gray-700 dark:text-gray-200 truncate">
                         {chatDetails?.subject || chatDetails?.title || '—'}
                     </p>
