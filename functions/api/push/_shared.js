@@ -29,5 +29,12 @@ export const sendToSubscriptions = async (payload, env) => {
   const subscriptions = (data.documents || []).map(document => ({ id: document.name.split('/').pop(), ...readFields(document.fields) })).filter(item => item.endpoint && item.p256dh && item.auth);
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
   const results = await Promise.allSettled(subscriptions.map(subscription => webpush.sendNotification({ endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } }, JSON.stringify(payload))));
-  return { sent: results.filter(result => result.status === 'fulfilled').length, attempted: results.length };
+  return {
+    sent: results.filter(result => result.status === 'fulfilled').length,
+    attempted: results.length,
+    failed: results.filter(result => result.status === 'rejected').map(result => ({
+      statusCode: result.reason?.statusCode || null,
+      body: result.reason?.body || null
+    }))
+  };
 };
