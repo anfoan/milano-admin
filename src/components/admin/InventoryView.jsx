@@ -210,39 +210,47 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
     }, []);
 
     const updateStock = async (id, newStock) => {
+        const nextStock = Number(newStock);
+        const previousProducts = products;
+        const updater = (prev) => prev.map(p => p.id === id ? { ...p, stock: nextStock } : p);
+        setProducts(updater);
+        setManualOrder(prev => updater(prev));
         try {
-            await updateDoc(doc(db, "products", id), { stock: Number(newStock) });
-            const updater = (prev) => prev.map(p => p.id === id ? { ...p, stock: Number(newStock) } : p);
-            setProducts(updater(products));
-            setManualOrder(prev => updater(prev));
+            await updateDoc(doc(db, "products", id), { stock: nextStock });
+            safeSessionSet(INVENTORY_CACHE_KEY, JSON.stringify(toInventoryCacheItems(updater(previousProducts))));
         } catch (err) {
             console.error("Error updating stock:", err);
+            setProducts(previousProducts);
+            setManualOrder(previousProducts);
         }
     };
 
     const updateStockWithSizes = async (id, sizeStocks) => {
-        try {
-            const firestoreUpdates = {};
-            let totalStock = 0;
+        const firestoreUpdates = {};
+        let totalStock = 0;
+        for (const [size, qty] of Object.entries(sizeStocks)) {
+            firestoreUpdates[`sizeStocks.${size}`] = Number(qty) || 0;
+            totalStock += Number(qty) || 0;
+        }
+        const previousProducts = products;
+        const updater = (prev) => prev.map(p => {
+            if (p.id !== id) return p;
+            const updatedSizeStocks = { ...(p.sizeStocks || {}) };
             for (const [size, qty] of Object.entries(sizeStocks)) {
-                firestoreUpdates[`sizeStocks.${size}`] = Number(qty) || 0;
-                totalStock += Number(qty) || 0;
+                updatedSizeStocks[size] = Number(qty) || 0;
             }
+            return { ...p, sizeStocks: updatedSizeStocks, stock: totalStock };
+        });
+        setProducts(updater);
+        setManualOrder(prev => updater(prev));
+        try {
             firestoreUpdates.stock = totalStock;
             await updateDoc(doc(db, "products", id), firestoreUpdates);
-            // Update local state immediately so no refresh needed
-            const updater = (prev) => prev.map(p => {
-                if (p.id !== id) return p;
-                const updatedSizeStocks = { ...(p.sizeStocks || {}) };
-                for (const [size, qty] of Object.entries(sizeStocks)) {
-                    updatedSizeStocks[size] = Number(qty) || 0;
-                }
-                return { ...p, sizeStocks: updatedSizeStocks, stock: totalStock };
-            });
-            setProducts(updater(products));
-            setManualOrder(prev => updater(prev));
+            safeSessionSet(INVENTORY_CACHE_KEY, JSON.stringify(toInventoryCacheItems(updater(previousProducts))));
         } catch (err) {
             console.error("Error updating size stocks:", err);
+            setProducts(previousProducts);
+            setManualOrder(previousProducts);
         }
     };
 
