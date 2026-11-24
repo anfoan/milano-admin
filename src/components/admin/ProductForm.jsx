@@ -213,7 +213,10 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
         };
     }, [mainImagePreview]);
 
-    const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x660));
+    const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩۰-۹]/g, digit => {
+        const code = digit.charCodeAt(0);
+        return String(code >= 0x6f0 ? code - 0x6f0 : code - 0x660);
+    });
     const formatThousands = (value) => {
         const normalized = toEnglishDigits(value).replace(/,/g, '').replace(/[^0-9]/g, '');
         return normalized ? Number(normalized).toLocaleString('en-US') : '';
@@ -1041,6 +1044,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                         </button>
                                         <input
                                             type="text"
+                                            dir="ltr"
                                             value={toEnglishDigits(v)}
                                             onChange={(e) => renameVariantValue(i, e.target.value)}
                                             className="w-full text-center bg-transparent text-sm font-black text-gray-800 dark:text-white mt-1 outline-none border-b border-transparent focus:border-blue-500"
@@ -1050,6 +1054,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                                             <input
                                                 type="text"
                                                 inputMode="numeric"
+                                                dir="ltr"
                                                 value={toEnglishDigits(sizeStocks[v] !== undefined ? sizeStocks[v] : 0)}
                                                 onChange={(e) => handleSizeStockChange(v, e.target.value)}
                                                 className="w-full text-center bg-white dark:bg-transparent border border-gray-200 dark:border-white/10 rounded-xl py-1.5 px-2 text-xs font-black outline-none focus:border-blue-500 text-gray-900 dark:text-white"
