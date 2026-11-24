@@ -34,7 +34,7 @@ export const sendToSubscriptions = async (payload, env) => {
       expirationTime: null,
       keys: { p256dh: subscription.p256dh, auth: subscription.auth }
     };
-    const request = await buildPushPayload({ data: JSON.stringify(payload), options: { ttl: 86400 } }, pushSubscription, vapid);
+    const request = await buildPushPayload({ data: JSON.stringify(payload), options: { ttl: 60, urgency: 'high' } }, pushSubscription, vapid);
     const response = await fetch(subscription.endpoint, request);
     if (!response.ok) {
       const body = await response.text();
