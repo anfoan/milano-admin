@@ -535,9 +535,13 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
         setLoading(true);
         try {
             // Prepare data for saving
-            const hasSizeVariants = variants[0]?.values?.length > 0;
+            const sizeValues = variants[0]?.values || [];
+            const hasSizeVariants = sizeValues.length > 0;
+            const cleanedSizeStocks = hasSizeVariants
+                ? Object.fromEntries(sizeValues.map(size => [size, Number(sizeStocks[size]) || 0]))
+                : sizeStocks;
             const calculatedStock = hasSizeVariants
-                ? variants[0].values.reduce((sum, size) => sum + (Number(sizeStocks[size]) || 0), 0)
+                ? Object.values(cleanedSizeStocks).reduce((sum, quantity) => sum + (Number(quantity) || 0), 0)
                 : formData.stock;
             let finalData = {
                 ...formData,
@@ -558,7 +562,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                 await updateDoc(productRef, {
                     ...finalData,
                     variants: variants,
-                    sizeStocks: sizeStocks,
+                    sizeStocks: cleanedSizeStocks,
                     updatedAt: serverTimestamp(),
                 });
 
@@ -571,7 +575,7 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                         ...editingProduct,
                         ...finalData,
                         variants,
-                        sizeStocks,
+                        sizeStocks: cleanedSizeStocks,
                         id: editingProduct.id,
                     };
                     const cacheItems = Array.isArray(cachedProducts)

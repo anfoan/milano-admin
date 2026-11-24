@@ -33,6 +33,12 @@ const getInventorySizeSlots = (product) => {
     return Array.from({ length: 6 }, (_, index) => ordered[index] || null);
 };
 
+const getProductSizeStockTotal = (product) => {
+    const sizeValues = product.variants?.find(variant => variant.type === 'size')?.values || [];
+    if (sizeValues.length === 0) return null;
+    return sizeValues.reduce((sum, size) => sum + (Number(product.sizeStocks?.[size]) || 0), 0);
+};
+
 const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQuery }) => {
     const t = {
         ar: {
@@ -173,9 +179,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                 });
                 // Fix products where total stock != sum of size stocks
                 const mismatchedStockItems = items.filter(p => {
-                    if (!p.sizeStocks || Object.keys(p.sizeStocks).length === 0) return false;
-                    const sumOfSizes = Object.values(p.sizeStocks).reduce((sum, qty) => sum + Number(qty || 0), 0);
-                    return Number(p.stock || 0) !== sumOfSizes;
+                    const sumOfSizes = getProductSizeStockTotal(p);
+                    return sumOfSizes !== null && Number(p.stock || 0) !== sumOfSizes;
                 });
                 
                 if (negativeItems.length > 0 || negativeSizesItems.length > 0 || mismatchedStockItems.length > 0) {
@@ -193,7 +198,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                         if (Object.keys(fixes).length > 0) fixesById.set(p.id, { ...(fixesById.get(p.id) || {}), ...fixes });
                     }
                     for (const p of mismatchedStockItems) {
-                        const correctStock = Object.values(p.sizeStocks).reduce((sum, qty) => sum + Number(qty || 0), 0);
+                        const correctStock = getProductSizeStockTotal(p);
                         fixesById.set(p.id, { ...(fixesById.get(p.id) || {}), stock: correctStock });
                     }
                     const batch = writeBatch(db);
@@ -226,17 +231,22 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
     };
 
     const updateStockWithSizes = async (id, sizeStocks) => {
+        const product = products.find(item => item.id === id);
+        const sizeValues = product?.variants?.find(variant => variant.type === 'size')?.values || [];
+        const effectiveSizeStocks = sizeValues.length > 0
+            ? Object.fromEntries(sizeValues.map(size => [size, sizeStocks[size] ?? 0]))
+            : sizeStocks;
         const firestoreUpdates = {};
         let totalStock = 0;
-        for (const [size, qty] of Object.entries(sizeStocks)) {
+        for (const [size, qty] of Object.entries(effectiveSizeStocks)) {
             firestoreUpdates[`sizeStocks.${size}`] = Number(qty) || 0;
             totalStock += Number(qty) || 0;
         }
         const previousProducts = products;
         const updater = (prev) => prev.map(p => {
             if (p.id !== id) return p;
-            const updatedSizeStocks = { ...(p.sizeStocks || {}) };
-            for (const [size, qty] of Object.entries(sizeStocks)) {
+            const updatedSizeStocks = sizeValues.length > 0 ? {} : { ...(p.sizeStocks || {}) };
+            for (const [size, qty] of Object.entries(effectiveSizeStocks)) {
                 updatedSizeStocks[size] = Number(qty) || 0;
             }
             return { ...p, sizeStocks: updatedSizeStocks, stock: totalStock };
