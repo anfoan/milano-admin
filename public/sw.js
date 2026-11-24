@@ -17,11 +17,19 @@ self.addEventListener('push', (event) => {
     event.waitUntil(self.registration.showNotification(data.title || 'إشعار جديد من ميلانو', {
         body: data.body || 'وصل طلب جديد إلى لوحة التحكم.',
         icon: data.icon || '/admin-icon-192.png',
+        image: data.image || undefined,
         badge: data.badge || '/admin-icon-192.png',
-        tag: data.tag || `milano-${data.orderId || Date.now()}`,
+        tag: data.tag || `milano-${data.orderId || data.productId || data.messageId || Date.now()}`,
         renotify: true,
         vibrate: [180, 80, 180],
-        data: { url: data.url || '/milano-dashboard-vault-77', orderId: data.orderId || '' }
+        data: {
+            url: data.url || '/milano-dashboard-vault-77',
+            orderId: data.orderId || '',
+            productId: data.productId || '',
+            quantity: data.quantity ?? '',
+            stockStatus: data.stockStatus || '',
+            messageId: data.messageId || ''
+        }
     }));
 });
 

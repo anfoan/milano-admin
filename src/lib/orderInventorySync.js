@@ -2,6 +2,7 @@ import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { isCompletedOrderStatus } from './walletRewards';
 import { toStockNumber } from './stockUtils';
+import { notifyAdminOfInventoryChanges } from './pushEvent';
 
 const itemSize = item => item?.selectedSize || item?.size || '';
 const normalizeSize = value => String(value ?? '')
@@ -36,7 +37,7 @@ const groupedItems = items => {
 export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
     const orderRef = doc(db, 'orders', orderId);
     const shouldCommit = isCompletedOrderStatus(nextStatus);
-    return runTransaction(db, async transaction => {
+    const result = await runTransaction(db, async transaction => {
         const orderSnap = await transaction.get(orderRef);
         if (!orderSnap.exists()) return { synced: false, reason: 'order-missing' };
         const order = orderSnap.data();
@@ -52,6 +53,7 @@ export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
         const productIds = [...groups.keys()];
         const productRefs = productIds.map(id => doc(db, 'products', id));
         const productSnaps = await Promise.all(productRefs.map(ref => transaction.get(ref)));
+        const inventoryChanges = [];
 
         productSnaps.forEach((snap, index) => {
             if (!snap.exists()) throw new Error(`PRODUCT_NOT_FOUND:${productIds[index]}`);
@@ -63,6 +65,7 @@ export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
                 ? Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0)
                 : Math.max(0, toStockNumber(product.stock));
             const direction = shouldCommit ? -1 : 1;
+            let nextStock;
 
             if (hasSizes) {
                 Object.entries(group.bySize).forEach(([size, quantity]) => {
@@ -72,15 +75,17 @@ export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
                     if (next < 0) throw new Error(`INSUFFICIENT_SIZE_STOCK:${productIds[index]}:${resolvedKey}`);
                     currentSizes[resolvedKey] = next;
                 });
+                nextStock = Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0);
                 transaction.update(productRefs[index], {
                     sizeStocks: currentSizes,
-                    stock: Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0)
+                    stock: nextStock
                 });
             } else {
-                const nextStock = currentStock + direction * group.total;
+                nextStock = currentStock + direction * group.total;
                 if (nextStock < 0) throw new Error(`INSUFFICIENT_STOCK:${productIds[index]}`);
                 transaction.update(productRefs[index], { stock: nextStock });
             }
+            inventoryChanges.push({ id: productIds[index], name: product.title || product.name || 'منتج', image: product.mainImage || product.image || '', quantity: nextStock });
         });
 
         transaction.update(orderRef, {
@@ -89,6 +94,10 @@ export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
             inventorySyncedAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
-        return { synced: true, committed: shouldCommit };
+        return { synced: true, committed: shouldCommit, inventoryChanges };
     });
+    if (result?.synced && result.inventoryChanges?.length) {
+        void notifyAdminOfInventoryChanges(result.inventoryChanges, 'order-sync');
+    }
+    return result;
 };

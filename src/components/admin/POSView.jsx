@@ -24,6 +24,7 @@ import { getSizeStock, resolveSizeKey, toStockNumber } from '../../lib/stockUtil
 import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 import { isValidYemenPhone } from '../../lib/phoneValidation';
 import { notifyAdminOfNewOrder } from '../../lib/pushOrderEvent';
+import { notifyAdminOfInventoryChanges } from '../../lib/pushEvent';
 
 const displayOrderId = (value) => String(value || '').replace(/^#+/, '');
 
@@ -646,6 +647,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 ? doc(db, "orders", editingOrderId)
                 : doc(collection(db, "orders"));
             const requestedDeltas = new Map();
+            const inventoryChanges = [];
             const addRequestedDelta = (item, delta) => {
                 if (!item?.id) return;
                 const entry = requestedDeltas.get(item.id) || { stock: 0, sizes: {} };
@@ -656,7 +658,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             cartItems.forEach((item) => addRequestedDelta(item, -1));
 
             checkoutStage = editingOrderId ? 'التحقق من الفاتورة والمخزون' : 'التحقق من المخزون';
-            await runTransaction(db, async (transaction) => {
+            const inventoryResult = await runTransaction(db, async (transaction) => {
                 const originalSnap = editingOrderId ? await transaction.get(orderRef) : null;
                 const deltas = new Map([...requestedDeltas].map(([id, value]) => [id, { stock: value.stock, sizes: { ...value.sizes } }]));
                 if (editingOrderId && originalSnap?.exists()) {
@@ -681,6 +683,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     const data = snap.data();
                     const delta = deltas.get(productRefs[index].id);
                     const hasSizes = data.sizeStocks && Object.keys(data.sizeStocks).length > 0;
+                    let nextStock;
                     if (hasSizes) {
                         const nextSizes = { ...data.sizeStocks };
                         Object.entries(delta.sizes).forEach(([size, amount]) => {
@@ -690,13 +693,14 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             if (nextQuantity < 0) throw new Error('INSUFFICIENT_SIZE_STOCK');
                             nextSizes[resolvedKey] = nextQuantity;
                         });
-                        const nextStock = Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, toStockNumber(quantity)), 0);
+                        nextStock = Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, toStockNumber(quantity)), 0);
                         transaction.update(productRefs[index], { stock: nextStock, sizeStocks: nextSizes });
                     } else {
-                        const nextStock = toStockNumber(data.stock) + delta.stock;
+                        nextStock = toStockNumber(data.stock) + delta.stock;
                         if (nextStock < 0) throw new Error('INSUFFICIENT_STOCK');
                         transaction.update(productRefs[index], { stock: nextStock });
                     }
+                    inventoryChanges.push({ id: productRefs[index].id, name: data.title || data.name || 'منتج', image: data.mainImage || data.image || '', quantity: nextStock });
                 });
                 if (editingOrderId) transaction.update(orderRef, { ...orderData, updatedAt: serverTimestamp() });
                 else {
@@ -706,6 +710,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             });
 
             if (!editingOrderId) void notifyAdminOfNewOrder({ ...orderData, id: orderRef.id }, 'pos');
+            if (inventoryResult && inventoryChanges.length) void notifyAdminOfInventoryChanges(inventoryChanges, 'pos');
 
             setLastCreatedOrderId(orderId);
             setLastCreatedOrderData({ id: orderRef.id, ...orderData });
