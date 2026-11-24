@@ -14,6 +14,7 @@ import {
 import { uploadToCloudinary } from '../../services/uploadService';
 import ImageCropper from './ImageCropper';
 import { useCurrency } from '../../context/CurrencyContext';
+import { safeLocalGet, safeLocalSet } from '../../lib/safeStorage';
 
 const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = 'ar' }) => {
     const { convertPrice } = useCurrency();
@@ -550,6 +551,29 @@ const ProductForm = ({ editingProduct, setEditingProduct, setActiveTab, lang = '
                     sizeStocks: sizeStocks,
                     updatedAt: serverTimestamp(),
                 });
+
+                // Keep the product-list cache in sync before returning to the list.
+                // Firestore remains the source of truth; this only removes the stale
+                // cached card while the list is being mounted again.
+                try {
+                    const cachedProducts = JSON.parse(safeLocalGet('milano_admin_products_cache') || '[]');
+                    const updatedProduct = {
+                        ...editingProduct,
+                        ...finalData,
+                        variants,
+                        sizeStocks,
+                        id: editingProduct.id,
+                    };
+                    const cacheItems = Array.isArray(cachedProducts)
+                        ? cachedProducts.map(product => product.id === editingProduct.id ? updatedProduct : product)
+                        : [];
+                    if (!cacheItems.some(product => product.id === editingProduct.id)) {
+                        cacheItems.push(updatedProduct);
+                    }
+                    safeLocalSet('milano_admin_products_cache', JSON.stringify(cacheItems));
+                } catch (cacheError) {
+                    console.warn('Could not refresh product-list cache:', cacheError);
+                }
 
                 // Notify Google Indexing API
                 try {
