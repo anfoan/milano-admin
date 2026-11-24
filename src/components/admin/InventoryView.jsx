@@ -40,6 +40,11 @@ const getProductSizeStockTotal = (product) => {
     return sizeValues.reduce((sum, size) => sum + (Number(product.sizeStocks?.[size]) || 0), 0);
 };
 
+const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩۰-۹]/g, digit => {
+    const code = digit.charCodeAt(0);
+    return String(code >= 0x6f0 ? code - 0x6f0 : code - 0x660);
+});
+
 const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQuery }) => {
     const t = {
         ar: {
@@ -692,11 +697,15 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                                         <label key={size} className="inline-flex items-center gap-1 whitespace-nowrap border border-blue-300 rounded-lg px-1.5 py-0.5 bg-blue-50">
                                                                             <span className="text-[10px] font-bold text-gray-500">{size}:</span>
                                                                             <input
-                                                                                type="number"
-                                                                                min="0"
+                                                                                type="text"
+                                                                                inputMode="numeric"
+                                                                                dir="ltr"
                                                                                 className="w-9 bg-white border border-blue-400 rounded text-center text-[11px] font-black outline-none"
-                                                                                value={tempSizeStocks[size] ?? product.sizeStocks?.[size] ?? 0}
-                                                                                onChange={(e) => setTempSizeStocks(prev => ({ ...prev, [size]: Math.max(0, Number(e.target.value) || 0) }))}
+                                                                                value={toEnglishDigits(tempSizeStocks[size] ?? product.sizeStocks?.[size] ?? 0)}
+                                                                                onChange={(e) => {
+                                                                                    const nextValue = toEnglishDigits(e.target.value).replace(/[^0-9]/g, '');
+                                                                                    setTempSizeStocks(prev => ({ ...prev, [size]: Math.max(0, Number(nextValue) || 0) }));
+                                                                                }}
                                                                                 onKeyDown={(e) => {
                                                                                     if (e.key === 'Enter') { updateStockWithSizes(product.id, tempSizeStocks); setEditingId(null); }
                                                                                     if (e.key === 'Escape') setEditingId(null);
