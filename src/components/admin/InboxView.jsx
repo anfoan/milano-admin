@@ -194,7 +194,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                         <tr key={msg.id} className="hover:bg-gray-50 transition-colors group">
                                             <td className="px-6 py-5 font-bold text-gray-700">{msg.name}</td>
                                             <td className="px-6 py-5 text-center text-gray-700 dark:text-gray-400 text-xl font-mono font-bold dir-ltr">{msg.email}</td>
-                                            <td className="px-6 py-5 text-gray-700 dark:text-gray-400 text-sm font-semibold">{msg.subject || msg.title}</td>
+                                            <td className="px-6 py-5 text-gray-700 dark:text-gray-400 text-sm">{msg.subject || msg.title}</td>
                                             <td className="px-6 py-5 text-center">
                                                 <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold ${msg.isBlocked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
                                                     {msg.isBlocked ? txt.blocked_yes : txt.blocked_no}
@@ -206,7 +206,7 @@ const InboxView = ({ onOpenChat, lang = 'ar' }) => {
                                                     return <><span dir="ltr" className="block">{dateTime.date}</span>{dateTime.time && <span dir="ltr" className="flex flex-row items-center justify-center gap-1"><span>{dateTime.period}</span><span>{dateTime.time}</span></span>}</>;
                                                 })()}
                                             </td>
-                                            <td className={`px-6 py-5 text-center whitespace-nowrap ${msg.status === 'closed' ? 'opacity-50' : ''}`}>
+                                            <td className="px-6 py-5 text-center whitespace-nowrap">
                                                     <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black ${msg.status === 'closed' ? 'text-sm dark:text-lg' : ''} ${getStatusColor(msg.status)}`}>
                                                     {getStatusLabel(msg.status)}
                                                 </span>
