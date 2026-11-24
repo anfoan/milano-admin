@@ -717,12 +717,14 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                                                         }}
                                                                     />
                                                                 )}
-                                                                <button type="button" onClick={() => { sizeValues.length > 0 ? updateStockWithSizes(product.id, tempSizeStocks) : updateStock(product.id, tempStock); setEditingId(null); }} className="w-7 h-7 p-0 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center justify-center" title={txt.save}>
-                                                                    <Save size={12} />
-                                                                </button>
-                                                                <button type="button" onClick={() => setEditingId(null)} className="px-1.5 py-1 text-[10px] font-black text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200" title={txt.cancel}>
-                                                                    {txt.cancel}
-                                                                </button>
+                                                                <div className="flex items-center gap-1.5 whitespace-nowrap" dir="ltr">
+                                                                    <button type="button" onClick={() => setEditingId(null)} className="px-1.5 py-1 text-[10px] font-black text-red-600 bg-red-500/15 border border-red-500/30 rounded-lg hover:bg-red-500/25" title={txt.cancel}>
+                                                                        {txt.cancel}
+                                                                    </button>
+                                                                    <button type="button" onClick={() => { sizeValues.length > 0 ? updateStockWithSizes(product.id, tempSizeStocks) : updateStock(product.id, tempStock); setEditingId(null); }} className="w-7 h-7 p-0 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center justify-center" title={txt.save}>
+                                                                        <Save size={12} />
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         ) : null}
                                                     </div>
