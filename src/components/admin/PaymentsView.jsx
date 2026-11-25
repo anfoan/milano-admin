@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Save, CreditCard, MessageCircle, Settings, X, Phone, MessageSquare } from 'lucide-react';
+import { Save, CreditCard, MessageCircle, Settings, X, Phone, MessageSquare, Pencil, Upload, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { uploadSettingsImage } from '../../services/uploadService';
 
 const PaymentsView = ({ lang = 'ar' }) => {
     const [settings, setSettings] = useState({
@@ -17,10 +18,14 @@ const PaymentsView = ({ lang = 'ar' }) => {
         whatsapp_condition_enabled: false,
         whatsapp_condition_type: 'min', // 'min', 'max', 'range'
         whatsapp_condition_min: 0,
-        whatsapp_condition_max: 0
+        whatsapp_condition_max: 0,
+        custom_methods: []
     });
     const [loading, setLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [showCustomModal, setShowCustomModal] = useState(false);
+    const [customDraft, setCustomDraft] = useState(null);
+    const [isUploadingIcon, setIsUploadingIcon] = useState(false);
 
     // Modal State
     const [showConfigModal, setShowConfigModal] = useState(false);
@@ -184,10 +189,82 @@ const PaymentsView = ({ lang = 'ar' }) => {
         setShowConfigModal(true);
     };
 
+    const openCustomModal = (method = null) => {
+        setCustomDraft(method ? { ...method } : {
+            id: `custom_${Date.now()}`,
+            title: '',
+            enabled: true,
+            iconUrl: ''
+        });
+        setShowCustomModal(true);
+    };
+
+    const handleCustomIconChange = async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+        if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
+            alert(isRTL ? 'يرجى اختيار صورة بصيغة JPG أو PNG أو WebP' : 'Please choose a JPG, PNG, or WebP image');
+            return;
+        }
+        if (file.size > 15 * 1024 * 1024) {
+            alert(isRTL ? 'حجم الصورة يجب أن يكون أقل من 15 ميجابايت' : 'Image size must be less than 15 MB');
+            return;
+        }
+        setIsUploadingIcon(true);
+        try {
+            const iconUrl = await uploadSettingsImage(file, `payment-method-${customDraft?.id || Date.now()}`);
+            setCustomDraft(previous => ({ ...previous, iconUrl }));
+        } catch (error) {
+            console.error('Payment method icon upload failed:', error);
+            alert(isRTL ? 'حدث خطأ أثناء رفع الأيقونة' : 'Could not upload the icon');
+        } finally {
+            setIsUploadingIcon(false);
+        }
+    };
+
+    const saveCustomMethod = async () => {
+        const title = String(customDraft?.title || '').trim();
+        if (!title) {
+            alert(isRTL ? 'يرجى كتابة اسم طريقة الدفع' : 'Please enter a payment method name');
+            return;
+        }
+        if (customDraft.builtIn) {
+            const fields = customDraft.builtIn === 'cod'
+                ? { cod_title: title, cod_icon: customDraft.iconUrl || '' }
+                : { whatsapp_title: title, whatsapp_icon: customDraft.iconUrl || '' };
+            await handleSave({ ...settings, ...fields });
+        } else {
+            const existing = Array.isArray(settings.custom_methods) ? settings.custom_methods : [];
+            const method = { ...customDraft, title, enabled: customDraft.enabled !== false };
+            const custom_methods = existing.some(item => item.id === method.id)
+                ? existing.map(item => item.id === method.id ? method : item)
+                : [...existing, method];
+            await handleSave({ ...settings, custom_methods });
+        }
+        setShowCustomModal(false);
+        setCustomDraft(null);
+    };
+
+    const deleteCustomMethod = async (id) => {
+        if (!window.confirm(isRTL ? 'هل تريد حذف طريقة الدفع هذه؟' : 'Delete this payment method?')) return;
+        const custom_methods = (settings.custom_methods || []).filter(item => item.id !== id);
+        await handleSave({ ...settings, custom_methods });
+    };
+
+    const toggleCustomMethod = (id) => {
+        const custom_methods = (settings.custom_methods || []).map(item => item.id === id ? { ...item, enabled: item.enabled === false } : item);
+        handleSave({ ...settings, custom_methods });
+    };
+
     return (
         <div className="space-y-6 font-['Cairo'] pb-20" dir={isRTL ? "rtl" : "ltr"}>
             {/* Header */}
-            <div className="bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm flex justify-between items-center">
+            <div className="relative bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm flex justify-between items-center">
+                <button type="button" onClick={() => openCustomModal()} className="absolute left-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700 active:scale-95">
+                    <CreditCard size={18} />
+                    {isRTL ? 'إضافة طريقة دفع جديدة' : 'Add new payment method'}
+                </button>
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
                         <CreditCard size={24} />
@@ -201,20 +278,20 @@ const PaymentsView = ({ lang = 'ar' }) => {
 
             {/* Payment Methods Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                 {/* 1. Cash On Delivery (COD) */}
                 <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
+                    <button type="button" onClick={() => openCustomModal({ id: 'cod', builtIn: 'cod', title: settings.cod_title || txt.cod_title, iconUrl: settings.cod_icon || 'https://cdn-icons-png.flaticon.com/512/2331/2331941.png' })} className="absolute left-5 top-5 rounded-xl bg-blue-50 p-2.5 text-blue-600 transition hover:bg-blue-100" title={isRTL ? 'تعديل' : 'Edit'}><Pencil size={17} /></button>
                     <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-4">
                             <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
                                 <img
-                                    src="https://cdn-icons-png.flaticon.com/512/2331/2331941.png"
+                                    src={settings.cod_icon || "https://cdn-icons-png.flaticon.com/512/2331/2331941.png"}
                                     className="w-10 h-10 object-contain drop-shadow-sm filter grayscale-[0.2]"
-                                    alt="COD"
+                                    alt={settings.cod_title || txt.cod_title}
                                 />
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-gray-800">{txt.cod_title}</h3>
+                                <h3 className="text-lg font-black text-gray-800">{settings.cod_title || txt.cod_title}</h3>
                                 <div className={`text-xs font-bold px-2 py-1 rounded-lg w-fit mt-1 flex items-center gap-1 ${settings.cod_enabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                                     <div className={`w-2 h-2 rounded-full ${settings.cod_enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                                     {settings.cod_enabled ? txt.active : txt.inactive}
@@ -243,19 +320,50 @@ const PaymentsView = ({ lang = 'ar' }) => {
                     </div>
                 </div>
 
+                {(settings.custom_methods || []).map((method) => (
+                    <div key={method.id} className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
+                        <button type="button" onClick={() => openCustomModal(method)} className="absolute left-5 top-5 rounded-xl bg-blue-50 p-2.5 text-blue-600 transition hover:bg-blue-100" title={isRTL ? 'تعديل' : 'Edit'}>
+                            <Pencil size={17} />
+                        </button>
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 overflow-hidden">
+                                    {method.iconUrl ? <img src={method.iconUrl} className="w-full h-full object-cover" alt={method.title} /> : <CreditCard size={30} />}
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black text-gray-800">{method.title}</h3>
+                                    <div className={`text-xs font-bold px-2 py-1 rounded-lg w-fit mt-1 flex items-center gap-1 ${method.enabled !== false ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                                        <div className={`w-2 h-2 rounded-full ${method.enabled !== false ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                                        {method.enabled !== false ? txt.active : txt.inactive}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 mt-8">
+                            <button type="button" onClick={() => toggleCustomMethod(method.id)} className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all text-sm ${method.enabled !== false ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}>
+                                {method.enabled !== false ? txt.disable_payment : txt.enable_payment}
+                            </button>
+                            <button type="button" onClick={() => deleteCustomMethod(method.id)} className="rounded-xl bg-red-50 p-3 text-red-500 transition hover:bg-red-100" title={isRTL ? 'حذف' : 'Delete'}>
+                                <Trash2 size={18} />
+                            </button>
+                        </div>
+                    </div>
+                ))}
+
                 {/* 2. WhatsApp Payment */}
                 <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
+                    <button type="button" onClick={() => openCustomModal({ id: 'whatsapp', builtIn: 'whatsapp', title: settings.whatsapp_title || txt.whatsapp_title, iconUrl: settings.whatsapp_icon || 'https://cdn-icons-png.flaticon.com/512/733/733585.png' })} className="absolute left-5 top-5 rounded-xl bg-blue-50 p-2.5 text-blue-600 transition hover:bg-blue-100" title={isRTL ? 'تعديل' : 'Edit'}><Pencil size={17} /></button>
                     <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-4">
                             <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600">
                                 <img
-                                    src="https://cdn-icons-png.flaticon.com/512/733/733585.png"
+                                    src={settings.whatsapp_icon || "https://cdn-icons-png.flaticon.com/512/733/733585.png"}
                                     className="w-10 h-10 object-contain"
-                                    alt="WhatsApp"
+                                    alt={settings.whatsapp_title || txt.whatsapp_title}
                                 />
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-gray-800">{txt.whatsapp_title}</h3>
+                                <h3 className="text-lg font-black text-gray-800">{settings.whatsapp_title || txt.whatsapp_title}</h3>
                                 <div className={`text-xs font-bold px-2 py-1 rounded-lg w-fit mt-1 flex items-center gap-1 ${settings.whatsapp_enabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                                     <div className={`w-2 h-2 rounded-full ${settings.whatsapp_enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                                     {settings.whatsapp_enabled ? txt.active : txt.inactive}
@@ -290,6 +398,46 @@ const PaymentsView = ({ lang = 'ar' }) => {
                     )}
                 </div>
             </div>
+
+            {/* Custom Payment Method Modal */}
+            <AnimatePresence>
+                {showCustomModal && customDraft && (
+                    <>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setShowCustomModal(false)} />
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+                            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} className="bg-white rounded-[24px] w-full max-w-lg shadow-2xl border border-gray-100 overflow-hidden pointer-events-auto" onClick={e => e.stopPropagation()}>
+                                <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                    <h3 className="text-xl font-black text-gray-900">{customDraft.title ? (isRTL ? 'تعديل طريقة الدفع' : 'Edit payment method') : (isRTL ? 'إضافة طريقة دفع جديدة' : 'Add new payment method')}</h3>
+                                    <button type="button" onClick={() => setShowCustomModal(false)} className="p-2 rounded-full text-gray-500 hover:bg-gray-200"><X size={20} /></button>
+                                </div>
+                                <div className="p-6 space-y-6">
+                                    <div>
+                                        <label className="mb-2 block text-sm font-bold text-gray-500">{isRTL ? 'اسم طريقة الدفع' : 'Payment method name'}</label>
+                                        <input autoFocus type="text" value={customDraft.title} onChange={e => setCustomDraft(previous => ({ ...previous, title: e.target.value }))} placeholder={isRTL ? 'اكتب اسم طريقة الدفع' : 'Enter payment method name'} className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 font-bold text-gray-800 outline-none focus:border-blue-500" />
+                                    </div>
+                                    <div className="flex items-start gap-5">
+                                        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center">
+                                            {customDraft.iconUrl ? <img src={customDraft.iconUrl} className="h-full w-full object-cover" alt="" /> : <CreditCard className="text-gray-300" size={32} />}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <input id="custom-payment-icon" type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleCustomIconChange} />
+                                            <label htmlFor="custom-payment-icon" className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-black text-blue-600 hover:bg-blue-100">
+                                                {isUploadingIcon ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}{isRTL ? 'رفع أيقونة' : 'Upload icon'}
+                                            </label>
+                                            {customDraft.iconUrl && <button type="button" onClick={() => setCustomDraft(previous => ({ ...previous, iconUrl: '' }))} className="block rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-100"><Trash2 size={13} className="ml-1 inline" />{isRTL ? 'حذف الصورة' : 'Remove image'}</button>}
+                                            <p className="text-xs font-bold text-gray-400">{isRTL ? 'اختياري: JPG أو PNG أو WebP' : 'Optional: JPG, PNG, or WebP'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
+                                    <button type="button" onClick={saveCustomMethod} disabled={isUploadingIcon || isSaving} className="rounded-xl bg-blue-600 px-7 py-3 font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-50">{isSaving ? txt.saving : txt.save}</button>
+                                    <button type="button" onClick={() => setShowCustomModal(false)} className="rounded-xl border border-gray-200 bg-white px-7 py-3 font-bold text-gray-700 hover:bg-gray-50">{txt.cancel}</button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </>
+                )}
+            </AnimatePresence>
 
             {/* Configuration Modal */}
             <AnimatePresence>
