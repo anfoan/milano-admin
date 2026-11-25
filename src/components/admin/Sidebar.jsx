@@ -4,7 +4,7 @@ import { db } from '../../lib/firebase';
 import {
     LayoutDashboard, Box, ShoppingCart, ShoppingBasket, ClipboardList, Plus, Percent,
     UserX, MessageSquare, Settings, CreditCard,
-    Palette, Truck, Briefcase, Inbox, Users,
+    Palette, Truck, Briefcase, Users,
     PhoneCall, LogOut, ChevronDown, Star, ShoppingBag, Tag, Receipt, BarChart3, Wallet, Store
 } from 'lucide-react';
 
@@ -22,11 +22,11 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             product_list: 'قائمة المنتجات',
             inventory: 'إدارة المخزون',
             orders: 'الطلبات',
-            discount: 'الخصم',
+            discount: 'الخصومات',
             coupons: 'الكوبونات',
             limited_offers: 'عرض لفترة محدودة',
             reviews: 'آراء العملاء',
-            inbox: 'صندوق الوارد',
+            inbox: 'خدمة العملاء',
             delivery: 'إعدادات التوصيل',
             payments: 'المدفوعات',
             store_settings: 'إعدادات المتجر',
@@ -52,11 +52,11 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
             product_list: 'Product List',
             inventory: 'Inventory',
             orders: 'Orders',
-            discount: 'Discount',
+            discount: 'Discounts',
             coupons: 'Coupons',
             limited_offers: 'Limited Offers',
             reviews: 'Reviews',
-            inbox: 'Inbox',
+            inbox: 'Customer Service',
             delivery: 'Delivery',
             payments: 'Payments',
             store_settings: 'Store Settings',
@@ -122,7 +122,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen, lang, t
                 { id: 'limited-offers', name: txt.limited_offers }
             ]
         },
-        { id: 'inbox', name: txt.inbox, icon: <Inbox size={20} /> },
+        { id: 'inbox', name: txt.inbox, icon: <MessageSquare size={20} /> },
         { id: 'reviews', name: txt.reviews, icon: <Star size={20} /> },
         { id: 'delivery', name: txt.delivery, icon: <Truck size={20} /> },
         { id: 'payments', name: txt.payments, icon: <CreditCard size={20} /> },
