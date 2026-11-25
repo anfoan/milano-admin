@@ -5,6 +5,8 @@ import { collection, query, getDocs, doc, updateDoc, serverTimestamp } from 'fir
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 
+const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 1632));
+
 const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -767,10 +769,11 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                                             <input
                                                 id="discountAmountInput"
                                                 type="number"
+                                                dir="ltr"
                                                 min="0"
-                                                value={discountAmountInput}
+                                                value={toEnglishDigits(discountAmountInput)}
                                                 onChange={(e) => {
-                                                    setDiscountAmountInput(e.target.value);
+                                                    setDiscountAmountInput(toEnglishDigits(e.target.value));
                                                     setLastInteracted('amount');
                                                 }}
                                                 disabled={!applyToAll && selectedProducts.length === 0}
@@ -778,7 +781,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                                                 className="w-full h-[52px] px-4 bg-white border-2 border-gray-200 rounded-2xl text-lg font-black text-blue-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-50 disabled:bg-gray-100"
                                             />
                                             <span className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 text-gray-400 font-black text-lg`}>
-                                                {txt.currency}
+                                                {currency}
                                             </span>
                                         </div>
                                     </div>
