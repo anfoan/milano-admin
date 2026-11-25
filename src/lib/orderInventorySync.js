@@ -52,7 +52,13 @@ export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
         const groups = groupedItems(order.cartItems);
         const productIds = [...groups.keys()];
         const productRefs = productIds.map(id => doc(db, 'products', id));
-        const productSnaps = await Promise.all(productRefs.map(ref => transaction.get(ref)));
+        // Firestore transactions require every read to finish before any write.
+        // Read product documents sequentially so status changes cannot abort
+        // before the inventory update on browsers with strict transaction checks.
+        const productSnaps = [];
+        for (const productRef of productRefs) {
+            productSnaps.push(await transaction.get(productRef));
+        }
         const inventoryChanges = [];
 
         productSnaps.forEach((snap, index) => {

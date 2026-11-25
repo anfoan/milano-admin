@@ -36,7 +36,12 @@ export const reconcilePendingCustomerOrder = async (orderId) => {
         });
         const productIds = [...grouped.keys()];
         const productRefs = productIds.map(id => doc(db, 'products', id));
-        const productSnaps = await Promise.all(productRefs.map(ref => transaction.get(ref)));
+        // Read product documents sequentially before any writes so the transaction
+        // remains reliable on browsers that reject concurrent transaction reads.
+        const productSnaps = [];
+        for (const productRef of productRefs) {
+            productSnaps.push(await transaction.get(productRef));
+        }
 
         productSnaps.forEach((snap, index) => {
             const productId = productIds[index];
