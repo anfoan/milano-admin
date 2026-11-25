@@ -2417,7 +2417,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                             ? (qty > 0 ? 'font-black bg-orange-200 text-orange-700 opacity-100' : 'font-bold bg-orange-100 text-orange-600')
                                                             : (qty > 0 ? 'font-black bg-green-200 text-green-800 opacity-100' : 'font-bold bg-green-100 text-green-700')
                                                 }`}>
-                                                    {sizeStock} قطعة
+                                                    {Math.max(0, sizeStock - qty)} قطعة
                                                 </span>
                                             </div>
                                             <div dir="ltr" className="flex items-center gap-2">
