@@ -20,12 +20,12 @@ export const getNextInvoiceNumber = async (db) => {
     });
 };
 
-export const getNextPurchaseInvoiceNumber = async (db) => {
+export const getNextPurchaseInvoiceNumber = async (db, minimumNextNumber = 79420) => {
     const counterRef = doc(db, ...COUNTER_PATH);
     return runTransaction(db, async (transaction) => {
         const snapshot = await transaction.get(counterRef);
         const stored = snapshot.exists() ? Number(snapshot.data()?.purchaseInvoiceSequence || 0) : 0;
-        const current = Math.max(stored, 19400);
+        const current = Math.max(stored, Number(minimumNextNumber) - 1, 79419);
         const next = current + 1;
         transaction.set(counterRef, {
             purchaseInvoiceSequence: next,

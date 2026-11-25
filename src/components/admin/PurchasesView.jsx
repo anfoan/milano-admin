@@ -109,21 +109,14 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
     const invoiceStatusTextClass = value => invoiceStatusTone(value) === 'paid' ? 'text-emerald-600' : invoiceStatusTone(value) === 'deferred' ? 'text-amber-600' : 'text-rose-600';
 
     const resetForm = () => { setForm({ invoiceNumber: '', supplierName: '', supplierPhone: '', date: new Date().toISOString().slice(0, 10), paid: '', remaining: '', notes: '', paymentMethod: 'cash', invoiceStatus: 'pending', items: [] }); setNewItem(makeEmptyItem()); };
-    const openAdd = async () => {
-        const localNextNumber = String(Math.max(19400, ...purchases.map(item => Number(item.invoiceNumber) || 0)) + 1);
+    const openAdd = () => {
+        const localNextNumber = String(Math.max(79419, ...purchases.map(item => Number(item.invoiceNumber) || 0)) + 1);
         setEditingId(null);
         resetForm();
         setForm(prev => ({ ...prev, invoiceNumber: localNextNumber }));
         setProductPickerOpen(false);
         setEditingItemIndex(null);
         setModalOpen(true);
-        try {
-            const invoiceNumber = await getNextPurchaseInvoiceNumber(db);
-            setForm(prev => ({ ...prev, invoiceNumber: prev.invoiceNumber === localNextNumber ? invoiceNumber : prev.invoiceNumber }));
-        } catch (error) {
-            console.error('Reserve purchase invoice number:', error);
-            alert(isRTL ? 'تعذر إنشاء رقم فاتورة المشتريات' : 'Could not create a purchase invoice number');
-        }
     };
     const openEdit = item => { setEditingId(item.id); setForm({ invoiceNumber: toEnglishDigits(item.invoiceNumber || ''), supplierName: item.supplierName || '', supplierPhone: toEnglishDigits(item.supplierPhone || ''), date: dateInput(item.date || new Date().toISOString().slice(0, 10)), paid: numericInput(item.paid ?? ''), remaining: numericInput(item.remaining ?? remainingOf(item)), notes: item.notes || '', paymentMethod: item.paymentMethod || 'cash', invoiceStatus: statusOf(item), items: getInvoiceItems(item).map(line => ({ ...line, quantity: toEnglishDigits(line.quantity ?? ''), unitCost: numericInput(line.unitCost ?? '') })) }); setNewItem(makeEmptyItem()); setProductPickerOpen(false); setEditingItemIndex(null); setModalOpen(true); };
     const updateStock = async (productId, delta) => { if (productId && delta) await updateDoc(doc(db, 'products', productId), { stock: increment(Number(delta)) }); };
@@ -160,7 +153,9 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
         if (!form.date || !form.supplierName.trim() || !form.supplierPhone.trim() || !form.invoiceStatus || !items.length) { alert(t.required); return; }
         setSaving(true);
         try {
-            const invoiceNumber = editingId ? form.invoiceNumber.trim() : (form.invoiceNumber.trim() || await getNextPurchaseInvoiceNumber(db));
+            const highestSavedNumber = Math.max(0, ...purchases.map(item => Number(item.invoiceNumber) || 0));
+            const nextSavedNumber = Math.max(79420, highestSavedNumber + 1);
+            const invoiceNumber = editingId ? form.invoiceNumber.trim() : await getNextPurchaseInvoiceNumber(db, nextSavedNumber);
             const payload = { invoiceNumber, supplierName: form.supplierName.trim(), supplierPhone: form.supplierPhone.trim(), productId: items[0]?.productId || '', productName: items.map(item => item.productName).join('، '), date: form.date, quantity: items.reduce((sum, item) => sum + item.quantity, 0), unitCost: items[0]?.unitCost || 0, total, paid: Math.max(0, Number(form.paid) || 0), remaining: Math.max(0, total - (Number(form.paid) || 0)), currency, notes: form.notes.trim(), paymentMethod: form.paymentMethod, invoiceStatus: form.invoiceStatus, items, updatedAt: serverTimestamp() };
             if (editingId) {
                 const old = purchases.find(item => item.id === editingId);
