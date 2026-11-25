@@ -768,17 +768,18 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                                         <div className="relative">
                                             <input
                                                 id="discountAmountInput"
-                                                type="number"
+                                                type="text"
+                                                inputMode="decimal"
                                                 dir="ltr"
                                                 min="0"
                                                 value={toEnglishDigits(discountAmountInput)}
                                                 onChange={(e) => {
-                                                    setDiscountAmountInput(toEnglishDigits(e.target.value));
+                                                    setDiscountAmountInput(toEnglishDigits(e.target.value).replace(/[^0-9.]/g, ''));
                                                     setLastInteracted('amount');
                                                 }}
                                                 disabled={!applyToAll && selectedProducts.length === 0}
                                                 placeholder={!applyToAll && selectedProducts.length === 0 ? (lang === 'ar' ? 'اختر منتج من الأسفل' : 'Select product') : '0'}
-                                                className="w-full h-[52px] px-4 bg-white border-2 border-gray-200 rounded-2xl text-lg font-black text-blue-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-50 disabled:bg-gray-100"
+                                                className="w-full h-[52px] px-4 bg-white border-2 border-gray-200 rounded-2xl text-right text-lg font-black text-blue-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all disabled:opacity-50 disabled:bg-gray-100"
                                             />
                                             <span className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 text-gray-400 font-black text-lg`}>
                                                 {currency}
