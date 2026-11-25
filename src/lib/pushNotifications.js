@@ -1,19 +1,8 @@
-import { collection, deleteDoc, doc, getDocs, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
 const PUSH_CONFIG_URL = '/api/push/config';
 const PUSH_SUBSCRIBE_URL = '/api/push/subscribe';
-
-const subscriptionDocumentId = async (endpoint) => {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint));
-  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
-};
-
-const removeSubscriptionRecords = async (endpoint) => {
-  if (!endpoint) return;
-  const snapshot = await getDocs(query(collection(db, 'push_subscriptions'), where('endpoint', '==', endpoint)));
-  await Promise.all(snapshot.docs.map(item => deleteDoc(item.ref)));
-};
 
 const decodeVapidKey = (value) => {
   const normalized = `${value}${'='.repeat((4 - (value.length % 4)) % 4)}`.replace(/-/g, '+').replace(/_/g, '/');
@@ -32,7 +21,6 @@ export const enableAdminPush = async () => {
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') throw new Error('permission-denied');
   const registration = await getAdminPushRegistration();
-  try { await registration.update(); } catch (_) { /* the active worker can still be used */ }
   const configResponse = await fetch(PUSH_CONFIG_URL, { cache: 'no-store' });
   if (!configResponse.ok) throw new Error('push-config-failed');
   const { publicKey } = await configResponse.json();
@@ -41,15 +29,10 @@ export const enableAdminPush = async () => {
   // Recreate the subscription after a PWA/Service Worker update so iOS does not
   // keep routing pushes through a stale Apple endpoint.
   if (subscription) {
-    const oldEndpoint = subscription.endpoint;
     try { await subscription.unsubscribe(); } catch (_) { /* continue with a fresh subscription */ }
-    await removeSubscriptionRecords(oldEndpoint);
   }
   subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: decodeVapidKey(publicKey) });
   const subscriptionJson = subscription.toJSON();
-  if (!subscriptionJson.endpoint || !subscriptionJson.keys?.p256dh || !subscriptionJson.keys?.auth) {
-    throw new Error('push-subscription-incomplete');
-  }
   const record = {
     endpoint: subscriptionJson.endpoint,
     p256dh: subscriptionJson.keys?.p256dh || '',
@@ -60,14 +43,12 @@ export const enableAdminPush = async () => {
     updatedAt: serverTimestamp(),
     enabled: true
   };
-  const recordId = await subscriptionDocumentId(subscriptionJson.endpoint);
-  await setDoc(doc(db, 'push_subscriptions', recordId), record);
-  const serverResponse = await fetch(PUSH_SUBSCRIBE_URL, {
+  await addDoc(collection(db, 'push_subscriptions'), record);
+  await fetch(PUSH_SUBSCRIBE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ subscription: subscriptionJson })
-  });
-  if (!serverResponse.ok) throw new Error('push-subscription-server-rejected');
+  }).catch(() => {});
   return subscription;
 };
 
@@ -82,9 +63,5 @@ export const disableAdminPush = async () => {
   if (!('serviceWorker' in navigator)) return;
   const registration = await getAdminPushRegistration();
   const subscription = await registration.pushManager.getSubscription();
-  if (subscription) {
-    const endpoint = subscription.endpoint;
-    await subscription.unsubscribe();
-    await removeSubscriptionRecords(endpoint);
-  }
+  if (subscription) await subscription.unsubscribe();
 };
