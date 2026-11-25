@@ -20,7 +20,7 @@ import InvoiceTemplate from '../InvoiceTemplate';
 import DraggableScrollContainer from '../DraggableScrollContainer';
 import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { syncOrderInventoryForStatus } from '../../lib/orderInventorySync';
-import { getSizeStock, resolveSizeKey, toStockNumber } from '../../lib/stockUtils';
+import { getSizeStock, getSizeStocksTotal, resolveSizeKey, toStockNumber } from '../../lib/stockUtils';
 import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 import { isValidYemenPhone } from '../../lib/phoneValidation';
 import { notifyAdminOfNewOrder } from '../../lib/pushOrderEvent';
@@ -695,7 +695,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             if (nextQuantity < 0) throw new Error('INSUFFICIENT_SIZE_STOCK');
                             nextSizes[resolvedKey] = nextQuantity;
                         });
-                        nextStock = Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, toStockNumber(quantity)), 0);
+                        nextStock = getSizeStocksTotal(data, nextSizes) ?? Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, toStockNumber(quantity)), 0);
                         transaction.update(productRefs[index], { stock: nextStock, sizeStocks: nextSizes });
                     } else {
                         nextStock = toStockNumber(data.stock) + delta.stock;
@@ -739,7 +739,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         }
                         // Sync total stock with sum of sizes if product has sizes
                         if (data.sizeStocks && Object.keys(data.sizeStocks).length > 0) {
-                            const sumOfSizes = Object.values(data.sizeStocks).reduce((sum, qty) => sum + Number(qty || 0), 0);
+                            const sumOfSizes = getSizeStocksTotal(data) ?? Object.values(data.sizeStocks).reduce((sum, qty) => sum + Number(qty || 0), 0);
                             const currentStock = Number(data.stock || 0);
                             const adjustedStock = fixes.stock !== undefined ? 0 : currentStock;
                             if (adjustedStock !== sumOfSizes) {

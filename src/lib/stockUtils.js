@@ -28,10 +28,19 @@ export const resolveSizeKey = (sizeStocks, requestedSize) => {
     return Object.keys(sizeStocks || {}).find(candidate => normalizeSize(candidate) === normalizeSize(requestedSize)) || null;
 };
 
+export const getSizeStocksTotal = (product, sizeStocks = product?.sizeStocks) => {
+    const values = product?.variants?.find(variant => variant.type === 'size')?.values || [];
+    if (values.length === 0) return null;
+    return values.reduce((sum, size) => {
+        const key = resolveSizeKey(sizeStocks, size);
+        return sum + (key == null ? 0 : Math.max(0, toStockNumber(sizeStocks?.[key])));
+    }, 0);
+};
+
 export const getAvailableProductStock = product => {
     const stocks = product?.sizeStocks;
     if (stocks && typeof stocks === 'object' && Object.keys(stocks).length > 0) {
-        return Object.values(stocks).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0);
+        return getSizeStocksTotal(product, stocks) ?? Object.values(stocks).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0);
     }
     return Math.max(0, toStockNumber(product?.stock));
 };

@@ -1,5 +1,6 @@
 import { collection, doc, increment, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
+import { getSizeStocksTotal } from './stockUtils';
 
 /**
  * Reconciles an order that was safely created by a customer while public
@@ -50,7 +51,7 @@ export const reconcilePendingCustomerOrder = async (orderId) => {
             const product = snap.data();
             const hasSizeStocks = product.sizeStocks && Object.keys(product.sizeStocks).length > 0;
             const stock = hasSizeStocks
-                ? Object.values(product.sizeStocks).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0)
+                ? getSizeStocksTotal(product) ?? Object.values(product.sizeStocks).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0)
                 : Math.max(0, Number(product.stock || 0));
             if (group.total <= 0 || group.total > stock) throw new Error(`INSUFFICIENT_STOCK:${productId}`);
             const updates = { stock: stock - group.total };
@@ -64,7 +65,7 @@ export const reconcilePendingCustomerOrder = async (orderId) => {
                     nextSizes[item.size] = sizeStock - amount;
                 });
                 updates.sizeStocks = nextSizes;
-                updates.stock = Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0);
+                updates.stock = getSizeStocksTotal(product, nextSizes) ?? Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0);
             }
             transaction.update(productRefs[index], updates);
         });

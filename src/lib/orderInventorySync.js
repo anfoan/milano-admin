@@ -1,7 +1,7 @@
 import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { isCompletedOrderStatus } from './walletRewards';
-import { toStockNumber } from './stockUtils';
+import { getSizeStocksTotal, toStockNumber } from './stockUtils';
 import { notifyAdminOfInventoryChanges } from './pushEvent';
 
 const itemSize = item => item?.selectedSize || item?.size || '';
@@ -81,7 +81,7 @@ export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
                     if (next < 0) throw new Error(`INSUFFICIENT_SIZE_STOCK:${productIds[index]}:${resolvedKey}`);
                     currentSizes[resolvedKey] = next;
                 });
-                nextStock = Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0);
+                nextStock = getSizeStocksTotal(product, currentSizes) ?? Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0);
                 transaction.update(productRefs[index], {
                     sizeStocks: currentSizes,
                     stock: nextStock

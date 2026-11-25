@@ -15,7 +15,7 @@ import {
 import { motion } from 'framer-motion';
 import { useCurrency } from '../../context/CurrencyContext';
 import InvoiceTemplate from '../InvoiceTemplate';
-import { getAvailableProductStock, getSizeStock } from '../../lib/stockUtils';
+import { getAvailableProductStock, getSizeStock, getSizeStocksTotal } from '../../lib/stockUtils';
 import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 import { isValidYemenPhone } from '../../lib/phoneValidation';
 
@@ -450,7 +450,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                     const data = snap.data();
                     const hasSizeStocks = data.sizeStocks && Object.keys(data.sizeStocks).length > 0;
                     const currentStock = hasSizeStocks
-                        ? Object.values(data.sizeStocks).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0)
+                        ? getSizeStocksTotal(data) ?? Object.values(data.sizeStocks).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0)
                         : Math.max(0, Number(data.stock || 0));
                     if (group.total > currentStock) throw new Error('INSUFFICIENT_STOCK');
                     if (hasSizeStocks) {

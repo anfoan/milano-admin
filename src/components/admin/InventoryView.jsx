@@ -8,6 +8,7 @@ import {
 import { db } from '../../lib/firebase';
 import { collection, query, getDocs, doc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
+import { getSizeStocksTotal } from '../../lib/stockUtils';
 import { safeSessionGet, safeSessionSet, safeJsonParse } from '../../lib/safeStorage';
 
 const INVENTORY_CACHE_KEY = 'milano_admin_inventory_snapshot_v1';
@@ -35,9 +36,7 @@ const getInventorySizeSlots = (product) => {
 };
 
 const getProductSizeStockTotal = (product) => {
-    const sizeValues = product.variants?.find(variant => variant.type === 'size')?.values || [];
-    if (sizeValues.length === 0) return null;
-    return sizeValues.reduce((sum, size) => sum + (Number(product.sizeStocks?.[size]) || 0), 0);
+    return getSizeStocksTotal(product);
 };
 
 const toEnglishDigits = (value) => String(value ?? '').replace(/[٠-٩۰-۹]/g, digit => {
@@ -169,11 +168,17 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                     id: doc.id,
                     ...doc.data()
                 }));
+                // Keep the displayed total synchronized with the actual size rows.
+                // This also prevents stale/orphan size keys from inflating stock.
+                const correctedItems = items.map(product => {
+                    const sizeTotal = getProductSizeStockTotal(product);
+                    return sizeTotal === null ? product : { ...product, stock: sizeTotal };
+                });
                 // Sort by sortOrder if available
-                items.sort((a, b) => (a.sortOrder ?? 99999) - (b.sortOrder ?? 99999));
-                setProducts(items);
-                setManualOrder(items);
-                safeSessionSet(INVENTORY_CACHE_KEY, JSON.stringify(toInventoryCacheItems(items)));
+                correctedItems.sort((a, b) => (a.sortOrder ?? 99999) - (b.sortOrder ?? 99999));
+                setProducts(correctedItems);
+                setManualOrder(correctedItems);
+                safeSessionSet(INVENTORY_CACHE_KEY, JSON.stringify(toInventoryCacheItems(correctedItems)));
                 // Render the inventory immediately; data cleanup continues in the background.
                 setLoading(false);
                 
