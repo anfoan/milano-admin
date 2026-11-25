@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Percent, Plus, Trash2, Tag, Calendar, Users, Edit2 } from 'lucide-react';
 import { db } from '../../lib/firebase';
-import { collection, query, orderBy, onSnapshot, doc, deleteDoc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, getDocs, doc, deleteDoc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
@@ -140,6 +140,19 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
         return toBaseCouponAmount(displayedMinimum);
     };
 
+    const syncCouponUsageCounts = async (fetchedCoupons) => {
+        const ordersSnapshot = await getDocs(collection(db, 'orders'));
+        const usageByCoupon = {};
+        ordersSnapshot.forEach(orderDoc => {
+            const couponId = orderDoc.data()?.couponId;
+            if (couponId) usageByCoupon[couponId] = (usageByCoupon[couponId] || 0) + 1;
+        });
+        await Promise.all(fetchedCoupons
+            .filter(coupon => !coupon.isUnlimited)
+            .filter(coupon => Number(coupon.usedCount || 0) !== Number(usageByCoupon[coupon.id] || 0))
+            .map(coupon => updateDoc(doc(db, 'coupons', coupon.id), { usedCount: Number(usageByCoupon[coupon.id] || 0) })));
+    };
+
     useEffect(() => {
         const q = query(collection(db, "coupons"), orderBy("createdAt", "desc"));
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -149,6 +162,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
             }));
             setCoupons(fetchedCoupons);
             setLoading(false);
+            void syncCouponUsageCounts(fetchedCoupons).catch(error => console.error('Coupon usage sync failed:', error));
         });
 
         return () => unsubscribe();
