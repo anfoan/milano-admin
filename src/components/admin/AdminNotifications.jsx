@@ -153,7 +153,7 @@ const AdminNotifications = ({ lang: propLang }) => {
         const unsubscribeFullOrders = onSnapshot(fullOrdersQ, (snap) => {
              const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
              setOrderNotifications(orders);
-             orders.filter(order => order.inventorySyncPending).forEach(order => {
+             orders.filter(order => order.inventorySyncPending || order.couponUsagePending).forEach(order => {
                  if (pendingSyncIdsRef.current.has(order.id)) return;
                  pendingSyncIdsRef.current.add(order.id);
                  reconcilePendingCustomerOrder(order.id)

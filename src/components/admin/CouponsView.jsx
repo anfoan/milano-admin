@@ -350,7 +350,7 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                             <table className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
                                 <thead className="bg-gray-50 text-gray-600 border-b border-gray-100">
                                     <tr>
-                                        <th className="p-6 font-bold">{txt.th_coupon}</th>
+                                        <th className="relative -left-4 p-6 font-bold">{txt.th_coupon}</th>
                                         <th className="p-6 font-bold">{txt.th_created}</th>
                                         <th className="p-6 font-bold">{txt.th_expiry}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_discount}</th>
@@ -384,17 +384,17 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                                                     <span className="text-gray-500 font-bold text-sm" dir="ltr">{coupon.createdAtDisplay?.split(' ')[0] || 'N/A'}</span>
                                                 </td>
                                                 <td className="p-6">
-                                                    <span className={`font-bold text-sm ${coupon.expiryDate ? 'text-orange-500' : 'text-green-500'}`} dir="ltr">
+                                                    <span className={`relative -left-3 font-bold text-sm ${coupon.expiryDate ? 'text-orange-500' : 'text-green-500'}`} dir="ltr">
                                                         {coupon.expiryDate || txt.open}
                                                     </span>
                                                 </td>
                                                 <td className="p-6 text-center">
                                                     {coupon.discountType === 'free' ? (
-                                                        <span className="inline-flex px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-black">{lang === 'ar' ? 'توصيل مجاني' : 'Free delivery'}</span>
+                                                        <span className="inline-flex px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-black">{lang === 'ar' ? 'توصيل مجاني' : 'Free delivery'}</span>
                                                     ) : couponHasFixedAmount(coupon) ? (
-                                                        <span className="inline-flex px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-xs font-black">{formatDiscountAmount(coupon)}</span>
+                                                        <span className="inline-flex px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-black">{formatDiscountAmount(coupon)}</span>
                                                     ) : (
-                                                        <span className="font-black text-gray-400 text-sm">{coupon.discountPercent || 0}%</span>
+                                                        <span className="font-black text-red-600 text-sm">{coupon.discountPercent || 0}%</span>
                                                     )}
                                                 </td>
                                                 <td className="p-6 text-center font-bold text-gray-600">

@@ -12,7 +12,20 @@ export const reconcilePendingCustomerOrder = async (orderId) => {
         const orderSnap = await transaction.get(orderRef);
         if (!orderSnap.exists()) return { reconciled: false, reason: 'order-missing' };
         const order = orderSnap.data();
-        if (!order.inventorySyncPending) return { reconciled: false, reason: 'already-synced' };
+        if (!order.inventorySyncPending && !order.couponUsagePending) return { reconciled: false, reason: 'already-synced' };
+
+        if (!order.inventorySyncPending && order.couponUsagePending && order.couponId) {
+            const couponRef = doc(db, 'coupons', order.couponId);
+            const couponSnap = await transaction.get(couponRef);
+            if (couponSnap.exists() && !couponSnap.data().isUnlimited) {
+                const used = Number(couponSnap.data().usedCount || 0);
+                const max = Number(couponSnap.data().maxUses || 0);
+                if (used >= max) throw new Error('COUPON_LIMIT_REACHED');
+                transaction.update(couponRef, { usedCount: increment(1) });
+            }
+            transaction.update(orderRef, { couponUsagePending: false, couponUsageSyncedAt: serverTimestamp() });
+            return { reconciled: true, couponOnly: true };
+        }
 
         const grouped = new Map();
         (order.cartItems || []).forEach(item => {
@@ -51,7 +64,7 @@ export const reconcilePendingCustomerOrder = async (orderId) => {
             transaction.update(productRefs[index], updates);
         });
 
-        if (order.couponId) {
+        if (order.couponId && (order.couponUsagePending || order.inventorySyncPending)) {
             const couponRef = doc(db, 'coupons', order.couponId);
             const couponSnap = await transaction.get(couponRef);
             if (couponSnap.exists() && !couponSnap.data().isUnlimited) {
@@ -77,6 +90,7 @@ export const reconcilePendingCustomerOrder = async (orderId) => {
         transaction.update(orderRef, {
             inventorySyncPending: false,
             inventorySyncStatus: 'synced-by-admin',
+            couponUsagePending: false,
             walletDebitPending: false,
             inventorySyncedAt: serverTimestamp()
         });
