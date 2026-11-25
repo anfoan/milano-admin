@@ -350,8 +350,8 @@ const CouponsView = ({ lang = 'ar', generalSettings }) => {
                             <table className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
                                 <thead className="bg-gray-50 text-gray-600 border-b border-gray-100">
                                     <tr>
-                                        <th className="relative -left-4 p-6 font-bold">{txt.th_coupon}</th>
-                                        <th className="p-6 font-bold">{txt.th_created}</th>
+                                        <th className="relative -translate-x-4 p-6 font-bold">{txt.th_coupon}</th>
+                                        <th className="relative left-1 p-6 font-bold">{txt.th_created}</th>
                                         <th className="p-6 font-bold">{txt.th_expiry}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_discount}</th>
                                         <th className="p-6 font-bold text-center">{txt.th_max}</th>
