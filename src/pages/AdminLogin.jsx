@@ -1,4 +1,4 @@
-import { safeSessionSet, safeSessionRemove } from '../lib/safeStorage';
+import { safeLocalGet, safeLocalRemove, safeLocalSet, safeJsonParse, safeSessionSet, safeSessionRemove } from '../lib/safeStorage';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Mail, User, ShieldCheck, Loader2, Eye, EyeOff } from 'lucide-react';
@@ -6,9 +6,13 @@ import { auth, db } from '../lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, query, getDocs, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 
+const REMEMBERED_LOGIN_KEY = 'milano_admin_remembered_login';
+const getRememberedLogin = () => safeJsonParse(safeLocalGet(REMEMBERED_LOGIN_KEY), {}) || {};
+
 const AdminLogin = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState(() => getRememberedLogin().username || '');
+    const [password, setPassword] = useState(() => getRememberedLogin().password || '');
+    const [rememberLogin, setRememberLogin] = useState(() => getRememberedLogin().remember === true);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -16,6 +20,11 @@ const AdminLogin = () => {
 
     const isEmail = (val) => val.includes('@');
     const isWorkerEmail = (val) => val.trim().toLowerCase().endsWith('@milano-store.com');
+    const updateRememberedLogin = () => {
+        if (rememberLogin) {
+            safeLocalSet(REMEMBERED_LOGIN_KEY, JSON.stringify({ username: username.trim(), password, remember: true }));
+        }
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -73,6 +82,7 @@ const AdminLogin = () => {
                             allowBonds: foundWorker.allowBonds || false
                         };
                         safeSessionSet('posWorkerPermissions', JSON.stringify(perms));
+                        updateRememberedLogin();
                         navigate('/milano-dashboard-vault-77');
                     } else {
                         setError('اسم المستخدم أو كلمة المرور غير صحيحة');
@@ -127,6 +137,7 @@ const AdminLogin = () => {
                 safeSessionRemove('posWorkerName');
                 safeSessionRemove('posWorkerPermissions');
 
+                updateRememberedLogin();
                 navigate('/milano-dashboard-vault-77');
             }
         } catch (err) {
@@ -182,7 +193,22 @@ const AdminLogin = () => {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-black text-gray-700 dark:text-gray-300 block mr-1">كلمة المرور</label>
+                        <div className="flex items-center justify-between gap-3">
+                            <label className="text-sm font-black text-gray-700 dark:text-gray-300 block mr-1">كلمة المرور</label>
+                            <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-bold text-gray-500 dark:text-gray-400">
+                                <span>تذكير</span>
+                                <input
+                                    type="checkbox"
+                                    checked={rememberLogin}
+                                    onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setRememberLogin(checked);
+                                        if (!checked) safeLocalRemove(REMEMBERED_LOGIN_KEY);
+                                    }}
+                                    className="h-4 w-4 cursor-pointer accent-blue-600"
+                                />
+                            </label>
+                        </div>
                         <div className="relative">
                             <input
                                 type={showPassword ? 'text' : 'password'}
