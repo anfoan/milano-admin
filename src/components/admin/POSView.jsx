@@ -2420,7 +2420,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                     {sizeStock} قطعة
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div dir="ltr" className="flex items-center gap-2">
                                                 <button
                                                     onClick={() => setSizeModalQtys(prev => ({ ...prev, [size]: Math.max(0, (prev[size] || 0) - 1) }))}
                                                     className={`w-8 h-8 rounded-xl flex items-center justify-center font-black transition-all ${
