@@ -1,7 +1,7 @@
 import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { isCompletedOrderStatus } from './walletRewards';
-import { getSizeStocksTotal, toStockNumber } from './stockUtils';
+import { getCanonicalSizeStocks, getSizeStocksTotal, toStockNumber } from './stockUtils';
 import { notifyAdminOfInventoryChanges } from './pushEvent';
 
 const itemSize = item => item?.selectedSize || item?.size || '';
@@ -66,7 +66,7 @@ export const syncOrderInventoryForStatus = async (orderId, nextStatus) => {
             const product = snap.data();
             const group = groups.get(productIds[index]);
             const hasSizes = product.sizeStocks && Object.keys(product.sizeStocks).length > 0;
-            const currentSizes = hasSizes ? { ...product.sizeStocks } : null;
+            const currentSizes = hasSizes ? (getCanonicalSizeStocks(product) || { ...product.sizeStocks }) : null;
             const currentStock = hasSizes
                 ? Object.values(currentSizes).reduce((sum, value) => sum + Math.max(0, toStockNumber(value)), 0)
                 : Math.max(0, toStockNumber(product.stock));

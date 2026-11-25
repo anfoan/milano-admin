@@ -37,6 +37,15 @@ export const getSizeStocksTotal = (product, sizeStocks = product?.sizeStocks) =>
     }, 0);
 };
 
+export const getCanonicalSizeStocks = (product, sizeStocks = product?.sizeStocks) => {
+    const values = product?.variants?.find(variant => variant.type === 'size')?.values || [];
+    if (values.length === 0) return null;
+    return Object.fromEntries(values.map(size => {
+        const key = resolveSizeKey(sizeStocks, size);
+        return [size, key == null ? 0 : Math.max(0, toStockNumber(sizeStocks?.[key]))];
+    }));
+};
+
 export const getAvailableProductStock = product => {
     const stocks = product?.sizeStocks;
     if (stocks && typeof stocks === 'object' && Object.keys(stocks).length > 0) {

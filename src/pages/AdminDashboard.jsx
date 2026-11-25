@@ -29,6 +29,7 @@ import ThemeToggle from '../components/ThemeToggle'; // Theme Toggle
 import AdminNotifications from '../components/admin/AdminNotifications'; // New Notifications Component
 import AdminSidePanel from '../components/admin/AdminSidePanel'; // Side Panel
 import { disableAdminPush } from '../lib/pushNotifications';
+import { reconcileInventoryConsistency } from '../lib/inventoryConsistency';
 const DesignView = lazy(() => import('../components/admin/DesignView'));
 const ManualOrderView = lazy(() => import('../components/admin/ManualOrderView'));
 const FooterSettingsView = lazy(() => import('../components/admin/FooterSettingsView'));
@@ -118,6 +119,26 @@ const AdminDashboard = () => {
             window.clearTimeout(timerId);
         };
     }, []);
+
+    // Periodically repair only aggregate stock/size inconsistencies while the
+    // authenticated admin dashboard is open. POS workers do not run maintenance.
+    useEffect(() => {
+        if (isWorker) return undefined;
+        let cancelled = false;
+        const runConsistencyCheck = () => {
+            if (cancelled) return;
+            reconcileInventoryConsistency().catch(error => {
+                console.error('Inventory consistency check failed:', error);
+            });
+        };
+        const initialTimer = window.setTimeout(runConsistencyCheck, 15000);
+        const interval = window.setInterval(runConsistencyCheck, 5 * 60 * 1000);
+        return () => {
+            cancelled = true;
+            window.clearTimeout(initialTimer);
+            window.clearInterval(interval);
+        };
+    }, [isWorker]);
 
     // Keep the navigation drawer from consuming tablet content space after a rotation or resize.
     useEffect(() => {

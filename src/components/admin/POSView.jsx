@@ -20,7 +20,7 @@ import InvoiceTemplate from '../InvoiceTemplate';
 import DraggableScrollContainer from '../DraggableScrollContainer';
 import { syncWalletRewardForOrderStatus } from '../../lib/walletRewards';
 import { syncOrderInventoryForStatus } from '../../lib/orderInventorySync';
-import { getSizeStock, getSizeStocksTotal, resolveSizeKey, toStockNumber } from '../../lib/stockUtils';
+import { getCanonicalSizeStocks, getSizeStock, getSizeStocksTotal, resolveSizeKey, toStockNumber } from '../../lib/stockUtils';
 import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 import { isValidYemenPhone } from '../../lib/phoneValidation';
 import { notifyAdminOfNewOrder } from '../../lib/pushOrderEvent';
@@ -687,7 +687,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     const hasSizes = data.sizeStocks && Object.keys(data.sizeStocks).length > 0;
                     let nextStock;
                     if (hasSizes) {
-                        const nextSizes = { ...data.sizeStocks };
+                        const nextSizes = getCanonicalSizeStocks(data) || { ...data.sizeStocks };
                         Object.entries(delta.sizes).forEach(([size, amount]) => {
                             const resolvedKey = resolveSizeKey(nextSizes, size);
                             if (!resolvedKey) throw new Error('SIZE_NOT_FOUND');

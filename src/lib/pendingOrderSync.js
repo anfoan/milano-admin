@@ -1,11 +1,12 @@
 import { collection, doc, increment, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
-import { getSizeStocksTotal } from './stockUtils';
+import { getSizeStock, getSizeStocksTotal } from './stockUtils';
 
 /**
- * Reconciles an order that was safely created by a customer while public
- * Firestore rules correctly blocked direct inventory writes. This function
- * runs only from the authenticated admin dashboard and is idempotent.
+ * Validates an order that was safely created by a customer while public
+ * Firestore rules correctly blocked direct inventory writes. Inventory is
+ * intentionally committed only by the completed-status transaction, so this
+ * function cannot create an early deduction or a later double deduction.
  */
 export const reconcilePendingCustomerOrder = async (orderId) => {
     const orderRef = doc(db, 'orders', orderId);
@@ -54,20 +55,14 @@ export const reconcilePendingCustomerOrder = async (orderId) => {
                 ? getSizeStocksTotal(product) ?? Object.values(product.sizeStocks).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0)
                 : Math.max(0, Number(product.stock || 0));
             if (group.total <= 0 || group.total > stock) throw new Error(`INSUFFICIENT_STOCK:${productId}`);
-            const updates = { stock: stock - group.total };
             if (hasSizeStocks) {
-                const nextSizes = { ...product.sizeStocks };
                 group.items.forEach(item => {
-                    if (!item.size || !Object.prototype.hasOwnProperty.call(nextSizes, item.size)) throw new Error(`SIZE_REQUIRED:${productId}`);
+                    if (!item.size) throw new Error(`SIZE_REQUIRED:${productId}`);
                     const amount = Number(item.quantity || 0);
-                    const sizeStock = Number(nextSizes[item.size] || 0);
+                    const sizeStock = getSizeStock(product, item.size);
                     if (amount > sizeStock) throw new Error(`INSUFFICIENT_SIZE_STOCK:${productId}:${item.size}`);
-                    nextSizes[item.size] = sizeStock - amount;
                 });
-                updates.sizeStocks = nextSizes;
-                updates.stock = getSizeStocksTotal(product, nextSizes) ?? Object.values(nextSizes).reduce((sum, quantity) => sum + Math.max(0, Number(quantity) || 0), 0);
             }
-            transaction.update(productRefs[index], updates);
         });
 
         if (order.couponId && (order.couponUsagePending || order.inventorySyncPending)) {
@@ -95,7 +90,7 @@ export const reconcilePendingCustomerOrder = async (orderId) => {
         }
         transaction.update(orderRef, {
             inventorySyncPending: false,
-            inventorySyncStatus: 'synced-by-admin',
+            inventorySyncStatus: 'awaiting-completion',
             couponUsagePending: false,
             walletDebitPending: false,
             inventorySyncedAt: serverTimestamp()

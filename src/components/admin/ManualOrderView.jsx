@@ -441,7 +441,10 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             const productRefs = [...groupedItems.keys()].map((id) => doc(db, "products", id));
             const couponRef = appliedCoupon?.id ? doc(db, "coupons", appliedCoupon.id) : null;
             await runTransaction(db, async (transaction) => {
-                const productSnaps = await Promise.all(productRefs.map((ref) => transaction.get(ref)));
+                const productSnaps = [];
+                for (const productRef of productRefs) {
+                    productSnaps.push(await transaction.get(productRef));
+                }
                 const couponSnap = couponRef ? await transaction.get(couponRef) : null;
                 productSnaps.forEach((snap, index) => {
                     if (!snap.exists()) throw new Error('PRODUCT_NOT_FOUND');
