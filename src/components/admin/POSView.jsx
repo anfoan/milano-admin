@@ -2333,6 +2333,9 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                             const items = receipt.cartItems || [];
                                             const subtotal = Number(receipt.subTotal ?? items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0));
                                             const paymentLabel = receipt.paymentMethod === 'card' ? (isRTL ? 'محفظة جيب' : 'Jib Wallet') : receipt.paymentMethod === 'transfer' ? (isRTL ? 'تحويل بنكي' : 'Bank Transfer') : (isRTL ? 'نقدي / كاش' : 'Cash');
+                                            const receiptDate = receipt.createdAt?.toDate?.() || new Date();
+                                            const receiptDateText = receiptDate.toLocaleDateString('en-GB');
+                                            const previewPhone = generalSettings?.phoneNumber || '783700707';
                                             return (
                                                 <article key={receipt.id} className="mx-auto w-full max-w-[365px] rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#202328] p-3 shadow-sm">
                                                     <div className="flex items-center justify-between border-b border-dashed border-gray-300 dark:border-white/10 pb-3">
@@ -2340,11 +2343,12 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                         <button onClick={() => triggerPrint(receipt)} className="inline-flex items-center gap-1 rounded-md border border-blue-200 dark:border-blue-500/30 px-2 py-1 text-[9px] font-black text-blue-600 dark:text-blue-300"><Printer size={11} />{isRTL ? 'طباعة هذه الفاتورة' : 'Print invoice'}</button>
                                                     </div>
                                                     <div className="flex items-start justify-between gap-3 border-b border-dashed border-gray-300 dark:border-white/10 py-3">
-                                                        <div className="text-right"><h4 className="text-sm font-black text-gray-900 dark:text-white">{generalSettings?.storeName || (isRTL ? 'متجر ميلانو للرياضة' : 'Milano Sports Store')}</h4><p className="mt-1 text-[11px] font-bold text-gray-700 dark:text-gray-200">{generalSettings?.storeAddress || ''}</p></div>
+                                                        <div className="text-right"><h4 className="text-sm font-black text-gray-900 dark:text-white">{generalSettings?.storeName || (isRTL ? 'متجر ميلانو للرياضة' : 'Milano Sports Store')}</h4><p className="mt-1 text-[11px] font-bold text-gray-700 dark:text-gray-200">{generalSettings?.storeAddress || ''}</p><p dir="rtl" className="mt-1 text-[10px] font-black text-gray-700 dark:text-gray-200">ت / {previewPhone}</p></div>
                                                         <img src={generalSettings?.invoiceLogo || '/admin-logo.png'} alt="" className="h-10 w-10 rounded-xl object-cover" onError={(e) => { e.currentTarget.src = '/admin-logo.png'; }} />
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 border-b border-dashed border-gray-400 dark:border-white/20 py-3 text-[10px] font-black">
                                                         <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'رقم الإيصال:' : 'Receipt:'}</span><span className="font-sans text-left text-gray-900 dark:text-white">{displayOrderId(receipt.orderId || receipt.id)}</span>
+                                                        <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'التاريخ:' : 'Date:'}</span><span className="font-sans text-left text-gray-900 dark:text-white">{receiptDateText}</span>
                                                         <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'العميل:' : 'Customer:'}</span><span className="text-left text-gray-900 dark:text-white">{receipt.formData?.name || (isRTL ? 'زبون محلي' : 'Walk-in')}</span>
                                                         <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'طريقة الدفع:' : 'Payment:'}</span><span className="text-left text-gray-900 dark:text-white">{paymentLabel}</span>
                                                         <span className="text-gray-600 dark:text-gray-300">{isRTL ? 'الحالة:' : 'Status:'}</span><span className={receipt.status === 'cancelled' ? 'text-left text-red-600' : 'text-left text-emerald-600'}>{receipt.status === 'cancelled' ? (isRTL ? 'مسترجع' : 'Refunded') : (isRTL ? 'مكتمل' : 'Completed')}</span>
