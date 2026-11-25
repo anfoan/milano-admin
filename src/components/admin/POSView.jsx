@@ -2390,7 +2390,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         <p className="text-xs text-gray-400 font-bold font-sans mt-0.5">{sizeModalProduct.code || '---'}</p>
                                     </div>
                                     <button onClick={() => setShowSizeModal(false)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                                        <X size={20} className="text-gray-400" />
+                                        <X size={20} className="text-red-500" />
                                     </button>
                                 </div>
                             </div>
