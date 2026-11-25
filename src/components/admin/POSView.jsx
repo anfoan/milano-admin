@@ -2410,12 +2410,12 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         }`}>
                                             <div className="flex items-center gap-3">
                                                 <span className="font-black text-sm text-gray-700 min-w-[40px]">{size}:</span>
-                                                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                                                <span className={`text-[11px] px-2 py-0.5 rounded-full ${
                                                     sizeStock <= 0 
-                                                        ? 'bg-red-100 text-red-500' 
+                                                        ? 'font-bold bg-red-100 text-red-500'
                                                         : sizeStock <= 3 
-                                                            ? 'bg-orange-100 text-orange-600' 
-                                                            : 'bg-green-100 text-green-700'
+                                                            ? (qty > 0 ? 'font-black bg-orange-200 text-orange-700 opacity-100' : 'font-bold bg-orange-100 text-orange-600')
+                                                            : (qty > 0 ? 'font-black bg-green-200 text-green-800 opacity-100' : 'font-bold bg-green-100 text-green-700')
                                                 }`}>
                                                     {sizeStock} قطعة
                                                 </span>
