@@ -8,7 +8,7 @@ const stockPayload = (product) => {
   const name = product.name || 'منتج';
   return {
     type: isOut ? 'stock-out' : 'stock-low',
-    title: isOut ? `نفذ المخزون: ${name}` : `مخزون منخفض: ${name}`,
+    title: isOut ? 'نفذ المخزون ⛔️' : 'مخزون منخفض ⚠️',
     body: isOut ? `${name} — الكمية المتبقية: 0` : `${name} — الكمية المتبقية: ${quantity}`,
     productId: product.productId || '',
     productName: name,
@@ -29,7 +29,7 @@ export async function onRequestPost({ request, env }) {
     if (!message.id) return json({ error: 'Message id is required' }, 400);
     payload = {
       type: 'new-message',
-      title: 'رسالة جديدة من صندوق الوارد',
+      title: 'رسالة جديدة من العميل 💬',
       body: `${message.name || 'عميل'} — ${message.subject || 'رسالة جديدة'}`,
       messageId: message.id,
       image: message.image || '',

@@ -7,11 +7,15 @@ export async function onRequestPost({ request, env }) {
   if (!order.id && !order.orderId) return json({ error: 'Order id is required' }, 400);
   const firstItem = Array.isArray(order.cartItems) ? order.cartItems.find((item) => item?.image || item?.imageUrl || item?.productImage) : null;
   const firstImage = firstItem?.image || firstItem?.imageUrl || firstItem?.productImage || '';
+  const currencyCode = String(order.currency || 'YER').trim().toUpperCase();
+  const currencyLabel = { YER: 'ريال يمني', SAR: 'ريال سعودي', USD: 'دولار أمريكي' }[currencyCode] || currencyCode;
+  const total = order.total == null || order.total === '' ? NaN : Number(order.total);
+  const amount = Number.isFinite(total) ? `${total.toLocaleString('en-US')} ${currencyLabel}` : 'غير متوفر';
   try {
     const result = await sendToSubscriptions({
       type: 'new-order',
-      title: order.isPOS ? 'طلب جديد من نقطة البيع' : 'طلب جديد من المتجر',
-      body: `${order.formData?.name || 'عميل'} — ${order.orderId || order.id || ''}`,
+      title: order.isPOS ? 'طلب جديد من نقطة البيع 🛍️' : 'طلب جديد من المتجر 🛍️',
+      body: `${order.formData?.name || 'عميل'} — ${order.orderId || order.id || ''}\nمبلغ الطلب : ${amount}`,
       orderId: order.orderId || order.id || '',
       image: firstImage,
       icon: firstImage || '/admin-icon-192.png',
