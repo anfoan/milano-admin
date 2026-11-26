@@ -25,7 +25,7 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
     const makeEmptyItem = () => ({ productId: '', productName: '', quantity: '', unitCost: '' });
     const [form, setForm] = useState({
         invoiceNumber: '', supplierName: '', supplierPhone: '', date: new Date().toISOString().slice(0, 10),
-        paid: '', remaining: '', notes: '', paymentMethod: 'cash', invoiceStatus: 'pending', items: []
+        paid: '', remaining: '', notes: '', paymentMethod: 'cash', invoiceStatus: 'paid', items: []
     });
     const [newItem, setNewItem] = useState(makeEmptyItem());
     const [productPickerOpen, setProductPickerOpen] = useState(false);
@@ -108,7 +108,7 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
     const invoiceStatusTone = value => value === 'paid' ? 'paid' : value === 'deferred' || value === 'partial' ? 'deferred' : 'pending';
     const invoiceStatusTextClass = value => invoiceStatusTone(value) === 'paid' ? 'text-emerald-600' : invoiceStatusTone(value) === 'deferred' ? 'text-amber-600' : 'text-rose-600';
 
-    const resetForm = () => { setForm({ invoiceNumber: '', supplierName: '', supplierPhone: '', date: new Date().toISOString().slice(0, 10), paid: '', remaining: '', notes: '', paymentMethod: 'cash', invoiceStatus: 'pending', items: [] }); setNewItem(makeEmptyItem()); };
+    const resetForm = () => { setForm({ invoiceNumber: '', supplierName: '', supplierPhone: '', date: new Date().toISOString().slice(0, 10), paid: '', remaining: '', notes: '', paymentMethod: 'cash', invoiceStatus: 'paid', items: [] }); setNewItem(makeEmptyItem()); };
     const openAdd = () => {
         const localNextNumber = String(Math.max(79419, ...purchases.map(item => Number(item.invoiceNumber) || 0)) + 1);
         setEditingId(null);
