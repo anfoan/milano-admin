@@ -18,6 +18,7 @@ import InvoiceTemplate from '../InvoiceTemplate';
 import { getAvailableProductStock, getSizeStock, getSizeStocksTotal } from '../../lib/stockUtils';
 import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
 import { isValidYemenPhone } from '../../lib/phoneValidation';
+import { notifyAdminOfNewOrder } from '../../lib/pushOrderEvent';
 
 const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
     const isRTL = lang === 'ar';
@@ -472,6 +473,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                 transaction.set(orderRef, orderData);
             });
             const docRef = orderRef;
+            void notifyAdminOfNewOrder({ ...orderData, id: docRef.id }, 'external');
 
             setCreatedOrderId(orderId);
             setCreatedOrderData({ id: docRef.id, ...orderData });

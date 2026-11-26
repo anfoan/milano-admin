@@ -10,7 +10,7 @@ const send = (payload) => fetch(ADMIN_PUSH_EVENT_ENDPOINT, {
 export const notifyAdminOfInventoryChanges = (changes = [], source = 'inventory') => {
   const events = changes
     .filter(change => change?.id && Number.isFinite(Number(change.quantity)) && Number(change.quantity) >= 0)
-    .filter(change => Number(change.quantity) <= 3)
+    .filter(change => Number(change.quantity) <= 4)
     .map(change => send({
       type: 'inventory',
       source,

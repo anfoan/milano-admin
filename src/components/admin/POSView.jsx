@@ -660,7 +660,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             cartItems.forEach((item) => addRequestedDelta(item, -1));
 
             checkoutStage = editingOrderId ? 'التحقق من الفاتورة والمخزون' : 'التحقق من المخزون';
-            const inventoryResult = await runTransaction(db, async (transaction) => {
+            await runTransaction(db, async (transaction) => {
+                inventoryChanges.length = 0; // Keep notification data limited to the final successful transaction attempt.
                 const originalSnap = editingOrderId ? await transaction.get(orderRef) : null;
                 const deltas = new Map([...requestedDeltas].map(([id, value]) => [id, { stock: value.stock, sizes: { ...value.sizes } }]));
                 if (editingOrderId && originalSnap?.exists()) {
@@ -712,7 +713,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             });
 
             if (!editingOrderId) void notifyAdminOfNewOrder({ ...orderData, id: orderRef.id }, 'pos');
-            if (inventoryResult && inventoryChanges.length) void notifyAdminOfInventoryChanges(inventoryChanges, 'pos');
+            if (inventoryChanges.length) void notifyAdminOfInventoryChanges(inventoryChanges, 'pos');
 
             setLastCreatedOrderId(orderId);
             setLastCreatedOrderData({ id: orderRef.id, ...orderData });

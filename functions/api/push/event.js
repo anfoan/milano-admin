@@ -39,6 +39,11 @@ export async function onRequestPost({ request, env }) {
     };
   } else if (body?.type === 'inventory') {
     if (!body.product?.id && !body.product?.productId) return json({ error: 'Product id is required' }, 400);
+    const quantity = Number(body.product.quantity);
+    if (body.product.quantity == null || String(body.product.quantity).trim() === '' || !Number.isFinite(quantity) || quantity < 0) {
+      return json({ error: 'A valid non-negative stock quantity is required' }, 400);
+    }
+    if (quantity > 4) return json({ ok: true, skipped: true }, 200);
     payload = stockPayload({ ...body.product, productId: body.product.productId || body.product.id });
   } else {
     return json({ error: 'Unsupported push event' }, 400);

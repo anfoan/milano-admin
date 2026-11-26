@@ -14,7 +14,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const result = await sendToSubscriptions({
       type: 'new-order',
-      title: order.isPOS ? 'طلب جديد من نقطة البيع 🛍️' : 'طلب جديد من المتجر 🛍️',
+      title: order.isPOS ? 'طلب جديد من نقطة البيع 🛍️' : order.isExternal || order.source === 'external' ? 'طلب جديد خارجي 🛍️' : 'طلب جديد من المتجر 🛍️',
       body: `${order.formData?.name || 'عميل'} — ${order.orderId || order.id || ''}\nمبلغ الطلب : ${amount}`,
       orderId: order.orderId || order.id || '',
       image: firstImage,

@@ -10,6 +10,7 @@ import { collection, query, getDocs, doc, updateDoc, deleteDoc, writeBatch } fro
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
 import { getSizeStocksTotal } from '../../lib/stockUtils';
 import { safeSessionGet, safeSessionSet, safeJsonParse } from '../../lib/safeStorage';
+import { notifyAdminOfInventoryChanges } from '../../lib/pushEvent';
 
 const INVENTORY_CACHE_KEY = 'milano_admin_inventory_snapshot_v1';
 const getCachedInventoryItems = () => {
@@ -234,6 +235,10 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
         try {
             await updateDoc(doc(db, "products", id), { stock: nextStock });
             safeSessionSet(INVENTORY_CACHE_KEY, JSON.stringify(toInventoryCacheItems(updater(previousProducts))));
+            const product = previousProducts.find(item => item.id === id);
+            if (Number(product?.stock) !== nextStock) {
+                void notifyAdminOfInventoryChanges([{ id, name: product?.name || product?.title || 'منتج', image: product?.mainImage || '', quantity: nextStock }], 'inventory');
+            }
         } catch (err) {
             console.error("Error updating stock:", err);
             setProducts(previousProducts);
@@ -268,6 +273,9 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             firestoreUpdates.stock = totalStock;
             await updateDoc(doc(db, "products", id), firestoreUpdates);
             safeSessionSet(INVENTORY_CACHE_KEY, JSON.stringify(toInventoryCacheItems(updater(previousProducts))));
+            if (Number(product?.stock) !== totalStock) {
+                void notifyAdminOfInventoryChanges([{ id, name: product?.name || product?.title || 'منتج', image: product?.mainImage || '', quantity: totalStock }], 'inventory');
+            }
         } catch (err) {
             console.error("Error updating size stocks:", err);
             setProducts(previousProducts);
