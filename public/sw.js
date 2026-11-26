@@ -16,7 +16,7 @@ self.addEventListener('push', (event) => {
     try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data?.text?.() || '' }; }
     const notificationTitle = data.title || 'إشعار جديد من ميلانو';
     const notificationBody = data.body || 'وصل طلب جديد إلى لوحة التحكم.';
-    event.waitUntil(self.registration.showNotification('ميلانو', {
+    event.waitUntil(self.registration.showNotification('\u200B', { // Non-empty invisible title; keep the system's app attribution.
         body: `${notificationTitle}\n${notificationBody}`,
         icon: data.icon || '/admin-icon-192.png',
         image: data.image || undefined,
