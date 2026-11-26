@@ -749,7 +749,7 @@ const LimitedOffersView = ({ lang = 'ar', generalSettings }) => {
                         initial={{ opacity: 0, x: isRTL ? -20 : 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: isRTL ? 20 : -20 }}
-                        className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-xl overflow-hidden"
+                        className="-translate-y-4 bg-white p-8 rounded-[32px] border border-gray-100 shadow-xl overflow-hidden"
                     >
                         <h3 className={`text-xl font-black mb-8 ${isRTL ? 'text-right' : 'text-left'}`}>{txt.add_offer}</h3>
 
