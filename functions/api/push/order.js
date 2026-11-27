@@ -10,7 +10,10 @@ export async function onRequestPost({ request, env }) {
   const currencyCode = String(order.currency || 'YER').trim().toUpperCase();
   const currencyLabel = { YER: 'ريال يمني', SAR: 'ريال سعودي', USD: 'دولار أمريكي' }[currencyCode] || currencyCode;
   const total = order.total == null || order.total === '' ? NaN : Number(order.total);
-  const amount = Number.isFinite(total) ? `${total.toLocaleString('en-US')} ${currencyLabel}` : 'غير متوفر';
+  // Storefront totals stay in YER; POS/external totals already use the invoice currency.
+  const isStorefront = !order.isPOS && !order.isExternal && order.source !== 'pos' && order.source !== 'external';
+  const invoiceTotal = isStorefront && currencyCode === 'SAR' ? total / 140 : total;
+  const amount = Number.isFinite(invoiceTotal) ? `${Math.round(invoiceTotal).toLocaleString('en-US')} ${currencyLabel}` : 'غير متوفر';
   try {
     const result = await sendToSubscriptions({
       type: 'new-order',
