@@ -239,7 +239,7 @@ const PaymentsView = ({ lang = 'ar' }) => {
             const method = { ...customDraft, title, enabled: customDraft.enabled !== false };
             const custom_methods = existing.some(item => item.id === method.id)
                 ? existing.map(item => item.id === method.id ? method : item)
-                : [...existing, method];
+                : [method, ...existing];
             await handleSave({ ...settings, custom_methods });
         }
         setShowCustomModal(false);
@@ -279,7 +279,7 @@ const PaymentsView = ({ lang = 'ar' }) => {
             {/* Payment Methods Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* 1. Cash On Delivery (COD) */}
-                <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
+                <div className="order-last bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
                     <button type="button" onClick={() => openCustomModal({ id: 'cod', builtIn: 'cod', title: settings.cod_title || txt.cod_title, iconUrl: settings.cod_icon || 'https://cdn-icons-png.flaticon.com/512/2331/2331941.png' })} className="absolute left-5 top-5 rounded-xl bg-blue-50 p-2.5 text-blue-600 transition hover:bg-blue-100" title={isRTL ? 'تعديل' : 'Edit'}><Pencil size={17} /></button>
                     <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-4">
@@ -311,17 +311,18 @@ const PaymentsView = ({ lang = 'ar' }) => {
                             {settings.cod_enabled ? txt.disable_payment : txt.enable_payment}
                         </button>
                         <button
-                            onClick={() => configurePayment('cod')}
-                            className="py-3 px-4 rounded-xl font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all text-sm flex items-center gap-2"
+                            type="button"
+                            onClick={() => togglePayment('cod_enabled')}
+                            className="rounded-xl bg-red-50 p-3 text-red-500 transition hover:bg-red-100"
+                            title={isRTL ? 'حذف' : 'Delete'}
                         >
-                            <Settings size={18} />
-                            {txt.config_condition}
+                            <Trash2 size={18} />
                         </button>
                     </div>
                 </div>
 
                 {(settings.custom_methods || []).map((method) => (
-                    <div key={method.id} className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
+                    <div key={method.id} className="order-first bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
                         <button type="button" onClick={() => openCustomModal(method)} className="absolute left-5 top-5 rounded-xl bg-blue-50 p-2.5 text-blue-600 transition hover:bg-blue-100" title={isRTL ? 'تعديل' : 'Edit'}>
                             <Pencil size={17} />
                         </button>
@@ -351,7 +352,7 @@ const PaymentsView = ({ lang = 'ar' }) => {
                 ))}
 
                 {/* 2. WhatsApp Payment */}
-                <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
+                <div className="order-last bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
                     <button type="button" onClick={() => openCustomModal({ id: 'whatsapp', builtIn: 'whatsapp', title: settings.whatsapp_title || txt.whatsapp_title, iconUrl: settings.whatsapp_icon || 'https://cdn-icons-png.flaticon.com/512/733/733585.png' })} className="absolute left-5 top-5 rounded-xl bg-blue-50 p-2.5 text-blue-600 transition hover:bg-blue-100" title={isRTL ? 'تعديل' : 'Edit'}><Pencil size={17} /></button>
                     <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-4">
