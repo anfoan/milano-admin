@@ -275,7 +275,7 @@ const InvoiceTemplate = React.forwardRef(({ orders, lang = 'ar', onClose, genera
 
                             <div className="mt-5 mb-0 text-center border-t border-gray-400 pt-4">
                                 <p className="text-gray-900 font-bold mb-1 text-xs">{lang === 'ar' ? 'شكراً لتسوقكم من متجر ميلانو' : 'Thank you for shopping with Milano Store'}</p>
-                                <p className="text-gray-900 font-mono text-[10px]">{window.location.hostname}</p>
+                                <p className="text-gray-900 font-mono text-[10px]" style={{ display: 'none' }}>{window.location.hostname}</p>
                             </div>
                         </div>
                         );
