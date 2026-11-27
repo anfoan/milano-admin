@@ -17,12 +17,13 @@ import { useCurrency } from '../../context/CurrencyContext';
 import InvoiceTemplate from '../InvoiceTemplate';
 import { getAvailableProductStock, getSizeStock, getSizeStocksTotal } from '../../lib/stockUtils';
 import { getNextInvoiceNumber } from '../../lib/invoiceNumber';
-import { isValidYemenPhone } from '../../lib/phoneValidation';
+import { normalizeYemenPhone } from '../../lib/phoneValidation';
 import { notifyAdminOfNewOrder } from '../../lib/pushOrderEvent';
 
 const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
     const isRTL = lang === 'ar';
     const { formatPrice, convertPrice, exchangeRate } = useCurrency();
+    const isValidExternalOrderPhone = (value) => /^(77|78|73|70|71|72)\d{7}$/.test(normalizeYemenPhone(value));
     const [orderCurrency, setOrderCurrency] = useState(generalSettings?.currency || 'YER');
 
     useEffect(() => { setOrderCurrency(generalSettings?.currency || 'YER'); }, [generalSettings?.currency]);
@@ -102,7 +103,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             step3: "تأكيد الطلب",
             name: "الاسم الكامل",
             phone: "رقم الهاتف",
-            invalid_phone: "يجب أن يبدأ رقم العميل بـ 77 أو 78 أو 73 أو 71 أو 70",
+            invalid_phone: "يجب أن يتكون رقم العميل من 9 أرقام ويبدأ بـ 77 أو 78 أو 73 أو 70 أو 71 أو 72",
             region: "المنطقة / المدينة",
             address: "العنوان التفصيلي",
             delivery_type: "نوع التوصيل",
@@ -150,7 +151,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             step3: "Confirm Order",
             name: "Full Name",
             phone: "Phone Number",
-            invalid_phone: "The customer number must start with 77, 78, 73, 71, or 70",
+            invalid_phone: "The customer number must contain 9 digits and start with 77, 78, 73, 70, 71, or 72",
             region: "Region / City",
             address: "Detailed Address",
             delivery_type: "Delivery Type",
@@ -379,7 +380,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             setValidationError(txt.fill_required);
             return;
         }
-        if (!isValidYemenPhone(formData.phone)) {
+        if (!isValidExternalOrderPhone(formData.phone)) {
             setValidationError(txt.invalid_phone);
             return;
         }
@@ -586,7 +587,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             setValidationError(txt.fill_required);
             return;
         }
-        if (step === 1 && !isValidYemenPhone(formData.phone)) {
+        if (step === 1 && !isValidExternalOrderPhone(formData.phone)) {
             setValidationError(txt.invalid_phone);
             return;
         }
@@ -723,12 +724,14 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                         <input
                                             type="text"
                                             value={formData.phone}
-                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, phone: normalizeYemenPhone(e.target.value).slice(0, 9) })}
                                             className="w-full pr-10 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 transition-all font-bold text-left"
                                             dir="ltr"
+                                            inputMode="numeric"
+                                            maxLength={9}
                                             placeholder="77xxxxxxx"
                                         />
-                                        {validationError && (!formData.phone.trim() || !isValidYemenPhone(formData.phone)) && <span className="mt-1 block text-[10px] font-bold text-red-600">{formData.phone.trim() ? txt.invalid_phone : txt.fill_required}</span>}
+                                        {validationError && (!formData.phone.trim() || !isValidExternalOrderPhone(formData.phone)) && <span className="mt-1 block text-[10px] font-bold text-red-600">{formData.phone.trim() ? txt.invalid_phone : txt.fill_required}</span>}
                                     </div>
                                 </div>
                                 <div className="space-y-2">
