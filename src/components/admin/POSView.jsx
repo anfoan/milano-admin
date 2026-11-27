@@ -721,12 +721,13 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             // A POS receipt is completed at creation; credit its phone-linked wallet once.
             // A temporary wallet issue must never prevent the sale or inventory update.
             if (savedOrderDocumentId) {
-                try { await syncWalletRewardForOrderStatus(savedOrderDocumentId, 'completed'); }
-                catch (rewardError) { console.error('POS wallet reward sync failed:', rewardError); }
+                void syncWalletRewardForOrderStatus(savedOrderDocumentId, 'completed')
+                    .catch(rewardError => console.error('POS wallet reward sync failed:', rewardError));
             }
 
-            // Auto-fix: cap negative stock at 0
-            try {
+            // Auto-fix: cap negative stock at 0 without blocking the completed sale UI.
+            void (async () => {
+                try {
                 for (const item of cartItems) {
                     const productRef = doc(db, "products", item.id);
                     const snap = await getDoc(productRef);
@@ -752,9 +753,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         }
                     }
                 }
-            } catch (autoFixErr) {
-                console.warn("Auto-fix stock error:", autoFixErr);
-            }
+                } catch (autoFixErr) {
+                    console.warn("Auto-fix stock error:", autoFixErr);
+                }
+            })();
 
             setShowSuccessModal(true);
             
