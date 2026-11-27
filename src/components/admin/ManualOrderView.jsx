@@ -672,8 +672,8 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                         <ShoppingBag size={24} />
                     </div>
                     <div>
-                        <h2 className="text-xl md:text-2xl font-black text-gray-800 line-clamp-1">{txt.title}</h2>
-                        <p className="text-[10px] md:text-sm text-gray-400 font-bold">{txt.subtitle}</p>
+                        <h2 className="text-xl md:text-2xl font-black text-gray-800 whitespace-nowrap">{txt.title}</h2>
+                        <p className="relative top-2 text-[10px] md:text-sm text-gray-400 font-bold">{txt.subtitle}</p>
                     </div>
                 </div>
             </div>
@@ -720,12 +720,12 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
                                 <div className="space-y-2">
                                     <label className="text-sm font-black text-gray-700 flex items-center gap-1"><span>{txt.phone}</span><span className="text-red-600">*</span></label>
                                     <div className="relative">
-                                        <Phone className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400" size={18} />
+                                        <Phone className="absolute top-1/2 -translate-y-1/2 left-3 text-gray-400" size={18} />
                                         <input
                                             type="text"
                                             value={formData.phone}
                                             onChange={(e) => setFormData({ ...formData, phone: normalizeYemenPhone(e.target.value).slice(0, 9) })}
-                                            className="w-full pr-10 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 transition-all font-bold text-left"
+                                            className="w-full pr-4 pl-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 transition-all font-bold text-right"
                                             dir="ltr"
                                             inputMode="numeric"
                                             maxLength={9}
