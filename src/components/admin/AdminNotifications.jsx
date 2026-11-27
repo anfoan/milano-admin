@@ -25,6 +25,25 @@ const AdminNotifications = ({ lang: propLang }) => {
     const dropdownRef = useRef(null);
     const toastTimerRef = useRef(null);
 
+    const formatOrderNotificationAmount = (item) => {
+        const currency = String(item?.currency || 'YER').trim().toUpperCase();
+        const storedTotal = item?.total !== undefined
+            ? Number(item.total)
+            : Number(item?.subTotal || 0) - Number(item?.discount || 0) + Number(item?.deliveryCost || 0);
+        const isStorefront = !item?.isPOS && !item?.isExternal && item?.source !== 'pos' && item?.source !== 'external';
+        const baseTotal = item?.totalInYER !== undefined
+            ? Number(item.totalInYER)
+            : isStorefront ? storedTotal : null;
+
+        if (Number.isFinite(baseTotal)) return formatPrice(baseTotal, currency);
+        if (!Number.isFinite(storedTotal)) return isRTL ? 'غير متوفر' : 'Unavailable';
+
+        const labels = isRTL
+            ? { YER: 'ريال يمني', SAR: 'ريال سعودي', USD: 'دولار أمريكي' }
+            : { YER: 'YER', SAR: 'SAR', USD: 'USD' };
+        return `${Math.round(storedTotal).toLocaleString('en-US')} ${labels[currency] || currency}`;
+    };
+
     const [orderNotifications, setOrderNotifications] = useState([]);
     const [messageNotifications, setMessageNotifications] = useState([]);
     const [authReady, setAuthReady] = useState(false);
@@ -320,7 +339,7 @@ const AdminNotifications = ({ lang: propLang }) => {
                                 </h4>
                                 <p className="text-xs text-gray-500 truncate">
                                     {activeToast.type === 'order' ? 
-                                        `${formatPrice(activeToast.total !== undefined ? activeToast.total : ((activeToast.subTotal || 0) - (activeToast.discount || 0) + (activeToast.deliveryCost || 0)), activeToast.currency || 'YER')} - ${activeToast.formData?.name || (lang === 'ar' ? 'زائر' : 'Guest')}` : 
+                                        `${formatOrderNotificationAmount(activeToast)} - ${activeToast.formData?.name || (lang === 'ar' ? 'زائر' : 'Guest')}` :
                                         `${activeToast.name}: ${activeToast.message?.substring(0, 30)}...`}
                                 </p>
                             </div>
@@ -400,7 +419,7 @@ const AdminNotifications = ({ lang: propLang }) => {
                                             <div className="flex-1 min-w-0">
                                                 {item.type === 'order' ? (
                                                     <p className="text-sm font-bold text-gray-800 dark:text-white mb-1">
-                                                        {txt.new_order} <span dir="ltr" className="font-black">{formatPrice(item.total !== undefined ? item.total : ((item.subTotal || 0) - (item.discount || 0) + (item.deliveryCost || 0)), item.currency || 'YER')}</span>
+                                                        {txt.new_order} <span dir="ltr" className="font-black">{formatOrderNotificationAmount(item)}</span>
                                                     </p>
                                                 ) : (
                                                     <p className="text-sm font-bold text-gray-800 dark:text-white mb-1">
