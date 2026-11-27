@@ -103,7 +103,7 @@ const ManualOrderView = ({ lang = 'ar', generalSettings }) => {
             step3: "تأكيد الطلب",
             name: "الاسم الكامل",
             phone: "رقم الهاتف",
-            invalid_phone: "يجب أن يتكون رقم العميل من 9 أرقام ويبدأ بـ 77 أو 78 أو 73 أو 70 أو 71 أو 72",
+            invalid_phone: "رقم الهاتف غير صحيح",
             region: "المنطقة / المدينة",
             address: "العنوان التفصيلي",
             delivery_type: "نوع التوصيل",
