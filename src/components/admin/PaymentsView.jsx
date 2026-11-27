@@ -12,6 +12,7 @@ const PaymentsView = ({ lang = 'ar' }) => {
         cod_condition_type: 'min', // 'min', 'max', 'range'
         cod_condition_min: 0,
         cod_condition_max: 0,
+        cod_deleted: false,
         whatsapp_enabled: false,
         whatsapp_number: '',
         whatsapp_label: 'تواصل لإكمال عملية الدفع عبر واتساب',
@@ -184,6 +185,11 @@ const PaymentsView = ({ lang = 'ar' }) => {
         handleSave(newSettings);
     };
 
+    const deleteCodPayment = async () => {
+        if (!window.confirm(isRTL ? 'هل تريد حذف طريقة الدفع عند الاستلام؟' : 'Delete Cash on Delivery payment method?')) return;
+        await handleSave({ ...settings, cod_enabled: false, cod_deleted: true, cod_condition_enabled: false });
+    };
+
     const configurePayment = (type) => {
         setModalType(type);
         setShowConfigModal(true);
@@ -279,7 +285,7 @@ const PaymentsView = ({ lang = 'ar' }) => {
             {/* Payment Methods Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* 1. Cash On Delivery (COD) */}
-                <div className="order-last bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
+                {!settings.cod_deleted && <div className="order-last bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
                     <button type="button" onClick={() => openCustomModal({ id: 'cod', builtIn: 'cod', title: settings.cod_title || txt.cod_title, iconUrl: settings.cod_icon || 'https://cdn-icons-png.flaticon.com/512/2331/2331941.png' })} className="absolute left-5 top-5 rounded-xl bg-blue-50 p-2.5 text-blue-600 transition hover:bg-blue-100" title={isRTL ? 'تعديل' : 'Edit'}><Pencil size={17} /></button>
                     <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-4">
@@ -312,14 +318,14 @@ const PaymentsView = ({ lang = 'ar' }) => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => togglePayment('cod_enabled')}
+                            onClick={deleteCodPayment}
                             className="rounded-xl bg-red-50 p-3 text-red-500 transition hover:bg-red-100"
                             title={isRTL ? 'حذف' : 'Delete'}
                         >
                             <Trash2 size={18} />
                         </button>
                     </div>
-                </div>
+                </div>}
 
                 {(settings.custom_methods || []).map((method) => (
                     <div key={method.id} className="order-first bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm relative overflow-hidden group">
