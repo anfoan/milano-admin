@@ -1914,9 +1914,9 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         <div className="p-3 sm:p-4 bg-gray-50 dark:bg-white/5 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
                             <div className="min-w-0">
                                 <span className="text-[10px] text-gray-400 font-bold block uppercase">{isRTL ? "إجمالي مبيعات الشهر" : "Month's Total Sales"}</span>
-                                <div className="mt-1 space-y-0.5 text-[10px] sm:text-xs font-black leading-tight whitespace-nowrap">
-                                    <div><span className="text-gray-500 dark:text-gray-400">{isRTL ? 'نقطة البيع وإنشاء طلب خارجي:' : 'POS and external orders:'}</span> <span className="text-gray-800 dark:text-white">{formatReceiptAmount(monthlySalesByCurrency.YER)} {isRTL ? 'ريال يمني' : 'YER'}</span></div>
-                                    <div><span className="text-gray-500 dark:text-gray-400">{isRTL ? 'نقطة البيع وإنشاء طلب خارجي:' : 'POS and external orders:'}</span> <span className="text-gray-800 dark:text-white">{formatReceiptAmount(monthlySalesByCurrency.SAR)} {isRTL ? 'ريال سعودي' : 'SAR'}</span></div>
+                                <div className="mt-1 space-y-0.5 text-[11px] sm:text-sm font-black leading-tight whitespace-nowrap">
+                                    <div className="text-gray-800 dark:text-white">{formatReceiptAmount(monthlySalesByCurrency.YER)} {isRTL ? 'ريال يمني' : 'YER'}</div>
+                                    <div className="text-gray-800 dark:text-white">{formatReceiptAmount(monthlySalesByCurrency.SAR)} {isRTL ? 'ريال سعودي' : 'SAR'}</div>
                                 </div>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-green-50 dark:bg-green-500/10 text-green-500 flex items-center justify-center">
