@@ -1913,7 +1913,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                         <div className="p-3 sm:p-4 bg-gray-50 dark:bg-white/5 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
                             <div className="min-w-0">
-                                <span className="relative -top-2 text-[10px] text-gray-400 font-bold block uppercase">{isRTL ? "إجمالي مبيعات الشهر هذا" : "This Month's Total Sales"}</span>
+                                <span className="relative -top-3 text-[10px] text-gray-400 font-bold block uppercase">{isRTL ? "إجمالي مبيعات الشهر هذا" : "This Month's Total Sales"}</span>
                                 <div className="relative top-0.5 mt-1 space-y-0.5 text-[11px] sm:text-sm font-black leading-tight whitespace-nowrap">
                                     <div className="text-gray-800 dark:text-white">{formatReceiptAmount(monthlySalesByCurrency.YER)} {isRTL ? 'ريال يمني' : 'YER'}</div>
                                     <div className="text-gray-800 dark:text-white">{formatReceiptAmount(monthlySalesByCurrency.SAR)} {isRTL ? 'ريال سعودي' : 'SAR'}</div>
