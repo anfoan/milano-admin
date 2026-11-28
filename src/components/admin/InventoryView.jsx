@@ -427,7 +427,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                     <div className="text-left py-1" dir="ltr">
                         <p className="text-[8px] font-black text-gray-400 mb-0.5 uppercase">{lang === 'ar' ? 'تاريخ التقرير' : 'Report Date'}</p>
                         <p className="text-[10px] font-bold text-gray-900 whitespace-nowrap">{printDate}</p>
-                        <p className="text-[10px] font-bold text-gray-900 whitespace-nowrap"><span>{printPeriod} {printTime}</span></p>
+                        <p className="text-[10px] font-bold text-gray-900 whitespace-nowrap"><span className="print-time-value" dir="ltr"><span>{printPeriod}</span><span>{printTime}</span></span></p>
                     </div>
                 </div>
                 <div className="grid grid-cols-4 gap-2 mb-4">
@@ -436,7 +436,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                         <p className="text-[8px] font-black text-blue-600 leading-tight">{filter === 'all' ? txt.filter_all : filter === 'near' ? txt.filter_near : filter === 'out' ? txt.filter_out : filter === 'available' ? txt.filter_available : txt.filter_audit}</p>
                     </div>
                     <div className="bg-blue-50 border border-blue-100 p-1.5 rounded text-center">
-                        <p className="text-[6px] font-black text-blue-400 uppercase mb-0">{isRTL ? 'إجمالي المنتجات' : 'Total Products'}</p>
+                        <p className="text-[6px] font-black text-blue-400 uppercase mb-0">{isRTL ? 'إجمالي كمية المنتجات' : 'Total Product Quantity'}</p>
                         <p className="text-[9px] font-black text-blue-700 leading-tight">{totalQty.toLocaleString()}</p>
                     </div>
                     <div className="bg-gray-50 border border-gray-100 p-1.5 rounded text-center">

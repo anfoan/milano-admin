@@ -929,3 +929,66 @@ html:not(.dark) .admin-dashboard-root .shadow-sm[class*="rounded-"],
 html:not(.dark) .admin-dashboard-root .shadow[class*="rounded-"] {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.09), 0 2px 6px rgba(15, 23, 42, 0.05) !important;
 }
+
+/* Inventory report print refinements: keep paper output light in dark mode. */
+@media print {
+  .inventory-print-root .print-time-value {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 3px !important;
+    direction: ltr !important;
+  }
+
+  .inventory-print-root .printable-content thead th:nth-child(8),
+  .inventory-print-root .printable-content thead th:nth-child(5),
+  .inventory-print-root .printable-content tbody td:nth-child(8),
+  .inventory-print-root .printable-content tbody td:nth-child(5) {
+    text-align: center !important;
+  }
+
+  .inventory-print-root .printable-content thead th:nth-child(8) > span {
+    display: inline-block !important;
+    transform: none !important;
+  }
+
+  .dark .inventory-print-root,
+  .dark .inventory-print-root .bg-white {
+    background-color: #ffffff !important;
+  }
+
+  .dark .inventory-print-root .bg-gray-50 {
+    background-color: #f9fafb !important;
+  }
+
+  .dark .inventory-print-root .bg-gray-100 {
+    background-color: #f3f4f6 !important;
+  }
+
+  .dark .inventory-print-root .bg-blue-50 {
+    background-color: #eff6ff !important;
+  }
+
+  .dark .inventory-print-root .bg-green-50 {
+    background-color: #f0fdf4 !important;
+  }
+
+  .dark .inventory-print-root .text-gray-900,
+  .dark .inventory-print-root .text-gray-800,
+  .dark .inventory-print-root .text-gray-700,
+  .dark .inventory-print-root .dark\:text-white {
+    color: #111827 !important;
+  }
+
+  .dark .inventory-print-root .text-gray-600,
+  .dark .inventory-print-root .text-gray-500,
+  .dark .inventory-print-root .text-gray-400 {
+    color: #6b7280 !important;
+  }
+
+  .dark .inventory-print-root .border-gray-50,
+  .dark .inventory-print-root .border-gray-100,
+  .dark .inventory-print-root .border-gray-200 {
+    border-color: #e5e7eb !important;
+  }
+}
