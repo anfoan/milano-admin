@@ -1945,7 +1945,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         <select
                                             value={reportPeriod}
                                             onChange={(e) => handleReportPeriodChange(e.target.value)}
-                                            className={`bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-lg ${isRTL ? 'pr-6 pl-2' : 'pl-6 pr-2'} py-1 text-xs outline-none font-bold text-gray-800 dark:text-white`}
+                                            className={`w-[120px] bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-lg ${isRTL ? 'pr-6 pl-2' : 'pl-6 pr-2'} py-1 text-xs outline-none font-bold text-gray-800 dark:text-white`}
                                         >
                                             <option value="custom">{isRTL ? "فترة مخصصة" : "Custom Period"}</option>
                                             <option value="this_week">{isRTL ? "هذا الأسبوع" : "This Week"}</option>
@@ -1976,7 +1976,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 setReportPeriod('custom');
                                                 setReportStartDate(e.target.value);
                                             }}
-                                            className="bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-lg px-2 py-1 text-xs outline-none font-bold text-gray-800 dark:text-white"
+                                            className="w-[130px] bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-lg px-2 py-1 text-xs outline-none font-bold text-gray-800 dark:text-white"
                                         />
                                     </div>
                                     <div className="flex flex-col">
@@ -1988,7 +1988,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                                 setReportPeriod('custom');
                                                 setReportEndDate(e.target.value);
                                             }}
-                                            className="bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-lg px-2 py-1 text-xs outline-none font-bold text-gray-800 dark:text-white"
+                                            className="w-[130px] bg-white dark:bg-[#0d0d0e] border border-gray-200 dark:border-white/5 rounded-lg px-2 py-1 text-xs outline-none font-bold text-gray-800 dark:text-white"
                                         />
                                     </div>
                                 </div>
