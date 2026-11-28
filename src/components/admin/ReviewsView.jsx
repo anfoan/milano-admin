@@ -157,7 +157,7 @@ const ReviewsView = ({ lang = 'ar' }) => {
                 </h2>
 
                 <div className="overflow-x-auto">
-                    <table className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'}`}>
                         <thead className="bg-gray-50 text-gray-600 border-b border-gray-100">
                             <tr>
                                 <th className={`p-4 text-center font-bold ${isRTL ? 'rounded-r-xl' : 'rounded-l-xl'}`}>{txt.customer}</th>
