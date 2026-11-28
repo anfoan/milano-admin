@@ -1966,7 +1966,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         </select>
                                     </div>
                                 </div>
-                                <div className="relative left-7 flex gap-2">
+                                <div className="relative left-7 mr-7 flex gap-2">
                                     <div className="flex flex-col">
                                         <label className="text-center text-[9px] text-gray-400 font-black mb-1">{isRTL ? "من تاريخ" : "From"}</label>
                                         <input
