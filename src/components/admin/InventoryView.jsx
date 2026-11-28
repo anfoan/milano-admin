@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Reorder } from 'framer-motion';
 import {
-    Search, Plus, Printer, Edit2, Trash2,
+    Search, Printer, Edit2, Trash2,
     CheckCircle, Package, Filter,
     ChevronDown, ChevronUp, Save, ArrowUpDown, ClipboardList, GripVertical
 } from 'lucide-react';
@@ -446,15 +446,23 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
             {/* ===================== ACTION BAR ===================== */}
             <div className="space-y-5 no-print">
                 <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between pb-5 border-b border-gray-100">
+                    <div className="w-full md:flex-1 md:max-w-md relative">
+                        <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-2.5 text-gray-400`} size={18} />
+                        <input
+                            type="search"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder={txt.search_placeholder}
+                            className={`w-full bg-white border border-gray-200 rounded-xl py-2.5 ${isRTL ? 'pr-12 pl-20' : 'pl-12 pr-20'} outline-none focus:border-blue-500 font-bold text-sm shadow-sm text-gray-900 placeholder-gray-400`}
+                        />
+                        <button className={`absolute ${isRTL ? 'left-1' : 'right-1'} top-1 h-8 px-4 bg-blue-500 text-white rounded-lg text-xs font-black shadow-md`}>{txt.search_btn}</button>
+                    </div>
                     <div className="flex flex-wrap gap-2 items-center">
-                        <button className="px-6 py-2.5 bg-blue-500 text-white rounded-xl font-black text-sm flex items-center gap-2 hover:bg-blue-600 transition shadow-lg shadow-blue-200">
-                            <Plus size={18} /> {txt.add_stock}
-                        </button>
-                        <button onClick={() => window.print()} className="px-6 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl font-black text-sm flex items-center gap-2 hover:bg-gray-50 transition">
+                        <button onClick={() => window.print()} className="order-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-black text-sm flex items-center gap-2 hover:bg-blue-700 transition shadow-lg shadow-blue-200">
                             <Printer size={18} /> {txt.print_report}
                         </button>
                         {/* Sort Dropdown - next to print button */}
-                        <div className="relative">
+                        <div className="relative order-1">
                             <button
                                 onClick={() => setShowSortMenu(!showSortMenu)}
                                 className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 hover:border-blue-300 rounded-xl font-black text-sm text-gray-600 transition-all hover:bg-gray-50"
@@ -493,17 +501,6 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                 {savingOrder ? txt.saving : txt.save_order}
                             </button>
                         )}
-                    </div>
-                    <div className="w-full md:flex-1 md:max-w-md relative">
-                        <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-2.5 text-gray-400`} size={18} />
-                        <input
-                            type="search"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder={txt.search_placeholder}
-                            className={`w-full bg-white border border-gray-200 rounded-xl py-2.5 ${isRTL ? 'pr-12 pl-20' : 'pl-12 pr-20'} outline-none focus:border-blue-500 font-bold text-sm shadow-sm text-gray-900 placeholder-gray-400`}
-                        />
-                        <button className={`absolute ${isRTL ? 'left-1' : 'right-1'} top-1 h-8 px-4 bg-blue-500 text-white rounded-lg text-xs font-black shadow-md`}>{txt.search_btn}</button>
                     </div>
                 </div>
 
