@@ -1939,7 +1939,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         <div className="col-span-2 md:col-span-2 p-3 sm:p-4 bg-blue-50/30 dark:bg-blue-500/5 rounded-xl sm:rounded-2xl border border-blue-500/10 flex flex-wrap items-center justify-between gap-3">
                             <div className="flex flex-wrap items-center gap-3">
                                 <div className="flex flex-col">
-                                    <label className="text-[9px] text-gray-400 font-black mb-1">{isRTL ? "تحديد الفترة" : "Period"}</label>
+                                    <label className="text-center text-[9px] text-gray-400 font-black mb-1">{isRTL ? "تحديد الفترة" : "Period"}</label>
                                     <div className="relative">
                                         <Calendar className={`absolute top-2.5 ${isRTL ? 'right-2' : 'left-2'} text-gray-400`} size={12} />
                                         <select
@@ -1968,7 +1968,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 </div>
                                 <div className="flex gap-2">
                                     <div className="flex flex-col">
-                                        <label className="text-[9px] text-gray-400 font-black mb-1">{isRTL ? "من تاريخ" : "From"}</label>
+                                        <label className="text-center text-[9px] text-gray-400 font-black mb-1">{isRTL ? "من تاريخ" : "From"}</label>
                                         <input
                                             type="date"
                                             value={reportStartDate}
@@ -1980,7 +1980,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         />
                                     </div>
                                     <div className="flex flex-col">
-                                        <label className="text-[9px] text-gray-400 font-black mb-1">{isRTL ? "إلى تاريخ" : "To"}</label>
+                                        <label className="text-center text-[9px] text-gray-400 font-black mb-1">{isRTL ? "إلى تاريخ" : "To"}</label>
                                         <input
                                             type="date"
                                             value={reportEndDate}
