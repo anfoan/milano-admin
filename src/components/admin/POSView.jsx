@@ -1970,9 +1970,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <div className="flex flex-col">
                                         <label className="text-center text-[9px] text-gray-400 font-black mb-1">{isRTL ? "من تاريخ" : "From"}</label>
                                         <input
-                                            type="date"
+                                            type="text"
                                             lang="en-US"
                                             dir="ltr"
+                                            inputMode="numeric"
+                                            placeholder="YYYY-MM-DD"
                                             value={reportStartDate}
                                             onChange={(e) => {
                                                 setReportPeriod('custom');
@@ -1984,9 +1986,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                     <div className="flex flex-col">
                                         <label className="text-center text-[9px] text-gray-400 font-black mb-1">{isRTL ? "إلى تاريخ" : "To"}</label>
                                         <input
-                                            type="date"
+                                            type="text"
                                             lang="en-US"
                                             dir="ltr"
+                                            inputMode="numeric"
+                                            placeholder="YYYY-MM-DD"
                                             value={reportEndDate}
                                             onChange={(e) => {
                                                 setReportPeriod('custom');
