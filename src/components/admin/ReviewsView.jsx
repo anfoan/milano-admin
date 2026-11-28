@@ -18,7 +18,7 @@ const ReviewsView = ({ lang = 'ar' }) => {
             title: "آراء العملاء",
             customer: "اسم العميل",
             rating: "التقييم",
-            comment: "تعليق العميل",
+            comment: "رأي العميل",
             date: "التاريخ",
             actions: "إجراءات",
             loading: "جاري التحميل...",
@@ -162,7 +162,7 @@ const ReviewsView = ({ lang = 'ar' }) => {
                             <tr>
                                 <th className={`p-4 text-center font-bold ${isRTL ? 'rounded-r-xl' : 'rounded-l-xl'}`}>{txt.customer}</th>
                                 <th className="p-4 text-center font-bold">{txt.rating}</th>
-                                <th className="p-4 text-right font-bold md:w-1/2">{txt.comment}</th>
+                                <th className="relative left-3 p-4 text-right font-bold md:w-1/2">{txt.comment}</th>
                                 <th className="relative right-2 p-4 text-center font-bold">{txt.date}</th>
                                 <th className={`p-4 text-center font-bold ${isRTL ? 'rounded-l-xl' : 'rounded-r-xl'}`}>{txt.actions}</th>
                             </tr>
