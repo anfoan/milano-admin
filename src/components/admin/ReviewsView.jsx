@@ -65,6 +65,20 @@ const ReviewsView = ({ lang = 'ar' }) => {
     const txt = t[lang];
     const isRTL = lang === 'ar';
     const MAX_CHARS = 500;
+    const formatReviewDate = (review) => {
+        const rawDate = review.createdAt ?? review.timestamp ?? review.reviewDate ?? review.date;
+        const date = rawDate?.toDate
+            ? rawDate.toDate()
+            : rawDate?.seconds
+                ? new Date(rawDate.seconds * 1000)
+                : rawDate instanceof Date
+                    ? rawDate
+                    : typeof rawDate === 'string'
+                        ? new Date(rawDate)
+                        : null;
+        if (date && !Number.isNaN(date.getTime())) return date.toLocaleDateString('en-GB');
+        return review.time && review.time !== 'جديد' ? review.time : '—';
+    };
 
     useEffect(() => {
         const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
@@ -148,7 +162,7 @@ const ReviewsView = ({ lang = 'ar' }) => {
                             <tr>
                                 <th className={`p-4 text-center font-bold ${isRTL ? 'rounded-r-xl' : 'rounded-l-xl'}`}>{txt.customer}</th>
                                 <th className="p-4 text-center font-bold">{txt.rating}</th>
-                                <th className="p-4 text-center font-bold md:w-1/2">{txt.comment}</th>
+                                <th className="p-4 text-right font-bold md:w-1/2">{txt.comment}</th>
                                 <th className="relative right-2 p-4 text-center font-bold">{txt.date}</th>
                                 <th className={`p-4 text-center font-bold ${isRTL ? 'rounded-l-xl' : 'rounded-r-xl'}`}>{txt.actions}</th>
                             </tr>
@@ -195,11 +209,7 @@ const ReviewsView = ({ lang = 'ar' }) => {
                                         </td>
                                         <td className="relative right-2 p-4">
                                             <span className="text-xs font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded-lg dir-ltr">
-                                                {review.createdAt?.toDate
-                                                    ? review.createdAt.toDate().toLocaleDateString('en-GB')
-                                                    : review.createdAt?.seconds
-                                                        ? new Date(review.createdAt.seconds * 1000).toLocaleDateString('en-GB')
-                                                        : (review.date || review.time || 'N/A')}
+                                                {formatReviewDate(review)}
                                             </span>
                                         </td>
                                         <td className="p-4 text-center">
