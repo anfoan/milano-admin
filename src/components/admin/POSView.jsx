@@ -2034,7 +2034,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
                         {/* Receipts Table */}
                         <div className="min-h-[280px] flex-1 overflow-auto border border-gray-100 dark:border-white/5 rounded-2xl">
-                            <table className="w-full min-w-[960px] text-start text-xs font-bold text-gray-800 dark:text-gray-200">
+                            <table className="w-full min-w-[960px] table-fixed text-start text-xs font-bold text-gray-800 dark:text-gray-200">
                                 <thead className="bg-gray-50 dark:bg-white/5 text-gray-500 font-black uppercase text-[10px] sticky top-0 z-10">
                                     <tr>
                                         <th className="p-3 w-8 text-center">#</th>
