@@ -1874,7 +1874,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="flex h-[30px] w-[92px] flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-[9px] font-black leading-none" title={isRTL ? 'العملة وسعر الصرف' : 'Currency and exchange rate'}>
+                            <div className="flex h-[34px] w-[88px] flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-[9px] font-black leading-none" title={isRTL ? 'العملة وسعر الصرف' : 'Currency and exchange rate'}>
                                 <button type="button" onClick={() => setReceiptCurrencyCode('YER')} className={`flex-1 px-2 transition-colors ${receiptCurrencyCode === 'YER' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال يمني' : 'YER'}</button>
                                 <button type="button" onClick={() => setReceiptCurrencyCode('SAR')} className={`flex-1 border-t border-gray-200 dark:border-white/10 px-2 transition-colors ${receiptCurrencyCode === 'SAR' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال سعودي' : 'SAR'}</button>
                             </div>
