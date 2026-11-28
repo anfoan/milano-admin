@@ -1971,6 +1971,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         <label className="text-center text-[9px] text-gray-400 font-black mb-1">{isRTL ? "من تاريخ" : "From"}</label>
                                         <input
                                             type="date"
+                                            lang="en-US"
+                                            dir="ltr"
                                             value={reportStartDate}
                                             onChange={(e) => {
                                                 setReportPeriod('custom');
@@ -1983,6 +1985,8 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                         <label className="text-center text-[9px] text-gray-400 font-black mb-1">{isRTL ? "إلى تاريخ" : "To"}</label>
                                         <input
                                             type="date"
+                                            lang="en-US"
+                                            dir="ltr"
                                             value={reportEndDate}
                                             onChange={(e) => {
                                                 setReportPeriod('custom');
