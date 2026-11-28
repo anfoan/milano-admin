@@ -16,11 +16,11 @@ const ReviewsView = ({ lang = 'ar' }) => {
     const t = {
         ar: {
             title: "آراء العملاء",
-            customer: "العميل",
+            customer: "اسم العميل",
             rating: "التقييم",
-            comment: "التعليق",
+            comment: "تعليق العميل",
             date: "التاريخ",
-            actions: "تحكم",
+            actions: "إجراءات",
             loading: "جاري التحميل...",
             no_reviews: "لا يوجد تقييمات حتى الآن",
             reply_label: "ردك:",
@@ -39,9 +39,9 @@ const ReviewsView = ({ lang = 'ar' }) => {
         },
         en: {
             title: "Customer Reviews",
-            customer: "Customer",
+            customer: "Customer Name",
             rating: "Rating",
-            comment: "Comment",
+            comment: "Customer Comment",
             date: "Date",
             actions: "Actions",
             loading: "Loading...",
@@ -146,11 +146,11 @@ const ReviewsView = ({ lang = 'ar' }) => {
                     <table className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>
                         <thead className="bg-gray-50 text-gray-600 border-b border-gray-100">
                             <tr>
-                                <th className={`p-4 font-bold ${isRTL ? 'rounded-r-xl' : 'rounded-l-xl'}`}>{txt.customer}</th>
-                                <th className="p-4 font-bold">{txt.rating}</th>
-                                <th className="p-4 font-bold md:w-1/2">{txt.comment}</th>
-                                <th className="p-4 font-bold">{txt.date}</th>
-                                <th className={`p-4 font-bold ${isRTL ? 'rounded-l-xl' : 'rounded-r-xl'}`}>{txt.actions}</th>
+                                <th className={`p-4 text-center font-bold ${isRTL ? 'rounded-r-xl' : 'rounded-l-xl'}`}>{txt.customer}</th>
+                                <th className="p-4 text-center font-bold">{txt.rating}</th>
+                                <th className="p-4 text-center font-bold md:w-1/2">{txt.comment}</th>
+                                <th className="relative right-2 p-4 text-center font-bold">{txt.date}</th>
+                                <th className={`p-4 text-center font-bold ${isRTL ? 'rounded-l-xl' : 'rounded-r-xl'}`}>{txt.actions}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -193,32 +193,34 @@ const ReviewsView = ({ lang = 'ar' }) => {
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="p-4">
+                                        <td className="relative right-2 p-4">
                                             <span className="text-xs font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded-lg dir-ltr">
-                                                {review.createdAt?.seconds
-                                                    ? new Date(review.createdAt.seconds * 1000).toISOString().slice(0, 19).replace('T', ' ')
-                                                    : (review.time || 'N/A')}
+                                                {review.createdAt?.toDate
+                                                    ? review.createdAt.toDate().toLocaleDateString('en-GB')
+                                                    : review.createdAt?.seconds
+                                                        ? new Date(review.createdAt.seconds * 1000).toLocaleDateString('en-GB')
+                                                        : (review.date || review.time || 'N/A')}
                                             </span>
                                         </td>
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-2">
+                                        <td className="p-4 text-center">
+                                            <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => openReplyModal(review)}
-                                                    className="p-2.5 bg-green-500/15 text-green-600 hover:bg-green-500/25 rounded-xl transition-all shadow-sm"
+                                                    className="p-2 bg-green-500/15 text-green-600 hover:bg-green-500/25 rounded-lg transition-all shadow-sm"
                                                     title={txt.reply_title}
                                                 >
                                                     <MessageSquare size={18} />
                                                 </button>
                                                 <button
                                                     onClick={() => openReplyModal(review)}
-                                                    className="p-2.5 bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 rounded-xl transition-all shadow-sm"
+                                                    className="p-2 bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 rounded-lg transition-all shadow-sm"
                                                     title={lang === 'ar' ? 'تعديل الرد' : 'Edit Reply'}
                                                 >
                                                     <Pencil size={18} />
                                                 </button>
                                                 <button
                                                     onClick={() => deleteReview(review.id)}
-                                                    className="p-2.5 bg-red-500/15 text-red-600 hover:bg-red-500/25 rounded-xl transition-all shadow-sm"
+                                                    className="p-2 bg-red-500/15 text-red-600 hover:bg-red-500/25 rounded-lg transition-all shadow-sm"
                                                     title={lang === 'ar' ? 'حذف التقييم' : 'Delete Review'}
                                                 >
                                                     <Trash2 size={18} />
