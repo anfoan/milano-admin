@@ -205,7 +205,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
     // Receipt Log States
     const [receipts, setReceipts] = useState([]);
-    const [monthlySalesSum, setMonthlySalesSum] = useState(0);
+    const [monthlySalesByCurrency, setMonthlySalesByCurrency] = useState({ YER: 0, SAR: 0 });
     const [monthlySalesCount, setMonthlySalesCount] = useState(0);
     const [todaySalesSum, setTodaySalesSum] = useState(0);
     const [todaySalesCount, setTodaySalesCount] = useState(0);
@@ -458,8 +458,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                 return false;
             });
 
-            const monthSum = monthActiveOrders.reduce((sum, r) => sum + (r.total || 0), 0);
-            setMonthlySalesSum(monthSum);
+            setMonthlySalesByCurrency(sumSalesByCurrency(monthActiveOrders));
             setMonthlySalesCount(monthActiveOrders.length);
         });
 
@@ -494,6 +493,11 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         return inPeriod && matchesSearch;
     }), [receipts, reportStartDate, reportEndDate, searchReceiptId]);
     const activeVisibleReceipts = useMemo(() => visibleReceipts.filter(receipt => receipt.status !== 'cancelled'), [visibleReceipts]);
+    const sumSalesByCurrency = (orders) => orders.reduce((totals, order) => {
+        const code = getInvoiceCurrencyCode(order);
+        totals[code] += Number(order.total || 0);
+        return totals;
+    }, { YER: 0, SAR: 0 });
     const paymentTotals = useMemo(() => activeVisibleReceipts.reduce((totals, receipt) => {
         const method = receipt.paymentMethod === 'card' ? 'card' : receipt.paymentMethod === 'transfer' ? 'transfer' : 'cash';
         totals[method] += convertReceiptAmount(receipt.total, receipt);
@@ -942,11 +946,13 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         let totalDelivery = 0;
         let activeCount = 0;
         let paymentBreakdown = { cash: 0, card: 0, transfer: 0 };
+        const salesByCurrency = { YER: 0, SAR: 0 };
         
         rangeReceipts.forEach(r => {
             if (r.status !== 'cancelled') {
                 activeCount += 1;
                 totalSales += (r.total || 0);
+                salesByCurrency[getInvoiceCurrencyCode(r)] += Number(r.total || 0);
                 totalDelivery += (r.deliveryCost || 0);
                 const pMethod = r.paymentMethod || 'cash';
                 paymentBreakdown[pMethod] = (paymentBreakdown[pMethod] || 0) + (r.total || 0);
@@ -965,6 +971,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
             endDate: reportEndDate,
             receiptsCount: activeCount,
             totalSales,
+            salesByCurrency,
             netProfit,
             paymentBreakdown,
             receipts: rangeReceipts
@@ -1086,7 +1093,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                   <td style="font-weight: bold;">${r.formData?.name || (isRTL ? 'زبون محلي' : 'Walk-in')}</td>
                                   <td>${paymentLabel}</td>
                                   <td>${r.formattedDate}</td>
-                                  <td style="text-align:left; font-weight: 900; font-family: monospace;">${r.total?.toLocaleString()} ${currency}</td>
+                                  <td style="text-align:left; font-weight: 900; font-family: monospace;">${r.total?.toLocaleString()} ${getInvoiceCurrencyLabel(r)}</td>
                                   <td style="text-align:center;">
                                       <span class="${r.status === 'cancelled' ? 'cancelled-val' : 'completed-val'}">
                                           ${r.status === 'cancelled' ? (isRTL ? 'مسترجع' : 'Refunded') : (isRTL ? 'مكتمل' : 'Completed')}
@@ -1904,9 +1911,12 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                     {/* Receipts Summary Header */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                         <div className="p-3 sm:p-4 bg-gray-50 dark:bg-white/5 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-white/5 flex items-center justify-between">
-                            <div>
+                            <div className="min-w-0">
                                 <span className="text-[10px] text-gray-400 font-bold block uppercase">{isRTL ? "إجمالي مبيعات الشهر" : "Month's Total Sales"}</span>
-                                <h3 className="text-sm sm:text-xl font-black text-gray-800 dark:text-white mt-1 font-sans whitespace-nowrap">{monthlySalesSum.toLocaleString()} {currency}</h3>
+                                <div className="mt-1 space-y-0.5 text-[10px] sm:text-xs font-black leading-tight whitespace-nowrap">
+                                    <div><span className="text-gray-500 dark:text-gray-400">{isRTL ? 'نقطة البيع وإنشاء طلب خارجي:' : 'POS and external orders:'}</span> <span className="text-gray-800 dark:text-white">{monthlySalesByCurrency.YER.toLocaleString()} {isRTL ? 'ريال يمني' : 'YER'}</span></div>
+                                    <div><span className="text-gray-500 dark:text-gray-400">{isRTL ? 'نقطة البيع وإنشاء طلب خارجي:' : 'POS and external orders:'}</span> <span className="text-gray-800 dark:text-white">{monthlySalesByCurrency.SAR.toLocaleString()} {isRTL ? 'ريال سعودي' : 'SAR'}</span></div>
+                                </div>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-green-50 dark:bg-green-500/10 text-green-500 flex items-center justify-center">
                                 <DollarSign size={20} />
@@ -2228,7 +2238,10 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                                 <div className="stats-grid grid grid-cols-3 gap-4">
                                     <div className="stat-card p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5 text-center">
                                         <span className="text-[10px] text-gray-400 font-bold block">{isRTL ? "إجمالي المبيعات" : "Total Sales"}</span>
-                                        <span dir="rtl" className="stat-val mt-1 inline-flex items-baseline whitespace-nowrap text-[15px] font-black text-blue-600 dark:text-blue-400" style={{ direction: 'rtl', whiteSpace: 'nowrap' }}><span dir="ltr">{generatedReport.totalSales.toLocaleString()}</span><span dir="rtl">&nbsp;{currency}</span></span>
+                                        <div className="mt-1 space-y-1 text-xs font-black text-blue-600 dark:text-blue-400">
+                                            <div dir="rtl"><span dir="ltr">{generatedReport.salesByCurrency.YER.toLocaleString()}</span>&nbsp;{isRTL ? 'ريال يمني' : 'YER'}</div>
+                                            <div dir="rtl"><span dir="ltr">{generatedReport.salesByCurrency.SAR.toLocaleString()}</span>&nbsp;{isRTL ? 'ريال سعودي' : 'SAR'}</div>
+                                        </div>
                                     </div>
                                     <div className="stat-card p-4 border border-gray-100 dark:border-white/5 rounded-xl bg-gray-50 dark:bg-white/5 text-center">
                                         <span className="text-[10px] text-gray-400 font-bold block">{isRTL ? "صافي الأرباح" : "Net Profit"}</span>
