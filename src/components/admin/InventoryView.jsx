@@ -417,7 +417,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                 <div className="flex justify-between items-start border-b-2 border-gray-100 pb-4 mb-4">
                     <div className="flex items-center gap-4">
                         <div style={{ width: '50px', height: '50px', minWidth: '50px', minHeight: '50px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #f0f0f0' }}>
-                            <img src="/admin-new-icon.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => e.target.src = "/nav-logo.png"} />
+                            <img src="/admin-new-icon.png" className="print-store-logo" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} onError={(e) => e.target.src = "/nav-logo.png"} />
                         </div>
                         <div className="flex flex-col justify-center">
                             <h1 className="text-lg font-black text-gray-900 leading-tight mb-0">{generalSettings?.storeName || 'Milano Store'}</h1>
@@ -426,7 +426,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                     </div>
                     <div className="text-left py-1" dir="ltr">
                         <p className="text-[8px] font-black text-gray-400 mb-0.5 uppercase">{lang === 'ar' ? 'تاريخ التقرير' : 'Report Date'}</p>
-                        <p className="text-[10px] font-bold text-gray-900 whitespace-nowrap"><span>{printDate}</span><span className="mx-1">-</span><span>{printPeriod} {printTime}</span></p>
+                        <p className="text-[10px] font-bold text-gray-900 whitespace-nowrap">{printDate}</p>
+                        <p className="text-[10px] font-bold text-gray-900 whitespace-nowrap"><span>{printPeriod} {printTime}</span></p>
                     </div>
                 </div>
                 <div className="grid grid-cols-4 gap-2 mb-4">
@@ -435,7 +436,7 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                         <p className="text-[8px] font-black text-blue-600 leading-tight">{filter === 'all' ? txt.filter_all : filter === 'near' ? txt.filter_near : filter === 'out' ? txt.filter_out : filter === 'available' ? txt.filter_available : txt.filter_audit}</p>
                     </div>
                     <div className="bg-blue-50 border border-blue-100 p-1.5 rounded text-center">
-                        <p className="text-[6px] font-black text-blue-400 uppercase mb-0">{txt.total} {txt.piece}</p>
+                        <p className="text-[6px] font-black text-blue-400 uppercase mb-0">{isRTL ? 'إجمالي المنتجات' : 'Total Products'}</p>
                         <p className="text-[9px] font-black text-blue-700 leading-tight">{totalQty.toLocaleString()}</p>
                     </div>
                     <div className="bg-gray-50 border border-gray-100 p-1.5 rounded text-center">
@@ -779,8 +780,8 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                                             </td>
 
                                             {/* Stock */}
-                                            <td className="px-3 py-1">
-                                                <div className="flex items-center gap-2">
+                                            <td className="px-3 py-1 print:text-center">
+                                                <div className="flex items-center gap-2 print:w-full print:justify-center">
                                                     <div className={`px-4 py-1.5 rounded-full text-sm font-black print:p-0 print:bg-transparent ${
                                                         stock <= 0 ? 'bg-red-100 text-red-600' :
                                                         stock <= 5 ? 'bg-orange-100 text-orange-600' :

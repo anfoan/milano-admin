@@ -221,6 +221,18 @@ input[type=number] {
     vertical-align: middle !important;
   }
 
+  .inventory-print-root .print-store-logo {
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: 8px !important;
+  }
+
+  .inventory-print-root .printable-content td:nth-child(8) > div,
+  .inventory-print-root .printable-content td:nth-child(5) > div {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
   .inventory-print-root .printable-content td:nth-child(3) > div {
     white-space: nowrap !important;
     overflow: hidden !important;
