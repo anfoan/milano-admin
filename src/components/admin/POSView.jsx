@@ -135,6 +135,7 @@ const POSWalletCreateModal = ({ onClose, onSaved, isRTL }) => {
 const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const isRTL = lang === 'ar';
     const [posCurrencyCode, setPosCurrencyCode] = useState(generalSettings?.currency || 'YER');
+    const [receiptCurrencyCode, setReceiptCurrencyCode] = useState(generalSettings?.currency || 'YER');
     const baseCurrencyCode = String(generalSettings?.currency || 'YER').toUpperCase();
     const exchangeRate = 140;
     const convertPosPrice = (value) => {
@@ -148,6 +149,19 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
         const isSar = code.includes('SAR') || code.includes('سعود');
         return isSar ? (isRTL ? 'ريال سعودي' : 'SAR') : (isRTL ? 'ريال يمني' : 'YER');
     };
+    const getInvoiceCurrencyCode = (invoice) => {
+        const code = String(invoice?.currency || invoice?.currencyCode || invoice?.formData?.currency || 'YER').toUpperCase();
+        return code.includes('SAR') || code.includes('سعود') ? 'SAR' : 'YER';
+    };
+    const convertReceiptAmount = (amount, invoice) => {
+        const numericAmount = Number(amount || 0);
+        const sourceCurrencyCode = getInvoiceCurrencyCode(invoice);
+        if (sourceCurrencyCode === receiptCurrencyCode) return numericAmount;
+        return sourceCurrencyCode === 'YER'
+            ? numericAmount / exchangeRate
+            : numericAmount * exchangeRate;
+    };
+    const receiptCurrency = receiptCurrencyCode === 'SAR' ? (isRTL ? 'ريال سعودي' : 'SAR') : (isRTL ? 'ريال يمني' : 'YER');
     const formatPosPrice = (value) => Math.round(convertPosPrice(value)).toLocaleString('en-US');
     const formatDisplayedPrice = (value) => Math.round(Number(value) || 0).toLocaleString('en-US');
 
@@ -482,9 +496,9 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
     const activeVisibleReceipts = useMemo(() => visibleReceipts.filter(receipt => receipt.status !== 'cancelled'), [visibleReceipts]);
     const paymentTotals = useMemo(() => activeVisibleReceipts.reduce((totals, receipt) => {
         const method = receipt.paymentMethod === 'card' ? 'card' : receipt.paymentMethod === 'transfer' ? 'transfer' : 'cash';
-        totals[method] += Number(receipt.total || 0);
+        totals[method] += convertReceiptAmount(receipt.total, receipt);
         return totals;
-    }, { cash: 0, card: 0, transfer: 0 }), [activeVisibleReceipts]);
+    }, { cash: 0, card: 0, transfer: 0 }), [activeVisibleReceipts, receiptCurrencyCode]);
 
     const getCartItemStockLimit = (item) => {
         const product = products.find(productItem => productItem.id === item?.id);
@@ -1871,7 +1885,7 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
 
                     <div className="flex-1 -mx-5 bg-white dark:bg-[#1c1c1e] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm pt-4 pb-5 px-3 sm:px-5 flex flex-col gap-2 overflow-visible lg:overflow-hidden h-auto lg:h-[calc(100vh-10rem)]">
                     {/* Payment totals use the same visible period/search filter as the invoice table. */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-1">
                         {[
                             { id: 'cash', label: isRTL ? 'نقدي / كاش' : 'Cash', cls: 'bg-green-500/15 text-green-700 dark:text-green-300' },
                             { id: 'card', label: isRTL ? 'محفظة جيب' : 'Jib Wallet', cls: 'bg-purple-500/15 text-purple-700 dark:text-purple-300' },
@@ -1879,9 +1893,13 @@ const POSView = ({ lang = 'ar', generalSettings, standalone = false }) => {
                         ].map(method => (
                             <div key={method.id} className={`rounded-xl sm:rounded-2xl px-2 py-2 sm:px-4 sm:py-3 text-center font-black ${method.cls}`}>
                                 <div className="text-[9px] sm:text-xs">{method.label}</div>
-                                <div className="font-sans text-[11px] sm:text-lg mt-1 whitespace-nowrap">{paymentTotals[method.id].toLocaleString()} {currency}</div>
+                                <div className="font-sans text-[11px] sm:text-lg mt-1 whitespace-nowrap">{Math.round(paymentTotals[method.id] * 100) / 100} {receiptCurrency}</div>
                             </div>
                         ))}
+                        <div className="flex flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-[9px] sm:text-[10px] font-black leading-none" title={isRTL ? 'العملة وسعر الصرف' : 'Currency and exchange rate'}>
+                            <button type="button" onClick={() => setReceiptCurrencyCode('YER')} className={`flex-1 px-2 py-1.5 transition-colors ${receiptCurrencyCode === 'YER' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال يمني' : 'YER'}</button>
+                            <button type="button" onClick={() => setReceiptCurrencyCode('SAR')} className={`flex-1 border-t border-gray-200 dark:border-white/10 px-2 py-1.5 transition-colors ${receiptCurrencyCode === 'SAR' ? 'bg-emerald-500 text-white' : 'text-gray-500 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>{isRTL ? 'ريال سعودي' : 'SAR'}</button>
+                        </div>
                     </div>
                     {/* Receipts Summary Header */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
