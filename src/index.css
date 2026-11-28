@@ -114,6 +114,11 @@ input[type=number] {
   }
 }
 
+@page inventory-report {
+  size: A4 landscape;
+  margin: 8mm;
+}
+
 @media print {
   @page {
     size: auto;
@@ -182,6 +187,47 @@ input[type=number] {
     background-color: #f9fafb !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  .inventory-print-root {
+    page: inventory-report;
+  }
+
+  .inventory-print-root .printable-content {
+    overflow: visible !important;
+  }
+
+  .inventory-print-root table {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  .inventory-print-root th,
+  .inventory-print-root td {
+    padding: 4px 3px !important;
+    font-size: 9px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+  }
+
+  .inventory-print-root .print-report-img {
+    display: inline-block !important;
+    width: 28px !important;
+    height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+    object-fit: contain !important;
+    vertical-align: middle !important;
+  }
+
+  .inventory-print-root .printable-content td:nth-child(3) > div {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+
+  .inventory-print-root .printable-content td:nth-child(3) span {
+    white-space: nowrap !important;
   }
 }
 

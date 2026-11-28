@@ -403,8 +403,14 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
         red: { active: 'border-red-500 bg-red-500 text-white', inactive: 'border-red-200 bg-white text-gray-500 hover:border-red-300', count: 'bg-red-500' },
     };
 
+    const printNow = new Date();
+    const printDate = printNow.toLocaleDateString('en-GB');
+    const printHours = printNow.getHours();
+    const printPeriod = printHours >= 12 ? 'م' : 'ص';
+    const printTime = `${String(printHours % 12 || 12).padStart(2, '0')}:${String(printNow.getMinutes()).padStart(2, '0')}`;
+
     return (
-        <div className="space-y-6 font-['Cairo'] relative" dir={isRTL ? "rtl" : "ltr"}>
+        <div className="inventory-print-root space-y-6 font-['Cairo'] relative" dir={isRTL ? "rtl" : "ltr"}>
 
             {/* ===================== PRINT HEADER ===================== */}
             <div className="hidden print:block mb-6 text-right" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
@@ -418,9 +424,9 @@ const InventoryView = ({ lang = 'ar', generalSettings, searchQuery, setSearchQue
                             <p className="text-blue-600 font-bold uppercase tracking-widest" style={{ fontSize: '9px' }}>{txt.print_report}</p>
                         </div>
                     </div>
-                    <div className="text-left py-1">
+                    <div className="text-left py-1" dir="ltr">
                         <p className="text-[8px] font-black text-gray-400 mb-0.5 uppercase">{lang === 'ar' ? 'تاريخ التقرير' : 'Report Date'}</p>
-                        <p className="text-[10px] font-bold text-gray-900">{new Date().toLocaleDateString(lang === 'ar' ? 'ar-YE' : 'en-GB')} - {new Date().toLocaleTimeString(lang === 'ar' ? 'ar-YE' : 'en-GB')}</p>
+                        <p className="text-[10px] font-bold text-gray-900 whitespace-nowrap"><span>{printDate}</span><span className="mx-1">-</span><span>{printPeriod} {printTime}</span></p>
                     </div>
                 </div>
                 <div className="grid grid-cols-4 gap-2 mb-4">
