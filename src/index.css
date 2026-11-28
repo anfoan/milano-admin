@@ -1010,3 +1010,30 @@ html:not(.dark) .admin-dashboard-root .shadow[class*="rounded-"] {
     box-shadow: none !important;
   }
 }
+
+/* Final light paper reset for the inventory report in dark mode. */
+@media print {
+  .dark,
+  .dark body,
+  .dark #root,
+  .dark .admin-dashboard-root,
+  .dark .inventory-print-root {
+    background-color: #ffffff !important;
+    color-scheme: light !important;
+  }
+
+  .dark .inventory-print-root,
+  .dark .inventory-print-root > *,
+  .dark .inventory-print-root .printable-content,
+  .dark .inventory-print-root .printable-content > div {
+    border-left: 0 !important;
+    border-right: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .dark .inventory-print-root .printable-content table {
+    border-left: 0 !important;
+    border-right: 0 !important;
+    outline: 0 !important;
+  }
+}
