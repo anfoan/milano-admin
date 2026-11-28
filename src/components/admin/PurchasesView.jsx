@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { addDoc, collection, deleteDoc, doc, increment, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { getNextPurchaseInvoiceNumber } from '../../lib/invoiceNumber';
 import { getLocalizedCurrency } from '../../lib/currencyUtils';
@@ -71,9 +71,9 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
     const [editingItemIndex, setEditingItemIndex] = useState(null);
 
     const t = isRTL ? {
-        title: 'إدارة المشتريات', subtitle: 'متابعة فواتير الشراء، الموردين، والمدفوعات', total: 'إجمالي المشتريات', paid: 'إجمالي المدفوع', remaining: 'إجمالي المتبقي', count: 'عدد فواتير المشتريات', invoices: 'فاتورة مسجلة', add: 'إضافة فاتورة شراء', report: 'تقرير المشتريات', search: 'بحث برقم الفاتورة أو اسم المورد أو المنتج...', all: 'الكل', paidStatus: 'مدفوع', partial: 'آجل', unpaid: 'معلق', period: 'الفترة', thisMonth: 'هذا الشهر', thisWeek: 'هذا الأسبوع', thisYear: 'هذه السنة', custom: 'مخصص', invoice: 'رقم الفاتورة', supplier: 'اسم المورد', product: 'اسم المنتج', date: 'التاريخ', quantity: 'الكمية', totalOrder: 'إجمالي الطلب', paidCol: 'المدفوع', due: 'المتبقي', status: 'الحالة', actions: 'الإجراءات', noData: 'لا توجد فواتير مشتريات مطابقة', subtotal: 'الإجمالي', formTitleAdd: 'إضافة فاتورة شراء', formTitleEdit: 'تعديل فاتورة الشراء', save: 'حفظ الفاتورة', cancel: 'إلغاء', unitCost: 'سعر الوحدة', notes: 'ملاحظات', chooseProduct: 'اختر المنتج من المخزون', manualProduct: 'أو اكتب اسم المنتج', print: 'طباعة', deleteConfirm: 'هل أنت متأكد من حذف فاتورة الشراء؟ سيتم إعادة الكمية للمخزون.', required: 'أكمل البيانات المطلوبة', close: 'إغلاق'
+        title: 'إدارة المشتريات', subtitle: 'متابعة فواتير الشراء، الموردين، والمدفوعات', total: 'إجمالي المشتريات', paid: 'إجمالي المدفوع', remaining: 'إجمالي المتبقي', count: 'عدد فواتير المشتريات', invoices: 'فاتورة مسجلة', add: 'إضافة فاتورة شراء', report: 'تقرير المشتريات', search: 'بحث برقم الفاتورة أو اسم المورد أو المنتج...', all: 'الكل', paidStatus: 'مدفوع', partial: 'آجل', unpaid: 'معلق', period: 'الفترة', thisMonth: 'هذا الشهر', thisWeek: 'هذا الأسبوع', thisYear: 'هذا العام', custom: 'مخصص', invoice: 'رقم الفاتورة', supplier: 'اسم المورد', product: 'اسم المنتج', date: 'التاريخ', quantity: 'الكمية', totalOrder: 'إجمالي الطلب', paidCol: 'المدفوع', due: 'المتبقي', status: 'الحالة', actions: 'الإجراءات', noData: 'لا توجد فواتير مشتريات مطابقة', subtotal: 'الإجمالي', formTitleAdd: 'إضافة فاتورة شراء', formTitleEdit: 'تعديل فاتورة الشراء', save: 'حفظ الفاتورة', cancel: 'إلغاء', unitCost: 'سعر الوحدة', notes: 'ملاحظات', chooseProduct: 'اختر المنتج من المخزون', manualProduct: 'أو اكتب اسم المنتج', print: 'طباعة', deleteConfirm: 'هل أنت متأكد من حذف فاتورة الشراء؟', required: 'أكمل البيانات المطلوبة', close: 'إغلاق'
     } : {
-        title: 'Purchase Management', subtitle: 'Track purchase invoices, suppliers, and payments', total: 'Total Purchases', paid: 'Total Paid', remaining: 'Total Remaining', count: 'Purchase Invoices', invoices: 'registered invoices', add: 'Add Purchase Invoice', report: 'Purchase Report', search: 'Search invoice, supplier, or product...', all: 'All', paidStatus: 'Paid', partial: 'Partial', unpaid: 'Unpaid', period: 'Period', thisMonth: 'This month', thisWeek: 'This week', thisYear: 'This year', custom: 'Custom', invoice: 'Invoice No.', supplier: 'Supplier', product: 'Product', date: 'Date', quantity: 'Qty', totalOrder: 'Order Total', paidCol: 'Paid', due: 'Remaining', status: 'Status', actions: 'Actions', noData: 'No matching purchase invoices', subtotal: 'Total', formTitleAdd: 'Add Purchase Invoice', formTitleEdit: 'Edit Purchase Invoice', save: 'Save Invoice', cancel: 'Cancel', unitCost: 'Unit Cost', notes: 'Notes', chooseProduct: 'Choose product from inventory', manualProduct: 'Or type product name', print: 'Print', deleteConfirm: 'Delete this purchase? The quantity will be returned from stock.', required: 'Complete the required fields', close: 'Close'
+        title: 'Purchase Management', subtitle: 'Track purchase invoices, suppliers, and payments', total: 'Total Purchases', paid: 'Total Paid', remaining: 'Total Remaining', count: 'Purchase Invoices', invoices: 'registered invoices', add: 'Add Purchase Invoice', report: 'Purchase Report', search: 'Search invoice, supplier, or product...', all: 'All', paidStatus: 'Paid', partial: 'Partial', unpaid: 'Unpaid', period: 'Period', thisMonth: 'This month', thisWeek: 'This week', thisYear: 'This year', custom: 'Custom', invoice: 'Invoice No.', supplier: 'Supplier', product: 'Product', date: 'Date', quantity: 'Qty', totalOrder: 'Order Total', paidCol: 'Paid', due: 'Remaining', status: 'Status', actions: 'Actions', noData: 'No matching purchase invoices', subtotal: 'Total', formTitleAdd: 'Add Purchase Invoice', formTitleEdit: 'Edit Purchase Invoice', save: 'Save Invoice', cancel: 'Cancel', unitCost: 'Unit Cost', notes: 'Notes', chooseProduct: 'Choose product from inventory', manualProduct: 'Or type product name', print: 'Print', deleteConfirm: 'Delete this purchase?', required: 'Complete the required fields', close: 'Close'
     };
 
     useEffect(() => {
@@ -164,8 +164,6 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
         setModalOpen(true);
     };
     const openEdit = item => { setEditingId(item.id); setForm({ invoiceNumber: toEnglishDigits(item.invoiceNumber || ''), supplierName: item.supplierName || '', supplierPhone: toEnglishDigits(item.supplierPhone || ''), date: dateInput(item.date || new Date().toISOString().slice(0, 10)), paid: numericInput(item.paid ?? ''), remaining: numericInput(item.remaining ?? remainingOf(item)), notes: item.notes || '', paymentMethod: item.paymentMethod || 'cash', invoiceStatus: statusOf(item), items: getInvoiceItems(item).map(line => ({ ...line, quantity: toEnglishDigits(line.quantity ?? ''), unitCost: numericInput(line.unitCost ?? '') })) }); setNewItem(makeEmptyItem()); setProductPickerOpen(false); setEditingItemIndex(null); setModalOpen(true); };
-    const updateStock = async (productId, delta) => { if (productId && delta) await updateDoc(doc(db, 'products', productId), { stock: increment(Number(delta)) }); };
-    const updateItemStocks = async (items, multiplier = 1) => { for (const item of items) await updateStock(item.productId, Number(item.quantity || 0) * multiplier); };
     const addItemToInvoice = () => {
         const quantity = Number(newItem.quantity || 0); const unitCost = Number(newItem.unitCost || 0);
         if (!newItem.productName.trim() || quantity <= 0 || unitCost < 0) { alert(t.required); return; }
@@ -206,13 +204,9 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
             const remaining = form.invoiceStatus === 'paid' ? 0 : total;
             const payload = { invoiceNumber, supplierName: form.supplierName.trim(), supplierPhone: form.supplierPhone.trim(), productId: items[0]?.productId || '', productName: items.map(item => item.productName).join('، '), date: form.date, quantity: items.reduce((sum, item) => sum + item.quantity, 0), unitCost: items[0]?.unitCost || 0, total, paid, remaining, currency, notes: form.notes.trim(), paymentMethod: form.paymentMethod, invoiceStatus: form.invoiceStatus, items, updatedAt: serverTimestamp() };
             if (editingId) {
-                const old = purchases.find(item => item.id === editingId);
-                await updateItemStocks(getInvoiceItems(old), -1);
-                await updateItemStocks(items, 1);
                 await updateDoc(doc(db, 'purchases', editingId), payload);
             } else {
                 await addDoc(collection(db, 'purchases'), { ...payload, createdAt: serverTimestamp() });
-                await updateItemStocks(items, 1);
             }
             setModalOpen(false);
         } catch (err) { console.error('Save purchase:', err); alert(isRTL ? 'حدث خطأ أثناء حفظ الفاتورة' : 'Could not save purchase'); }
@@ -220,7 +214,7 @@ const PurchasesView = ({ lang = 'ar', generalSettings }) => {
     };
     const remove = async item => {
         if (!window.confirm(t.deleteConfirm)) return;
-        try { await deleteDoc(doc(db, 'purchases', item.id)); await updateItemStocks(getInvoiceItems(item), -1); } catch (err) { console.error('Delete purchase:', err); }
+        try { await deleteDoc(doc(db, 'purchases', item.id)); } catch (err) { console.error('Delete purchase:', err); }
     };
     const openReport = () => setReportOpen(true);
 
